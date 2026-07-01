@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.bmw-border {
+  position: relative;
+  border-radius: 1rem;
+}
+
+.bmw-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px; /* border thickness */
+  border-radius: 1rem;
+  background: linear-gradient(
+    90deg,
+    #00aaff,   /* light blue */
+    #0046ff,   /* dark blue */
+    #ff1e1e    /* red */
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
