@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 
+const PASSWORD_RESET_REDIRECT_URL =
+  "https://tunesight-beta.vercel.app/reset-password";
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -12,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
@@ -62,6 +66,30 @@ export default function LoginPage() {
     router.push("/dashboard");
   };
 
+  const handleForgotPassword = async () => {
+    setMessage("");
+
+    if (!email) {
+      setMessage("Enter your email address first, then press Forgot Password.");
+      return;
+    }
+
+    setResetLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: PASSWORD_RESET_REDIRECT_URL,
+    });
+
+    if (error) {
+      setMessage(error.message);
+      setResetLoading(false);
+      return;
+    }
+
+    setMessage("Password reset email sent. Check your inbox.");
+    setResetLoading(false);
+  };
+
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
       <div className="bmw-border max-w-md w-full bg-zinc-900 rounded-2xl p-8">
@@ -92,10 +120,18 @@ export default function LoginPage() {
 
         <button
           onClick={handleLogin}
-          disabled={loading}
+          disabled={loading || resetLoading}
           className="w-full py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition disabled:opacity-50"
         >
           {loading ? "Logging In..." : "Login"}
+        </button>
+
+        <button
+          onClick={handleForgotPassword}
+          disabled={loading || resetLoading}
+          className="w-full mt-4 text-sm text-zinc-400 hover:text-white transition disabled:opacity-50"
+        >
+          {resetLoading ? "Sending reset email..." : "Forgot Password?"}
         </button>
 
         {message && (
