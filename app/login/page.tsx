@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 
-const PASSWORD_RESET_REDIRECT_URL =
-  "https://tunesight-beta.vercel.app/reset-password";
-
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -17,6 +14,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const getPasswordResetRedirectUrl = () => {
+    return `${window.location.origin}/reset-password`;
+  };
 
   const handleLogin = async () => {
     setLoading(true);
@@ -77,7 +78,7 @@ export default function LoginPage() {
     setResetLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: PASSWORD_RESET_REDIRECT_URL,
+      redirectTo: getPasswordResetRedirectUrl(),
     });
 
     if (error) {
@@ -98,6 +99,7 @@ export default function LoginPage() {
         </Link>
 
         <h1 className="text-4xl font-bold mt-8 mb-4">Member Login</h1>
+
         <p className="text-zinc-400 mb-8">
           Login with your TuneSight account.
         </p>
