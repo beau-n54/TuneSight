@@ -16,8 +16,8 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
 
   const getPasswordResetRedirectUrl = () => {
-    return `${window.location.origin}/reset-password`;
-  };
+  return `${window.location.origin}/auth/callback?next=/reset-password`;
+};
 
   const handleLogin = async () => {
     setLoading(true);
