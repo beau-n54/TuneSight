@@ -276,7 +276,7 @@ Target architecture:
 
 ---
 
-This document represents the current verified architecture as of the latest engineering audit.
+This document represents the git status as of the latest engineering audit.
 
 Historical audit progression is maintained in:
 

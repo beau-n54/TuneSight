@@ -9,89 +9,110 @@ export default function StarterPlanPage() {
         </Link>
 
         <h1 className="text-5xl font-bold mt-8 mb-4">Starter Plan</h1>
+
         <p className="text-zinc-400 text-lg mb-8">
-          The Starter Plan is built for individual BMW owners who want a smarter way
-          to review MHD logs without needing workshop-level tools. It gives you a clean,
-          guided entry into TuneSight and helps turn raw data into something easier to
-          understand and act on.
+          Starter is built for single-vehicle BMW owners who want reliable
+          diagnostic clarity without workshop-level volume. It gives you a
+          clean way to analyse your own logs, upload tune files, track your
+          vehicle setup, and understand what the data is pointing toward.
         </p>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">What’s Included</h2>
+
           <div className="space-y-5 text-zinc-300">
             <div>
-              <h3 className="font-semibold text-white">Upload and review MHD CSV logs</h3>
+              <h3 className="font-semibold text-white">1 vehicle profile</h3>
               <p className="text-zinc-400 mt-1">
-                Upload your MHD log files directly into TuneSight and view them in a
-                cleaner, more structured way. Instead of scanning raw CSV data manually,
-                you get an easier starting point for understanding how the car behaved
-                during the pull or drive.
+                Keep one BMW organised inside TuneSight with its engine
+                platform, modifications, uploaded logs, tune files, and setup
+                details stored in one place.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Single vehicle profile setup</h3>
+              <h3 className="font-semibold text-white">
+                10 log analyses per month
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Create one vehicle profile tied to your own car. This allows TuneSight
-                to keep your log history, selected engine platform, and basic setup
-                information organised in one place.
+                Upload and analyse up to 10 vehicle logs each month to review
+                boost control, fuel pressure, timing behaviour, throttle
+                activity, and other key diagnostic areas.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Basic engine and modification tracking</h3>
+              <h3 className="font-semibold text-white">
+                5 tune uploads per month
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Record the key details of your setup, such as your engine type, fueling
-                configuration, turbo setup, intake, exhaust, intercooler, and other
-                supporting modifications. This helps give context to your logs instead of
-                treating every file as standalone data.
+                Upload tune files so TuneSight can compare calibration changes
+                against log behaviour and vehicle setup.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Core AI-generated summaries</h3>
+              <h3 className="font-semibold text-white">
+                Complete diagnostic reports
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Receive a simple AI-assisted summary of what the log appears to show.
-                This is designed to help highlight broad areas of concern or interest,
-                making it easier to understand whether a log looks healthy or whether it
-                needs a closer look.
+                Receive structured reports that highlight likely issues,
+                supporting evidence, rejected causes, and diagnostic direction.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Ideal for one personal build</h3>
+              <h3 className="font-semibold text-white">
+                Log and tune cross-reference
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Starter is designed for the owner who wants to monitor and learn from
-                their own car. It is not aimed at managing multiple vehicles or a full
-                customer workflow.
+                Review how log behaviour lines up with tune calibrations and
+                vehicle setup instead of treating each file as isolated data.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white">
+                Root cause identification
+              </h3>
+              <p className="text-zinc-400 mt-1">
+                Use TuneSight to narrow down the most likely cause of a problem
+                before making unnecessary calibration or hardware changes.
               </p>
             </div>
           </div>
         </div>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-8">
-          <h2 className="text-2xl font-semibold mb-4">What You Can Do With Starter</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            What You Can Do With Starter
+          </h2>
+
           <ul className="space-y-3 text-zinc-300 list-disc pl-5">
-            <li>Upload your own logs and keep them stored under one vehicle profile</li>
-            <li>Track your car’s basic modification list for better analysis context</li>
-            <li>Review AI summaries to get a quick first-pass understanding of the log</li>
-            <li>Build confidence reading log data without needing advanced tools straight away</li>
+            <li>Manage one personal BMW build</li>
+            <li>Analyse up to 10 logs per month</li>
+            <li>Upload up to 5 tune files per month</li>
+            <li>Track your vehicle setup and modification details</li>
+            <li>Review diagnostic reports with clear evidence</li>
+            <li>Understand the likely cause before changing calibration</li>
           </ul>
         </div>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-10">
           <h2 className="text-2xl font-semibold mb-4">Best For</h2>
+
           <p className="text-zinc-300">
-            Starter is best for individual enthusiasts, first-time users of log analysis,
-            and owners who want a cleaner way to review their own MHD files without
-            paying for a larger, more advanced tier they may not need yet.
+            Starter is best for individual BMW enthusiasts, single-car owners,
+            and first-time TuneSight users who want a professional way to review
+            their own logs and tune files without needing multi-vehicle or
+            workshop-level volume.
           </p>
         </div>
 
         <a
-        href="/checkout/starter"
-         className="px-8 py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition"
-         >
+          href="/checkout/starter"
+          className="px-8 py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition"
+        >
           Continue to Payment
         </a>
       </div>

@@ -9,58 +9,83 @@ export default function ProPlanPage() {
         </Link>
 
         <h1 className="text-5xl font-bold mt-8 mb-4">Pro Plan</h1>
+
         <p className="text-zinc-400 text-lg mb-8">
-          The Pro Plan is built for serious enthusiasts, remote tuners, and users
-          running repeated revisions of the same setup. It is designed for people who
-          need deeper visibility into how the car, the tune, and the logs relate to
-          each other over time.
+          Pro is built for active BMW enthusiasts managing up to 3 vehicles with
+          unlimited log analyses, unlimited tune uploads, and full access to the
+          TuneSight diagnostic platform. It is designed for users who are
+          regularly reviewing logs, comparing tune revisions, and refining
+          vehicle setup.
         </p>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">What’s Included</h2>
+
           <div className="space-y-5 text-zinc-300">
             <div>
-              <h3 className="font-semibold text-white">Unlimited MHD CSV log uploads</h3>
+              <h3 className="font-semibold text-white">Up to 3 vehicle profiles</h3>
               <p className="text-zinc-400 mt-1">
-                Upload as many logs as needed for repeated testing, revision checks,
-                and setup comparisons without running into basic usage limits.
+                Manage up to 3 BMWs inside one account, including engine
+                platform, modifications, uploaded logs, tune files, and setup
+                details for each vehicle.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Multiple vehicle profiles</h3>
+              <h3 className="font-semibold text-white">Unlimited log analyses</h3>
               <p className="text-zinc-400 mt-1">
-                Manage more than one vehicle inside the same account, which is ideal
-                for users with multiple cars or separate street and track setups.
+                Analyse as many logs as needed for repeated testing, revision
+                checks, setup comparisons, and ongoing diagnostic review.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Tune file / map upload support</h3>
+              <h3 className="font-semibold text-white">Unlimited tune uploads</h3>
               <p className="text-zinc-400 mt-1">
-                Upload tune or map revision files alongside your logs so TuneSight can
-                help you keep track of what revision was on the car when the log was
-                taken. This creates a much clearer relationship between the file being
-                flashed and the behavior shown in the log.
+                Upload tune files without monthly limits so each revision can be
+                reviewed alongside the logs and vehicle setup it belongs to.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Cross-reference tune files with logs</h3>
+              <h3 className="font-semibold text-white">
+                Complete cross-reference analysis
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Compare uploaded tune revisions against uploaded logs so you can see
-                which map version produced which behavior. This is especially useful
-                when trying to confirm whether a change in the tune improved boost
-                control, timing behavior, fueling, or general drivability.
+                Compare log behaviour against tune calibrations and vehicle
+                setup to understand what is really driving the issue.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white">Deeper AI-assisted analysis</h3>
+              <h3 className="font-semibold text-white">
+                Calibration recommendations
+              </h3>
               <p className="text-zinc-400 mt-1">
-                Receive stronger AI interpretation of the log data with more focus on
-                trend recognition, repeated behavior, and setup-specific context rather
-                than a simple first-pass summary.
+                Receive clear diagnostic direction that helps identify what
+                calibration area should be reviewed before making the next
+                change.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white">
+                Complete analysis history
+              </h3>
+              <p className="text-zinc-400 mt-1">
+                Keep logs, tune files, diagnostic reports, and vehicle setup
+                history organised so you can track how the build changes over
+                time.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white">
+                Priority support and future updates
+              </h3>
+              <p className="text-zinc-400 mt-1">
+                Get priority support and access to all future TuneSight platform
+                updates as new diagnostic features are released.
               </p>
             </div>
           </div>
@@ -68,28 +93,33 @@ export default function ProPlanPage() {
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">What You Can Do With Pro</h2>
+
           <ul className="space-y-3 text-zinc-300 list-disc pl-5">
-            <li>Upload unlimited logs for repeated tune revisions</li>
-            <li>Store and organise multiple cars or setups</li>
-            <li>Upload the tune/map file used for each revision cycle</li>
-            <li>Cross-reference a tune revision against the logs produced from it</li>
-            <li>Build a more complete picture of how hardware, tune, and fuel interact</li>
+            <li>Manage up to 3 BMW vehicles</li>
+            <li>Analyse unlimited logs</li>
+            <li>Upload unlimited tune files</li>
+            <li>Compare tune revisions against real log behaviour</li>
+            <li>Track vehicle setup and modification changes</li>
+            <li>Review diagnostic reports with clear supporting evidence</li>
+            <li>Build a cleaner workflow for active tuning and revision checks</li>
           </ul>
         </div>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8 mb-10">
           <h2 className="text-2xl font-semibold mb-4">Best For</h2>
+
           <p className="text-zinc-300">
-            Pro is best for serious users who want more than basic log review. It is
-            ideal when you are actively tuning, comparing revisions, or trying to keep
-            your tune files and log results tied together in a cleaner workflow.
+            Pro is best for active BMW enthusiasts, serious single-user tuners,
+            and owners managing multiple vehicles who need unlimited analysis,
+            tune upload freedom, and full access to the TuneSight diagnostic
+            platform.
           </p>
         </div>
 
         <a
-        href="/checkout/pro"
-         className="px-8 py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition"
-         >
+          href="/checkout/pro"
+          className="px-8 py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition"
+        >
           Continue to Payment
         </a>
       </div>
