@@ -12,8 +12,9 @@ export default function Home() {
           </h1>
 
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mb-10">
-            AI-powered MHD log analysis for BMW platforms. Upload logs, review vehicle setup,
-            and get smarter tuning insights with clarity and speed.
+           Advanced BMW diagnostic platform that analyses vehicle logs alongside tune calibrations
+           and vehicle setup to uncover smarter calibration decisions with clarity, confidence,
+           and speed.
           </p>
 
           {/* LOGIN / SIGNUP BUTTONS */}
