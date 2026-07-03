@@ -1,19 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const supabase = createClient();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [sessionReady, setSessionReady] = useState(false);
+  const [message, setMessage] = useState("Checking recovery session...");
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+
+      if (session) {
+        setSessionReady(true);
+        setMessage("");
+        return;
+      }
+
+      setSessionReady(false);
+      setMessage("Recovery session missing. Please request a fresh reset link.");
+    };
+
+    checkSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase.auth]);
 
   const handleUpdatePassword = async () => {
     setMessage("");
+
+    if (!sessionReady) {
+      setMessage("Recovery session missing. Please request a fresh reset link.");
+      return;
+    }
 
     if (!password || !confirmPassword) {
       setMessage("Please enter and confirm your new password.");
@@ -42,8 +77,13 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setMessage("Password updated successfully. You can now log in.");
-    setLoading(false);
+    await supabase.auth.signOut();
+
+    setMessage("Password updated successfully. Redirecting to login...");
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1500);
   };
 
   return (
@@ -64,7 +104,8 @@ export default function ResetPasswordPage() {
           placeholder="New password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
+          disabled={!sessionReady || loading}
+          className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700 disabled:opacity-50"
         />
 
         <input
@@ -72,12 +113,13 @@ export default function ResetPasswordPage() {
           placeholder="Confirm new password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full mb-6 p-4 rounded-xl bg-black border border-zinc-700"
+          disabled={!sessionReady || loading}
+          className="w-full mb-6 p-4 rounded-xl bg-black border border-zinc-700 disabled:opacity-50"
         />
 
         <button
           onClick={handleUpdatePassword}
-          disabled={loading}
+          disabled={!sessionReady || loading}
           className="w-full py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition disabled:opacity-50"
         >
           {loading ? "Updating Password..." : "Update Password"}
