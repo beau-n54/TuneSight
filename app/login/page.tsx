@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "../../lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
+
+type Profile = {
+  plan: string | null;
+  subscription_status: string | null;
+  legal_accepted: boolean | null;
+  beta_access: boolean | null;
+  beta_status: string | null;
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,11 +23,11 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const getPasswordResetRedirectUrl = () => {
-  return `${window.location.origin}/auth/callback?next=/reset-password`;
-};
+  function getPasswordResetRedirectUrl() {
+    return `${window.location.origin}/auth/callback?next=/reset-password`;
+  }
 
-  const handleLogin = async () => {
+  async function handleLogin() {
     setLoading(true);
     setMessage("");
 
@@ -42,21 +50,18 @@ export default function LoginPage() {
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("plan, subscription_status")
+      .select(
+        "plan, subscription_status, legal_accepted, beta_access, beta_status"
+      )
       .eq("id", user.id)
       .single();
 
-    if (profileError) {
-      setMessage(profileError.message);
-      setLoading(false);
-      return;
-    }
+    const profile = profileData as Profile | null;
 
-    if (profile.subscription_status !== "active") {
-      await supabase.auth.signOut();
-      setMessage("Your subscription is not active yet.");
+    if (profileError || !profile) {
+      setMessage(profileError?.message || "Profile not found.");
       setLoading(false);
       return;
     }
@@ -64,10 +69,21 @@ export default function LoginPage() {
     localStorage.setItem("ts_plan", profile.plan || "starter");
 
     router.refresh();
-    router.push("/dashboard");
-  };
 
-  const handleForgotPassword = async () => {
+    if (!profile.legal_accepted) {
+      router.push("/legal-acceptance");
+      return;
+    }
+
+    if (!profile.beta_access || profile.beta_status === "suspended") {
+      router.push("/beta-access");
+      return;
+    }
+
+    router.push("/dashboard");
+  }
+
+  async function handleForgotPassword() {
     setMessage("");
 
     if (!email) {
@@ -89,58 +105,54 @@ export default function LoginPage() {
 
     setMessage("Password reset email sent. Check your inbox.");
     setResetLoading(false);
-  };
+  }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="bmw-border max-w-md w-full bg-zinc-900 rounded-2xl p-8">
-        <Link href="/" className="text-zinc-400 hover:text-white transition">
+    <main className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
+      <div className="bmw-border w-full max-w-md rounded-2xl bg-zinc-900 p-8">
+        <Link href="/" className="text-zinc-400 transition hover:text-white">
           ← Back to Home
         </Link>
 
-        <h1 className="text-4xl font-bold mt-8 mb-4">Member Login</h1>
+        <h1 className="mb-4 mt-8 text-4xl font-bold">Member Login</h1>
 
-        <p className="text-zinc-400 mb-8">
-          Login with your TuneSight account.
-        </p>
+        <p className="mb-8 text-zinc-400">Login with your TuneSight account.</p>
 
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
+          onChange={(event) => setEmail(event.target.value)}
+          className="mb-4 w-full rounded-xl border border-zinc-700 bg-black p-4"
         />
 
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-6 p-4 rounded-xl bg-black border border-zinc-700"
+          onChange={(event) => setPassword(event.target.value)}
+          className="mb-6 w-full rounded-xl border border-zinc-700 bg-black p-4"
         />
 
         <button
+          type="button"
           onClick={handleLogin}
           disabled={loading || resetLoading}
-          className="w-full py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition disabled:opacity-50"
+          className="w-full rounded-xl bg-white py-4 font-semibold text-black transition hover:opacity-80 disabled:opacity-50"
         >
           {loading ? "Logging In..." : "Login"}
         </button>
 
         <button
+          type="button"
           onClick={handleForgotPassword}
           disabled={loading || resetLoading}
-          className="w-full mt-4 text-sm text-zinc-400 hover:text-white transition disabled:opacity-50"
+          className="mt-4 w-full text-sm text-zinc-400 transition hover:text-white disabled:opacity-50"
         >
           {resetLoading ? "Sending reset email..." : "Forgot Password?"}
         </button>
 
-        {message && (
-          <p className="mt-6 text-sm text-zinc-300">
-            {message}
-          </p>
-        )}
+        {message && <p className="mt-6 text-sm text-zinc-300">{message}</p>}
       </div>
     </main>
   );

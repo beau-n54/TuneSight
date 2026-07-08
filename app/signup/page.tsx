@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const router = useRouter();
+  const supabase = createClient();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSignup = async () => {
+  async function handleSignup() {
     setLoading(true);
     setMessage("");
 
@@ -38,11 +39,18 @@ export default function SignupPage() {
       return;
     }
 
-    const { error: profileError } = await supabase.from("profiles").insert({
+    const { error: profileError } = await supabase.from("profiles").upsert({
       id: user.id,
       full_name: fullName,
       plan,
       subscription_status: "inactive",
+      legal_accepted: false,
+      legal_version: null,
+      accepted_at: null,
+      beta_access: false,
+      beta_status: "awaiting",
+      beta_plan: plan,
+      beta_expires_at: null,
     });
 
     if (profileError) {
@@ -51,10 +59,10 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage("Account created successfully. Your subscription is currently inactive.");
-    setLoading(false);
-    router.push("/login");
-  };
+    localStorage.setItem("ts_plan", plan);
+
+    router.push("/legal-acceptance");
+  }
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-16">
@@ -64,15 +72,16 @@ export default function SignupPage() {
         </Link>
 
         <h1 className="text-4xl font-bold mt-8 mb-4">Create Account</h1>
+
         <p className="text-zinc-400 mb-8">
-          Create your TuneSight account and choose your plan.
+          Create your TuneSight account and begin the beta onboarding process.
         </p>
 
         <input
           type="text"
           placeholder="Full Name"
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          onChange={(event) => setFullName(event.target.value)}
           className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
         />
 
@@ -80,7 +89,7 @@ export default function SignupPage() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
           className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
         />
 
@@ -88,13 +97,13 @@ export default function SignupPage() {
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
           className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
         />
 
         <select
           value={plan}
-          onChange={(e) => setPlan(e.target.value)}
+          onChange={(event) => setPlan(event.target.value)}
           className="w-full mb-6 p-4 rounded-xl bg-black border border-zinc-700"
         >
           <option value="starter">Starter</option>
@@ -103,6 +112,7 @@ export default function SignupPage() {
         </select>
 
         <button
+          type="button"
           onClick={handleSignup}
           disabled={loading}
           className="w-full py-4 rounded-xl bg-white text-black font-semibold hover:opacity-80 transition disabled:opacity-50"
@@ -110,11 +120,7 @@ export default function SignupPage() {
           {loading ? "Creating Account..." : "Create Account"}
         </button>
 
-        {message && (
-          <p className="mt-6 text-sm text-zinc-300">
-            {message}
-          </p>
-        )}
+        {message && <p className="mt-6 text-sm text-zinc-300">{message}</p>}
       </div>
     </main>
   );
