@@ -65,122 +65,121 @@ export default function BetaAccessPage() {
     profile?.beta_access === true && profile?.beta_status !== "suspended";
 
   const isSuspended = profile?.beta_status === "suspended";
-
   const isAwaiting = !isApproved && !isSuspended;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-12">
-      <p className="mb-3 text-sm uppercase tracking-[0.3em] text-cyan-400">
-        TuneSight Beta Access
-      </p>
+    <main className="min-h-screen bg-black px-6 py-12 text-white">
+      <div className="mx-auto flex max-w-4xl flex-col">
+        <p className="mb-3 text-sm uppercase tracking-[0.3em] text-cyan-400">
+          TuneSight Beta Access
+        </p>
 
-      <h1 className="mb-4 text-4xl font-bold">
-        Beta Access Status
-      </h1>
+        <h1 className="mb-4 text-4xl font-bold">Beta Access Status</h1>
 
-      <p className="mb-8 text-muted-foreground">
-        TuneSight checks your beta access status before unlocking the diagnostic
-        platform.
-      </p>
+        <p className="mb-8 text-zinc-400">
+          TuneSight checks your beta access status before unlocking the
+          diagnostic platform.
+        </p>
 
-      {isLoading && (
-        <div className="rounded-xl border p-6">
-          Checking your beta access...
-        </div>
-      )}
+        {isLoading && (
+          <div className="bmw-border rounded-2xl bg-zinc-900 p-8 text-zinc-300">
+            Checking your beta access...
+          </div>
+        )}
 
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-red-500">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-red-400">
+            {error}
+          </div>
+        )}
 
-      {!isLoading && !error && profile && (
-        <>
-          {isApproved && (
-            <section className="rounded-2xl border border-green-500/30 bg-green-500/10 p-8">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-green-400">
-                Approved
-              </p>
-
-              <h2 className="text-2xl font-bold">
-                Your TuneSight beta access is active.
-              </h2>
-
-              <p className="mt-4 text-muted-foreground">
-                You can now enter the TuneSight dashboard and begin using the
-                beta diagnostic platform.
-              </p>
-
-              {profile.beta_plan && (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  Plan: {profile.beta_plan}
+        {!isLoading && !error && profile && (
+          <>
+            {isApproved && (
+              <section className="bmw-border rounded-2xl bg-zinc-900 p-8">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-green-400">
+                  Approved
                 </p>
-              )}
 
-              {profile.beta_expires_at && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Beta expires:{" "}
-                  {new Date(profile.beta_expires_at).toLocaleDateString()}
+                <h2 className="text-2xl font-bold text-white">
+                  Your TuneSight beta access is active.
+                </h2>
+
+                <p className="mt-4 text-zinc-400">
+                  You can now enter the TuneSight dashboard and begin using the
+                  beta diagnostic platform.
                 </p>
-              )}
 
-              <Link
-                href="/dashboard"
-                className="mt-8 inline-flex rounded-xl bg-cyan-500 px-6 py-4 font-semibold text-white transition hover:bg-cyan-600"
-              >
-                Enter Dashboard
-              </Link>
-            </section>
-          )}
+                {profile.beta_plan && (
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Plan: {profile.beta_plan}
+                  </p>
+                )}
 
-          {isAwaiting && (
-            <section className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-8">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-yellow-400">
-                Awaiting Approval
-              </p>
+                {profile.beta_expires_at && (
+                  <p className="mt-2 text-sm text-zinc-400">
+                    Beta expires:{" "}
+                    {new Date(profile.beta_expires_at).toLocaleDateString()}
+                  </p>
+                )}
 
-              <h2 className="text-2xl font-bold">
-                Your beta access request is being reviewed.
-              </h2>
+                <Link
+                  href="/dashboard"
+                  className="mt-8 inline-flex rounded-xl bg-cyan-500 px-6 py-4 font-semibold text-white transition hover:bg-cyan-600"
+                >
+                  Enter Dashboard
+                </Link>
+              </section>
+            )}
 
-              <p className="mt-4 text-muted-foreground">
-                Your legal acceptance has been saved. TuneSight beta access is
-                currently awaiting approval.
-              </p>
+            {isAwaiting && (
+              <section className="bmw-border rounded-2xl bg-zinc-900 p-8">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-yellow-400">
+                  Awaiting Approval
+                </p>
 
-              <p className="mt-4 text-sm text-muted-foreground">
-                Once approved, this page will automatically unlock dashboard
-                access.
-              </p>
-            </section>
-          )}
+                <h2 className="text-2xl font-bold text-white">
+                  Your beta access request is being reviewed.
+                </h2>
 
-          {isSuspended && (
-            <section className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-red-400">
-                Access Suspended
-              </p>
+                <p className="mt-4 text-zinc-400">
+                  Your legal acceptance has been saved. TuneSight beta access is
+                  currently awaiting approval.
+                </p>
 
-              <h2 className="text-2xl font-bold">
-                Your TuneSight beta access is currently suspended.
-              </h2>
+                <p className="mt-4 text-sm text-zinc-400">
+                  Once approved, this page will automatically unlock dashboard
+                  access.
+                </p>
+              </section>
+            )}
 
-              <p className="mt-4 text-muted-foreground">
-                Please contact TuneSight support if you believe this is a
-                mistake or need your beta access reviewed.
-              </p>
+            {isSuspended && (
+              <section className="bmw-border rounded-2xl bg-zinc-900 p-8">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-red-400">
+                  Access Suspended
+                </p>
 
-              <Link
-                href="/support"
-                className="mt-8 inline-flex rounded-xl border px-6 py-4 font-semibold transition hover:bg-muted/40"
-              >
-                Contact Support
-              </Link>
-            </section>
-          )}
-        </>
-      )}
+                <h2 className="text-2xl font-bold text-white">
+                  Your TuneSight beta access is currently suspended.
+                </h2>
+
+                <p className="mt-4 text-zinc-400">
+                  Please contact TuneSight support if you believe this is a
+                  mistake or need your beta access reviewed.
+                </p>
+
+                <Link
+                  href="/support"
+                  className="mt-8 inline-flex rounded-xl bg-cyan-500 px-6 py-4 font-semibold text-white transition hover:bg-cyan-600"
+                >
+                  Contact Support
+                </Link>
+              </section>
+            )}
+          </>
+        )}
+      </div>
     </main>
   );
 }

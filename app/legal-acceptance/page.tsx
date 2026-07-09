@@ -46,63 +46,65 @@ export default function LegalAcceptancePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-12">
-      <h1 className="mb-4 text-4xl font-bold">
-        Legal Review
-      </h1>
+    <main className="min-h-screen bg-black px-6 py-12 text-white">
+      <div className="mx-auto flex max-w-4xl flex-col">
+        <p className="mb-3 text-sm uppercase tracking-[0.3em] text-cyan-400">
+          TuneSight Legal Review
+        </p>
 
-      <p className="mb-8 text-muted-foreground">
-        Before accessing the TuneSight Beta you must review and accept the
-        Legal Disclaimer, Terms & Conditions and Privacy Policy.
-      </p>
+        <h1 className="mb-4 text-4xl font-bold">Legal Review</h1>
 
-      <div className="space-y-4">
+        <p className="mb-8 text-zinc-400">
+          Before accessing the TuneSight Beta you must review and accept the
+          Legal Disclaimer, Terms & Conditions and Privacy Policy.
+        </p>
 
-        <a
-          href="/legal"
-          className="block rounded-xl border p-5 hover:bg-muted/40 transition"
-        >
-          <h2 className="font-semibold">Legal Disclaimer</h2>
-          <p className="text-sm text-muted-foreground">
-            Read the TuneSight Legal Disclaimer.
-          </p>
-        </a>
+        <div className="space-y-4">
+          <a
+            href="/legal"
+            className="bmw-border block rounded-2xl bg-zinc-900 p-5 transition hover:bg-zinc-800"
+          >
+            <h2 className="font-semibold text-white">Legal Disclaimer</h2>
+            <p className="text-sm text-zinc-400">
+              Read the TuneSight Legal Disclaimer.
+            </p>
+          </a>
 
-        <a
-          href="/terms"
-          className="block rounded-xl border p-5 hover:bg-muted/40 transition"
-        >
-          <h2 className="font-semibold">Terms & Conditions</h2>
-          <p className="text-sm text-muted-foreground">
-            Review the Terms & Conditions.
-          </p>
-        </a>
+          <a
+            href="/terms"
+            className="bmw-border block rounded-2xl bg-zinc-900 p-5 transition hover:bg-zinc-800"
+          >
+            <h2 className="font-semibold text-white">Terms & Conditions</h2>
+            <p className="text-sm text-zinc-400">
+              Review the Terms & Conditions.
+            </p>
+          </a>
 
-        <a
-          href="/privacy"
-          className="block rounded-xl border p-5 hover:bg-muted/40 transition"
-        >
-          <h2 className="font-semibold">Privacy Policy</h2>
-          <p className="text-sm text-muted-foreground">
-            Review how TuneSight stores and protects your information.
-          </p>
-        </a>
-
-      </div>
-
-      {error && (
-        <div className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-500">
-          {error}
+          <a
+            href="/privacy"
+            className="bmw-border block rounded-2xl bg-zinc-900 p-5 transition hover:bg-zinc-800"
+          >
+            <h2 className="font-semibold text-white">Privacy Policy</h2>
+            <p className="text-sm text-zinc-400">
+              Review how TuneSight stores and protects your information.
+            </p>
+          </a>
         </div>
-      )}
 
-      <button
-        onClick={handleAccept}
-        disabled={isSaving}
-        className="mt-10 rounded-xl bg-cyan-500 px-6 py-4 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-60"
-      >
-        {isSaving ? "Saving..." : "Accept & Continue"}
-      </button>
+        {error && (
+          <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-400">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleAccept}
+          disabled={isSaving}
+          className="mt-10 rounded-xl bg-cyan-500 px-6 py-4 font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSaving ? "Saving..." : "Accept & Continue"}
+        </button>
+      </div>
     </main>
   );
 }
