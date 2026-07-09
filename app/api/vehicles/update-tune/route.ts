@@ -8,7 +8,6 @@ import { fingerprintRom } from "@/lib/tunes/romFingerprint";
 import path from "path";
 import { buildRuntimeRomLibrary } from "@/lib/tunes/buildRunTimeRomLibrary";
 import { getLibrary, hasLibrary } from "@/lib/tunes/libraryCache";
-import { compareBinaryRegions } from "@/lib/tunes/compareBinaryRegions";
 
 async function getSupabase() {
   const cookieStore = await cookies();
@@ -29,59 +28,7 @@ async function getSupabase() {
 }
 
 export async function POST(request: Request) {
-  const formData = await request.formData();
-  console.log("REFERENCE FIELD RAW:", formData.get("reference_tune_id"));
-  
-  const tuneNameRaw = formData.get("tune_name");
-const fileNameRaw = formData.get("file_name");
-
-const tuneNameForStockCheck =
-  typeof tuneNameRaw === "string" ? tuneNameRaw.toLowerCase() : "";
-
-const fileNameForStockCheck =
-  typeof fileNameRaw === "string" ? fileNameRaw.toLowerCase() : "";
-
-const isStockReference =
-
-  formData.get("is_stock_reference") === "on" ||
-  tuneNameForStockCheck.includes("stock") ||
-  tuneNameForStockCheck.includes("original") ||
-  fileNameForStockCheck.includes("stock") ||
-  fileNameForStockCheck.includes("original");
-
- console.log("isStockReference:", isStockReference);
-console.log("fileNameRaw:", fileNameRaw);
-console.log("tuneNameRaw:", tuneNameRaw);
-
-  const referenceTuneIdRaw =
-  formData.get("reference_tune_id");
-
-const referenceTuneId =
-   typeof referenceTuneIdRaw === "string" &&
-  referenceTuneIdRaw.length > 0
-    ? referenceTuneIdRaw
-    : null;
-
-const supabase = await getSupabase();
-
-const vehicleId = formData.get("vehicleId") as string;
-
-let activeReferenceTuneId = referenceTuneId;
-
-if (!activeReferenceTuneId && !isStockReference) {
-  const { data: latestStockTune } = await supabase
-    .from("tunes")
-    .select("id")
-    .eq("vehicle_id", vehicleId)
-    .eq("is_stock_reference", true)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  activeReferenceTuneId = latestStockTune?.id ?? null;
-}
-
-console.log("ACTIVE REFERENCE AFTER FALLBACK:", activeReferenceTuneId);
+  const supabase = await getSupabase();
 
   const {
     data: { user },
@@ -89,86 +36,119 @@ console.log("ACTIVE REFERENCE AFTER FALLBACK:", activeReferenceTuneId);
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    console.error("NO AUTH USER FOUND:", userError?.message || "No user");
-    return NextResponse.redirect(new URL("/login", request.url), {
-      status: 303,
-    });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const tuneFile = formData.get("tuneFile") as File | null;
-  let binarySummary = null;
-  let binaryDiffSummary: any = null;
-  let binaryChangedBytes = 0;
-  let binaryChangedRegions: any[] = [];
+  const body = await request.json();
 
-if (tuneFile) {
-  binarySummary = await parseBinaryTuneFile(tuneFile);
-  if (!isStockReference) {
-    console.log("DIFF CHECK STARTED");
-    console.log("referenceTuneId:", referenceTuneId);
-  const { data: stockReference } = await supabase
-    .from("tunes")
-    .select("*")
-    .eq("id", referenceTuneId)
-    .eq("vehicle_id", vehicleId)
-    .single();
+  const {
+    vehicleId,
+    tuneName,
+    fileName,
+    fileSize,
+    storageBucket,
+    storagePath,
+    isStockReference,
+    referenceTuneId,
+  } = body;
 
-  if (stockReference?.storage_path) {
-    console.log("STOCK REFERENCE FOUND:", stockReference);
-    const { data: referenceFile } = await supabase.storage
-      .from("tunes")
-      .download(stockReference.storage_path);
-
-    if (referenceFile) {
-      console.log("REFERENCE FILE DOWNLOADED");
-      const currentBuffer = Buffer.from(await tuneFile.arrayBuffer());
-      const referenceBuffer = Buffer.from(
-        await referenceFile.arrayBuffer()
-      );
-
-      const comparisonResult = compareBinaryRegions(
-        binarySummary,
-        currentBuffer,
-        referenceBuffer
-      );
-
-      console.log("COMPARISON RESULT:", comparisonResult.metadata?.binaryComparison);
-
-      binarySummary = comparisonResult;
-
-      binaryDiffSummary =
-        comparisonResult.metadata?.binaryComparison ?? null;
-
-      binaryChangedBytes =
-        comparisonResult.metadata?.binaryComparison
-          ?.totalChangedBytes ?? 0;
-
-      binaryChangedRegions =
-        comparisonResult.metadata?.binaryComparison
-          ?.changedRegions ?? [];
-    }
-  }
-}
-
-  console.log("BINARY PARSE RESULT:");
-  console.log(binarySummary);
-}
-  const tuneName = (formData.get("tune_name") as string) || "";
-
-  if (!vehicleId) {
-    return NextResponse.redirect(new URL("/garage", request.url), {
-      status: 303,
-    });
-  }
-
-  if (!tuneFile || tuneFile.size === 0) {
-    return NextResponse.redirect(
-      new URL(`/dashboard/vehicles/${vehicleId}`, request.url),
-      { status: 303 }
+  if (!vehicleId || !storagePath || !fileName) {
+    return NextResponse.json(
+      { error: "Missing tune upload metadata" },
+      { status: 400 }
     );
   }
 
-  const initialTuneName = tuneName || tuneFile.name || "Unnamed Tune";
+  const { data: vehicle } = await supabase
+    .from("vehicles")
+    .select("id")
+    .eq("id", vehicleId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!vehicle) {
+    return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
+  }
+
+  const { data: currentFile, error: downloadError } = await supabase.storage
+    .from(storageBucket || "tunes")
+    .download(storagePath);
+
+  if (downloadError || !currentFile) {
+    console.error("CURRENT TUNE DOWNLOAD ERROR:", downloadError?.message);
+
+    return NextResponse.json(
+      { error: "Could not download uploaded tune file" },
+      { status: 500 }
+    );
+  }
+
+  const arrayBuffer = await currentFile.arrayBuffer();
+  const currentBuffer = Buffer.from(arrayBuffer);
+
+  const binarySummary = await parseBinaryTuneFile(currentFile as File);
+
+  let activeReferenceTuneId = referenceTuneId || null;
+
+  if (!activeReferenceTuneId && !isStockReference) {
+    const { data: latestStockTune } = await supabase
+      .from("tunes")
+      .select("id")
+      .eq("vehicle_id", vehicleId)
+      .eq("user_id", user.id)
+      .eq("is_stock_reference", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    activeReferenceTuneId = latestStockTune?.id ?? null;
+  }
+
+  let binaryDiffSummary = null;
+  let binaryChangedBytes = 0;
+  let binaryChangedRegions: unknown[] = [];
+
+  if (activeReferenceTuneId && !isStockReference) {
+    const { data: referenceTune } = await supabase
+      .from("tunes")
+      .select("*")
+      .eq("id", activeReferenceTuneId)
+      .eq("vehicle_id", vehicleId)
+      .eq("user_id", user.id)
+      .single();
+
+    const referencePath = referenceTune?.file_path || referenceTune?.storage_path;
+
+    if (referencePath) {
+      const { data: referenceFile } = await supabase.storage
+        .from("tunes")
+        .download(referencePath);
+
+      if (referenceFile) {
+        const referenceArrayBuffer = await referenceFile.arrayBuffer();
+        const referenceBuffer = Buffer.from(referenceArrayBuffer);
+
+        const diffResult = detectBinaryDifferences(
+          currentBuffer,
+          referenceBuffer
+        );
+
+        binaryDiffSummary = diffResult;
+        binaryChangedBytes = diffResult.totalChangedBytes ?? 0;
+        binaryChangedRegions = diffResult.changedRegions ?? [];
+      }
+    }
+  }
+
+  const initialTuneName = tuneName || fileName || "Unnamed Tune";
+
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    .from(storageBucket || "tunes")
+    .createSignedUrl(storagePath, 60 * 60 * 24 * 365);
+
+  if (signedUrlError) {
+    console.error("SIGNED URL ERROR:", signedUrlError.message);
+  }
 
   const { data: insertedTune, error: tuneInsertError } = await supabase
     .from("tunes")
@@ -176,11 +156,13 @@ if (tuneFile) {
       vehicle_id: vehicleId,
       user_id: user.id,
       tune_name: initialTuneName,
-      file_name: null,
-      file_url: null,
-      reference_tune_id: referenceTuneId,
-      is_stock_reference: isStockReference,
-      comparison_ready: !isStockReference && !!referenceTuneId,
+      file_name: fileName,
+      file_url: signedUrlData?.signedUrl || null,
+      file_path: storagePath,
+      storage_path: storagePath,
+      reference_tune_id: activeReferenceTuneId,
+      is_stock_reference: !!isStockReference,
+      comparison_ready: !isStockReference && !!activeReferenceTuneId,
       binary_diff_summary: binaryDiffSummary,
       binary_changed_bytes: binaryChangedBytes,
       binary_changed_regions: binaryChangedRegions,
@@ -189,235 +171,86 @@ if (tuneFile) {
     .single();
 
   if (tuneInsertError || !insertedTune) {
-    console.error(
-      "INITIAL TUNE INSERT ERROR:",
-      tuneInsertError?.message || "No tune inserted"
-    );
+    console.error("TUNE INSERT ERROR:", tuneInsertError?.message);
 
-    return NextResponse.redirect(
-      new URL(`/dashboard/vehicles/${vehicleId}`, request.url),
-      { status: 303 }
+    return NextResponse.json(
+      { error: "Tune database insert failed" },
+      { status: 500 }
     );
   }
+
+  let profile: ReturnType<typeof buildTuneProfile> | null = null;
 
   try {
-    const arrayBuffer = await tuneFile.arrayBuffer();
-
-    const uploadBlob = new Blob([arrayBuffer], {
-      type: tuneFile.type || "application/octet-stream",
+    profile = buildTuneProfile({
+      tuneId: insertedTune.id,
+      tuneName: initialTuneName,
+      fileName,
+      fileBuffer: arrayBuffer,
     });
-
-    const fileExt = tuneFile.name.split(".").pop() || "bin";
-    const filePath = `${user.id}/${vehicleId}/${insertedTune.id}.${fileExt}`;
-    let binaryDiffSummary = null;
-
-    let binaryChangedBytes = 0;
-
-    let binaryChangedRegions: unknown[] = [];
-
-if (activeReferenceTuneId) {
-  console.log("REFERENCE TUNE ID:", activeReferenceTuneId);
-  const { data: referenceTune } = await supabase
-    .from("tunes")
-    .select("*")
-    .eq("id", activeReferenceTuneId)
-    .single();
-
-  if (referenceTune?.file_path) {
-    console.log(
-      "REFERENCE FILE PATH:",
-       referenceTune.file_path
-    );
-
-    const { data: referenceFileData } = await supabase.storage
-      .from("tunes")
-      .download(referenceTune.file_path);
-
-    if (referenceFileData) {
-      console.log("REFERENCE FILE DOWNLOADED");
-      const modifiedBuffer = Buffer.from(arrayBuffer);
-
-      const referenceArrayBuffer =
-        await referenceFileData.arrayBuffer();
-
-      const referenceBuffer = Buffer.from(referenceArrayBuffer);
-      console.log("MODIFIED FILE SIZE:", modifiedBuffer.length);
-      console.log("REFERENCE FILE SIZE:", referenceBuffer.length);
-
-      console.log(
-        "FIRST 20 MODIFIED BYTES:",
-         modifiedBuffer.subarray(0, 20).toString("hex")
-      );
-
-      console.log(
-        "FIRST 20 REFERENCE BYTES:",
-        referenceBuffer.subarray(0, 20).toString("hex")
-      );
-      console.log("RUNNING BINARY DIFF ENGINE");
-
-      const diffResult = detectBinaryDifferences(
-        modifiedBuffer,
-        referenceBuffer
-     );
-
-     console.log("DIFF RESULT:", diffResult);
-
-     binaryDiffSummary = diffResult;
-
-     binaryChangedBytes =
-     diffResult.totalChangedBytes ?? 0;
-
-     binaryChangedRegions =
-     diffResult.changedRegions ?? [];
-    
-    }
+  } catch (profileBuildError) {
+    console.error("PROFILE BUILD FAILED:", profileBuildError);
   }
-}
-    const { error: uploadError } = await supabase.storage
-      .from("tunes")
-      .upload(filePath, uploadBlob, {
-        upsert: false,
-      });
 
-    if (uploadError) {
-      console.error("TUNE UPLOAD ERROR:", uploadError.message);
-
-      return NextResponse.redirect(
-        new URL(`/dashboard/vehicles/${vehicleId}`, request.url),
-        { status: 303 }
-      );
-    }
-
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-      .from("tunes")
-      .createSignedUrl(filePath, 60 * 60 * 24 * 365);
-
-    if (signedUrlError) {
-      console.error("SIGNED URL ERROR:", signedUrlError.message);
-    }
-
-    const { error: tuneUpdateError } = await supabase
-      .from("tunes")
-      .update({
-        file_name: tuneFile.name,
-        file_url: signedUrlData?.signedUrl || null,
-      })
-      .eq("id", insertedTune.id)
-      .eq("user_id", user.id);
-
-    if (tuneUpdateError) {
-      console.error("TUNE ROW UPDATE ERROR:", tuneUpdateError.message);
-    }
-
-    console.log("STEP 1: Starting tune profile build");
-
-    let profile: ReturnType<typeof buildTuneProfile> | null = null;
-    
-    
-    try {
-      profile = buildTuneProfile({
-        tuneId: insertedTune.id,
-        tuneName: initialTuneName,
-        fileName: tuneFile.name,
-        fileBuffer: arrayBuffer,
-      });
-
-      console.log("STEP 2: Profile built:", profile);
-    } catch (profileBuildError) {
-      console.error("PROFILE BUILD FAILED:", profileBuildError);
-    }
-
-    console.log("PROFILE RESULT:", profile);
-
-    if (profile) {
-      console.log("STEP 3: Inserting profile into DB");
-
-     if (!hasLibrary()) {
+  if (profile) {
+    if (!hasLibrary()) {
       const root = path.join(process.cwd(), "BMW-XDFs-master");
       buildRuntimeRomLibrary(root);
-    } 
+    }
+
     const romFingerprint = fingerprintRom({
-      fileName: tuneFile?.name ?? null,
-      binarySizeBytes: binarySummary?.fileSize ?? null,
+      fileName,
+      binarySizeBytes: binarySummary?.fileSize ?? fileSize ?? null,
       printableStrings: binarySummary?.printableStrings ?? [],
       library: getLibrary(),
     });
 
-      const { data: insertedProfile, error: profileInsertError } = await supabase
-        .from("tune_profiles")
-        .insert({
-  vehicle_id: vehicleId,
-  user_id: user.id,
+    const { error: profileInsertError } = await supabase
+      .from("tune_profiles")
+      .insert({
+        vehicle_id: vehicleId,
+        user_id: user.id,
 
-  binary_size_bytes: binarySummary?.fileSize ?? null,
+        binary_size_bytes: binarySummary?.fileSize ?? fileSize ?? null,
+        binary_confidence: binarySummary?.confidence ?? null,
+        parser_notes: binarySummary?.parserNotes ?? [],
+        printable_strings: binarySummary?.printableStrings ?? [],
+        checksum_status: "pending",
+        map_scan_status: "pending",
 
-  binary_confidence: binarySummary?.confidence ?? null,
+        rom_platform: romFingerprint.platform,
+        ecu_family: romFingerprint.ecu,
+        rom_family: romFingerprint.romFamily,
+        binary_type: romFingerprint.binaryType,
+        xdf_suggested: romFingerprint.xdfSuggested,
+        rom_confidence: romFingerprint.confidence,
+        rom_evidence: romFingerprint.evidence,
+        rom_warnings: romFingerprint.warnings,
 
-  parser_notes: binarySummary?.parserNotes ?? [],
+        reference_tune_id: activeReferenceTuneId,
+        is_stock_reference: !!isStockReference,
+        comparison_ready: !isStockReference && !!activeReferenceTuneId,
 
-  printable_strings: binarySummary?.printableStrings ?? [],
+        binary_diff_summary: binaryDiffSummary,
+        binary_changed_bytes: binaryChangedBytes,
+        binary_changed_regions: binaryChangedRegions,
 
-  checksum_status: "pending",
+        binary_signature:
+          binarySummary?.binarySignature ??
+          binarySummary?.detectedRom ??
+          binarySummary?.detectedPlatform ??
+          null,
 
-  map_scan_status: "pending",
+        ...profile,
+      });
 
-  rom_platform: romFingerprint.platform,
-
-  ecu_family: romFingerprint.ecu,
-
-  rom_family: romFingerprint.romFamily,
-
-  binary_type: romFingerprint.binaryType,
-
-  xdf_suggested: romFingerprint.xdfSuggested,
-
-  rom_confidence: romFingerprint.confidence,
-
-  rom_evidence: romFingerprint.evidence,
-
-  rom_warnings: romFingerprint.warnings,
-
-  reference_tune_id: null,
-  is_stock_reference: isStockReference,
-  comparison_ready: !isStockReference,
-
-  
-  binary_diff_summary: binaryDiffSummary,
-
-  binary_changed_bytes: binaryChangedBytes,
-
-  binary_changed_regions: binaryChangedRegions,
-  
-  binary_signature:
-  binarySummary?.binarySignature ??
-  binarySummary?.detectedRom ??
-  binarySummary?.detectedPlatform ??
-  null,
-
-  ...profile,
-})
-        .select()
-        .single();
-
-      if (profileInsertError) {
-        console.error(
-          "TUNE PROFILE INSERT FAILED:",
-          profileInsertError.message
-        );
-      } else {
-        console.log("TUNE PROFILE INSERTED:", insertedProfile);
-      }
-    } else {
-      console.warn(
-        "Profile was null, so nothing was inserted into tune_profiles"
-      );
+    if (profileInsertError) {
+      console.error("TUNE PROFILE INSERT FAILED:", profileInsertError.message);
     }
-  } catch (error) {
-    console.error("TUNE PROCESSING ERROR:", error);
   }
 
-  return NextResponse.redirect(
-    new URL(`/dashboard/vehicles/${vehicleId}`, request.url),
-    { status: 303 }
-  );
+  return NextResponse.json({
+    success: true,
+    tuneId: insertedTune.id,
+  });
 }
