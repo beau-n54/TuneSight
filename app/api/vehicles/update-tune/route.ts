@@ -158,8 +158,6 @@ export async function POST(request: Request) {
       tune_name: initialTuneName,
       file_name: fileName,
       file_url: signedUrlData?.signedUrl || null,
-      file_path: storagePath,
-      storage_path: storagePath,
       reference_tune_id: activeReferenceTuneId,
       is_stock_reference: !!isStockReference,
       comparison_ready: !isStockReference && !!activeReferenceTuneId,
@@ -171,13 +169,18 @@ export async function POST(request: Request) {
     .single();
 
   if (tuneInsertError || !insertedTune) {
-    console.error("TUNE INSERT ERROR:", tuneInsertError?.message);
+  console.error("TUNE INSERT ERROR:", tuneInsertError?.message);
 
-    return NextResponse.json(
-      { error: "Tune database insert failed" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: "Tune database insert failed",
+      details: tuneInsertError?.message ?? null,
+      hint: tuneInsertError?.hint ?? null,
+      code: tuneInsertError?.code ?? null,
+    },
+    { status: 500 }
+  );
+}
 
   let profile: ReturnType<typeof buildTuneProfile> | null = null;
 
