@@ -1,29 +1,110 @@
 import type { ParsedTuneFile } from "./types";
 
-export function extractTuneMetadata(parsed: ParsedTuneFile): ParsedTuneFile {
-  const joined = parsed.printableStrings.join(" ");
+function unique(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
+}
 
-  const notes = [...parsed.parserNotes];
+function findVin(printableStrings: string[]): string | undefined {
+  for (const value of printableStrings) {
+    const match = value
+      .toUpperCase()
+      .match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
 
-  const vinMatch = joined.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
-
-  const calibrationMatch =
-    joined.match(/\b[0-9]{7}\b/) ||
-    joined.match(/\b[0-9]{6,8}[A-Z]{0,2}\b/);
-
-  const softwareVersion =
-    parsed.detectedRom ?? parsed.metadata.softwareVersion;
-
-  if (vinMatch?.[0]) {
-    notes.push("Possible VIN-like identifier detected in binary metadata.");
+    if (match?.[0]) {
+      return match[0];
+    }
   }
 
-  if (calibrationMatch?.[0]) {
-    notes.push("Possible calibration/software identifier detected in binary metadata.");
+  return undefined;
+}
+
+function findCalibrationId(
+  printableStrings: string[],
+  detectedRom: string | null
+): string | undefined {
+  const romUpper = detectedRom?.toUpperCase() ?? null;
+
+  const candidates = unique(
+    printableStrings.flatMap((value) => {
+      const upper = value.toUpperCase();
+
+      return (
+        upper.match(
+          /\b(?:[A-Z]{1,4}[0-9]{5,12}|[0-9]{8,14}[A-Z]{0,3})\b/g
+        ) ?? []
+      );
+    })
+  );
+
+  return candidates.find((candidate) => {
+    if (candidate === romUpper) {
+      return false;
+    }
+
+    if (/^0+$/.test(candidate)) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+export function extractTuneMetadata(
+  parsed: ParsedTuneFile
+): ParsedTuneFile {
+  const notes = [...parsed.parserNotes];
+
+  const detectedVin =
+    parsed.metadata.vin ??
+    findVin(parsed.printableStrings);
+
+  const detectedCalibrationId =
+    parsed.metadata.calibrationId ??
+    findCalibrationId(
+      parsed.printableStrings,
+      parsed.detectedRom
+    );
+
+  const softwareVersion =
+    parsed.metadata.softwareVersion ??
+    parsed.detectedRom ??
+    undefined;
+
+  const romId =
+    parsed.metadata.romId ??
+    parsed.detectedRom ??
+    undefined;
+
+  if (detectedVin) {
+    notes.push(
+      `VIN-like metadata detected: ${detectedVin}.`
+    );
+  } else {
+    notes.push(
+      "No reliable VIN metadata was detected."
+    );
+  }
+
+  if (detectedCalibrationId) {
+    notes.push(
+      `Calibration identifier candidate detected: ${detectedCalibrationId}.`
+    );
+  } else {
+    notes.push(
+      "No reliable calibration identifier was detected."
+    );
   }
 
   if (softwareVersion) {
-    notes.push(`Software/ROM metadata assigned: ${softwareVersion}.`);
+    notes.push(
+      `Software version metadata detected: ${softwareVersion}.`
+    );
+  }
+
+  if (romId) {
+    notes.push(
+      `ROM identifier detected: ${romId}.`
+    );
   }
 
   return {
@@ -31,10 +112,18 @@ export function extractTuneMetadata(parsed: ParsedTuneFile): ParsedTuneFile {
     parserNotes: notes,
     metadata: {
       ...parsed.metadata,
-      vin: vinMatch?.[0],
-      calibrationId: calibrationMatch?.[0],
-      softwareVersion,
-      romId: parsed.detectedRom ?? parsed.metadata.romId,
+      ...(detectedVin
+        ? { vin: detectedVin }
+        : {}),
+      ...(detectedCalibrationId
+        ? { calibrationId: detectedCalibrationId }
+        : {}),
+      ...(softwareVersion
+        ? { softwareVersion }
+        : {}),
+      ...(romId
+        ? { romId }
+        : {}),
     },
   };
 }

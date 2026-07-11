@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import RomIdentityCard from "@/lib/components/RomIdentityCard";
+import { buildRomIdentityFromTuneProfile } from "@/lib/intelligence/romIdentityAdapter";
 
 export default function TunePage() {
   const params = useParams<{ id: string }>();
@@ -92,7 +94,14 @@ export default function TunePage() {
     };
   });
 
-  const latestTuneProfile = tuneProfiles[0];
+  const latestTune = tunes[0];
+
+  const latestTuneProfile = latestTune
+    ? tuneProfiles.find((profile) => profile.tune_id === latestTune.id)
+    : null;
+
+    const romIdentity =
+      buildRomIdentityFromTuneProfile(latestTuneProfile);
 
   const stockTunes = tunes.filter((t) => t.is_stock_reference);
 
@@ -297,55 +306,7 @@ export default function TunePage() {
           </button>
         </form>
 
-        <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
-          <h2 className="mb-4 text-xl font-semibold">
-            Binary Tune Intelligence
-          </h2>
-
-          <div className="space-y-3 text-sm">
-            <div>
-              <span className="text-zinc-500">Detected Type:</span>{" "}
-              <span className="text-white">{testTuneData.detectedType}</span>
-            </div>
-
-            <div>
-              <span className="text-zinc-500">Likely ROM:</span>{" "}
-              <span className="text-white">{testTuneData.likelyRom}</span>
-            </div>
-
-            <div>
-              <span className="text-zinc-500">ECU:</span>{" "}
-              <span className="text-white">{testTuneData.ecu}</span>
-            </div>
-
-            <div>
-              <span className="text-zinc-500">XDF:</span>{" "}
-              <span className="text-white">{testTuneData.xdf}</span>
-            </div>
-
-            <div>
-              <span className="text-zinc-500">Confidence:</span>{" "}
-              <span className="text-yellow-400 uppercase">
-                {testTuneData.confidence}
-              </span>
-            </div>
-
-            <div className="pt-2">
-              <p className="mb-2 text-zinc-500">Parser Notes</p>
-
-              <ul className="space-y-1">
-                {testTuneData.notes.map((note: string) => (
-                  <li
-                    key={note}
-                    className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-zinc-300"
-                  >
-                    {note}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <RomIdentityCard identity={romIdentity} />
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
           <h2 className="mb-4 text-xl font-semibold">Tune History</h2>

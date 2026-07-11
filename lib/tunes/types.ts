@@ -12,6 +12,15 @@ export type BinaryConfidence =
   | "medium"
   | "high";
 
+export type VerificationStatus =
+  | "pending"
+  | "verified"
+  | "valid"
+  | "invalid"
+  | "matched"
+  | "not_matched"
+  | "not_available";
+
 export interface ParsedTuneFile {
   detectedPlatform: TunePlatform;
   detectedRom: string | null;
@@ -20,9 +29,9 @@ export interface ParsedTuneFile {
 
   fileSize: number;
 
-referenceTuneId?: string | null;
-isStockReference?: boolean;
-comparisonReady?: boolean;
+  referenceTuneId?: string | null;
+  isStockReference?: boolean;
+  comparisonReady?: boolean;
 
   printableStrings: string[];
 
@@ -34,17 +43,25 @@ comparisonReady?: boolean;
     vin?: string;
     romId?: string;
 
+    checksumFamily?: string;
+    checksumVerificationStatus?: VerificationStatus;
+
+    calibrationVerificationStatus?: VerificationStatus;
+
+    exactBinaryMatchStatus?: VerificationStatus;
+    binaryHash?: string;
+
     suspectedMapRegions?: {
       type: string;
       startOffset: number;
       endOffset: number;
-   }[];
+    }[];
 
-   entropyAnalysis?: {
-     averageEntropy: number;
-     lowestEntropyOffset: number | null;
-     highestEntropyOffset: number | null;
-     notes: string[];
+    entropyAnalysis?: {
+      averageEntropy: number;
+      lowestEntropyOffset: number | null;
+      highestEntropyOffset: number | null;
+      notes: string[];
     };
 
     binaryComparison?: {

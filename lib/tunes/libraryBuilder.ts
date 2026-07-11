@@ -182,10 +182,21 @@ export function buildRomLibrary(files: LibraryFile[]): RomLibraryEntry[] {
     }
   }
 
-  return [...entries.values()]
-    .sort((a, b) => {
-      if (a.platform !== b.platform) return a.platform.localeCompare(b.platform);
-      return a.romFamily.localeCompare(b.romFamily);
-    })
-    .map(({ score, ...entry }) => entry);
+ return [...entries.values()]
+  .sort((a, b) => {
+    if (a.platform !== b.platform) {
+      return a.platform.localeCompare(b.platform);
+    }
+
+    return a.romFamily.localeCompare(b.romFamily);
+  })
+  .map(({ score, ...entry }) => ({
+    ...entry,
+    hasXdf: !!entry.xdfSuggested,
+    hasStockBin: !!entry.stockBinSuggested,
+    hasMapSwitchBin: !!entry.mapSwitchBinSuggested,
+    libraryEvidenceScore: score,
+    stockBinaryHash: null,
+    stockBinarySizeBytes: null,
+  }));
 }
