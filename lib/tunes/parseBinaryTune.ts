@@ -5,50 +5,78 @@ import { extractTuneMetadata } from "./extractMetadata";
 import { detectChecksumFamily } from "./detectChecksumFamily";
 import { detectMapRegions } from "./detectMapRegions";
 import { analyzeEntropy } from "./analyzeEntropy";
+import { calculateBinaryHash } from "./calculateBinaryHash";
 
 import type { ParsedTuneFile } from "./types";
 
 export async function parseBinaryTuneFile(
   file: File
 ): Promise<ParsedTuneFile> {
-  const arrayBuffer = await file.arrayBuffer();
+  const arrayBuffer =
+    await file.arrayBuffer();
 
-  const buffer = Buffer.from(arrayBuffer);
+  const buffer =
+    Buffer.from(arrayBuffer);
+
+  const binaryHash =
+    calculateBinaryHash(buffer);
 
   const printableStrings =
-    extractPrintableStringsFromBuffer(buffer);
+    extractPrintableStringsFromBuffer(
+      buffer
+    );
 
   const romDetection =
-    detectRomSignature(printableStrings);
+    detectRomSignature(
+      printableStrings
+    );
 
   const parsed: ParsedTuneFile = {
-  detectedPlatform: romDetection.detectedPlatform,
+    detectedPlatform:
+      romDetection.detectedPlatform,
 
-  detectedRom: romDetection.detectedRom,
+    detectedRom:
+      romDetection.detectedRom,
 
-  binarySignature: romDetection.binarySignature,
+    binarySignature:
+      romDetection.binarySignature,
 
-  confidence: romDetection.confidence,
+    confidence:
+      romDetection.confidence,
 
-  fileSize: buffer.length,
+    fileSize:
+      buffer.length,
 
-  printableStrings,
+    printableStrings,
 
-  parserNotes: romDetection.parserNotes,
+    parserNotes:
+      romDetection.parserNotes,
 
-  metadata: {},
-};
+    metadata: {
+      binaryHash,
+    },
+  };
 
-const withMetadata = extractTuneMetadata(parsed);
+  const withMetadata =
+    extractTuneMetadata(parsed);
 
-const withChecksumFamily =
-  detectChecksumFamily(withMetadata);
+  const withChecksumFamily =
+    detectChecksumFamily(
+      withMetadata
+    );
 
-const withMapRegions =
-  detectMapRegions(withChecksumFamily);
+  const withMapRegions =
+    detectMapRegions(
+      withChecksumFamily
+    );
 
-const withEntropy =
-  analyzeEntropy(withMapRegions, buffer);
+  const withEntropy =
+    analyzeEntropy(
+      withMapRegions,
+      buffer
+    );
 
-return routePlatformParser(withEntropy);
+  return routePlatformParser(
+    withEntropy
+  );
 }

@@ -12,8 +12,10 @@ export type RomLibraryEntry = {
 
   /**
    * Describes the supporting files available for this ROM entry.
-   * These fields strengthen detection confidence but do not prove
-   * that an uploaded binary is byte-for-byte identical.
+   *
+   * These fields strengthen ROM identification confidence, but they
+   * do not prove that an uploaded binary is byte-for-byte identical
+   * to a known reference.
    */
   hasXdf?: boolean;
   hasStockBin?: boolean;
@@ -21,10 +23,22 @@ export type RomLibraryEntry = {
   libraryEvidenceScore?: number;
 
   /**
-   * Reserved for future exact binary verification.
+   * Exact stock-reference metadata.
+   *
+   * These values are populated from the binary contents of a known
+   * stock-library file and may be used for verified classification.
    */
   stockBinaryHash?: string | null;
   stockBinarySizeBytes?: number | null;
+
+  /**
+   * Exact map-switch-reference metadata.
+   *
+   * These values are populated from the binary contents of a known
+   * map-switch-library file and may be used for verified classification.
+   */
+  mapSwitchBinaryHash?: string | null;
+  mapSwitchBinarySizeBytes?: number | null;
 };
 
 export const ROM_LIBRARY: RomLibraryEntry[] = [
@@ -43,6 +57,8 @@ export const ROM_LIBRARY: RomLibraryEntry[] = [
     libraryEvidenceScore: 3,
     stockBinaryHash: null,
     stockBinarySizeBytes: null,
+    mapSwitchBinaryHash: null,
+    mapSwitchBinarySizeBytes: null,
   },
   {
     platform: "N54",
@@ -59,6 +75,8 @@ export const ROM_LIBRARY: RomLibraryEntry[] = [
     libraryEvidenceScore: 3,
     stockBinaryHash: null,
     stockBinarySizeBytes: null,
+    mapSwitchBinaryHash: null,
+    mapSwitchBinarySizeBytes: null,
   },
   {
     platform: "N54",
@@ -75,6 +93,8 @@ export const ROM_LIBRARY: RomLibraryEntry[] = [
     libraryEvidenceScore: 3,
     stockBinaryHash: null,
     stockBinarySizeBytes: null,
+    mapSwitchBinaryHash: null,
+    mapSwitchBinarySizeBytes: null,
   },
   {
     platform: "N54",
@@ -91,5 +111,7 @@ export const ROM_LIBRARY: RomLibraryEntry[] = [
     libraryEvidenceScore: 3,
     stockBinaryHash: null,
     stockBinarySizeBytes: null,
+    mapSwitchBinaryHash: null,
+    mapSwitchBinarySizeBytes: null,
   },
 ];
