@@ -1,0 +1,317 @@
+This document forms part of TuneSight's Engineering Governance Framework.
+
+**Authority:** Engineering Governance Framework
+
+**Purpose:** Preserves the permanent record of formally reviewed and ratified TuneSight engineering artefacts.
+
+**Status:** Active Governance Record
+
+
+
+
+# TuneSight
+
+# Engineering Ratification Register
+
+---
+
+## Record Responsibility
+
+This document answers: **What has been formally reviewed and approved?**
+
+It is the canonical permanent historical record of formal engineering ratifications. Entries shall not be deleted when an artefact is superseded. Supersession shall be recorded as additional history.
+
+Current implementation, validation, dependency and Engineering Hold state belongs to the [Engineering Project Status](engineering-project-status.md).
+
+Architecture Ratification approves what an Engineering Domain is. It does not prove implementation, validation, Work Package completion or Founder Validation of runtime behaviour.
+
+---
+
+## Governing References
+
+- [Engineering Blueprint](../04-engineering-blueprint.md)
+- [Engineering Architecture Bible](<../05 engineering-architecture-bible/README.md>)
+- [Engineering Domain 01 - Vehicle Identity](<../05 engineering-architecture-bible/01-vehicle-identity.md>)
+- [Engineering Domain 02 - Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>)
+- [Cross-Domain Engineering Contracts](<../05 engineering-architecture-bible/00-cross-domain-engineering-contracts.md>)
+- [WP-003 Vehicle Identity Implementation](../08-engineering-work-packages/WP-003-vehicle-identity-implementation.md)
+- [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md)
+- [Engineering Project Status](engineering-project-status.md)
+
+---
+
+## Register Identifier
+
+Ratification entries use the stable format `TS-RAT-NNN`.
+
+Identifiers are permanent and shall not be reused. A superseding ratification receives a new identifier and references the earlier entry.
+
+---
+
+## Ratification Scope
+
+Every ratification shall identify its exact scope, including one or more of:
+
+- Architecture Ratified
+- Work Package specification ratified
+- Implementation Ratified
+- Founder Validation Passed
+- Amendment approved
+
+An approval in one scope shall never imply approval in another scope.
+
+---
+
+## Founder Audit Amendments
+
+A Founder Audit Amendment is a numbered, controlled refinement applied to an Engineering Architecture Bible specification after it has entered Founder Audit.
+
+Founder Audit Amendments shall:
+
+- preserve existing architecture wherever practical;
+- state the reason for each refinement;
+- identify every affected section;
+- avoid unrelated changes;
+- remain independently reviewable;
+- preserve audit traceability; and
+- never silently rewrite ratified architecture.
+
+Amendments shall be recorded against the ratified artefact. Separate amendment files are not required unless later governance explicitly establishes that convention.
+
+---
+
+## Ratification Entries
+
+### TS-RAT-001
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-001 |
+| Date | Date requires Founder confirmation |
+| Artefact Type | Engineering Architecture Bible specification |
+| Artefact Name | Engineering Domain 02 - Knowledge |
+| Artefact Path | [`engineering/05 engineering-architecture-bible/02-knowledge.md`](<../05 engineering-architecture-bible/02-knowledge.md>) |
+| Version | Version requires Founder confirmation |
+| Authority | Founder |
+| Ratification Scope | Architecture Ratified; Founder Audit completed; FAA-001 approved |
+| Status | RATIFIED |
+| Founder Audit Status | Completed |
+| Amendments Applied | FAA-001 |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies the authoritative architecture and engineering specification for Engineering Domain 02 - Knowledge.
+
+Knowledge is approved as the authoritative owner of reusable Engineering Truth and canonical Engineering Knowledge within the boundaries established by the Engineering Blueprint and Engineering Architecture Bible.
+
+**Founder Audit Amendment FAA-001**
+
+FAA-001 refined the specification to:
+
+- establish Knowledge as the authoritative owner of reusable Engineering Truth;
+- add preservation of Engineering Context;
+- explicitly strengthen canonical Engineering Relationships; and
+- clarify that Vehicle Identity establishes current Engineering Identity from authoritative reusable Engineering Truth supplied by Knowledge.
+
+Affected sections:
+
+- Engineering Intent
+- Purpose
+- Responsibilities
+- Boundaries
+
+**Dependencies and Qualifications**
+
+- This ratification applies only to the Engineering Architecture Bible specification.
+- It does not declare WP-004 implementation complete.
+- It does not declare WP-004 validation complete.
+- It does not declare WP-004 Founder Validated.
+- It does not release WP-003 from Engineering Hold.
+- It authorises implementation of WP-004 against the ratified specification.
+- WP-003 return criteria and current implementation status remain governed by the [Engineering Project Status](engineering-project-status.md).
+- The Architecture Bible file currently retains its `Draft for Founder Audit` label. This register preserves the formal Founder approval; administrative alignment of the source label was outside the authorised scope of this records task.
+
+**Notes**
+
+No ratification date or artefact version was available from authoritative repository evidence. Both remain explicitly subject to Founder confirmation.
+
+---
+
+### TS-RAT-002
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-002 |
+| Date | 22 July 2026 |
+| Artefact Type | Work Package Subsystem Implementation |
+| Artefact Name | WP-004.1 Stock Variant Knowledge Engine |
+| Implementation Path | [`lib/knowledge/stockVariants.ts`](../../lib/knowledge/stockVariants.ts) |
+| Validation Harness | [`scripts/validateStockVariantKnowledge.ts`](../../scripts/validateStockVariantKnowledge.ts) |
+| Authority | Founder |
+| Ratification Scope | Implementation, Founder Code Audit and Physical Founder Validation |
+| Status | RATIFIED |
+| Architecture Authority | [Engineering Domain 02 - Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>) |
+| Parent Work Package | [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md) |
+| Validation Status | Passed |
+| Regression Status | Passed within approved scope |
+| WP-003 Dependency Status | ENGINEERING HOLD remains active |
+| WP-004 Status | IN PROGRESS |
+| Commit Status | Not committed or pushed at time of ratification |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies the implementation, Founder Code Audit and Physical Founder Validation of WP-004.1 Stock Variant Knowledge Engine.
+
+This ratification approves the following capability:
+
+- Canonical Stock Variant Knowledge model
+- Multiple variants per ROM Family
+- Exact SHA-256 plus binary-size lookup
+- Immutable append-safe registry
+- Verification and confidence separation
+- Provenance preservation
+- Conflict exposure
+- Legacy provisional adapter
+- Read-only Founder Validation harness
+- Honest unknown behaviour
+
+**Physical Validation Evidence**
+
+- The production registry contained 196 variants before validation.
+- The production registry contained 196 variants after validation.
+- A real legacy reference resolved as a provisional exact candidate.
+- An explicitly verified fixture resolved as exact verified.
+- Beau's F30 founder binary remained unknown.
+- Christos' Supra founder binary remained unknown.
+- A contradictory ROM Family produced conflict.
+- No production Knowledge mutation occurred.
+
+**Validation-Discovered Correction**
+
+Physical validation exposed a legacy Knowledge Object identity collision where one exact binary could relate to multiple legacy catalogue entries.
+
+The adapter identity was corrected to preserve distinct qualified relationships using exact binary identity together with platform and ROM Family context.
+
+Conflicting legacy relationships now remain separate and surface as conflict instead of being resolved through ordering.
+
+**Dependencies and Qualifications**
+
+This ratification applies only to WP-004.1.
+
+It does not:
+
+- complete WP-004;
+- release WP-003 from Engineering Hold;
+- connect Vehicle Identity to the Knowledge registry;
+- classify Beau's binary as Stock;
+- classify Christos' binary as Stock; or
+- ratify any future Knowledge subsystem.
+
+WP-004 remains IN PROGRESS. WP-003 return criteria and the current Engineering Hold remain governed by the [Engineering Project Status](engineering-project-status.md).
+
+---
+
+### TS-RAT-003
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-003 |
+| Date | 26 July 2026 |
+| Artefact Type | Engineering Architecture Bible |
+| Artefact Name | Rewritten TuneSight Engineering Architecture Bible |
+| Artefact Path | [`engineering/05 engineering-architecture-bible/README.md`](<../05 engineering-architecture-bible/README.md>) |
+| Authority | Founder |
+| Ratification Scope | Complete Architecture Bible structure, eight Engineering Domains, Presentation architectural layer, universal Cross-Domain Engineering Contract standard, ownership clarifications and Founder-approved architectural amendments |
+| Status | RATIFIED |
+| Constitutional Audit | Completed |
+| Founder Amendment Pass | Completed |
+| Editorial Amendment Pass | Completed |
+| Founder Review | Completed |
+| Founder Ratification | Completed |
+| Superseded Status | Supersedes previous Architecture Bible wording while preserving previously ratified Founder architectural intent unless explicitly amended |
+
+**Founder Ratification Declaration**
+
+By explicit Founder authority, the rewritten Engineering Architecture Bible is Ratified as the authoritative architectural reference for TuneSight.
+
+This is an explicit Founder architectural ratification. It is not an engineering recommendation, automated decision or implementation decision.
+
+**Ratified Chapters and Standards**
+
+- [Engineering Architecture Bible README](<../05 engineering-architecture-bible/README.md>)
+- [Cross-Domain Engineering Contracts](<../05 engineering-architecture-bible/00-cross-domain-engineering-contracts.md>)
+- [Vehicle Identity](<../05 engineering-architecture-bible/01-vehicle-identity.md>)
+- [Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>)
+- [Evidence](<../05 engineering-architecture-bible/03-evidence.md>)
+- [Correlation](<../05 engineering-architecture-bible/04-correlation.md>)
+- [Explanation](<../05 engineering-architecture-bible/05-explanation.md>)
+- [Decision](<../05 engineering-architecture-bible/06-decision.md>)
+- [Memory](<../05 engineering-architecture-bible/07-memory.md>)
+- [Evolution](<../05 engineering-architecture-bible/08-evolution.md>)
+- [Presentation](<../05 engineering-architecture-bible/09-presentation.md>)
+
+The ratification includes the rewritten structure, architectural ownership clarifications, cross-domain boundary standard, constitutional compatibility corrections and all Founder-approved refinements contained within the rewritten Bible.
+
+**Relationship to Previous Architecture Bible**
+
+This ratification supersedes previous Architecture Bible wording. It preserves previously ratified Founder architectural intent except where the rewritten Bible explicitly amends or clarifies that intent. Earlier ratification records remain permanent historical evidence.
+
+**Relationship to Engineering Blueprint**
+
+The Engineering Blueprint remains the higher-order organisational authority from which the Architecture Bible derives its Domain organisation and ownership boundaries. The Ratified Bible provides the authoritative detailed architectural doctrine for those Domains and their relationships.
+
+**Relationship to Production Contract**
+
+The Production Contract remains downstream of the Architecture Bible. It operationalises and enforces production conformance but does not authorise, redefine or supersede the Ratified architecture.
+
+**Relationship to Engineering Domains**
+
+The ratification confirms eight Engineering Domains: Vehicle Identity, Knowledge, Evidence, Correlation, Explanation, Decision, Memory and Evolution. Their established ownership, responsibilities and boundaries are Ratified. Presentation remains a non-domain architectural communication layer.
+
+**Relationship to Cross-Domain Engineering Contracts**
+
+The universal Cross-Domain Engineering Contract standard is Ratified as part of the Architecture Bible. It governs qualified truth transfer across Domain boundaries and into authorised infrastructure without owning engineering truth or creating a new Domain or runtime layer.
+
+**Implementation and Validation Qualification**
+
+Architecture Ratification completes the Architecture Foundation phase. It does not by itself declare any Work Package implementation complete, satisfy runtime Founder Validation, release an Engineering Hold or change production behaviour.
+
+Future implementation shall proceed in accordance with the Ratified Architecture Bible until amended through Founder-approved Engineering Governance.
+
+---
+
+## Legacy Ratification Registration
+
+Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
+
+Those artefacts shall remain authoritative according to their existing status declarations. Historical registration requires confirmation and shall not be fabricated in this register.
+
+---
+
+## Register Discipline
+
+Every future entry shall preserve, where available:
+
+- Register ID
+- Date
+- Artefact type
+- Artefact name and path
+- Version
+- Authority
+- Ratification scope
+- Founder Audit status
+- Amendments applied
+- Ratification declaration
+- Dependencies and qualifications
+- Superseded status
+- Notes
+
+Missing historical facts shall be recorded as requiring confirmation rather than inferred.
+
+---
+
+## Responsibility
+
+The Engineering Ratification Register is responsible for preserving formal engineering approval history permanently, precisely and without implying unapproved implementation or validation status.
