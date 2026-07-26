@@ -2,206 +2,68 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Authority:** Derived from the Engineering Blueprint
 
-**Purpose:** Defines the complete engineering specification for the Memory Engineering Domain.
+**Status:** Consolidated Draft for Founder Review
 
-**Status:** Ratified
+# TuneSight Engineering Architecture Bible
 
+## Engineering Domain 07 — Memory
 
+## Engineering Intent and Purpose
 
+Memory preserves engineering understanding beyond one analysis so current and future work can benefit from historically accurate context and retained learning.
 
+## Authoritative Ownership
 
-# TuneSight
+Memory solely owns faithful preservation of vehicle-specific history, analysis history, engineering events, prior outputs, outcomes, validations, user-specific and historical context, timelines, retained historical relationships, historically derived insight and the provenance of historical learning.
 
-# Engineering Architecture Bible
-
-## Engineering Domain 07
-
-# Memory
-
----
-
-## Engineering Intent
-
-The Memory Engineering Domain exists to preserve engineering understanding beyond the completion of a single engineering analysis.
-
-Memory preserves engineering guidance, engineering outcomes and engineering understanding as persistent engineering knowledge that improves future engineering reasoning.
-
-Every future engineering analysis benefits from the engineering history preserved by this Domain.
-
-The quality of TuneSight's long-term engineering intelligence depends upon the quality and integrity of engineering memory.
-
----
-
-## Purpose
-
-The purpose of the Memory Engineering Domain is to establish one authoritative source of persistent engineering memory that can be consumed consistently throughout TuneSight.
-
-Engineering memory preserves engineering understanding so that future reasoning benefits from previous engineering experience.
-
----
+Memory does not automatically own canonical reusable engineering truth. Knowledge owns canonical reusable truth.
 
 ## Responsibilities
 
-The Memory Engineering Domain is responsible for:
-
-- Preserving engineering history.
-- Recording engineering events.
-- Recording engineering outcomes.
-- Recording engineering recommendations.
-- Recording engineering validations.
-- Preserving engineering context.
-- Maintaining engineering timelines.
-- Producing one authoritative engineering memory source for platform-wide consumption.
-
-The Memory Engineering Domain shall never establish Engineering Identity, engineering knowledge, engineering evidence, engineering correlations, engineering explanations or engineering guidance.
-
----
+- Preserve events, analyses, guidance, outcomes and validation.
+- Maintain chronology, originating context and contract versions.
+- Preserve successful, unsuccessful and unresolved outcomes.
+- Preserve what happened, what was concluded, what was validated and what was learned historically.
+- Publish qualified historical records.
 
 ## Boundaries
 
-The Memory Engineering Domain is responsible only for preserving engineering memory.
+Memory shall not establish or revise identity, reusable Knowledge, Evidence, Correlation, Explanation or Decision. Recording repetition or an assertion does not make it universally true.
 
-The Memory Engineering Domain shall not:
+Memory may preserve learned historical insight, but that insight remains qualified historical context until Knowledge admits it as canonical reusable truth through the governed Knowledge process. Evolution determines how potential improvements are evaluated and governed.
 
-- establish Engineering Identity;
-- maintain engineering knowledge;
-- establish engineering evidence;
-- establish engineering correlations;
-- perform engineering reasoning;
-- generate engineering guidance.
+## Primary Dependencies
 
-These responsibilities belong to other Engineering Domains.
+Memory primarily consumes the qualified outputs, events, outcomes and validations that it is required to preserve.
 
----
+## Traceability Dependencies
 
-## Inputs
+Memory preserves original owner, qualification, provenance, contract version and upstream references. It may inform Knowledge, Evidence, Correlation, Explanation, Decision and Evolution, but traceability does not require direct coupling to every source Domain.
 
-The Memory Engineering Domain may consume engineering information including, but not limited to:
+## Outputs and Consumers
 
-- Engineering Identity
-- Engineering explanations
-- Engineering guidance
-- Engineering events
-- Engineering outcomes
-- Engineering validations
-- Engineering timestamps
+It publishes vehicle and analysis history, timelines, outcomes, retained relationships, historically derived insight, preserved context and provenance. Knowledge, Evidence, Correlation, Explanation, Decision, Evolution and Presentation may consume this qualified history without altering it or promoting it silently.
 
-The Memory Engineering Domain shall consume only validated engineering information suitable for long-term preservation.
+## Contract Obligations
 
----
-
-## Outputs
-
-The Memory Engineering Domain produces one authoritative engineering memory source.
-
-Engineering memory may include:
-
-- Engineering history
-- Engineering timelines
-- Engineering events
-- Engineering outcomes
-- Engineering recommendations
-- Engineering validations
-- Engineering context
-- Historical engineering relationships
-
-Every downstream Engineering Domain shall consume this authoritative engineering memory.
-
----
-
-## Consumers
-
-Engineering memory is consumed by:
-
-- Evolution
-- Presentation
-
-Consumers shall use validated engineering memory.
-
-Consumers shall never redefine engineering memory.
-
----
-
-## Dependencies
-
-The Memory Engineering Domain depends upon:
-
-- Engineering Identity
-- Engineering explanations
-- Engineering guidance
-- Validated engineering outcomes
-
-The Memory Engineering Domain shall minimise dependencies wherever practical.
-
----
+Outputs follow the [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md). Memory shall preserve the qualification, owner, version and provenance of recorded outputs; persistence itself confers no authority.
 
 ## Engineering Rules
 
-The Memory Engineering Domain shall preserve engineering understanding without altering engineering truth.
-
-Engineering memory shall remain historically accurate.
-
-Engineering memory shall remain traceable to its originating engineering analysis.
-
-Engineering memory shall preserve both successful and unsuccessful engineering outcomes.
-
-Engineering memory shall never fabricate engineering history.
-
-Engineering memory shall remain stable unless new engineering information justifies amendment.
-
----
-
-## Data Ownership
-
-The Memory Engineering Domain is the sole authoritative owner of engineering memory.
-
-No other Engineering Domain shall own, modify or redefine engineering memory.
-
-Engineering memory shall remain the canonical engineering history consumed throughout TuneSight.
-
----
+- Historical accuracy takes precedence over completeness.
+- Amendment preserves the prior record and reason.
+- Incomplete history remains incomplete.
+- Later outcomes do not silently rewrite earlier understanding.
+- User-specific history is not canonical reusable Knowledge.
 
 ## Failure Behaviour
 
-Where engineering memory cannot be fully preserved:
+Partial preservation is explicit and traceable. Memory shall never invent missing history or present a failed write as a preserved record.
 
-- validated engineering history shall be preserved;
-- incomplete engineering history shall remain incomplete;
-- uncertainty shall remain explicit;
-- historical engineering integrity shall take precedence over completeness;
-- engineering history shall never be fabricated.
+## Validation and Evolution
 
-Failure to preserve complete engineering memory shall never result in invented engineering history.
+Validation shall prove chronology, provenance, immutability and faithful retrieval. Storage mechanisms may evolve while historical meaning and contract version remain intact.
 
----
+## Closing Responsibility
 
-## Validation
-
-The Memory Engineering Domain shall be validated against:
-
-- Historical engineering records
-- Engineering event timelines
-- Engineering outcome verification
-- Historical data integrity
-- Platform validation
-- Regression testing
-
-Validation shall demonstrate accurate, reliable and traceable engineering memory.
-
----
-
-## Future Evolution
-
-The Memory Engineering Domain is designed to evolve as engineering understanding improves.
-
-Future evolution shall improve engineering memory without compromising historical integrity or architectural responsibilities.
-
-Engineering responsibility shall remain stable throughout future evolution.
-
----
-
-## Responsibility
-
-The Memory Engineering Domain is responsible for preserving the authoritative engineering history upon which future engineering understanding depends.
-
-Every Engineering Domain within TuneSight shall rely upon, but never redefine, the engineering memory preserved by this Domain.
+Memory is responsible for TuneSight's authoritative engineering history.

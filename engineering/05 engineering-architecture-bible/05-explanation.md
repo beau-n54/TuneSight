@@ -2,206 +2,65 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Authority:** Derived from the Engineering Blueprint
 
-**Purpose:** Defines the complete engineering specification for the Explanation Engineering Domain.
+**Status:** Consolidated Draft for Founder Review
 
-**Status:** Ratified
+# TuneSight Engineering Architecture Bible
 
+## Engineering Domain 05 — Explanation
 
+## Engineering Intent and Purpose
 
+Explanation transforms qualified identity, Knowledge, Evidence and Correlation into explainable engineering understanding. It is the first Domain permitted to determine why observed behaviour occurred.
 
-# TuneSight
+## Authoritative Ownership
 
-# Engineering Architecture Bible
-
-## Engineering Domain 05
-
-# Explanation
-
----
-
-## Engineering Intent
-
-The Explanation Engineering Domain exists to transform validated engineering correlations into explainable engineering understanding.
-
-Explanation establishes why engineering behaviour occurred by reasoning from Engineering Identity, canonical engineering knowledge, validated engineering evidence and established engineering correlations.
-
-The Explanation Engineering Domain is the first Engineering Domain permitted to perform engineering reasoning.
-
-The quality of every engineering recommendation produced by TuneSight depends upon the quality of the explanations established by this Domain.
-
----
-
-## Purpose
-
-The purpose of the Explanation Engineering Domain is to establish one authoritative source of explainable engineering understanding that can be consumed consistently throughout TuneSight.
-
-Engineering explanations provide the reasoning foundation from which Decision performs engineering guidance and recommendation.
-
----
+Explanation solely owns analysis-specific engineering reasoning, root causes, contributing factors, competing explanations, conclusions and explanation confidence.
 
 ## Responsibilities
 
-The Explanation Engineering Domain is responsible for:
-
-- Performing engineering reasoning.
-- Determining engineering root causes.
-- Evaluating competing engineering explanations.
-- Identifying primary engineering explanations.
-- Identifying contributing engineering factors.
-- Evaluating engineering confidence.
-- Producing explainable engineering conclusions.
-- Producing one authoritative engineering explanation source for platform-wide consumption.
-
-The Explanation Engineering Domain shall never generate engineering recommendations or preserve engineering history.
-
----
+- Evaluate competing explanations.
+- Determine root cause only where authoritative support exists.
+- Preserve supporting and contradictory information.
+- Publish traceable conclusions, reasoning status and rationale.
 
 ## Boundaries
 
-The Explanation Engineering Domain is responsible only for establishing engineering explanations.
+Explanation shall not establish its inputs, create reusable Knowledge, recommend action, preserve history or control presentation.
 
-The Explanation Engineering Domain shall not:
+## Primary Dependencies
 
-- establish Engineering Identity;
-- maintain engineering knowledge;
-- establish engineering evidence;
-- establish engineering correlations;
-- generate engineering recommendations;
-- preserve engineering history.
+Explanation primarily consumes authoritative Correlation and the qualified Evidence required to evaluate its relationships.
 
-These responsibilities belong to other Engineering Domains.
+## Traceability Dependencies
 
----
+Engineering Identity and canonical Knowledge remain traceable through qualified upstream references and may be consulted when scope, provenance or reasoning requires them. Direct dependency shall be explicit and justified; Explanation shall not reconstruct upstream ownership.
 
-## Inputs
+## Outputs and Consumers
 
-The Explanation Engineering Domain may consume engineering information including, but not limited to:
+It publishes root causes, contributing factors, competing explanations, rationale, evidence references, contradictory evidence references, reasoning confidence, reasoning status and unresolved state. Reasoning status may express supported, partially supported, contradicted, unresolved or insufficient evidence.
 
-- Engineering Identity
-- Canonical engineering knowledge
-- Validated engineering evidence
-- Engineering correlations
-- Engineering relationship confidence
-- Engineering validation rules
+Explanation does not inherit or recreate Knowledge verification or Evidence validation. Those upstream states remain unchanged and are cited only as supporting qualifications. Decision, Memory, Evolution and Presentation may consume Explanation outputs without redefining them.
 
-The Explanation Engineering Domain shall consume only validated engineering information suitable for engineering reasoning.
+## Contract Obligations
 
----
-
-## Outputs
-
-The Explanation Engineering Domain produces one authoritative engineering explanation source.
-
-Engineering explanations may include:
-
-- Root causes
-- Contributing factors
-- Engineering reasoning
-- Engineering confidence
-- Supporting evidence
-- Contradictory evidence
-- Explainable conclusions
-- Engineering rationale
-
-Every downstream Engineering Domain shall consume this authoritative engineering explanation.
-
----
-
-## Consumers
-
-Engineering explanations are consumed by:
-
-- Decision
-- Memory
-- Evolution
-- Presentation
-
-Consumers shall use validated engineering explanations.
-
-Consumers shall never redefine engineering explanations.
-
----
-
-## Dependencies
-
-The Explanation Engineering Domain depends upon:
-
-- Engineering Identity
-- Canonical engineering knowledge
-- Validated engineering evidence
-- Engineering correlations
-
-The Explanation Engineering Domain shall minimise dependencies wherever practical.
-
----
+Outputs follow the [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md). Every conclusion shall retain a traceable path to authoritative inputs and identify unresolved contradiction.
 
 ## Engineering Rules
 
-The Explanation Engineering Domain shall perform engineering reasoning only after Engineering Identity, engineering knowledge, engineering evidence and engineering correlations have been established.
-
-Engineering explanations shall remain traceable to the evidence and correlations from which they were derived.
-
-Engineering explanations shall communicate confidence honestly.
-
-Engineering explanations shall preserve contradictory evidence where multiple explanations remain plausible.
-
-Engineering explanations shall remain explainable.
-
-Engineering explanations shall remain stable unless new engineering evidence justifies change.
-
----
-
-## Data Ownership
-
-The Explanation Engineering Domain is the sole authoritative owner of engineering explanations.
-
-No other Engineering Domain shall own, modify or redefine engineering explanations.
-
-Engineering explanations shall remain the canonical engineering understanding consumed throughout TuneSight.
-
----
+- Reasoning begins only after required inputs are qualified.
+- Correlation is not automatically causation.
+- Explanation confidence is distinct from Knowledge verification, Evidence validation, authority, certainty and Founder ratification.
+- Competing plausible explanations remain visible.
+- Unsupported conclusions remain unknown.
 
 ## Failure Behaviour
 
-Where engineering explanations cannot be established with sufficient confidence:
+Insufficient or conflicting support produces qualified competing explanations or no conclusion. Explanation shall never fabricate certainty or conceal contradictory Evidence.
 
-- validated explanations shall be preserved;
-- competing explanations shall remain visible;
-- uncertainty shall remain explicit;
-- confidence shall reflect the available engineering evidence;
-- unsupported conclusions shall never be produced.
+## Validation and Evolution
 
-Failure to establish a complete engineering explanation shall never result in fabricated engineering reasoning.
+Validation shall demonstrate repeatable, traceable and explainable reasoning against verified case studies and known diagnoses. Reasoning may evolve while prior outputs and their governing versions remain traceable.
 
----
+## Closing Responsibility
 
-## Validation
-
-The Explanation Engineering Domain shall be validated against:
-
-- Verified engineering case studies
-- Known engineering diagnoses
-- Real-world engineering datasets
-- Root cause validation
-- Platform validation
-- Regression testing
-
-Validation shall demonstrate repeatable, explainable and reliable engineering reasoning.
-
----
-
-## Future Evolution
-
-The Explanation Engineering Domain is designed to evolve as engineering understanding improves.
-
-Future evolution shall improve engineering reasoning without compromising existing engineering truth or architectural responsibilities.
-
-Engineering responsibility shall remain stable throughout future evolution.
-
----
-
-## Responsibility
-
-The Explanation Engineering Domain is responsible for establishing the authoritative engineering understanding upon which every subsequent Engineering Domain depends.
-
-Every Engineering Domain within TuneSight shall rely upon, but never redefine, the engineering explanations produced by this Domain.
+Explanation is responsible for authoritative engineering understanding used by Decision.

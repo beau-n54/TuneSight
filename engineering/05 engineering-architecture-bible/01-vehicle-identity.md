@@ -2,211 +2,62 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Authority:** Derived from the Engineering Blueprint
 
-**Purpose:** Defines the complete engineering specification for the Vehicle Identity Engineering Domain.
+**Status:** Consolidated Draft for Founder Review
 
-**Status:** Ratified
+# TuneSight Engineering Architecture Bible
 
+## Engineering Domain 01 — Vehicle Identity
 
+## Engineering Intent and Purpose
 
+Vehicle Identity establishes the complete, authoritative Engineering Identity of the current system under analysis. It is the first Domain in the Engineering Lifecycle; downstream reasoning shall not begin without its qualified output.
 
-# TuneSight
+## Authoritative Ownership
 
-# Engineering Architecture Bible
+Vehicle Identity solely owns current-system Engineering Identity: vehicle, platform, ECU, ROM, calibration, software, hardware and configuration identity, together with identity evidence, confidence and verification state.
 
-## Engineering Domain 01
-
-# Vehicle Identity
-
----
-
-## Engineering Intent
-
-The Vehicle Identity Engineering Domain exists to establish the complete and authoritative Engineering Identity of every system analysed by TuneSight.
-
-Vehicle Identity is the first Engineering Domain within the Engineering Lifecycle.
-
-No subsequent Engineering Domain shall perform engineering reasoning until Vehicle Identity has completed its responsibilities.
-
-The quality of every engineering conclusion produced by TuneSight depends upon the accuracy and completeness of Vehicle Identity.
-
----
-
-## Purpose
-
-The purpose of the Vehicle Identity Engineering Domain is to establish one authoritative Engineering Identity that can be consumed consistently throughout TuneSight.
-
-This Engineering Identity provides the engineering foundation upon which every subsequent Engineering Domain performs its responsibilities.
-
----
+It does not own reusable reference truth, observations, correlations, explanations, guidance, history, evolution or presentation.
 
 ## Responsibilities
 
-The Vehicle Identity Engineering Domain is responsible for:
-
-- Identifying the vehicle under analysis.
-- Identifying the engineering platform.
-- Identifying the calibration.
-- Identifying the ROM.
-- Identifying the software family.
-- Identifying the hardware configuration.
-- Identifying engineering characteristics relevant to downstream analysis.
-- Producing one authoritative Engineering Identity for platform-wide consumption.
-
-Vehicle Identity shall never perform engineering analysis, diagnosis or recommendation.
-
----
+- Identify the current vehicle and engineering platform.
+- Establish ROM, calibration, software, ECU, DME, hardware and configuration identity where authoritative evidence exists.
+- Preserve exact-match, classification, checksum and verification outcomes without fabrication.
+- Produce one qualified, traceable Engineering Identity.
 
 ## Boundaries
 
-Vehicle Identity is responsible only for establishing Engineering Identity.
+Vehicle Identity shall not diagnose, correlate observations, determine root cause, recommend action, preserve history or create reusable Knowledge. [Knowledge](02-knowledge.md) provides authoritative reusable Engineering Truth; Vehicle Identity applies it to establish the identity of the current system.
 
-Vehicle Identity shall not:
+## Inputs and Dependencies
 
-- perform engineering reasoning;
-- determine root cause;
-- generate engineering recommendations;
-- interpret engineering evidence;
-- preserve engineering history.
+Inputs may include binaries, calibration files, vehicle metadata, hardware configuration, identifiers, validated evidence and canonical Knowledge. Receipt does not establish identity. Every attribute requires appropriate evidence.
 
-These responsibilities belong to other Engineering Domains.
+## Outputs and Consumers
 
----
+The Domain publishes a versioned Engineering Identity containing known attributes, explicit unknowns, evidence, provenance, confidence and verification. Knowledge, Evidence, Correlation, Explanation, Decision, Memory, Evolution and Presentation may consume it but shall not redefine it.
 
-## Inputs
+## Contract Obligations
 
-Vehicle Identity may consume engineering information including, but not limited to:
-
-- Binary files
-- Calibration files
-- Vehicle metadata
-- Hardware configuration
-- Vehicle identifiers
-- Engineering reference data
-- Knowledge Domain outputs
-
-Vehicle Identity shall consume only the information required to establish Engineering Identity.
-
----
-
-## Outputs
-
-Vehicle Identity produces one authoritative Engineering Identity.
-
-Engineering Identity may include:
-
-- Vehicle identity
-- Platform identity
-- ROM identity
-- Calibration identity
-- Hardware identity
-- Configuration identity
-- Identity confidence
-- Identity evidence
-
-Every downstream Engineering Domain shall consume this authoritative Engineering Identity.
-
----
-
-## Consumers
-
-Engineering Identity is consumed by:
-
-- Knowledge
-- Evidence
-- Correlation
-- Explanation
-- Decision
-- Memory
-- Evolution
-- Presentation
-
-Consumers shall use Engineering Identity.
-
-Consumers shall never redefine Engineering Identity.
-
----
-
-## Dependencies
-
-Vehicle Identity depends upon:
-
-- Engineering Knowledge
-- Canonical engineering reference data
-- Verified engineering evidence where required
-
-Vehicle Identity shall minimise dependencies wherever practical.
-
----
+Identity is exchanged under the [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md). Consumers shall not inspect parser or fingerprint internals, promote family membership to exact identity, or convert confidence into verification.
 
 ## Engineering Rules
 
-Vehicle Identity shall establish Engineering Identity before engineering reasoning begins.
-
-Vehicle Identity shall produce one authoritative Engineering Identity.
-
-Vehicle Identity shall never infer identity without supporting evidence.
-
-Vehicle Identity shall preserve every verified identity attribute.
-
-Vehicle Identity shall communicate confidence where Engineering Identity cannot be fully established.
-
-Vehicle Identity shall communicate uncertainty honestly whenever Engineering Identity cannot be verified.
-
-Engineering Identity shall remain stable unless new engineering evidence justifies change.
-
----
-
-## Data Ownership
-
-Vehicle Identity is the sole authoritative owner of Engineering Identity.
-
-No other Engineering Domain shall own, modify or redefine Engineering Identity.
-
-Engineering Identity shall remain the canonical identity consumed throughout TuneSight.
-
----
+- Identity precedes reasoning.
+- One current system has one authoritative qualified identity outcome.
+- Exact identity requires exact authoritative evidence.
+- Filename, workflow completion and persistence are not identity evidence.
+- Verified attributes remain stable until stronger evidence justifies authorised change.
+- Unsupported attributes remain unknown.
 
 ## Failure Behaviour
 
-Where Engineering Identity cannot be fully established:
+Partial identity preserves verified attributes and exposes unknowns, conflicts and reduced confidence. Missing reference truth or failed validation shall never produce fabricated identity or false success.
 
-- verified identity shall be preserved;
-- unknown identity shall remain unknown;
-- confidence shall be reduced appropriately;
-- downstream Engineering Domains shall receive the highest-confidence Engineering Identity available;
-- uncertainty shall remain visible.
+## Validation and Evolution
 
-Failure to establish complete Engineering Identity shall never result in fabricated Engineering Identity.
+Validation shall use verified production calibrations, ROM families, hardware configurations, exact binaries, unknown cases and regression datasets. Evolution may improve detection while preserving ownership, evidence requirements and historical traceability.
 
----
+## Closing Responsibility
 
-## Validation
-
-The Vehicle Identity Engineering Domain shall be validated against:
-
-- Verified engineering reference data
-- Known production calibrations
-- Known ROM families
-- Known hardware configurations
-- Real-world engineering datasets
-- Regression testing
-
-Validation shall demonstrate repeatable, explainable and reliable Engineering Identity.
-
----
-
-## Future Evolution
-
-The Vehicle Identity Engineering Domain is designed to evolve as new engineering knowledge becomes available.
-
-Future evolution shall improve Engineering Identity without compromising existing engineering truth or architectural responsibilities.
-
-Engineering responsibility shall remain stable throughout future evolution.
-
----
-
-## Responsibility
-
-The Vehicle Identity Engineering Domain is responsible for establishing the authoritative Engineering Identity upon which every subsequent Engineering Domain depends.
-
-Every Engineering Domain within TuneSight shall rely upon, but never redefine, the Engineering Identity produced by this Domain.
+Vehicle Identity is responsible for the authoritative Engineering Identity on which all subsequent analysis depends.

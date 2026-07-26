@@ -1,122 +1,101 @@
 This document forms part of TuneSight's Engineering Governance Framework.
 
-**Authority:** Derived from the Engineering Blueprint
+**Authority:** Derived from the Founder Vision, Engineering Manifesto, Engineering Constitution, Engineering Principles and Engineering Blueprint
 
-**Purpose:** Defines the structure, purpose and organisation of the Engineering Architecture Bible.
+**Purpose:** Defines the authoritative architectural structure and interpretation of the Engineering Architecture Bible.
 
-**Status:** Ratified
-
-
-
+**Status:** Consolidated Draft for Founder Review
 
 # TuneSight
 
 ## Engineering Architecture Bible
 
----
+## Architectural Role
 
-## Introduction
+The Engineering Blueprint defines TuneSight's organisation. The Engineering Architecture Bible is the authoritative architectural doctrine defining the enduring responsibilities, boundaries and relationships through which that organisation operates. The Production Contract is the downstream production instrument that implements and enforces this architecture. Engineering Governance controls authorised change.
 
-The Engineering Blueprint defines how TuneSight is organised.
+This consolidated draft preserves previously ratified architectural decisions. It does not supersede those decisions until Founder ratification is recorded through Governance.
 
-The Engineering Architecture Bible defines how every Engineering Domain fulfils its responsibilities.
+## Engineering Philosophy
 
-Each Engineering Domain specification is the authoritative engineering specification for that Engineering Domain.
+TuneSight establishes engineering truth from evidence. It preserves uncertainty where truth cannot be established, assigns every authoritative truth to one owner and prevents consumers from redefining what they consume.
 
-Together, these specifications define the authoritative engineering architecture of TuneSight.
+The architecture separates reusable truth, current-system identity, observation, relationship, explanation, guidance, history, improvement and communication so that each remains independently accountable and traceable.
 
----
+## Architectural Order
 
-# Purpose
+Where interpretation is required:
 
-The Engineering Architecture Bible exists to document every Engineering Domain in sufficient detail that it can be understood, maintained and evolved independently while remaining faithful to the Engineering Blueprint.
+1. The Founder Vision establishes Founder intent.
+2. The Engineering Manifesto establishes engineering purpose.
+3. The Engineering Constitution establishes non-negotiable principles.
+4. The Engineering Principles establish enduring engineering rules.
+5. The Engineering Blueprint establishes organisation and ownership.
+6. This Bible specifies the authoritative domain and cross-domain architecture.
+7. The Production Contract operationalises and enforces production conformance.
+8. Work Packages authorise bounded implementation.
+9. Implementation realises the authorised architecture.
+10. Validation and Governance assess conformance and record authorised status.
 
-It is the authoritative engineering reference for the internal architecture of TuneSight.
+Lower-order material shall not silently amend higher-order authority.
 
----
+## Architecture
 
-# Organisation
+The eight Engineering Domains are:
 
-The Engineering Architecture Bible is organised by Engineering Domain.
+1. [Vehicle Identity](01-vehicle-identity.md)
+2. [Knowledge](02-knowledge.md)
+3. [Evidence](03-evidence.md)
+4. [Correlation](04-correlation.md)
+5. [Explanation](05-explanation.md)
+6. [Decision](06-decision.md)
+7. [Memory](07-memory.md)
+8. [Evolution](08-evolution.md)
 
-Each Engineering Domain is documented independently.
+[Presentation](09-presentation.md) is an architectural layer, not an Engineering Domain. It communicates authoritative outputs and owns no engineering truth.
 
-Every Engineering Domain derives its authority from the Engineering Blueprint and remains subject to the Engineering Governance Framework.
+[Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md) are the universal architectural standard by which these owners and consumers exchange qualified engineering truth. They are not a domain, runtime layer, framework or implementation interface.
 
----
+## Standard Chapter Structure
 
-# Engineering Domains
+Each domain chapter defines:
 
-The Engineering Architecture Bible consists of the following Engineering Domains.
+- engineering intent and purpose;
+- authoritative ownership;
+- responsibilities and boundaries;
+- qualified inputs and outputs;
+- consumers and dependencies;
+- contract obligations;
+- invariants and engineering rules;
+- failure behaviour and validation;
+- lifecycle and future evolution; and
+- a closing responsibility declaration.
 
-1. Vehicle Identity
-2. Knowledge
-3. Evidence
-4. Correlation
-5. Explanation
-6. Decision
-7. Memory
-8. Evolution
-9. Presentation
+Specialised detail may be added where it clarifies an established responsibility without creating new ownership.
 
-Each Engineering Domain represents one authoritative engineering responsibility.
+## Universal Invariants
 
-No Engineering Domain shall duplicate or assume responsibilities belonging to another Engineering Domain.
+- Every authoritative engineering truth has one owner.
+- A domain never transfers ownership when it publishes an output.
+- A consumer never upgrades verification, confidence or certainty.
+- Confidence is not verification.
+- Unknown is not evidence of absence and shall not be converted into certainty.
+- Routes, persistence, workflows and Presentation are not engineering authorities.
+- Workflow completion is not engineering evidence.
+- Consumers use contract outputs and do not inspect another domain's internals to recreate truth.
+- Contradiction and uncertainty remain visible.
+- Architectural change occurs through Governance, not incidental implementation.
 
----
+## Independence and Dependency
 
-# Standard Structure
+Domains shall evolve independently within explicit boundaries. Dependencies permit qualified consumption; they do not confer ownership. Circular data flow may exist only where ownership remains unambiguous and no output is used to self-authorise its own truth.
 
-Every Engineering Domain shall follow a consistent engineering structure.
+## Amendment and Ratification
 
-Each Engineering Domain specification shall define:
+Changes to this Bible require architectural review and compatibility review against the Engineering Constitution for ownership, dependency, terminology, lifecycle and contract integrity. A draft becomes Founder-ratified architecture only through Founder approval recorded by Governance.
 
-- Purpose
-- Responsibilities
-- Boundaries
-- Inputs
-- Outputs
-- Consumers
-- Dependencies
-- Engineering Rules
-- Data Ownership
-- Failure Behaviour
-- Future Evolution
+Implementation, tests, schemas and runtime behaviour may demonstrate conformance but cannot ratify or amend this architecture.
 
-Additional sections may be introduced where necessary, provided they strengthen engineering understanding without compromising architectural clarity.
+## Closing Declaration
 
----
-
-# Architectural Independence
-
-Engineering Domains are designed to evolve independently.
-
-Changes within one Engineering Domain should minimise impact upon other Engineering Domains wherever possible.
-
-Architectural dependencies shall remain explicit, intentional and well defined.
-
----
-
-# Engineering Responsibility
-
-Each Engineering Domain is the sole authoritative owner of its engineering responsibility.
-
-Engineering truth shall remain within the Engineering Domain that owns it.
-
-Other Engineering Domains consume engineering truth.
-
-They do not redefine it.
-
----
-
-## Closing Statement
-
-The Engineering Architecture Bible expands the Engineering Blueprint into detailed engineering specifications.
-
-Together, these specifications define the enduring internal architecture of TuneSight.
-
----
-
-## Responsibility
-
-Every engineer entrusted with TuneSight shares the responsibility of preserving the clarity, integrity and independence of every Engineering Domain throughout the continued evolution of the platform.
+The Engineering Architecture Bible is TuneSight's enduring internal architecture. Every engineer entrusted with TuneSight shall preserve its truth ownership, explicit boundaries, qualified contracts, honest uncertainty and traceable evolution.

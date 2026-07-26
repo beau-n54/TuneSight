@@ -2,204 +2,67 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Authority:** Derived from the Engineering Blueprint
 
-**Purpose:** Defines the complete engineering specification for the Evolution Engineering Domain.
+**Status:** Consolidated Draft for Founder Review
 
-**Status:** Ratified
+# TuneSight Engineering Architecture Bible
 
+## Engineering Domain 08 — Evolution
 
+## Engineering Intent and Purpose
 
+Evolution owns the governed process by which TuneSight becomes more capable. It does not own the engineering truth it proposes to improve.
 
+## Authoritative Ownership
 
-# TuneSight
+Evolution solely owns detection of improvement opportunities, repeated-limit identification, learning-process design, proposal evaluation, controlled capability refinement, present-versus-proposed comparison, improvement-effectiveness validation, regression awareness and preservation of improvement rationale and outcomes.
 
-# Engineering Architecture Bible
-
-## Engineering Domain 08
-
-# Evolution
-
----
-
-## Engineering Intent
-
-The Evolution Engineering Domain exists to improve TuneSight's engineering capability through the continuous refinement of engineering understanding.
-
-Evolution transforms preserved engineering memory into improved engineering knowledge, reasoning and future engineering capability.
-
-Every future engineering analysis benefits from the lessons preserved by the Memory Engineering Domain.
-
-The quality of TuneSight's long-term engineering intelligence depends upon the discipline and integrity of engineering evolution.
-
----
-
-## Purpose
-
-The purpose of the Evolution Engineering Domain is to establish one authoritative process for improving TuneSight's engineering capability while preserving engineering truth.
-
-Evolution ensures that engineering understanding continually improves without compromising architectural integrity or historical engineering knowledge.
-
----
+It does not own Vehicle Identity, Knowledge, Evidence, Correlation, Explanation or Decision truth, Founder ratification or unilateral production authority.
 
 ## Responsibilities
 
-The Evolution Engineering Domain is responsible for:
-
-- Identifying opportunities for engineering improvement.
-- Refining engineering knowledge.
-- Refining engineering reasoning models.
-- Refining engineering confidence models.
-- Refining engineering validation rules.
-- Improving future engineering analyses.
-- Preserving architectural consistency during improvement.
-- Producing one authoritative engineering evolution source for platform-wide improvement.
-
-The Evolution Engineering Domain shall never modify historical engineering truth or fabricate engineering understanding.
-
----
+- Identify evidence-backed opportunities and repeated limitations.
+- Design and operate controlled learning and capability-improvement processes.
+- Evaluate proposed improvements and compare present with proposed capability.
+- Validate improvement effectiveness with regression awareness.
+- Preserve why an improvement was proposed and whether adoption improved later performance.
+- Submit qualified improvements to the authoritative owner.
 
 ## Boundaries
 
-The Evolution Engineering Domain is responsible only for improving TuneSight's engineering capability.
+Evolution shall not modify historical Memory, directly rewrite another Domain's truth, self-ratify a proposal, authorise production unilaterally or perform analysis-specific diagnosis and guidance. An affected Domain must adopt, reject or qualify an improvement through its own governed process.
 
-The Evolution Engineering Domain shall not:
+## Primary Dependencies
 
-- establish Engineering Identity;
-- maintain engineering knowledge directly;
-- establish engineering evidence;
-- establish engineering correlations;
-- perform engineering reasoning for individual analyses;
-- generate engineering guidance for individual analyses;
-- alter historical engineering memory.
+Evolution primarily consumes qualified Memory, outcomes, validations, feedback and engineering performance evidence.
 
-These responsibilities belong to other Engineering Domains.
+## Traceability Dependencies
 
----
+It retains qualified references to the Domain outputs and contract versions implicated by an improvement. Traceability does not transfer their ownership or require broad direct runtime coupling.
 
-## Inputs
+## Outputs and Consumers
 
-The Evolution Engineering Domain may consume engineering information including, but not limited to:
+It publishes improvement opportunities, qualified proposals, evaluation evidence, capability comparisons, regression implications, effectiveness findings, confidence, risk and compatibility implications. Owning Domains evaluate adoption; Governance records authorised status; Presentation may communicate the qualified state.
 
-- Engineering memory
-- Engineering outcomes
-- Engineering validations
-- Historical engineering analyses
-- Engineering feedback
-- Engineering performance metrics
+## Contract Obligations
 
-The Evolution Engineering Domain shall consume only validated engineering information suitable for long-term engineering improvement.
-
----
-
-## Outputs
-
-The Evolution Engineering Domain produces one authoritative engineering evolution source.
-
-Engineering evolution may include:
-
-- Improved engineering knowledge
-- Improved engineering reasoning models
-- Improved engineering confidence models
-- Improved engineering validation rules
-- Improved engineering workflows
-- Architectural improvement proposals
-- Engineering refinement recommendations
-
-Every future engineering analysis benefits from these improvements through the appropriate Engineering Domains.
-
----
-
-## Consumers
-
-Engineering evolution is consumed by:
-
-- Knowledge
-- Presentation
-
-Consumers shall apply validated engineering improvements.
-
-Consumers shall never reinterpret engineering evolution outside the Engineering Governance Framework.
-
----
-
-## Dependencies
-
-The Evolution Engineering Domain depends upon:
-
-- Engineering memory
-- Historical engineering outcomes
-- Engineering validation
-- Engineering performance analysis
-
-The Evolution Engineering Domain shall minimise dependencies wherever practical.
-
----
+Outputs follow the [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md). A proposal remains a proposal until the authoritative owner and Governance admit it through the required lifecycle.
 
 ## Engineering Rules
 
-The Evolution Engineering Domain shall improve engineering capability without altering historical engineering truth.
-
-Engineering evolution shall remain traceable to preserved engineering memory.
-
-Engineering evolution shall preserve architectural consistency.
-
-Engineering evolution shall be validated before becoming authoritative.
-
-Engineering evolution shall communicate confidence honestly.
-
-Engineering evolution shall improve future engineering understanding without compromising previous engineering integrity.
-
----
-
-## Data Ownership
-
-The Evolution Engineering Domain is the sole authoritative owner of engineering evolution.
-
-No other Engineering Domain shall own, modify or redefine engineering evolution.
-
-Engineering evolution shall remain the canonical process for improving TuneSight's engineering capability.
-
----
+- Learning does not equal authority.
+- Improvement shall be evidence-backed and traceable.
+- Existing capability remains authoritative until change is validated and ratified.
+- Historical outputs retain their original contract and domain versions.
+- Architectural integrity takes precedence over novelty.
 
 ## Failure Behaviour
 
-Where engineering improvements cannot be validated:
+Unvalidated improvement is rejected or remains qualified; it is never adopted silently. Failure preserves existing capability and all evaluation evidence.
 
-- existing engineering capability shall be preserved;
-- uncertainty shall remain explicit;
-- unsupported improvements shall never be adopted;
-- architectural integrity shall take precedence over innovation.
+## Validation and Evolution
 
-Failure to establish validated engineering improvements shall never result in fabricated engineering capability.
+Validation shall demonstrate measurable improvement, regression safety, compatibility and preserved ownership. Evolution may refine its methods only through the same governed discipline.
 
----
+## Closing Responsibility
 
-## Validation
-
-The Evolution Engineering Domain shall be validated against:
-
-- Historical engineering outcomes
-- Engineering performance improvements
-- Regression testing
-- Platform validation
-- Engineering review
-- Long-term engineering consistency
-
-Validation shall demonstrate measurable improvement while preserving engineering integrity.
-
----
-
-## Future Evolution
-
-The Evolution Engineering Domain is designed to evolve as TuneSight's engineering capability expands.
-
-Future evolution shall improve engineering evolution itself without compromising architectural responsibilities or engineering governance.
-
-Engineering responsibility shall remain stable throughout future evolution.
-
----
-
-## Responsibility
-
-The Evolution Engineering Domain is responsible for ensuring that TuneSight continuously becomes a better engineering platform while remaining faithful to engineering truth, architectural integrity and the Founder's Vision.
-
-Every Engineering Domain within TuneSight shall benefit from, but never redefine, the engineering evolution established by this Domain.
+Evolution is responsible for controlled learning and governed capability improvement without corruption or unilateral ownership of engineering truth.
