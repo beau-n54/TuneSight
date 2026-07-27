@@ -1,6 +1,6 @@
 import path from "path";
-import { LibraryFile } from "./libraryScanner";
-import { RomLibraryEntry } from "./romLibrary";
+import type { LibraryFile } from "./libraryScanner";
+import type { RomLibraryEntry } from "./romLibrary";
 
 type WorkingEntry = RomLibraryEntry & {
   score: number;
@@ -232,6 +232,7 @@ function normaliseRomFamily(
       /[\s_-]*(stock|original|ori|map[\s_-]*switch(?:[\s_-]*base)?)[\s_-]*/gi,
       ""
     )
+    .replace(/[\s_-]*b58o1$/i, "")
     .trim();
 }
 

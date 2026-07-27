@@ -12,9 +12,5 @@ export function enrichMsd80TuneProfile(
   return {
     ...parsed,
     parserNotes: notes,
-    metadata: {
-      ...parsed.metadata,
-      softwareVersion: parsed.detectedRom ?? undefined,
-    },
   };
 }

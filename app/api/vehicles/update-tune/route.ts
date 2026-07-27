@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { buildTuneProfile } from "@/lib/analysis/tuneProfile";
-import { parseBinaryTuneFile } from "@/lib/tunes/parseBinaryTune";
+import { parseEngineeringBinary } from "@/lib/tunes/parseBinaryTune";
 import { detectBinaryDifferences } from "@/lib/tunes/detectBinaryDifferences";
 import {
   fingerprintRom,
@@ -12,9 +12,18 @@ import type {
   BinaryConfidence,
   VerificationStatus,
 } from "@/lib/tunes/types";
+import type { BinaryComparisonEvidence } from "@/lib/tunes/binaryClassification";
 import path from "path";
 import { buildRuntimeRomLibrary } from "@/lib/tunes/buildRunTimeRomLibrary";
-import { getLibrary, hasLibrary } from "@/lib/tunes/libraryCache";
+import {
+  getLibrary,
+  hasLibrary,
+  lookupRuntimeStockVariantKnowledge,
+} from "@/lib/tunes/libraryCache";
+import { interpretRuntimeStockVariantKnowledge } from "@/lib/tunes/vehicleIdentityKnowledgeInterpretation";
+import { calculateBinaryHash } from "@/lib/tunes/calculateBinaryHash";
+import { qualifyComparisonReference } from "@/lib/tunes/comparisonReferenceQualification";
+import { resolveBinaryContainer } from "@/lib/tunes/binaryContainer";
 
 type TuneProfileInsertPayload =
   ReturnType<typeof buildTuneProfile> & {
@@ -94,6 +103,7 @@ export async function POST(request: Request) {
     tuneName,
     fileName,
     fileSize,
+    fileType,
     storageBucket,
     storagePath,
     isStockReference,
@@ -134,15 +144,6 @@ export async function POST(request: Request) {
   const arrayBuffer = await currentFile.arrayBuffer();
   const currentBuffer = Buffer.from(arrayBuffer);
 
-  const binarySummary = await parseBinaryTuneFile(currentFile as File);
-
-  let activeReferenceTuneId =
-    isStockReference
-      ? null
-      : referenceTuneId || null;
-
-  let activeReferenceTuneProfileId: string | null = null;
-
   async function cleanupUploadedStorageObject() {
     const { error: storageCleanupError } = await supabase.storage
       .from(storageBucket || "tunes")
@@ -155,6 +156,50 @@ export async function POST(request: Request) {
       });
     }
   }
+
+  const currentResolution =
+    resolveBinaryContainer({
+      bytes: currentBuffer,
+      fileName,
+      mimeType: fileType,
+    });
+
+  if (currentResolution.status === "unresolved") {
+    await cleanupUploadedStorageObject();
+
+    return NextResponse.json(
+      {
+        error: currentResolution.message,
+        code: currentResolution.errorCode,
+      },
+      {
+        status:
+          currentResolution.errorCode ===
+          "unsupported_container"
+            ? 415
+            : 422,
+      }
+    );
+  }
+
+  const currentEngineeringBinary =
+    currentResolution.engineeringBinary;
+  const binarySummary =
+    await parseEngineeringBinary(
+      currentEngineeringBinary
+    );
+
+  if (!hasLibrary()) {
+    const root = path.join(process.cwd(), "BMW-XDFs-master");
+    buildRuntimeRomLibrary(root);
+  }
+
+  let activeReferenceTuneId =
+    isStockReference
+      ? null
+      : referenceTuneId || null;
+
+  let activeReferenceTuneProfileId: string | null = null;
 
   if (!activeReferenceTuneId && !isStockReference) {
     const { data: latestStockTune } = await supabase
@@ -173,6 +218,7 @@ export async function POST(request: Request) {
   let binaryDiffSummary = null;
   let binaryChangedBytes = 0;
   let binaryChangedRegions: unknown[] = [];
+  let binaryComparisonEvidence: BinaryComparisonEvidence | null = null;
 
   if (activeReferenceTuneId && !isStockReference) {
     const {
@@ -204,7 +250,7 @@ export async function POST(request: Request) {
       error: referenceTuneProfileError,
     } = await supabase
       .from("tune_profiles")
-      .select("id")
+      .select("id, rom_family")
       .eq("tune_id", referenceTune.id)
       .eq("vehicle_id", vehicleId)
       .eq("user_id", user.id)
@@ -227,27 +273,137 @@ export async function POST(request: Request) {
 
     activeReferenceTuneProfileId = referenceTuneProfile.id;
 
-    const referencePath = referenceTune?.file_path || referenceTune?.storage_path;
+    const referencePath = referenceTune.storage_path;
 
-    if (referencePath) {
-      const { data: referenceFile } = await supabase.storage
-        .from("tunes")
-        .download(referencePath);
+    if (!referencePath) {
+      await cleanupUploadedStorageObject();
 
-      if (referenceFile) {
-        const referenceArrayBuffer = await referenceFile.arrayBuffer();
-        const referenceBuffer = Buffer.from(referenceArrayBuffer);
-
-        const diffResult = detectBinaryDifferences(
-          currentBuffer,
-          referenceBuffer
-        );
-
-        binaryDiffSummary = diffResult;
-        binaryChangedBytes = diffResult.totalChangedBytes ?? 0;
-        binaryChangedRegions = diffResult.changedRegions ?? [];
-      }
+      return NextResponse.json(
+        {
+          error:
+            "The selected stock reference has no stored binary object path. Re-upload the stock reference before comparing tunes.",
+          code: "REFERENCE_STORAGE_PATH_MISSING",
+        },
+        { status: 422 }
+      );
     }
+
+    const {
+      data: referenceFile,
+      error: referenceDownloadError,
+    } = await supabase.storage
+      .from("tunes")
+      .download(referencePath);
+
+    if (referenceDownloadError || !referenceFile) {
+      console.error("REFERENCE TUNE DOWNLOAD FAILED", {
+        code: referenceDownloadError?.name ?? null,
+        message: referenceDownloadError?.message ?? "Reference file unavailable",
+      });
+
+      await cleanupUploadedStorageObject();
+
+      return NextResponse.json(
+        {
+          error:
+            "The selected stock reference binary could not be downloaded.",
+          code: "REFERENCE_BINARY_UNAVAILABLE",
+        },
+        { status: 422 }
+      );
+    }
+
+    const referenceArrayBuffer = await referenceFile.arrayBuffer();
+    const referenceBuffer = Buffer.from(referenceArrayBuffer);
+    const referenceResolution =
+      resolveBinaryContainer({
+        bytes: referenceBuffer,
+        fileName:
+          referenceTune.file_name ??
+          "",
+        mimeType: null,
+      });
+
+    if (
+      referenceResolution.status ===
+      "unresolved"
+    ) {
+      await cleanupUploadedStorageObject();
+
+      return NextResponse.json(
+        {
+          error:
+            "The selected comparison reference could not be resolved to an Engineering Binary.",
+          code:
+            referenceResolution.errorCode,
+        },
+        { status: 422 }
+      );
+    }
+
+    const referenceEngineeringBinary =
+      referenceResolution.engineeringBinary;
+    const referenceKnowledge =
+      lookupRuntimeStockVariantKnowledge({
+        sha256:
+          calculateBinaryHash(
+            referenceEngineeringBinary
+              .bytes
+          ),
+        binarySizeBytes:
+          referenceEngineeringBinary
+            .byteLength,
+        romFamily:
+          referenceTuneProfile.rom_family,
+      });
+    const referenceQualification =
+      qualifyComparisonReference(
+        referenceKnowledge
+      );
+
+    let diffResult: ReturnType<typeof detectBinaryDifferences>;
+
+    try {
+      diffResult = detectBinaryDifferences(
+        currentEngineeringBinary,
+        referenceEngineeringBinary
+      );
+    } catch (comparisonError) {
+      console.error("BINARY COMPARISON FAILED", {
+        message:
+          comparisonError instanceof Error
+            ? comparisonError.message
+            : "Unknown binary comparison error",
+      });
+
+      await cleanupUploadedStorageObject();
+
+      return NextResponse.json(
+        {
+          error:
+            "The uploaded binary could not be compared with the selected stock reference.",
+          code: "BINARY_COMPARISON_FAILED",
+        },
+        { status: 422 }
+      );
+    }
+
+    binaryDiffSummary = diffResult;
+    binaryChangedBytes = diffResult.totalChangedBytes ?? 0;
+    binaryChangedRegions = diffResult.changedRegions ?? [];
+    binaryComparisonEvidence = {
+      referenceClassification:
+        referenceQualification
+          .referenceClassification,
+      referenceQualification,
+      totalChangedBytes: binaryChangedBytes,
+      uploadedSizeBytes:
+        currentEngineeringBinary
+          .byteLength,
+      referenceSizeBytes:
+        referenceEngineeringBinary
+          .byteLength,
+    };
   }
 
   const initialTuneName = tuneName || fileName || "Unnamed Tune";
@@ -268,6 +424,7 @@ export async function POST(request: Request) {
       tune_name: initialTuneName,
       file_name: fileName,
       file_url: signedUrlData?.signedUrl || null,
+      storage_path: storagePath,
       reference_tune_id: activeReferenceTuneId,
       is_stock_reference: !!isStockReference,
       comparison_ready: !isStockReference && !!activeReferenceTuneId,
@@ -320,7 +477,8 @@ export async function POST(request: Request) {
       tuneId: insertedTune.id,
       tuneName: initialTuneName,
       fileName,
-      fileBuffer: arrayBuffer,
+      fileBuffer:
+        currentEngineeringBinary.bytes,
     });
   } catch (profileBuildError) {
     console.error("PROFILE BUILD FAILED", {
@@ -338,14 +496,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!hasLibrary()) {
-    const root = path.join(process.cwd(), "BMW-XDFs-master");
-    buildRuntimeRomLibrary(root);
-  }
-
-  const romFingerprint = fingerprintRom({
-      fileName,
-
+  const legacyRomFingerprint = fingerprintRom({
+      binaryBytes:
+        currentEngineeringBinary.bytes,
       binarySizeBytes:
         binarySummary?.fileSize ??
         fileSize ??
@@ -360,7 +513,31 @@ export async function POST(request: Request) {
         [],
 
       library: getLibrary(),
+
+      comparison: binaryComparisonEvidence,
   });
+
+  const runtimeStockVariantKnowledge =
+    lookupRuntimeStockVariantKnowledge({
+      sha256:
+        binarySummary?.metadata?.binaryHash ??
+        null,
+      binarySizeBytes:
+        binarySummary?.fileSize ??
+        fileSize ??
+        null,
+      romFamily:
+        legacyRomFingerprint.romFamily,
+    });
+
+  const vehicleIdentityKnowledgeInterpretation =
+    interpretRuntimeStockVariantKnowledge({
+      knowledge: runtimeStockVariantKnowledge,
+      legacyFingerprint: legacyRomFingerprint,
+    });
+
+  const romFingerprint =
+    legacyRomFingerprint;
 
   const profilePayload: TuneProfileInsertPayload = {
         ...profile,
@@ -390,9 +567,13 @@ export async function POST(request: Request) {
         calibration_verification_status:
           binarySummary?.metadata?.calibrationVerificationStatus ?? "pending",
         exact_binary_match_status:
-          romFingerprint.exactBinaryMatch
+          vehicleIdentityKnowledgeInterpretation
+            .exactBinaryMatch
             ? "matched"
-            : binarySummary?.metadata?.exactBinaryMatchStatus ?? "not_matched",
+            : vehicleIdentityKnowledgeInterpretation
+                  .binaryType === "modified"
+              ? "not_matched"
+              : binarySummary?.metadata?.exactBinaryMatchStatus ?? "pending",
         map_scan_status: "pending",
 
         rom_platform: romFingerprint.platform,
@@ -413,13 +594,21 @@ export async function POST(request: Request) {
                 ? binarySummary.detectedPlatform
                 : null),
         rom_family: romFingerprint.romFamily,
-        binary_type: romFingerprint.binaryType,
+        binary_type:
+          vehicleIdentityKnowledgeInterpretation
+            .binaryType,
         xdf_suggested: romFingerprint.xdfSuggested,
         stock_bin_suggested: romFingerprint.stockBinSuggested,
         map_switch_bin_suggested: romFingerprint.mapSwitchBinSuggested,
         rom_confidence: romFingerprint.confidence,
-        rom_evidence: romFingerprint.evidence,
-        rom_warnings: romFingerprint.warnings,
+        rom_evidence: [
+          ...vehicleIdentityKnowledgeInterpretation
+            .evidence,
+        ],
+        rom_warnings: [
+          ...vehicleIdentityKnowledgeInterpretation
+            .warnings,
+        ],
 
         reference_tune_id: activeReferenceTuneProfileId,
         is_stock_reference: !!isStockReference,

@@ -13,9 +13,13 @@ export type BinaryDifferenceSummary = {
 };
 
 export function detectBinaryDifferences(
-  modifiedBuffer: Buffer,
-  referenceBuffer: Buffer
+  modifiedBinary: EngineeringBinary,
+  referenceBinary: EngineeringBinary
 ): BinaryDifferenceSummary {
+  const modifiedBuffer =
+    modifiedBinary.bytes;
+  const referenceBuffer =
+    referenceBinary.bytes;
   const chunkSize = 4096;
 
   const changedRegions: BinaryChangedRegion[] = [];
@@ -83,3 +87,6 @@ export function detectBinaryDifferences(
     notes,
   };
 }
+import type {
+  EngineeringBinary,
+} from "./binaryContainer";

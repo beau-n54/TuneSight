@@ -3,6 +3,11 @@ import type {
   RomDetectionLevel,
   RomVerificationStatus,
 } from "../intelligence/romIdentityAdapter";
+import {
+  formatPresentedBinaryType,
+  formatPresentedEvidence,
+  formatPresentedWarnings,
+} from "./romIdentityPresentation";
 
 type RomIdentityCardProps = {
   identity: RomIdentity;
@@ -72,28 +77,6 @@ function formatVerificationStatus(
   }
 }
 
-function formatBinaryType(
-  value: string | null
-): string | null {
-  if (!value) {
-    return null;
-  }
-
-  switch (value) {
-    case "stock":
-      return "Stock Reference";
-
-    case "mapswitch":
-      return "Map-Switch Binary";
-
-    case "modified":
-      return "Modified Binary";
-
-    default:
-      return value;
-  }
-}
-
 function IdentityRow({
   label,
   value,
@@ -143,12 +126,17 @@ export default function RomIdentityCard({
 
   const evidence =
     identity.evidence.length > 0
-      ? identity.evidence
+      ? formatPresentedEvidence(
+          identity.evidence
+        )
       : ["No detection evidence is currently available."];
 
   const warnings =
     identity.warnings.length > 0
-      ? identity.warnings
+      ? formatPresentedWarnings({
+          evidence: identity.evidence,
+          warnings: identity.warnings,
+        })
       : ["No ROM identification warnings detected."];
 
   return (
@@ -207,7 +195,10 @@ export default function RomIdentityCard({
 
           <IdentityRow
             label="Binary Type"
-            value={formatBinaryType(identity.binaryType)}
+            value={formatPresentedBinaryType({
+              binaryType: identity.binaryType,
+              evidence: identity.evidence,
+            })}
           />
 
           <IdentityRow

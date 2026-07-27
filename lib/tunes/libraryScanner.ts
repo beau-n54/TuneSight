@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { calculateBinaryHash } from "./calculateBinaryHash";
+import { calculateBinaryHash } from "./calculateBinaryHash.ts";
 
 export type LibraryFile = {
   fileName: string;

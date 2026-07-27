@@ -1,11 +1,15 @@
 import {
   classifyBinary,
+} from "./binaryClassification.ts";
+import type {
   BinaryComparisonEvidence,
-} from "./binaryClassification";
+} from "./binaryClassification.ts";
 import {
   ROM_LIBRARY,
+} from "./romLibrary.ts";
+import type {
   RomLibraryEntry,
-} from "./romLibrary";
+} from "./romLibrary.ts";
 
 export type RomFingerprintResult = {
   platform: string | null;
@@ -34,6 +38,51 @@ type ScoredMatch = {
 
 function normalise(value: string): string {
   return value.trim().toUpperCase();
+}
+
+function binaryEncodedRomFamilies(
+  binaryBytes: Uint8Array | null,
+  library: RomLibraryEntry[]
+): ReadonlySet<string> {
+  if (!binaryBytes) {
+    return new Set();
+  }
+
+  const bytes = Buffer.from(
+    binaryBytes.buffer,
+    binaryBytes.byteOffset,
+    binaryBytes.byteLength
+  );
+  const families = new Set<string>();
+
+  for (const romFamily of new Set(
+    library.map(
+      (entry) => entry.romFamily
+    )
+  )) {
+    if (
+      !/^\d{12,16}$/.test(romFamily) ||
+      romFamily.length % 2 !== 0
+    ) {
+      continue;
+    }
+
+    const encoded = Buffer.from(
+      romFamily,
+      "hex"
+    );
+
+    if (
+      encoded.length > 0 &&
+      bytes.indexOf(encoded) >= 0
+    ) {
+      families.add(
+        normalise(romFamily)
+      );
+    }
+  }
+
+  return families;
 }
 
 function markerWeight(
@@ -143,7 +192,7 @@ function calculateConfidence(
 }
 
 export function fingerprintRom(input: {
-  fileName?: string | null;
+  binaryBytes?: Uint8Array | null;
   binarySizeBytes?: number | null;
   binaryHash?: string | null;
   printableStrings?: string[] | null;
@@ -152,9 +201,6 @@ export function fingerprintRom(input: {
 }): RomFingerprintResult {
   const library =
     input.library ?? ROM_LIBRARY;
-
-  const fileName =
-    input.fileName ?? "";
 
   const binarySizeBytes =
     input.binarySizeBytes ?? null;
@@ -165,9 +211,14 @@ export function fingerprintRom(input: {
   const printableStrings =
     input.printableStrings ?? [];
 
+  const encodedRomFamilies =
+    binaryEncodedRomFamilies(
+      input.binaryBytes ?? null,
+      library
+    );
+
   const haystack = normalise(
     [
-      fileName,
       ...printableStrings,
     ].join(" ")
   );
@@ -177,12 +228,28 @@ export function fingerprintRom(input: {
   const scoredMatches: ScoredMatch[] = [];
 
   for (const entry of library) {
-    const matchedMarkers =
-      entry.markers.filter((marker) =>
+    const matchedMarkers = [
+      ...entry.markers.filter((marker) =>
         haystack.includes(
           normalise(marker)
         )
+      ),
+    ];
+
+    if (
+      encodedRomFamilies.has(
+        normalise(entry.romFamily)
+      ) &&
+      !matchedMarkers.some(
+        (marker) =>
+          normalise(marker) ===
+          normalise(entry.romFamily)
+      )
+    ) {
+      matchedMarkers.push(
+        entry.romFamily
       );
+    }
 
     const score =
       matchedMarkers.reduce(
@@ -227,7 +294,7 @@ export function fingerprintRom(input: {
 
   if (!bestMatch) {
     warnings.push(
-      "No recognised ROM signature was found in the filename or printable binary strings."
+      "No recognised ROM signature was found in printable Engineering Binary strings."
     );
   } else {
     const entry = bestMatch.entry;
@@ -278,6 +345,16 @@ export function fingerprintRom(input: {
       evidence.push(
         `Confirmed ROM signature: ${entry.romFamily}.`
       );
+
+      if (
+        encodedRomFamilies.has(
+          normalise(entry.romFamily)
+        )
+      ) {
+        evidence.push(
+          `Exact binary-encoded ROM-family marker matched: ${entry.romFamily}.`
+        );
+      }
     } else {
       evidence.push(
         `ROM library candidate identified: ${entry.romFamily}.`

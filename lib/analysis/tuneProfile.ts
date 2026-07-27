@@ -5,7 +5,7 @@ type BuildTuneProfileInput = {
   tuneId: string;
   tuneName?: string | null;
   fileName?: string | null;
-  fileBuffer: ArrayBuffer;
+  fileBuffer: Uint8Array;
 };
 
 function normalizeText(...values: Array<string | null | undefined>): string {
@@ -19,11 +19,11 @@ function normalizeText(...values: Array<string | null | undefined>): string {
 }
 
 function bytesToAsciiStrings(
-  buffer: ArrayBuffer,
+  buffer: Uint8Array,
   minLength = 4,
   maxStrings = 400
 ): string[] {
-  const bytes = new Uint8Array(buffer);
+  const bytes = buffer;
   const strings: string[] = [];
   let current = "";
 

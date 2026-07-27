@@ -16,7 +16,13 @@ function variant(input: Partial<StockVariantKnowledge> & Pick<StockVariantKnowle
     romFamily: "IJE0S",
     verificationStatus: "verified",
     confidence: "high",
-    provenance: [{ sourceType: "test", sourceIdentifier: input.id }],
+    provenance: [{
+      sourceType: "test",
+      sourceIdentifier: input.id,
+      validationMethod: "Exact test fixture validation",
+      validationAuthority: "WP-004 test authority",
+      validationDate: "2026-07-22",
+    }],
     supportingEvidence: [`Evidence for ${input.id}`],
     lifecycleStatus: "active",
     discoveredAt: "2026-07-22T00:00:00.000Z",
@@ -164,5 +170,103 @@ test("registry rejects destructive reuse of a stable identity", () => {
   assert.throws(
     () => registry.register(variant({ id: "stable", sha256: HASH_B })),
     /already registered with different knowledge/
+  );
+});
+
+test("authoritative status requires verified provenance", () => {
+  assert.throws(
+    () =>
+      createStockVariantRegistry([
+        variant({
+          id: "unqualified-authority",
+          sha256: HASH_A,
+          provenance: [
+            {
+              sourceType: "test",
+              sourceIdentifier:
+                "unqualified-authority",
+            },
+          ],
+        }),
+      ]),
+    /requires verified provenance/
+  );
+});
+
+test("authoritative and corroborating provisional records coexist without losing qualification", () => {
+  const authoritative = variant({
+    id: "authoritative",
+    sha256: HASH_A,
+  });
+  const provisional = variant({
+    id: "provisional",
+    sha256: HASH_A,
+    verificationStatus: "provisional",
+    confidence: "unknown",
+  });
+  const registry = createStockVariantRegistry([
+    authoritative,
+    provisional,
+  ]);
+  const result = registry.lookup({
+    sha256: HASH_A,
+    binarySizeBytes: 2_097_152,
+    romFamily: "IJE0S",
+  });
+
+  assert.equal(registry.variants.length, 2);
+  assert.equal(result.status, "exact_verified");
+  assert.equal(
+    result.verificationStatus,
+    "verified"
+  );
+  assert.equal(
+    result.variant?.id,
+    "authoritative"
+  );
+  assert.deepEqual(
+    result.candidateVariants.map(
+      (item) => item.id
+    ),
+    ["provisional"]
+  );
+  assert.equal(
+    result.provenanceSummary.length,
+    2
+  );
+});
+
+test("authoritative and provisional records remain conflict when their engineering context disagrees", () => {
+  const registry = createStockVariantRegistry([
+    variant({
+      id: "authoritative-context",
+      sha256: HASH_A,
+      platform: "N54",
+      ecu: "MSD81",
+    }),
+    variant({
+      id: "provisional-context",
+      sha256: HASH_A,
+      verificationStatus: "provisional",
+      confidence: "unknown",
+      platform: "B58 Gen1",
+      ecu: "MG1",
+    }),
+  ]);
+  const result = registry.lookup({
+    sha256: HASH_A,
+    binarySizeBytes: 2_097_152,
+    romFamily: "IJE0S",
+  });
+
+  assert.equal(result.status, "conflict");
+  assert.equal(result.variant, null);
+  assert.equal(
+    result.conflictState,
+    "unresolved"
+  );
+  assert.equal(
+    result.candidateVariants.length,
+    2
   );
 });

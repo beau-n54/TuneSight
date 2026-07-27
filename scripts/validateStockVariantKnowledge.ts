@@ -86,6 +86,9 @@ function fixture(input: {
         sourceType: "founder_validation_fixture",
         sourceIdentifier: input.id,
         validationMethod: "Controlled in-memory WP-004.1 validation fixture",
+        validationAuthority:
+          "WP-004.1 Founder Validation harness",
+        validationDate: "2026-07-22",
       },
     ],
     supportingEvidence: ["WP-004.1 executable Founder Validation harness"],

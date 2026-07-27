@@ -8,15 +8,13 @@ import { analyzeEntropy } from "./analyzeEntropy";
 import { calculateBinaryHash } from "./calculateBinaryHash";
 
 import type { ParsedTuneFile } from "./types";
+import type { EngineeringBinary } from "./binaryContainer";
 
-export async function parseBinaryTuneFile(
-  file: File
+export async function parseEngineeringBinary(
+  engineeringBinary: EngineeringBinary
 ): Promise<ParsedTuneFile> {
-  const arrayBuffer =
-    await file.arrayBuffer();
-
   const buffer =
-    Buffer.from(arrayBuffer);
+    engineeringBinary.bytes;
 
   const binaryHash =
     calculateBinaryHash(buffer);

@@ -1,4 +1,4 @@
-import { RomLibraryEntry } from "./romLibrary";
+import type { RomLibraryEntry } from "./romLibrary";
 
 export type RomLibrarySummary = {
   totalEntries: number;

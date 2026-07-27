@@ -119,6 +119,12 @@ const AUTHORITATIVE_STATUSES = new Set<StockVariantVerificationStatus>([
   "authoritatively_verified",
 ]);
 
+export function isAuthoritativeStockVariantStatus(
+  status: StockVariantVerificationStatus
+): boolean {
+  return AUTHORITATIVE_STATUSES.has(status);
+}
+
 function normaliseHash(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -129,6 +135,30 @@ function normaliseFamily(value: string): string {
 
 function isSha256(value: string): boolean {
   return /^[a-f0-9]{64}$/.test(normaliseHash(value));
+}
+
+function isIsoDate(value: string): boolean {
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+      value.trim()
+    );
+
+  if (!match) {
+    return false;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(
+    Date.UTC(year, month - 1, day)
+  );
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
 }
 
 function freezeVariant(variant: StockVariantKnowledge): StockVariantKnowledge {
@@ -180,6 +210,49 @@ function validateVariant(variant: StockVariantKnowledge): void {
 
   if (variant.provenance.length === 0) {
     throw new Error(`Stock Variant ${variant.id} requires provenance.`);
+  }
+
+  if (
+    isAuthoritativeStockVariantStatus(
+      variant.verificationStatus
+    )
+  ) {
+    const hasInvalidValidationDate =
+      variant.provenance.some(
+        (item) =>
+          !!item.validationDate?.trim() &&
+          !isIsoDate(item.validationDate)
+      );
+
+    if (hasInvalidValidationDate) {
+      throw new Error(
+        `Authoritative Stock Variant ${variant.id} has an invalid validation date.`
+      );
+    }
+
+    const verifiedProvenance =
+      variant.provenance.find(
+        (item) =>
+          !!item.validationMethod?.trim() &&
+          !!item.validationAuthority?.trim() &&
+          !!item.validationDate?.trim()
+      );
+
+    if (!verifiedProvenance) {
+      throw new Error(
+        `Authoritative Stock Variant ${variant.id} requires verified provenance.`
+      );
+    }
+
+    if (
+      !variant.supportingEvidence.some(
+        (item) => item.trim()
+      )
+    ) {
+      throw new Error(
+        `Authoritative Stock Variant ${variant.id} requires supporting evidence.`
+      );
+    }
   }
 }
 
@@ -290,7 +363,56 @@ export function createStockVariantRegistry(
           });
         }
 
-        if (exactMatches.length > 1) {
+        const authoritativeMatches =
+          exactMatches.filter((variant) =>
+            isAuthoritativeStockVariantStatus(
+              variant.verificationStatus
+            )
+          );
+
+        const authoritativeMatch =
+          authoritativeMatches.length === 1
+            ? authoritativeMatches[0]
+            : null;
+
+        const hasContradictoryContext =
+          authoritativeMatch
+            ? exactMatches.some((variant) => {
+                const conflicts = (
+                  left?: string,
+                  right?: string
+                ) =>
+                  !!left &&
+                  !!right &&
+                  normaliseFamily(left) !==
+                    normaliseFamily(right);
+
+                return (
+                  conflicts(
+                    authoritativeMatch.romFamily,
+                    variant.romFamily
+                  ) ||
+                  conflicts(
+                    authoritativeMatch.platform,
+                    variant.platform
+                  ) ||
+                  conflicts(
+                    authoritativeMatch.ecu,
+                    variant.ecu
+                  ) ||
+                  conflicts(
+                    authoritativeMatch.dmeVariant,
+                    variant.dmeVariant
+                  )
+                );
+              })
+            : false;
+
+        if (
+          exactMatches.length > 1 &&
+          (!authoritativeMatch ||
+            hasContradictoryContext)
+        ) {
           return makeResult({
             status: "conflict",
             variant: null,
@@ -307,25 +429,50 @@ export function createStockVariantRegistry(
           });
         }
 
-        const exact = exactMatches[0];
+        const exact =
+          authoritativeMatch ??
+          exactMatches[0];
         if (exact) {
-          const authoritative = AUTHORITATIVE_STATUSES.has(exact.verificationStatus);
+          const authoritative =
+            isAuthoritativeStockVariantStatus(
+              exact.verificationStatus
+            );
+          const corroboratingCandidates =
+            authoritative
+              ? exactMatches.filter(
+                  (variant) =>
+                    variant.id !== exact.id
+                )
+              : [];
+
           return makeResult({
             status: authoritative ? "exact_verified" : "exact_candidate",
             variant: exact,
             romFamily: exact.romFamily,
             verificationStatus: exact.verificationStatus,
             confidence: exact.confidence,
-            provenanceSummary: exact.provenance,
-            supportingEvidence: exact.supportingEvidence,
+            provenanceSummary:
+              exactMatches.flatMap(
+                (variant) =>
+                  variant.provenance
+              ),
+            supportingEvidence:
+              exactMatches.flatMap(
+                (variant) =>
+                  variant.supportingEvidence
+              ),
             exactMatchEvidence: { sha256Matched: true, binarySizeMatched: true },
             conflictState: exact.conflictState,
             unresolvedReason: authoritative
               ? null
               : "Exact binary knowledge exists but is not authoritatively verified.",
-            candidateVariants: authoritative ? [] : [exact],
+            candidateVariants: authoritative
+              ? corroboratingCandidates
+              : [exact],
             explanation: authoritative
-              ? "SHA-256 and binary size exactly match an authoritatively qualified Stock Variant."
+              ? corroboratingCandidates.length > 0
+                ? "SHA-256 and binary size exactly match an authoritatively qualified Stock Variant with additional qualified candidate provenance."
+                : "SHA-256 and binary size exactly match an authoritatively qualified Stock Variant."
               : "SHA-256 and binary size exactly match a qualified candidate Stock Variant.",
           });
         }

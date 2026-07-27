@@ -1,3 +1,7 @@
+import type {
+  ComparisonReferenceQualification,
+} from "./comparisonReferenceQualification";
+
 export type BinaryClassification =
   | "unknown"
   | "stock"
@@ -25,6 +29,8 @@ export type BinaryComparisonEvidence = {
    * the reference has already been independently verified as Stock.
    */
   referenceClassification: BinaryClassification;
+  referenceQualification:
+    ComparisonReferenceQualification;
 
   totalChangedBytes: number;
   uploadedSizeBytes: number;
@@ -195,7 +201,7 @@ export function classifyBinary(
       "stock"
   ) {
     warnings.push(
-      "Binary differences were detected, but the comparison reference has not been independently verified as stock."
+      `Binary differences were detected, but the comparison reference has not been independently verified as stock. Qualified reference outcome: ${comparison.referenceQualification.outcome}.`
     );
   }
 

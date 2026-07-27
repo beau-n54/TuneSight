@@ -1,13 +1,18 @@
-import { scanLibrary } from "./libraryScanner";
-import { buildRomLibrary } from "./libraryBuilder";
-import { setLibrary } from "./libraryCache";
-import { summariseRomLibrary } from "./librarySummary";
+import { setRuntimeRomKnowledgeSnapshot } from "./libraryCache";
+import { loadRomLibrary } from "./loadRomLibrary";
 
 export function buildRuntimeRomLibrary(root: string) {
-  const files = scanLibrary(root);
-  const library = buildRomLibrary(files);
+  const snapshot = loadRomLibrary(root);
 
-  setLibrary(library);
+  setRuntimeRomKnowledgeSnapshot({
+    library: snapshot.library,
+    stockVariantRegistry: snapshot.stockVariantRegistry,
+  });
 
-  return summariseRomLibrary(library);
+  return {
+    ...snapshot.summary,
+    stockVariantKnowledge: {
+      totalVariants: snapshot.stockVariantRegistry.variants.length,
+    },
+  };
 }

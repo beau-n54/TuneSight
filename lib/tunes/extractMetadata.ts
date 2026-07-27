@@ -1,9 +1,5 @@
 import type { ParsedTuneFile } from "./types";
 
-function unique(values: string[]): string[] {
-  return [...new Set(values.filter(Boolean))];
-}
-
 function findVin(printableStrings: string[]): string | undefined {
   for (const value of printableStrings) {
     const match = value
@@ -18,37 +14,6 @@ function findVin(printableStrings: string[]): string | undefined {
   return undefined;
 }
 
-function findCalibrationId(
-  printableStrings: string[],
-  detectedRom: string | null
-): string | undefined {
-  const romUpper = detectedRom?.toUpperCase() ?? null;
-
-  const candidates = unique(
-    printableStrings.flatMap((value) => {
-      const upper = value.toUpperCase();
-
-      return (
-        upper.match(
-          /\b(?:[A-Z]{1,4}[0-9]{5,12}|[0-9]{8,14}[A-Z]{0,3})\b/g
-        ) ?? []
-      );
-    })
-  );
-
-  return candidates.find((candidate) => {
-    if (candidate === romUpper) {
-      return false;
-    }
-
-    if (/^0+$/.test(candidate)) {
-      return false;
-    }
-
-    return true;
-  });
-}
-
 export function extractTuneMetadata(
   parsed: ParsedTuneFile
 ): ParsedTuneFile {
@@ -59,16 +24,10 @@ export function extractTuneMetadata(
     findVin(parsed.printableStrings);
 
   const detectedCalibrationId =
-    parsed.metadata.calibrationId ??
-    findCalibrationId(
-      parsed.printableStrings,
-      parsed.detectedRom
-    );
+    parsed.metadata.calibrationId;
 
   const softwareVersion =
-    parsed.metadata.softwareVersion ??
-    parsed.detectedRom ??
-    undefined;
+    parsed.metadata.softwareVersion;
 
   const romId =
     parsed.metadata.romId ??

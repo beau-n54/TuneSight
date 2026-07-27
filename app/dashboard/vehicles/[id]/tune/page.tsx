@@ -20,6 +20,11 @@ export default function TunePage() {
   const [tuneProfiles, setTuneProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [containerResult, setContainerResult] = useState<{
+    title: string;
+    status: string;
+    message: string;
+  } | null>(null);
 
   const [tuneFile, setTuneFile] = useState<File | null>(null);
   const [tuneName, setTuneName] = useState("");
@@ -152,6 +157,7 @@ export default function TunePage() {
     }
 
     setSaving(true);
+    setContainerResult(null);
 
     try {
       const safeFileName = tuneFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -188,15 +194,42 @@ export default function TunePage() {
       });
 
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Tune save failed.");
+        const failure =
+          await response
+            .json()
+            .catch(() => null);
+
+        if (
+          failure?.code ===
+          "dtf_extraction_unavailable"
+        ) {
+          setContainerResult({
+            title:
+              "DTF Container Recognised",
+            status:
+              "Extraction unavailable",
+            message:
+              failure.error ||
+              "TuneSight recognised this DTF container but could not verify a safe Engineering Binary extraction method for this DTF variant. The file was not analysed or persisted.",
+          });
+          return;
+        }
+
+        throw new Error(
+          failure?.error ||
+            "Tune save failed."
+        );
       }
 
       router.refresh();
       window.location.reload();
     } catch (error) {
       console.error(error);
-      alert("Tune upload failed. Check the console for details.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Tune upload failed."
+      );
     } finally {
       setSaving(false);
     }
@@ -237,10 +270,10 @@ export default function TunePage() {
               <label className="text-sm text-zinc-400">Tune File</label>
               <input
                 type="file"
-                accept=".bin,.hex,.rom"
-                onChange={(event) =>
-                  setTuneFile(event.target.files?.[0] ?? null)
-                }
+                onChange={(event) => {
+                  setTuneFile(event.target.files?.[0] ?? null);
+                  setContainerResult(null);
+                }}
                 className="cursor-pointer block w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white file:cursor-pointer file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-4 file:py-2 file:text-white hover:file:bg-zinc-700"
               />
             </div>
@@ -304,6 +337,25 @@ export default function TunePage() {
           >
             {saving ? "Uploading Tune..." : "Save Tune"}
           </button>
+
+          {containerResult && (
+            <section
+              role="status"
+              className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5"
+            >
+              <h2 className="text-lg font-semibold text-amber-100">
+                {containerResult.title}
+              </h2>
+
+              <p className="mt-2 text-sm font-medium text-amber-200">
+                {containerResult.status}
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                {containerResult.message}
+              </p>
+            </section>
+          )}
         </form>
 
         <RomIdentityCard identity={romIdentity} />
