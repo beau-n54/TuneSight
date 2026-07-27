@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 26 July 2026
+**Last Updated:** 27 July 2026
 
 
 
@@ -37,6 +37,7 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 - [Engineering Domain 02 - Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>)
 - [WP-003 Vehicle Identity Implementation](../08-engineering-work-packages/WP-003-vehicle-identity-implementation.md)
 - [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md)
+- [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md)
 - [Engineering Ratification Register](engineering-ratification-register.md)
 
 ---
@@ -49,17 +50,40 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** Knowledge Engineering Domain implementation
+**Current Engineering Phase:** WP-011.0 Engineering Presentation Intelligence architecture complete
 
-**Current Active Work Package:** WP-004 - Knowledge Implementation
+**Current Active Work Package:** WP-011.0 - Engineering Presentation Intelligence Architecture
 
-**Current Objective:** WP-004.1 Stock Variant Knowledge Engine is Founder Ratified. WP-004 Knowledge Implementation remains in progress.
+**Current Objective:** WP-011.0 Engineering Presentation Intelligence Architecture is Founder Validated, Founder Ratified and Architecture Complete. Implementation remains Not Started. WP-004.2 remains complete, Founder Validated, production deployed and production validated.
 
-**Next Authorised Objective:** Define and implement the next dependency-safe WP-004 slice required to connect authoritative Stock Variant Knowledge to Vehicle Identity without weakening Vehicle Identity ownership or classification rules.
+**Next Authorised Objective:** Await separate Founder authority for any WP-011 Presentation implementation slice. No presentation implementation is authorised.
 
-**Next Subsystem Definition:** WP-004 next implementation slice requires Founder architectural definition.
+**Next Subsystem Definition:** WP-011.0 is the ratified governing architecture for the WP-011 Presentation implementation family; implementation Not Started.
 
-**Current Engineering Hold:** WP-003 - Vehicle Identity Implementation
+**Current Engineering Hold:** WP-003 - Vehicle Identity Implementation; Knowledge integration dependency satisfied, formal hold disposition pending Founder review
+
+TuneSight now resolves supported upload containers into immutable Engineering Binary evidence before any engineering analysis. BIN and the proven 8 MiB MG1/86T0 DTF variant enter one common EngineeringBinary pipeline:
+
+```text
+Upload Container
+    |
+    v
+Binary Container Resolution
+    |
+    v
+Immutable EngineeringBinary
+    |
+    +-- Parsing
+    +-- Fingerprinting
+    +-- Qualified Knowledge
+    +-- Vehicle Identity Interpretation
+    +-- Comparison Qualification
+    +-- Evidence and Persistence
+```
+
+Container metadata and engineering provenance remain preserved. Knowledge owns reusable Engineering Truth; Vehicle Identity owns interpretation of qualified Knowledge for the current system.
+
+The Founder-ratified WP-011.0 architecture defines how existing outputs shall be communicated through engineering conclusions, Evidence, interpretation, confidence, provenance and progressive disclosure. It changes no runtime behaviour and creates no engineering truth. WP-011.0 is the authoritative governing architecture for the existing WP-011 Presentation implementation family. The existing WP-005 Evidence and WP-011 Presentation identities remain unchanged.
 
 ---
 
@@ -71,27 +95,28 @@ WP-003 Vehicle Identity
     +-- ENGINEERING HOLD
             |
             v
-WP-004 Knowledge Implementation
+WP-004.1 Stock Variant Knowledge Engine
     |
-    +-- IN PROGRESS
-            |
-            +-- WP-004.1 Stock Variant Knowledge Engine
-            |       |
-            |       +-- RATIFIED
+    +-- RATIFIED
+    |
+    v
+WP-004.2 Qualified Knowledge and Binary Container Resolution
+    |
+    +-- COMPLETE
+    +-- FOUNDER VALIDATED
+    +-- PRODUCTION DEPLOYED
+    +-- PRODUCTION VALIDATED
             |
             v
-Next dependency-safe WP-004 slice
-    |
-    +-- Founder architectural definition required
-            |
-            v
-Knowledge-backed Vehicle Identity integration and Founder Validation
-                    |
-                    v
 WP-003 hold review and ratification decision
-                    |
-                    v
-WP-005 Evidence Implementation
+            |
+            v
+WP-011.0 Engineering Presentation Intelligence Architecture
+    |
+    +-- FOUNDER VALIDATED
+    +-- FOUNDER RATIFIED
+    +-- ARCHITECTURE COMPLETE
+    +-- IMPLEMENTATION NOT STARTED
 ```
 
 WP-003 remains the owner of Vehicle Identity. WP-004 shall provide authoritative reusable Engineering Truth and Stock Variant Knowledge without taking ownership of current-system Engineering Identity.
@@ -149,8 +174,9 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 |---|---|---|---|---|---|
 | WP-001 Engineering Foundation Verification | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
 | WP-002 Repository Architecture Foundation | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
-| WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED with unresolved Knowledge integration dependency | Runtime Founder Validation remains required after Vehicle Identity consumes ratified Stock Variant Knowledge | ENGINEERING HOLD | Not ratified as a completed Work Package |
-| WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 implemented and ratified | WP-004.1 Founder Validation and scoped regression passed; remaining WP-004 validation is not complete | IN PROGRESS | WP-004.1 implementation ratified only; parent Work Package is not complete or ratified |
+| WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED; WP-004.2 Knowledge integration dependency satisfied | Founder production validation completed across the accepted WP-004.2 scope; formal WP-003 hold disposition remains pending | ENGINEERING HOLD pending Founder review | Not ratified as a completed Work Package |
+| WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified and WP-004.2 complete | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed | IN PROGRESS; WP-004.2 COMPLETE | WP-004.1 and WP-004.2 ratified within their defined scopes; parent Work Package completion has not been declared |
+| WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
 | WP-005 Evidence Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006 Correlation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-007 Explanation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
@@ -167,31 +193,34 @@ The Ratified status printed within a Work Package specification identifies the g
 
 ### Reason
 
-Vehicle Identity does not yet consume the ratified Stock Variant Knowledge Engine through the production identity path, and Founder Validation has not yet been repeated through the runtime Vehicle Identity flow.
+The Knowledge integration dependency that created the hold has been satisfied by WP-004.2. Vehicle Identity now consumes qualified Stock Variant Knowledge through the production identity path, and Founder production validation has completed.
 
-No Vehicle Identity redesign is currently required.
+The Engineering Hold remains recorded until the Founder explicitly reviews its disposition and the WP-003 ratification decision. No Vehicle Identity redesign is required.
 
 ### Required Knowledge Capability
 
-WP-004.1 has provided the foundational Knowledge capability for:
+WP-004.1 and WP-004.2 now provide:
 
 - Multiple verified Stock Variants per ROM Family
-- Founder stock binary registration
-- Authoritative Stock Variant lookup
-- Correct knowledge-backed MG1 Stock classification
+- Verification-aware authoritative Stock Variant lookup
+- Qualified provisional, family-only, conflict, unknown and invalid outcomes
 - Knowledge-backed Vehicle Identity
+- Authoritative comparison-reference qualification
+- Immutable EngineeringBinary evidence
+- BIN and proven MG1/86T0 DTF container resolution
+- Provenance-preserving production interpretation
 
-Vehicle Identity integration remains a separate dependency-safe implementation step and shall preserve Vehicle Identity ownership and classification rules.
+Founder binaries remain provisional or unresolved where authoritative evidence is absent. No Founder binary was promoted without the required evidence.
 
 ### Return Criteria
 
-- WP-004 implementation provides the required Knowledge capability.
-- Founder Validation is repeated.
-- N54 regression remains valid.
-- Beau's F30 B58 Gen1 stock and modified binaries are tested.
-- Christos' Supra stock and modified binaries are tested.
-- Unknown remains the result where authoritative provenance is unavailable.
-- WP-003 passes Founder Validation before ratification.
+- WP-004 implementation provides the required Knowledge capability. **Satisfied by WP-004.2.**
+- Founder Validation is repeated. **Satisfied.**
+- N54 regression remains valid. **Satisfied within Founder Validation.**
+- Beau's F30 B58 Gen1 stock and modified binaries are tested. **Satisfied within Founder Validation.**
+- Christos' Supra stock and modified binaries are tested. **Satisfied within Founder Validation.**
+- Unknown or a qualified non-authoritative outcome remains where authoritative provenance is unavailable. **Satisfied.**
+- WP-003 passes Founder review before ratification. **Pending formal Founder decision.**
 
 WP-003 shall remain on ENGINEERING HOLD until every return criterion has been satisfied and formally reviewed.
 
@@ -215,7 +244,7 @@ Knowledge is included within the complete Engineering Architecture Bible ratific
 
 **Work Package Status:** IN PROGRESS
 
-WP-004 is not complete. Ratification of WP-004.1 applies only to the Stock Variant Knowledge Engine subsystem and does not ratify the parent Work Package.
+WP-004 remains governed as a parent Work Package. WP-004.1 is ratified and WP-004.2 is complete and ratified within their defined scopes. No unsupported completion claim is made for future WP-004 capability.
 
 **First Capability:** WP-004.1 Stock Variant Knowledge Engine
 
@@ -260,19 +289,45 @@ WP-004.1 completed Implementation, Founder Code Audit, Physical Founder Validati
 
 The permanent ratification is recorded as [TS-RAT-002](engineering-ratification-register.md#ts-rat-002) in the Engineering Ratification Register.
 
+### WP-004.2 Qualified Knowledge and Binary Container Resolution
+
+**WP-004.2 Status:** COMPLETE
+
+**Ratification Date:** 27 July 2026
+
+WP-004.2 completed Engineering implementation, Engineering Acceptance, Founder Validation, local commit, GitHub push, production deployment and Founder Production Validation.
+
+### Completed Capability
+
+- Runtime Knowledge Contract
+- Vehicle Identity interpretation of qualified Knowledge
+- Qualified Stock Variant Knowledge
+- Authoritative Stock Variant source boundary
+- Authoritative comparison-reference qualification
+- EngineeringBinary architecture and immutable byte evidence
+- Binary Container Resolution
+- Lossless BIN resolution
+- Proven 8 MiB MG1/86T0 DTF Engineering Binary support
+- Truthful bounded failure for unsupported DTF variants
+- Provenance and qualification preservation
+- Stock Candidate and Family Match presentation
+- Production persistence and refresh validation
+
+The production runtime analyses BIN and the proven DTF variant through the same EngineeringBinary pipeline. Knowledge qualifications remain unchanged across Domain boundaries, and unsupported or unverified evidence is not upgraded.
+
+The permanent ratification is recorded as [TS-RAT-004](engineering-ratification-register.md#ts-rat-004).
+
 ### Next Authorised Objective
 
-Define and implement the next dependency-safe WP-004 slice required to connect authoritative Stock Variant Knowledge to Vehicle Identity without weakening Vehicle Identity ownership or classification rules.
-
-WP-004 next implementation slice requires Founder architectural definition. No authoritative WP-004.2 subsystem title currently exists.
+Founder review of the WP-003 Engineering Hold and ratification criteria. No further WP-004.2 implementation is authorised.
 
 ---
 
 ## Current Blockers and Qualifications
 
-- WP-003 cannot be ratified until Vehicle Identity consumes the ratified Stock Variant Knowledge Engine through the production identity path, Founder Validation is repeated, and the return criteria are satisfied.
-- WP-004 remains IN PROGRESS; WP-004.1 ratification does not complete the parent Work Package.
-- The next WP-004 implementation slice requires Founder architectural definition.
+- WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
+- WP-004.1 and WP-004.2 are ratified within their defined scopes. Parent WP-004 completion beyond those scopes has not been declared.
+- No additional WP-004.2 implementation is authorised.
 - WP-001, WP-002 and WP-005 through WP-011 lack sufficient repository evidence for implementation-completion claims and remain REQUIRES VERIFICATION.
 - Architecture Bible Ratification does not by itself establish runtime implementation, validation or Work Package completion.
 - Any pre-ratification status wording within the rewritten Architecture Bible is governed by the later explicit Founder ratification recorded in TS-RAT-003.

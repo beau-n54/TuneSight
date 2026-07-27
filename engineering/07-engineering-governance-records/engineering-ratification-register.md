@@ -282,6 +282,132 @@ Future implementation shall proceed in accordance with the Ratified Architecture
 
 ---
 
+### TS-RAT-004
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-004 |
+| Date | 27 July 2026 |
+| Artefact Type | Work Package Subsystem Implementation |
+| Artefact Name | WP-004.2 — Qualified Knowledge and Binary Container Resolution |
+| Authority | Founder |
+| Ratification Scope | Engineering implementation, Founder Engineering Acceptance, Founder Validation and Production Validation |
+| Status | RATIFIED |
+| Architecture Authority | [Engineering Architecture Bible](<../05 engineering-architecture-bible/README.md>) |
+| Parent Work Package | [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md) |
+| Founder Engineering Acceptance | Completed |
+| Founder Validation | Completed |
+| Production Validation | Completed |
+| Local Commit | Completed |
+| GitHub Push | Completed |
+| Production Deployment | Completed |
+| Commit | `147945aa573827b62aaf84b222f882c5e16a7377` |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-004.2 — Qualified Knowledge and Binary Container Resolution following Engineering Acceptance, Founder Validation, GitHub publication, production deployment and successful Founder Production Validation.
+
+TuneSight now analyses both BIN and the proven 8 MiB MG1/86T0 DTF Engineering Binary through a common immutable EngineeringBinary pipeline while preserving engineering provenance and truthful Knowledge qualification.
+
+**Ratified Capability**
+
+- Runtime Knowledge Contract
+- Vehicle Identity interpretation of qualified Knowledge
+- Qualified Stock Variant Knowledge
+- Authoritative Stock Variant source boundary
+- Authoritative comparison-reference qualification
+- Immutable EngineeringBinary evidence
+- Binary Container Resolution
+- Lossless BIN resolution
+- Proven MG1/86T0 DTF Engineering Binary support
+- Truthful bounded failure for unsupported DTF variants
+- Provenance and conflict preservation
+- Stock Candidate and Family Match presentation
+- Tune and tune-profile persistence
+- Refresh persistence
+
+**Founder and Production Validation Evidence**
+
+- N54 stock and modified validation passed.
+- Beau's B58 Founder datasets preserved truthful qualified outcomes.
+- Christos' Supra datasets preserved truthful qualified outcomes.
+- The supported Founder DTF resolved into EngineeringBinary and completed parsing, Vehicle Identity, Runtime Knowledge, comparison and persistence.
+- Unsupported DTF validation produced a bounded in-app failure without a tune, tune-profile or Tune History entry.
+- Successful results remained present after refresh.
+- Production Knowledge validation passed without mutating the 196-record production registry.
+- No Founder binary was promoted to authoritative Stock without sufficient evidence.
+
+**Dependencies and Qualifications**
+
+- This ratification applies to WP-004.2.
+- It does not fabricate Software Version, Calibration ID or checksum verification.
+- It does not admit an authoritative Stock Variant without the required evidence.
+- It does not claim universal DTF support beyond the proven MG1/86T0 8 MiB variant.
+- It satisfies the WP-003 Knowledge integration dependency but does not itself ratify WP-003 or formally lift the WP-003 Engineering Hold.
+- Future hold disposition and WP-003 ratification remain explicit Founder decisions.
+
+---
+
+### TS-RAT-005
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-005 |
+| Date | 27 July 2026 |
+| Artefact Type | Work Package Architecture |
+| Artefact Name | WP-011.0 — Engineering Presentation Intelligence Architecture |
+| Permanent Work Package Identifier | WP-011.0 |
+| Authority | Founder |
+| Ratification Scope | Engineering Presentation Intelligence architecture, boundaries, principles, information hierarchy, presentation contracts and implementation roadmap |
+| Status | RATIFIED |
+| Architecture Artefact | [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md) |
+| Architecture Authority | [Engineering Architecture Bible](<../05 engineering-architecture-bible/README.md>) |
+| Related Work Package | [WP-011 Presentation Implementation](../08-engineering-work-packages/WP-011-presentation-implementation.md) |
+| Founder Validation | Completed |
+| Implementation Status | Not Started |
+| Implementation Authority | No WP-011.1 through WP-011.6 implementation authorised |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-011.0 — Engineering Presentation Intelligence Architecture as the authoritative governing architecture for the WP-011 Presentation implementation family.
+
+**Ratified Architecture Scope**
+
+- Presentation ownership and architectural boundaries
+- Four-tier engineering information hierarchy
+- Engineering reading order
+- Evidence traceability
+- Primary, Alternative and Rejected Cause presentation
+- Global Tune Note and Event-Specific Note separation
+- Confidence-type separation
+- Telemetry presentation architecture and numerical-truth preservation
+- Provenance presentation
+- Professional engineering language
+- Progressive disclosure and accessibility principles
+- Presentation contracts
+- Failure and uncertainty handling
+- WP-011.1 through WP-011.6 implementation roadmap
+
+**Architectural Boundaries**
+
+Presentation communicates engineering truth and does not generate, modify, promote, weaken or suppress it. WP-011.0 does not own or alter engineering truth generated by Vehicle Identity, Knowledge, Comparison, Evidence, Reasoning or Cross Reference. It does not alter confidence calculations or recommendation generation.
+
+Unknown, unavailable, unsupported and not implemented remain distinct. Source Container, Engineering Binary and derived engineering outputs remain traceable and visually distinct. Rendering interpolation shall not alter raw telemetry samples, peaks, minima, event boundaries or calculations.
+
+**Relationship to WP-011**
+
+WP-011.0 is the governing architectural definition for the existing WP-011 Presentation Implementation work-package family. It preserves the existing WP-005 Evidence identity and the existing WP-011 Presentation identity without renumbering, superseding or reinterpreting either Work Package.
+
+**Implementation Qualification**
+
+This ratification approves architecture only. Implementation remains Not Started. WP-011.1 through WP-011.6 remain planned and require separate Founder implementation authority, validation and ratification.
+
+WP-011.0 does not resolve Software Version, Calibration ID, checksum verification or any deferred Knowledge capability.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
