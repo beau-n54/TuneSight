@@ -38,6 +38,9 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 - [WP-003 Vehicle Identity Implementation](../08-engineering-work-packages/WP-003-vehicle-identity-implementation.md)
 - [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md)
 - [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md)
+- [WP-011.1 Engineering Graph Intelligence](../08-engineering-work-packages/WP-011.1-engineering-graph-intelligence.md)
+- [WP-011.2 Engineering Evidence Hierarchy](../08-engineering-work-packages/WP-011.2-engineering-evidence-hierarchy.md)
+- [WP-006.1 Conservative Correlation V1](../08-engineering-work-packages/WP-006.1-conservative-correlation-v1.md)
 - [Engineering Ratification Register](engineering-ratification-register.md)
 
 ---
@@ -50,15 +53,15 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** WP-011.0 Engineering Presentation Intelligence architecture complete
+**Current Engineering Phase:** WP-011.1 and WP-006.1 milestone closure; WP-011.2 partial completion held on Explanation coverage
 
-**Current Active Work Package:** WP-011.0 - Engineering Presentation Intelligence Architecture
+**Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
 
-**Current Objective:** WP-011.0 Engineering Presentation Intelligence Architecture is Founder Validated, Founder Ratified and Architecture Complete. Implementation remains Not Started. WP-004.2 remains complete, Founder Validated, production deployed and production validated.
+**Current Objective:** WP-011.1 Engineering Graph Intelligence and WP-006.1 Conservative Correlation V1 are complete, Founder validated and ratified. WP-011.2 provides the Founder-validated presentation-safe hierarchy but remains partially complete and not ratified because authoritative Root Cause output is absent for event families including Lean Under Load.
 
-**Next Authorised Objective:** Await separate Founder authority for any WP-011 Presentation implementation slice. No presentation implementation is authorised.
+**Next Authorised Objective:** No additional implementation is authorised by this closure. WP-011.2 completion depends on future WP-007 Explanation coverage for event families lacking authoritative Root Cause output, beginning with Lean Under Load. No WP-011.3 through WP-011.6 implementation is authorised.
 
-**Next Subsystem Definition:** WP-011.0 is the ratified governing architecture for the WP-011 Presentation implementation family; implementation Not Started.
+**Next Subsystem Definition:** WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 is on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
 **Current Engineering Hold:** WP-003 - Vehicle Identity Implementation; Knowledge integration dependency satisfied, formal hold disposition pending Founder review
 
@@ -116,7 +119,32 @@ WP-011.0 Engineering Presentation Intelligence Architecture
     +-- FOUNDER VALIDATED
     +-- FOUNDER RATIFIED
     +-- ARCHITECTURE COMPLETE
-    +-- IMPLEMENTATION NOT STARTED
+    |
+    v
+WP-011.1 Engineering Graph Intelligence
+    |
+    +-- ENGINEERING IMPLEMENTATION COMPLETE
+    +-- FOUNDER VALIDATION COMPLETE
+    +-- RATIFIED
+    |
+    v
+WP-011.2 Engineering Evidence Hierarchy
+    |
+    +-- ENGINEERING IMPLEMENTATION PARTIALLY COMPLETE
+    +-- FOUNDER VALIDATION COMPLETE FOR IMPLEMENTED SCOPE
+    +-- ENGINEERING HOLD
+    +-- NOT RATIFIED
+            |
+            v
+WP-007 Explanation coverage for unsupported event families
+    |
+    +-- LEAN UNDER LOAD ROOT CAUSE NOT IMPLEMENTED
+
+WP-006.1 Conservative Correlation V1
+    |
+    +-- ENGINEERING IMPLEMENTATION COMPLETE
+    +-- FOUNDER VALIDATION COMPLETE
+    +-- RATIFIED
 ```
 
 WP-003 remains the owner of Vehicle Identity. WP-004 shall provide authoritative reusable Engineering Truth and Stock Variant Knowledge without taking ownership of current-system Engineering Identity.
@@ -177,8 +205,11 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED; WP-004.2 Knowledge integration dependency satisfied | Founder production validation completed across the accepted WP-004.2 scope; formal WP-003 hold disposition remains pending | ENGINEERING HOLD pending Founder review | Not ratified as a completed Work Package |
 | WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified and WP-004.2 complete | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed | IN PROGRESS; WP-004.2 COMPLETE | WP-004.1 and WP-004.2 ratified within their defined scopes; parent Work Package completion has not been declared |
 | WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
+| WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
+| WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
 | WP-005 Evidence Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006 Correlation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
+| WP-006.1 Conservative Correlation V1 | Architecture Ratified under TS-RAT-003 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-007; authoritative and closed |
 | WP-007 Explanation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-008 Decision Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-009 Memory Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
@@ -328,7 +359,9 @@ Founder review of the WP-003 Engineering Hold and ratification criteria. No furt
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
 - WP-004.1 and WP-004.2 are ratified within their defined scopes. Parent WP-004 completion beyond those scopes has not been declared.
 - No additional WP-004.2 implementation is authorised.
-- WP-001, WP-002 and WP-005 through WP-011 lack sufficient repository evidence for implementation-completion claims and remain REQUIRES VERIFICATION.
+- WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.
+- WP-011.2 is partially complete and not ratified. Presentation truthfully exposes the absence of Lean Under Load Root Cause output; future WP-007 Explanation coverage owns the missing capability.
+- WP-001, WP-002, WP-005, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
 - Architecture Bible Ratification does not by itself establish runtime implementation, validation or Work Package completion.
 - Any pre-ratification status wording within the rewritten Architecture Bible is governed by the later explicit Founder ratification recorded in TS-RAT-003.
 

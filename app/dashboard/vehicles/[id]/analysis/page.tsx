@@ -1,14 +1,37 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { buildActionableFixes } from "@/lib/analysis/actionableFixes";
 import { validateBoostAgainstTune } from "@/lib/analysis/boostValidation";
 import type { AnalysisWarning } from "@/lib/analysis/core/analysisWarning";
+import type { EnginePlatform } from "@/lib/analysis/core/analysisContext";
+import type { RootCauseEvidence } from "@/lib/analysis/rootCauseEngine";
 import type { RoutedEvent } from "@/lib/analysis/types";
+import {
+  correlateEngineeringObservations,
+  type ConservativeCorrelationResult,
+  type CorrelationGroup,
+} from "@/lib/correlation/conservativeCorrelation";
 import { WorkshopDiagnosticCard } from "@/lib/components/diagnostics/WorkshopDiagnosticCard";
 import { groupDiagnosticEvents } from "@/lib/diagnostics/groupDiagnosticEvents";
 import { buildHistoricalDiagnosticEvents } from "@/lib/diagnostics/buildHistoricalDiagnosticEvents";
 import TelemetryGraphV1 from "./TelemetryGraphV1";
+import {
+  classifyCrossReferenceNotes,
+  groupEventsForPresentation,
+  selectScopedPrimaryResults,
+  type EventPresentationGroup,
+  type GlobalPresentationNote,
+  type ScopedPrimaryResult,
+} from "./analysisPresentation";
+import {
+  buildCauseHierarchy,
+  dedupeCrossReferencesByEventId,
+  groupRepeatedEventObservations,
+  observationCountLabel,
+  orderRootCauses,
+  type PresentationCrossReference,
+  type RepeatedObservationGroup,
+} from "./evidenceHierarchyPresentation";
 
 type PageProps = {
   params: Promise<{
@@ -22,11 +45,6 @@ type AnalysisFlag = {
   title: string;
   message: string;
   tone: FlagTone;
-};
-
-type SuggestedFix = {
-  title: string;
-  action: string;
 };
 
 type EngineQuickVerdict = {
@@ -46,23 +64,74 @@ type EngineWarning = {
   supportingEvidence?: string[];
 };
 
-type EngineFix = {
-  id?: string;
-  title?: string;
-  recommendation?: string;
-  rationale?: string;
-};
-
 type EngineEvent = {
   id?: string;
   type?: string;
   severity?: "low" | "medium" | "high" | "critical";
   confidence?: number;
+  startIndex?: number;
+  endIndex?: number;
   rpmStart?: number;
   rpmEnd?: number;
   evidence?: string[];
   supportingChannels?: string[];
   metrics?: Record<string, number | string | boolean | null>;
+};
+
+type EventDescriptor = EngineEvent & {
+  title?: string;
+  name?: string;
+  message?: string;
+  description?: string;
+  category?: string;
+  source?: string;
+  reason?: string;
+  action?: string;
+  eventType?: string;
+  event_type?: string;
+};
+
+type XdfCrossReference = {
+  tableName?: string;
+  name?: string;
+  category?: string;
+  description?: string;
+  axis?: string;
+  matchReason?: string;
+};
+
+type LegacySummary = {
+  max_boost?: unknown;
+  max_boost_target?: unknown;
+  max_iat?: unknown;
+  min_afr?: unknown;
+  min_rail_pressure?: unknown;
+  min_lpfp?: unknown;
+  max_wgdc?: unknown;
+  ethanol_content?: unknown;
+  max_timing_correction?: unknown;
+  throttle_closure_detected?: unknown;
+  cyl2_max_timing_correction?: unknown;
+  cyl3_max_timing_correction?: unknown;
+  maxBoost?: unknown;
+  maxBoostTarget?: unknown;
+  maxWgdc?: unknown;
+};
+
+type VehicleContext = {
+  engine_code?: string | null;
+  platform?: string | null;
+  fuel_type?: string | null;
+  fueling_setup?: string | null;
+  turbo_setup?: string | null;
+  horsepower_goal?: unknown;
+};
+
+type EnginePullWindow = {
+  id?: string;
+  startIndex?: number;
+  endIndex?: number;
+  quality?: "strong" | "usable" | "questionable";
 };
 
 type LikelyCause = {
@@ -71,7 +140,7 @@ type LikelyCause = {
   reason?: string;
 };
 
-type EngineCrossReference = {
+type EngineCrossReference = PresentationCrossReference & {
   eventId?: string;
   primaryTuneAreas?: string[];
   secondaryTuneAreas?: string[];
@@ -85,11 +154,11 @@ type EngineV2 = {
   quickVerdict?: EngineQuickVerdict;
   warnings?: EngineWarning[];
   pipelineWarnings?: AnalysisWarning[];
-  suggestedFixes?: EngineFix[];
-  pullWindows?: unknown[];
+  pullWindows?: EnginePullWindow[];
   events?: EngineEvent[];
   routedEvents?: RoutedEvent[];
   crossReferences?: EngineCrossReference[];
+  xdfCrossReferences?: XdfCrossReference[];
   telemetry?: unknown;
   worstCylinder?: string | null;
   diagnosticTimeline?: {
@@ -233,7 +302,6 @@ const { data: historicalSummaries } = await supabase
 
   const fallbackWarnings = buildWarnings(latestSummary, boostError, vehicle);
   const fallbackFlags = buildAnalysisFlags(latestSummary, boostError, vehicle);
-  const fallbackFixes = buildSuggestedFixes(latestSummary, boostError, vehicle);
 
 const legacyPipelineWarnings: EngineWarning[] =
   (engineV2?.pipelineWarnings ?? []).map((warning) => ({
@@ -268,10 +336,6 @@ const renderedWarnings =
         .sort(sortWarnings)
         .map(mapLegacyWarningToFlag)
     : fallbackWarnings;
-
-  const renderedFixes = engineV2?.suggestedFixes?.length
-    ? engineV2.suggestedFixes.map(mapEngineFixToCard)
-    : fallbackFixes;
 
   const renderedVerdictFlags = engineV2?.quickVerdict
     ? buildVerdictFlagsFromEngine(engineV2.quickVerdict)
@@ -309,12 +373,51 @@ const worstCylinderSeverity =
       ? "warn"
       : "good";
 
-  const engineCrossReferences = Array.isArray(engineV2?.crossReferences)
-    ? engineV2.crossReferences
-    : [];
+  const engineCrossReferences = dedupeCrossReferencesByEventId(
+    Array.isArray(engineV2?.crossReferences)
+      ? engineV2.crossReferences
+      : []
+  ) as EngineCrossReference[];
 
-const xdfCrossReferences = Array.isArray((engineV2 as any)?.xdfCrossReferences)
-  ? (engineV2 as any).xdfCrossReferences
+  const repeatedUnresolvedEventGroups = groupRepeatedEventObservations(
+    engineEvents,
+    engineCrossReferences
+  ).filter(
+    (group) =>
+      group.observations.every(
+        ({ crossReference }) =>
+          !crossReference.rootCauses?.length
+      )
+  );
+
+  const groupedUnresolvedEventIds = new Set(
+    repeatedUnresolvedEventGroups.flatMap((group) =>
+      group.observations.flatMap(({ event }) =>
+        event.id ? [event.id] : []
+      )
+    )
+  );
+  const eventPresentationGroups =
+    groupEventsForPresentation(engineEvents);
+  const noteHierarchy =
+    classifyCrossReferenceNotes(engineCrossReferences);
+  const scopedPrimaryResults = selectScopedPrimaryResults(
+    engineEvents,
+    engineCrossReferences
+  );
+
+  const correlationResult = correlateEngineeringObservations({
+    analysisId:
+      typeof latestSummary?.id === "string"
+        ? latestSummary.id
+        : undefined,
+    events: engineEvents,
+    pullWindows: engineV2?.pullWindows ?? [],
+    crossReferences: engineCrossReferences,
+  });
+
+const xdfCrossReferences = Array.isArray(engineV2?.xdfCrossReferences)
+  ? engineV2.xdfCrossReferences
   : [
     
       {
@@ -355,26 +458,18 @@ const tuneReasoningFlags = buildTuneReasoningFlags(
   tuneProfile,
   latestSummary,
   vehicle,
-  engineCrossReferences,
   engineEvents
 );
-
-const actionableFixes = buildActionableFixes({
-  tuneProfile,
-  summary: latestSummary,
-  tuneReasoningFlags,
-  warnings: renderedWarnings,
-  routedEvents,
-  engineFixes: engineV2?.suggestedFixes || [],
-  historicalSummaries: historicalSummaries || [],
-});
 
 const historicalDiagnosticEvents =
   buildHistoricalDiagnosticEvents(
     historicalSummaries || []
   );
 
-function getRelatedXdfTablesForEvent(event: any, xdfCrossReferences: any[] = []) {
+function getRelatedXdfTablesForEvent(
+  event: EventDescriptor | null,
+  xdfCrossReferences: readonly XdfCrossReference[] = []
+) {
   if (!event || !Array.isArray(xdfCrossReferences)) return [];
 
   const eventText = [
@@ -564,7 +659,26 @@ const groupedDiagnosticEvents =
           </div>
         </div>
 
-        <TelemetryGraphV1 telemetry={engineV2?.telemetry ?? null} />
+        <EngineeringSummaryCard
+          hasLog={!!latestLog}
+          hasSummary={!!latestSummary}
+          quickVerdict={engineV2?.quickVerdict}
+          verdictFlags={renderedVerdictFlags}
+        />
+
+        {scopedPrimaryResults.length > 0 && (
+          <PrimaryEngineeringResults
+            results={scopedPrimaryResults}
+          />
+        )}
+
+        <TelemetryGraphV1
+          events={engineV2?.events ?? []}
+          pullWindows={engineV2?.pullWindows ?? []}
+          telemetry={engineV2?.telemetry ?? null}
+        />
+
+        <EngineeringCorrelationSurface result={correlationResult} />
 
         <div className="grid gap-4 md:grid-cols-4">
           <InfoCard
@@ -866,49 +980,6 @@ const groupedDiagnosticEvents =
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Quick Verdict</h2>
-            {engineV2?.quickVerdict?.status && (
-              <StatusBadge
-                label={humanizeStatus(engineV2.quickVerdict.status)}
-                tone={
-                  engineV2.quickVerdict.status === "critical"
-                    ? "bad"
-                    : engineV2.quickVerdict.status === "caution"
-                    ? "warn"
-                    : "good"
-                }
-              />
-            )}
-          </div>
-
-          {!latestLog && (
-            <p className="text-zinc-400">
-              No log uploaded yet. Upload a log to begin analysis.
-            </p>
-          )}
-
-          {latestLog && !latestSummary && (
-            <p className="text-zinc-400">
-              Log found, but no summary data is available yet.
-            </p>
-          )}
-
-          {latestLog && latestSummary && (
-            <div className="space-y-3">
-              {renderedVerdictFlags.map((flag, index) => (
-                <FlagCard
-                  key={`${flag.title}-${index}`}
-                  title={flag.title}
-                  message={flag.message}
-                  tone={flag.tone}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Intelligent Warnings</h2>
             <StatusBadge
               label={`${renderedRoutedEvents.length} events`}
@@ -1132,9 +1203,24 @@ const groupedDiagnosticEvents =
 
       {engineEvents.length > 0 ? (
         <div className="space-y-4">
-          {engineEvents.map((event, index) => (
-            <EventCard key={event.id || `event-${index}`} event={event} />
-          ))}
+          {eventPresentationGroups.map((group) =>
+            group.events.length > 1 ? (
+              <RepeatedEventFamilyCard
+                crossReferences={engineCrossReferences}
+                group={group}
+                key={group.eventType}
+                pullWindows={engineV2?.pullWindows ?? []}
+              />
+            ) : (
+              <EventCard
+                key={
+                  group.events[0]?.id ||
+                  `event-${group.eventType}`
+                }
+                event={group.events[0] as EngineEvent}
+              />
+            )
+          )}
         </div>
       ) : (
         <p className="text-zinc-400">
@@ -1157,7 +1243,21 @@ const groupedDiagnosticEvents =
 
             {engineCrossReferences.length > 0 ? (
               <div className="space-y-4">
+                {repeatedUnresolvedEventGroups.map((group) => (
+                  <RepeatedObservationGroupCard
+                    key={group.eventType}
+                    group={group}
+                  />
+                ))}
+
                 {engineCrossReferences.map((crossRef, index) => {
+                  if (
+                    crossRef.eventId &&
+                    groupedUnresolvedEventIds.has(crossRef.eventId)
+                  ) {
+                    return null;
+                  }
+
                   const linkedEvent =
                     engineEvents.find((event) => event.id === crossRef.eventId) ||
                     null;
@@ -1166,6 +1266,13 @@ const groupedDiagnosticEvents =
                     <CrossReferenceCard
                       key={crossRef.eventId || `crossref-${index}`}
                       crossRef={crossRef}
+                      eventSpecificNotes={
+                        crossRef.eventId
+                          ? noteHierarchy.eventSpecificNotes.get(
+                              crossRef.eventId
+                            ) ?? []
+                          : []
+                      }
                       linkedEvent={linkedEvent}
                       relatedXdfTables={getRelatedXdfTablesForEvent(linkedEvent, xdfCrossReferences)}
                     />
@@ -1179,13 +1286,21 @@ const groupedDiagnosticEvents =
             )}
           </div>
         )}
+
+        {noteHierarchy.globalNotes.length > 0 && (
+          <GlobalTuneNotesCard notes={noteHierarchy.globalNotes} />
+        )}
       </div>
     </main>
   );
 }
 
-function getEngineV2(summaryRow: any): EngineV2 | null {
-  const raw = summaryRow?.summary?.engine_v2;
+function getEngineV2(summaryRow: unknown): EngineV2 | null {
+  if (!isRecord(summaryRow) || !isRecord(summaryRow.summary)) {
+    return null;
+  }
+
+  const raw = summaryRow.summary.engine_v2;
 
   if (!raw || typeof raw !== "object") {
     return null;
@@ -1196,10 +1311,9 @@ function getEngineV2(summaryRow: any): EngineV2 | null {
 
 function buildTuneReasoningFlags(
   tuneProfile: TuneProfileRow | null,
-  summary: any,
-  vehicle: any,
-  crossReferences: EngineCrossReference[],
-  engineEvents: any[] = []
+  summary: LegacySummary | null,
+  vehicle: VehicleContext,
+  engineEvents: EventDescriptor[] = []
 ): AnalysisFlag[] {
   const flags: AnalysisFlag[] = [];
 
@@ -1215,26 +1329,29 @@ function buildTuneReasoningFlags(
 }
 
    const boostValidation = validateBoostAgainstTune({
-  platform:
+  platform: toEnginePlatform(
     vehicle?.engine_code ||
-    vehicle?.platform ||
-    "unknown",
+    vehicle?.platform
+  ),
 
   fuelType:
     vehicle?.fuel_type ||
     "Unknown",
 
-  maxBoost:
+  maxBoost: finiteNumberOrNullish(
     summary?.max_boost ??
-    summary?.maxBoost,
+    summary?.maxBoost
+  ),
 
-  maxBoostTarget:
+  maxBoostTarget: finiteNumberOrNullish(
     summary?.max_boost_target ??
-    summary?.maxBoostTarget,
+    summary?.maxBoostTarget
+  ),
 
-  maxWgdc:
+  maxWgdc: finiteNumberOrNullish(
     summary?.max_wgdc ??
-    summary?.maxWgdc,
+    summary?.maxWgdc
+  ),
 
   boostIntent: null,
 })
@@ -1250,7 +1367,7 @@ function buildTuneReasoningFlags(
         : "good",
   });
 
-  const hpfpCapacityEvent = engineEvents.find((x: any) => {
+  const hpfpCapacityEvent = engineEvents.find((x) => {
   const eventType = x.eventType ?? x.event_type ?? x.type;
 
   return eventType === "hpfp_capacity_limit";
@@ -1265,7 +1382,7 @@ if (hpfpCapacityEvent) {
   });
 }
 
-const lpfpSupplyEvent = engineEvents.find((x: any) => {
+const lpfpSupplyEvent = engineEvents.find((x) => {
   const eventType = x.eventType ?? x.event_type ?? x.type;
 
   return eventType === "lpfp_supply_limit" || eventType === "lpfp_drop";
@@ -1279,15 +1396,6 @@ if (lpfpSupplyEvent) {
     tone: "bad",
   });
 }
-const timingCorrectionEvent = engineEvents.find((x: any) => {
-  const eventType = x.eventType ?? x.event_type ?? x.type;
-
-  return (
-    eventType === "timing_correction" ||
-    eventType === "multi_cyl_timing_correction"
-  );
-});
-
   if (tuneProfile.fueling_intent === "pump") {
     flags.push({
       title: "Ethanol-based fueling strategy detected",
@@ -1413,16 +1521,6 @@ const timingCorrectionEvent = engineEvents.find((x: any) => {
   });
 }
 
-  const notesFromCrossRefs = crossReferences
-    .flatMap((ref) => ref.notes || [])
-    .filter(Boolean);
-
-  const uniqueNotes = Array.from(new Set(notesFromCrossRefs))
-    .filter((note) => note.toLowerCase() !== "no tune profile available.")
-    .slice(0, 4);
-
-  
-
   return sortFlags(flags);
 }
 
@@ -1495,15 +1593,6 @@ function mapLegacyWarningToFlag(warning: EngineWarning): AnalysisFlag {
     title: warning.title || "Engine warning",
     message: `${warning.summary || "Issue detected."}${rpmText}${confidenceText}${evidenceText}`,
     tone: mapSeverityToTone(warning.severity),
-  };
-}
-
-function mapEngineFixToCard(fix: EngineFix): SuggestedFix {
-  const rationale = fix.rationale ? ` Why: ${fix.rationale}` : "";
-
-  return {
-    title: fix.title || "Suggested fix",
-    action: `${fix.recommendation || "Review the related tune and hardware systems."}${rationale}`,
   };
 }
 
@@ -1587,9 +1676,9 @@ function calculateBoostError(
 }
 
 function buildWarnings(
-  summary: any,
+  summary: LegacySummary | null,
   boostError: number | null,
-  vehicle: any
+  vehicle: VehicleContext
 ): AnalysisFlag[] {
   if (!summary) return [];
 
@@ -1687,86 +1776,10 @@ function buildWarnings(
   return sortFlags(warnings);
 }
 
-function buildSuggestedFixes(
-  summary: any,
-  boostError: number | null,
-  vehicle: any
-): SuggestedFix[] {
-  if (!summary) return [];
-
-  const fixes: SuggestedFix[] = [];
-
-  const minAfr = toNumber(summary.min_afr);
-  const minRailPressure = toNumber(summary.min_rail_pressure);
-  const minLpfp = toNumber(summary.min_lpfp);
-  const maxTimingCorrection = toNumber(summary.max_timing_correction);
-  const maxWgdc = toNumber(summary.max_wgdc);
-  const throttleDetected = summary.throttle_closure_detected;
-  const fuelType = String(vehicle?.fuel_type || "").toLowerCase();
-
-  if (minRailPressure !== null && minRailPressure < 1500) {
-    fixes.push({
-      title: "HPFP Limitation",
-      action:
-        "Consider reducing load or boost, or upgrading the HPFP if the setup demands more fuel on the high-pressure side.",
-    });
-  }
-
-  if (minLpfp !== null && minLpfp < 45) {
-    fixes.push({
-      title: "LPFP Limitation",
-      action:
-        "Review LPFP capacity, pump wiring, voltage supply, and any controller setup. Upgrade LPFP if the setup needs it.",
-    });
-  }
-
-  if (fuelType.includes("e") && minLpfp !== null && minLpfp < 55) {
-    fixes.push({
-      title: "Ethanol Fuel Supply Check",
-      action:
-        "Because the car is on ethanol, verify low-pressure fuel supply is strong enough for the current blend and load.",
-    });
-  }
-
-  if (maxTimingCorrection !== null && maxTimingCorrection <= -3) {
-    fixes.push({
-      title: "Timing Correction Fix",
-      action:
-        "Reduce ignition timing in the tune, improve fuel quality, or lower IAT with better cooling and airflow.",
-    });
-  }
-
-  if (minAfr !== null && minAfr > 13) {
-    fixes.push({
-      title: "Lean AFR Fix",
-      action:
-        "Increase fueling, review injector data, and verify fuel pressure is staying healthy under load.",
-    });
-  }
-
-  if (boostError !== null && boostError > 2 && maxWgdc !== null && maxWgdc > 75) {
-    fixes.push({
-      title: "Boost Leak / Turbo Efficiency Check",
-      action:
-        "Pressure test the system, inspect charge pipes and intercooler joins, and review turbo condition and wastegate control.",
-    });
-  }
-
-  if (throttleDetected === true) {
-    fixes.push({
-      title: "Throttle Closure Fix",
-      action:
-        "Review torque limits, load targets, and boost control logic in the tune. Throttle closure often points to intervention logic.",
-    });
-  }
-
-  return fixes;
-}
-
 function buildAnalysisFlags(
-  summary: any,
+  summary: LegacySummary | null,
   boostError: number | null,
-  vehicle: any
+  vehicle: VehicleContext
 ): AnalysisFlag[] {
   if (!summary) return [];
 
@@ -2045,6 +2058,38 @@ function toNumber(value: unknown): number | null {
   return null;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function finiteNumberOrNullish(
+  value: unknown
+): number | null | undefined {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function toEnginePlatform(value: string | null | undefined): EnginePlatform {
+  const normalized = value?.trim().toLowerCase();
+
+  if (
+    normalized === "n54" ||
+    normalized === "n55" ||
+    normalized === "s55" ||
+    normalized === "b58" ||
+    normalized === "s58"
+  ) {
+    return normalized;
+  }
+
+  return "unknown";
+}
+
 function formatValue(
   value: number | string | null | undefined,
   decimals = 1
@@ -2143,72 +2188,6 @@ function FlagCard({
   );
 }
 
-function FixCard({
-  title,
-  action,
-}: {
-  title: string;
-  action: string;
-}) {
-  const actionItems = action
-    .split(" • ")
-    .filter(Boolean);
-
-  return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <p className="font-semibold text-white">{title}</p>
-        <StatusBadge label="action" tone="info" />
-      </div>
-
-      <div className="space-y-2 text-sm text-zinc-300">
-        {actionItems.map((item, index) => {
-          let label = "Action";
-          let color = "text-zinc-300";
-
-          if (
-            item.toLowerCase().includes("verify") ||
-            item.toLowerCase().includes("confirm")
-          ) {
-            label = "Verify First";
-            color = "text-amber-300";
-          }
-
-          if (
-            item.toLowerCase().includes("do not") ||
-            item.toLowerCase().includes("avoid")
-          ) {
-            label = "Avoid";
-            color = "text-red-300";
-          }
-
-          if (
-            item.toLowerCase().includes("table") ||
-            item.toLowerCase().includes("scalar") ||
-            item.toLowerCase().includes("target")
-          ) {
-            label = "Tune Area";
-            color = "text-cyan-300";
-          }
-
-          return (
-            <div
-              key={`${item}-${index}`}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3"
-            >
-              <p className={`mb-1 text-xs font-semibold uppercase ${color}`}>
-                {label}
-              </p>
-
-              <p className="leading-relaxed">{item}</p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function EventCard({ event }: { event: EngineEvent }) {
   const severityTone = mapSeverityToTone(event.severity);
   const toneClasses =
@@ -2269,19 +2248,753 @@ function EventCard({ event }: { event: EngineEvent }) {
   );
 }
 
+function EngineeringSummaryCard({
+  hasLog,
+  hasSummary,
+  quickVerdict,
+  verdictFlags,
+}: {
+  hasLog: boolean;
+  hasSummary: boolean;
+  quickVerdict?: EngineQuickVerdict;
+  verdictFlags: readonly AnalysisFlag[];
+}) {
+  return (
+    <section className="bmw-border rounded-2xl bg-zinc-900 p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold">Engineering Summary</h2>
+        {quickVerdict?.status && (
+          <StatusBadge
+            label={humanizeStatus(quickVerdict.status)}
+            tone={
+              quickVerdict.status === "critical"
+                ? "bad"
+                : quickVerdict.status === "caution"
+                  ? "warn"
+                  : "good"
+            }
+          />
+        )}
+      </div>
+
+      {!hasLog && (
+        <p className="text-zinc-400">
+          No log uploaded yet. Upload a log to begin analysis.
+        </p>
+      )}
+
+      {hasLog && !hasSummary && (
+        <p className="text-zinc-400">
+          Log found, but no summary data is available yet.
+        </p>
+      )}
+
+      {hasLog && hasSummary && (
+        <div className="space-y-3">
+          {verdictFlags.map((flag, index) => (
+            <FlagCard
+              key={`${flag.title}-${index}`}
+              message={flag.message}
+              title={flag.title}
+              tone={flag.tone}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PrimaryEngineeringResults({
+  results,
+}: {
+  results: readonly ScopedPrimaryResult[];
+}) {
+  return (
+    <section
+      aria-labelledby="primary-engineering-results-heading"
+      className="bmw-border rounded-2xl bg-zinc-900 p-6"
+    >
+      <header>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-400">
+          Event-scoped authoritative reasoning
+        </p>
+        <h2
+          className="mt-1 text-xl font-semibold"
+          id="primary-engineering-results-heading"
+        >
+          Primary Engineering Result
+          {results.length === 1 ? "" : "s"}
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+          Each result is scoped to its detected event. It is not a global
+          diagnosis for the complete analysis.
+        </p>
+      </header>
+
+      <div className="mt-5 space-y-4">
+        {results.map(({ event, rootCause }, index) => {
+          const rejectedCauses = rootCause.rejectedCauses ?? [];
+          const evidence = (rootCause.evidence ?? []).filter(
+            (
+              item
+            ): item is RootCauseEvidence =>
+              !!item &&
+              typeof item === "object" &&
+              "label" in item &&
+              typeof item.label === "string" &&
+              "passed" in item &&
+              typeof item.passed === "boolean"
+          );
+
+          return (
+            <article
+              className="border border-sky-500/40 bg-sky-500/5 p-5"
+              key={`${event.id ?? "event"}-${rootCause.cause ?? index}`}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">
+                    Primary Engineering Result for{" "}
+                    {humanizeEventType(event.type ?? "detected event")}
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">
+                    {rootCause.cause ?? "Unidentified cause"}
+                  </h3>
+                  {typeof event.rpmStart === "number" &&
+                    typeof event.rpmEnd === "number" && (
+                      <p className="mt-1 font-mono text-xs text-zinc-400">
+                        Event scope:{" "}
+                        {Math.round(event.rpmStart).toLocaleString()}–
+                        {Math.round(event.rpmEnd).toLocaleString()} RPM
+                      </p>
+                    )}
+                </div>
+
+                {typeof rootCause.confidence === "number" && (
+                  <StatusBadge
+                    label={`${rootCause.confidence}% cause confidence`}
+                    tone="info"
+                  />
+                )}
+              </div>
+
+              {rootCause.reasoningNarrative && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-zinc-300">
+                    Why this result was selected
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    {rootCause.reasoningNarrative}
+                  </p>
+                </div>
+              )}
+
+              {evidence.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-zinc-300">
+                    Strongest supplied evidence
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {evidence.map((item, evidenceIndex) => (
+                      <p
+                        className="text-xs text-zinc-400"
+                        key={`${item.label}-${evidenceIndex}`}
+                      >
+                        {item.passed === false ? "✕" : "✓"} {item.label}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {rejectedCauses.length > 0 && (
+                <div className="mt-4 border-l-2 border-zinc-700 pl-3">
+                  <p className="text-xs font-semibold text-zinc-300">
+                    Important rejected causes
+                  </p>
+                  {rejectedCauses.map((rejected, rejectedIndex) => (
+                    <p
+                      className="mt-1 text-xs text-zinc-400"
+                      key={`${rejected.cause}-${rejectedIndex}`}
+                    >
+                      {rejected.cause}
+                      {typeof rejected.confidence === "number"
+                        ? ` · ${rejected.confidence}%`
+                        : ""}
+                      {rejected.reason ? ` · ${rejected.reason}` : ""}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {rootCause.suggestedDirection && (
+                <div className="mt-4 border-t border-zinc-800 pt-3">
+                  <p className="text-xs font-semibold text-zinc-300">
+                    Existing inspection direction
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {rootCause.suggestedDirection}
+                  </p>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function eventPullLabels(
+  event: EngineEvent,
+  pullWindows: readonly EnginePullWindow[]
+): string[] {
+  if (
+    typeof event.startIndex !== "number" ||
+    typeof event.endIndex !== "number"
+  ) {
+    return [];
+  }
+  const eventStart = event.startIndex;
+  const eventEnd = event.endIndex;
+
+  return pullWindows.flatMap((pull, index) => {
+    if (
+      typeof pull.startIndex !== "number" ||
+      typeof pull.endIndex !== "number"
+    ) {
+      return [];
+    }
+    const overlaps =
+      eventStart <= pull.endIndex &&
+      eventEnd >= pull.startIndex;
+
+    return overlaps ? [`Pull ${index + 1}`] : [];
+  });
+}
+
+function RepeatedEventFamilyCard({
+  crossReferences,
+  group,
+  pullWindows,
+}: {
+  crossReferences: readonly EngineCrossReference[];
+  group: EventPresentationGroup;
+  pullWindows: readonly EnginePullWindow[];
+}) {
+  const crossReferenceByEventId = new Map(
+    crossReferences.flatMap((crossReference) =>
+      crossReference.eventId
+        ? [[crossReference.eventId, crossReference] as const]
+        : []
+    )
+  );
+  const rankedObservationCount = group.events.filter((event) => {
+    const crossReference = event.id
+      ? crossReferenceByEventId.get(event.id)
+      : undefined;
+    return (crossReference?.rootCauses?.length ?? 0) > 0;
+  }).length;
+
+  return (
+    <section className="border border-zinc-800 bg-zinc-950">
+      <header className="border-b border-zinc-800 p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+          Repeated detected event family
+        </p>
+        <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-zinc-100">
+              {humanizeEventType(group.eventType)}
+            </h3>
+            <p className="mt-1 text-sm text-zinc-400">
+              Observed across {group.events.length} distinct regions. Every
+              event remains a separate engineering record.
+            </p>
+            {rankedObservationCount === 0 && (
+              <p className="mt-2 text-xs text-amber-200">
+                No authoritative cause ranking is available for these
+                observations.
+              </p>
+            )}
+          </div>
+          <StatusBadge
+            label={`${group.events.length} distinct observations`}
+            tone="info"
+          />
+        </div>
+      </header>
+
+      <div className="grid gap-px bg-zinc-800 lg:grid-cols-2">
+        {group.events.map((event, index) => {
+          const crossReference = event.id
+            ? crossReferenceByEventId.get(event.id)
+            : undefined;
+          const rootCauses = orderRootCauses(
+            crossReference?.rootCauses ?? []
+          );
+          const pullLabels = eventPullLabels(
+            event as EngineEvent,
+            pullWindows
+          );
+          const minAfr = event.metrics?.minAfr;
+
+          return (
+            <article
+              className="bg-zinc-950 p-4"
+              key={event.id ?? `${group.eventType}-${index}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-zinc-100">
+                    Observation {index + 1}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {pullLabels.length > 0
+                      ? pullLabels.join(", ")
+                      : "Pull association unavailable"}
+                  </p>
+                  {typeof event.rpmStart === "number" &&
+                    typeof event.rpmEnd === "number" && (
+                      <p className="mt-1 font-mono text-xs text-zinc-400">
+                        {Math.round(event.rpmStart).toLocaleString()}–
+                        {Math.round(event.rpmEnd).toLocaleString()} RPM
+                      </p>
+                    )}
+                </div>
+                {event.severity &&
+                  ["low", "medium", "high", "critical"].includes(
+                    event.severity
+                  ) && (
+                  <StatusBadge
+                    label={event.severity}
+                    tone={mapSeverityToTone(
+                      event.severity as EngineEvent["severity"]
+                    )}
+                  />
+                  )}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-3 text-xs text-zinc-500">
+                {typeof event.confidence === "number" && (
+                  <span>
+                    {Math.round(event.confidence * 100)}% event confidence
+                  </span>
+                )}
+                {typeof minAfr === "number" && (
+                  <span>Minimum AFR {minAfr.toFixed(2)}</span>
+                )}
+              </div>
+
+              {(event.evidence?.length ?? 0) > 0 && (
+                <div className="mt-3 space-y-1">
+                  {(event.evidence ?? []).map((evidence, evidenceIndex) => (
+                    <p
+                      className="text-xs leading-5 text-zinc-300"
+                      key={`${evidence}-${evidenceIndex}`}
+                    >
+                      {evidence}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {(event.supportingChannels?.length ?? 0) > 0 && (
+                <p className="mt-3 text-xs text-zinc-500">
+                  Evidence channels:{" "}
+                  {(event.supportingChannels ?? []).join(", ")}
+                </p>
+              )}
+
+              {rootCauses.length > 0 && (
+                <div className="mt-3 border-t border-zinc-800 pt-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+                    Supplied cause ranking
+                  </p>
+                  {rootCauses.map((rootCause, rootCauseIndex) => (
+                    <p
+                      className="mt-1 text-xs text-zinc-300"
+                      key={`${rootCause.rank}-${rootCause.cause}-${rootCauseIndex}`}
+                    >
+                      {rootCause.rank}: {rootCause.cause}
+                      {typeof rootCause.confidence === "number"
+                        ? ` · ${rootCause.confidence}%`
+                        : ""}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function GlobalTuneNotesCard({
+  notes,
+}: {
+  notes: readonly GlobalPresentationNote[];
+}) {
+  return (
+    <section className="bmw-border rounded-2xl bg-zinc-900 p-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-400">
+        Analysis-wide tune context
+      </p>
+      <h2 className="mt-1 text-xl font-semibold">Global Tune Notes</h2>
+      <div className="mt-4 space-y-2">
+        {notes.map((note) => (
+          <div className="border-l-2 border-zinc-700 pl-3" key={note.text}>
+            <p className="text-sm text-zinc-300">{note.text}</p>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              Preserved from {note.sourceEventIds.length} event Cross
+              Reference{note.sourceEventIds.length === 1 ? "" : "s"}.
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EngineeringCorrelationSurface({
+  result,
+}: {
+  result: ConservativeCorrelationResult;
+}) {
+  return (
+    <section
+      aria-labelledby="engineering-correlation-heading"
+      className="bmw-border rounded-2xl bg-zinc-900 p-6"
+    >
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-400">
+            Qualified observation relationships
+          </p>
+          <h2
+            className="mt-1 text-xl font-semibold"
+            id="engineering-correlation-heading"
+          >
+            Engineering Correlation
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+            Deterministic relationships between existing events and evidence.
+            Correlation does not establish a global diagnosis or inspection
+            direction.
+          </p>
+        </div>
+
+        <StatusBadge
+          label={`${result.groups.length} qualified ${
+            result.groups.length === 1 ? "relationship" : "relationships"
+          }`}
+          tone={result.groups.length > 0 ? "info" : "warn"}
+        />
+      </header>
+
+      {result.groups.length > 0 ? (
+        <div className="mt-5 space-y-4">
+          {result.groups.map((group) => (
+            <CorrelationGroupCard group={group} key={group.id} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5 border border-zinc-800 bg-zinc-950 p-4">
+          <p className="text-sm text-zinc-300">
+            No qualified cross-event relationship can be established from the
+            available persisted analysis.
+          </p>
+        </div>
+      )}
+
+      {result.uncorrelatedEventIds.length > 0 && (
+        <p className="mt-4 text-xs leading-5 text-zinc-500">
+          {result.uncorrelatedEventIds.length} event
+          {result.uncorrelatedEventIds.length === 1 ? "" : "s"} remain
+          {result.uncorrelatedEventIds.length === 1 ? "s" : ""} uncorrelated.
+          Same-log membership alone does not establish a
+          relationship.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function CorrelationGroupCard({
+  group,
+}: {
+  group: CorrelationGroup;
+}) {
+  const relationshipLabel = humanizeToken(group.relationshipType);
+  const uniqueEvidence = group.supportingEvidence.filter(
+    (evidence, index, all) =>
+      all.findIndex(
+        (candidate) =>
+          candidate.eventId === evidence.eventId &&
+          candidate.evidenceIndex === evidence.evidenceIndex
+      ) === index
+  );
+
+  return (
+    <article className="border border-zinc-800 bg-zinc-950 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+            {relationshipLabel}
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-zinc-100">
+            {group.label}
+          </h3>
+          <p className="mt-2 text-sm text-zinc-400">
+            {group.relatedEventIds.length} contributing events
+            {group.relatedPullIds.length > 0
+              ? ` across ${group.relatedPullIds.length} pull regions`
+              : ""}
+            .
+          </p>
+        </div>
+
+        <StatusBadge
+          label={`${humanizeToken(group.strength)} correlation`}
+          tone={
+            group.strength === "contradictory"
+              ? "bad"
+              : group.strength === "unresolved"
+                ? "warn"
+                : "info"
+          }
+        />
+      </div>
+
+      {group.sharedChannels.length > 0 && (
+        <p className="mt-3 text-xs text-zinc-500">
+          Shared channels: {group.sharedChannels.join(", ")}
+        </p>
+      )}
+
+      {uniqueEvidence.length > 0 && (
+        <div className="mt-4">
+          <p className="text-xs font-semibold text-zinc-300">
+            Supporting evidence references
+          </p>
+          <div className="mt-2 space-y-1">
+            {uniqueEvidence.map((evidence) => (
+              <p
+                className="text-xs leading-5 text-zinc-400"
+                key={`${evidence.eventId}-${evidence.evidenceIndex}`}
+              >
+                {evidence.eventId}: {evidence.statement}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {group.contradictingEvidence.length > 0 && (
+        <div className="mt-4 border-l-2 border-red-500/70 pl-3">
+          <p className="text-xs font-semibold text-red-200">
+            Contradicting evidence
+          </p>
+          {group.contradictingEvidence.map((evidence) => (
+            <p className="mt-1 text-xs text-zinc-400" key={evidence}>
+              {evidence}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {group.unresolvedLimitations.length > 0 && (
+        <div className="mt-4 border-l-2 border-amber-400/70 pl-3">
+          <p className="text-xs font-semibold text-amber-200">
+            Unresolved limitation
+          </p>
+          {group.unresolvedLimitations.map((limitation) => (
+            <p className="mt-1 text-xs leading-5 text-zinc-400" key={limitation}>
+              {limitation}
+            </p>
+          ))}
+        </div>
+      )}
+
+      <details className="mt-4 border-t border-zinc-800 pt-3">
+        <summary className="cursor-pointer text-xs font-medium text-zinc-400">
+          Correlation provenance
+        </summary>
+        <div className="mt-2 space-y-1 font-mono text-[11px] text-zinc-500">
+          <p>Events: {group.provenance.eventIds.join(", ")}</p>
+          <p>
+            Pulls:{" "}
+            {group.provenance.pullIds.length > 0
+              ? group.provenance.pullIds.join(", ")
+              : "not available"}
+          </p>
+          <p>Rules: {group.appliedRuleIds.join(", ")}</p>
+        </div>
+      </details>
+    </article>
+  );
+}
+
+function RepeatedObservationGroupCard({
+  group,
+}: {
+  group: RepeatedObservationGroup;
+}) {
+  const isWgdc = group.eventType === "wgdc_saturation";
+  const groupTitle = isWgdc
+    ? "WGDC Control Saturation"
+    : humanizeEventType(group.eventType);
+
+  return (
+    <section
+      aria-label={`${groupTitle} observations`}
+      className="border border-amber-500/30 bg-zinc-950"
+    >
+      <header className="border-b border-zinc-800 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+              Repeated observed event family
+            </p>
+            <h3 className="mt-1 text-lg font-semibold text-white">
+              {groupTitle}
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+              Observed across {group.observations.length} distinct regions.{" "}
+              {isWgdc
+                ? "The available evidence establishes repeated wastegate control saturation but does not distinguish the underlying mechanical or calibration cause."
+                : "The observations remain distinct engineering records, and no authoritative cause ranking is available for this event family."}
+            </p>
+          </div>
+
+          <StatusBadge
+            label={observationCountLabel(group.observations.length)}
+            tone="warn"
+          />
+        </div>
+      </header>
+
+      <div className="grid gap-px bg-zinc-800 lg:grid-cols-3">
+        {group.observations.map(
+          ({ event, crossReference }, index) => {
+            const avgWgdc = event.metrics?.avgWgdc;
+            const minAfr = event.metrics?.minAfr;
+
+            return (
+              <article
+                key={event.id ?? `wgdc-observation-${index}`}
+                className="bg-zinc-950 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-100">
+                      Observation {index + 1}
+                    </p>
+                    {typeof event.rpmStart === "number" &&
+                      typeof event.rpmEnd === "number" && (
+                        <p className="mt-1 font-mono text-xs text-zinc-400">
+                          {Math.round(event.rpmStart).toLocaleString()}–
+                          {Math.round(event.rpmEnd).toLocaleString()} RPM
+                        </p>
+                      )}
+                  </div>
+
+                  {typeof event.confidence === "number" && (
+                    <StatusBadge
+                      label={`${Math.round(
+                        event.confidence * 100
+                      )}% event confidence`}
+                      tone="info"
+                    />
+                  )}
+                </div>
+
+                {typeof avgWgdc === "number" && (
+                  <div className="mt-3 border-l-2 border-amber-400 pl-3">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                      Average WGDC
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-semibold text-amber-200">
+                      {avgWgdc.toFixed(1)}%
+                    </p>
+                  </div>
+                )}
+
+                {typeof minAfr === "number" && (
+                  <div className="mt-3 border-l-2 border-amber-400 pl-3">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                      Minimum AFR
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-semibold text-amber-200">
+                      {minAfr.toFixed(2)}
+                    </p>
+                  </div>
+                )}
+
+                {event.evidence && event.evidence.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    {event.evidence.map((evidence) => (
+                      <p
+                        key={evidence}
+                        className="text-xs leading-5 text-zinc-300"
+                      >
+                        {evidence}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {event.supportingChannels &&
+                  event.supportingChannels.length > 0 && (
+                    <p className="mt-3 text-xs text-zinc-500">
+                      Evidence channels:{" "}
+                      {event.supportingChannels.join(", ")}
+                    </p>
+                  )}
+
+                {crossReference.likelyCauses &&
+                  crossReference.likelyCauses.length > 0 && (
+                    <div className="mt-3 border-t border-zinc-800 pt-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+                        Existing reasoning context
+                      </p>
+                      {crossReference.likelyCauses.map((cause) => (
+                        <p
+                          key={cause.label}
+                          className="mt-1 text-xs text-zinc-300"
+                        >
+                          {cause.label}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+              </article>
+            );
+          }
+        )}
+      </div>
+    </section>
+  );
+}
+
 function CrossReferenceCard({
   crossRef,
+  eventSpecificNotes = [],
   linkedEvent,
   relatedXdfTables = [],
 }: {
-  crossRef: EngineCrossReference & {
-    rootCauses?: any[];
-  };
+  crossRef: EngineCrossReference;
+  eventSpecificNotes?: readonly string[];
   linkedEvent: EngineEvent | null;
-  relatedXdfTables?: any[];
+  relatedXdfTables?: readonly XdfCrossReference[];
 }) {
   const severityTone = mapSeverityToTone(linkedEvent?.severity);
-console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
+  const orderedRootCauses = orderRootCauses(crossRef.rootCauses ?? []);
+  const causeHierarchy = buildCauseHierarchy(crossRef.rootCauses ?? []);
+
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -2306,15 +3019,29 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
         )}
       </div>
        
-      {crossRef.rootCauses &&
-       crossRef.rootCauses.length > 0 && (
+      {orderedRootCauses.length > 0 && (
   <div className="mt-4">
+   {causeHierarchy.primary && (
+     <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-300">
+       Primary Engineering Result
+     </p>
+   )}
    <div className="mt-2 space-y-3">
-      {(crossRef.rootCauses || []).map((rootCause: any, index: number) => (
+      {orderedRootCauses.map((rootCause, index) => (
         <div
-          key={index}
-          className="rounded-lg border border-zinc-800 bg-zinc-900 p-3"
+          key={`${rootCause.rank}-${rootCause.cause}-${index}`}
+          className={
+            rootCause.rank === "primary"
+              ? "border border-sky-500/40 bg-sky-500/5 p-4"
+              : "border border-zinc-800 bg-zinc-900 p-3"
+          }
         >
+          {rootCause.rank === "primary" && (
+            <p className="mb-2 text-xs font-medium text-sky-300">
+              The strongest supported cause is:
+            </p>
+          )}
+
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white">
@@ -2322,7 +3049,9 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
               </p>
 
               <p className="text-xs text-zinc-400 uppercase">
-                {rootCause.rank}
+                {rootCause.rank === "primary"
+                  ? "Primary Engineering Result"
+                  : "Alternative Supported Cause"}
               </p>
             </div>
 
@@ -2332,7 +3061,7 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
             />
           </div>
 
-          {rootCause.confidenceBreakdown?.length > 0 && (
+          {(rootCause.confidenceBreakdown?.length ?? 0) > 0 && (
             <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950 p-3">
               <p className="text-xs font-medium text-zinc-300">
                 Why TuneSight selected this cause
@@ -2344,9 +3073,9 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
               )}
 
               <div className="mt-2 space-y-1">
-                {rootCause.confidenceBreakdown
-                  .filter((factor: any) => factor.contribution !== 0)
-                  .map((factor: any, factorIndex: number) => (
+                {(rootCause.confidenceBreakdown ?? [])
+                  .filter((factor) => factor.contribution !== 0)
+                  .map((factor, factorIndex) => (
                   <div
                     key={factorIndex}
                     className="flex items-center justify-between text-xs"
@@ -2368,15 +3097,15 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
             </div>
 )}
 
-{rootCause.candidateCauses?.length > 0 && (
+{(rootCause.candidateCauses?.length ?? 0) > 0 && (
   <div className="mt-3 border-t border-zinc-800 pt-3">
     <p className="text-xs font-medium text-zinc-300">
       Diagnostic Ranking
     </p>
 
     <div className="mt-2 space-y-1">
-      {rootCause.candidateCauses.map(
-        (candidate: any, candidateIndex: number) => (
+      {(rootCause.candidateCauses ?? []).map(
+        (candidate, candidateIndex) => (
           <div
   key={candidateIndex}
   className="text-xs"
@@ -2399,11 +3128,11 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
     </div>
   </div>
 
-  {candidate.evidence?.length > 0 && (
+  {(candidate.evidence?.length ?? 0) > 0 && (
     <div className="ml-4 mt-1 space-y-1">
-      {candidate.evidence
-        .filter((factor: any) => factor.contribution !== 0)
-        .map((factor: any, factorIndex: number) => (
+      {(candidate.evidence ?? [])
+        .filter((factor) => factor.contribution !== 0)
+        .map((factor, factorIndex) => (
           <div
               key={factorIndex}
               className="flex items-center justify-between text-[10px]"
@@ -2427,15 +3156,15 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
   </div>
 )}
 
-          {rootCause.evidence?.length > 0 && (
+          {(rootCause.evidence?.length ?? 0) > 0 && (
             <div className="mt-3">
               <p className="text-xs font-medium text-zinc-300">
                 Evidence
               </p>
 
               <div className="mt-1 space-y-1">
-                {rootCause.evidence.map(
-                  (e: any, evidenceIndex: number) => (
+                {(rootCause.evidence ?? []).map(
+                  (e, evidenceIndex) => (
                     <p
                       key={evidenceIndex}
                       className="text-xs text-zinc-400"
@@ -2448,27 +3177,34 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
             </div>
           )}
 
-          {rootCause.rejectedCauses?.length > 0 && (
+          {(rootCause.rejectedCauses?.length ?? 0) > 0 && (
             <div className="mt-3">
               <p className="text-xs font-medium text-zinc-300">
                 Rejected Causes
               </p>
 
               <div className="mt-1 space-y-1">
-                {rootCause.rejectedCauses.map(
-                  (rejected: any, rejectedIndex: number) => (
+                {(rootCause.rejectedCauses ?? []).map(
+                  (rejected, rejectedIndex) => (
                     <div
                       key={rejectedIndex}
-                      className="flex items-center justify-between text-xs"
+                      className="border-l border-zinc-700 pl-2 text-xs"
                     >
-                      <span className="text-zinc-500">
+                      <div className="flex items-center justify-between gap-3">
+                      <span className="text-zinc-400">
                         ✕ {rejected.cause}
                       </span>
 
                       {typeof rejected.confidence === "number" && (
-                        <span className="text-zinc-400">
-                          Rejected {rejected.confidence}%
+                        <span className="text-zinc-500">
+                          {rejected.confidence}%
                         </span>
+                      )}
+                      </div>
+                      {rejected.reason && (
+                        <p className="mt-1 text-zinc-500">
+                          {rejected.reason}
+                        </p>
                       )}
                     </div>
                   )
@@ -2476,14 +3212,14 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
               </div>
             </div>
           )}
-          {rootCause.relatedTables?.length > 0 && (
+          {(rootCause.relatedTables?.length ?? 0) > 0 && (
             <div className="mt-3">
               <p className="text-xs font-medium text-zinc-300">
                 Related XDF Tables
               </p>
 
               <div className="mt-1 space-y-1">
-                {rootCause.relatedTables.map(
+                {(rootCause.relatedTables ?? []).map(
                   (table: string, tableIndex: number) => (
                     <div
                       key={tableIndex}
@@ -2507,40 +3243,13 @@ console.log("CARD XDF COUNT:", relatedXdfTables.length, relatedXdfTables);
   </div>
 )}
 
-      {false && (
-        <div className="mt-4">
-          <p className="text-sm font-medium text-zinc-200">Likely Causes</p>
-          <div className="mt-2 space-y-2">
-            {[].map((cause: any, index: number) => (
-              <div
-                key={index}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 p-3"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-white">
-                    {cause.label || "Unknown cause"}
-                  </p>
-                  {typeof cause.score === "number" && (
-                    <StatusBadge
-                      label={`${(cause.score * 100).toFixed(0)}% confidence`}
-                      tone="info"
-                    />
-                  )}
-                </div>
-                {cause.reason && (
-                  <p className="mt-1 text-sm text-zinc-300">{cause.reason}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {crossRef.notes && crossRef.notes.length > 0 && (
+      {eventSpecificNotes.length > 0 && (
         <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-          <p className="text-sm font-medium text-zinc-200">Tune Notes</p>
+          <p className="text-sm font-medium text-zinc-200">
+            Event-Specific Notes
+          </p>
           <div className="mt-2 space-y-1">
-            {crossRef.notes.map((note, index) => (
+            {eventSpecificNotes.map((note, index) => (
               <p key={index} className="text-sm text-zinc-300">
                 • {note}
               </p>

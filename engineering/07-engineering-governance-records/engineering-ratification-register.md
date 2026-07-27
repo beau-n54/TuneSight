@@ -408,6 +408,97 @@ WP-011.0 does not resolve Software Version, Calibration ID, checksum verificatio
 
 ---
 
+### TS-RAT-006
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-006 |
+| Date | 27 July 2026 |
+| Artefact Type | Work Package Implementation |
+| Artefact Name | WP-011.1 — Engineering Graph Intelligence |
+| Permanent Work Package Identifier | WP-011.1 |
+| Authority | Founder |
+| Ratification Scope | Engineering Graph Intelligence implementation and Founder-validated Engineering Inspection Surface |
+| Status | RATIFIED |
+| Work Package | [WP-011.1 Engineering Graph Intelligence](../08-engineering-work-packages/WP-011.1-engineering-graph-intelligence.md) |
+| Architecture Authority | [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md) |
+| Founder Validation | Completed |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-011.1 — Engineering Graph Intelligence as the authoritative and closed implementation of its defined graph-presentation scope.
+
+**Ratified Implementation Scope**
+
+- Shared Engineering Inspection Panels
+- Canonical BMW-inspired panel borders and uniform geometry
+- Truthful RPM and Sample Sequence axes
+- Exact stored-RPM and sampled-value tooltip access
+- Grouped target-versus-actual traces
+- Grouped per-cylinder timing-correction traces
+- Pull-region and event-region preservation
+- Multi-pull ordering
+- Cross-platform presentation consistency
+- Truthful empty states
+- Unchanged telemetry and numerical truth
+
+**Architectural Boundaries and Validation**
+
+Founder Validation confirmed the implementation against Christos' Supra, N54 and B58 Founder states. Presentation does not alter telemetry, detection, Evidence, Correlation, Explanation, confidence, engineering conclusions or provenance. No unrelated Engineering Domain ownership changed.
+
+**Known Limitations**
+
+- Non-monotonic records without persisted timestamps use Sample Sequence while retaining exact stored RPM in tooltip inspection.
+- Event selection is not connected to graph selection.
+- Populated B58 graph behaviour was not physically validated where the persisted Founder record contained no telemetry.
+- These limitations do not change the ratified WP-011.1 scope.
+
+---
+
+### TS-RAT-007
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-007 |
+| Date | 27 July 2026 |
+| Artefact Type | Work Package Implementation |
+| Artefact Name | WP-006.1 — Conservative Correlation V1 |
+| Permanent Work Package Identifier | WP-006.1 |
+| Authority | Founder |
+| Ratification Scope | Deterministic conservative relationships between existing persisted engineering observations |
+| Status | RATIFIED |
+| Work Package | [WP-006.1 Conservative Correlation V1](../08-engineering-work-packages/WP-006.1-conservative-correlation-v1.md) |
+| Architecture Authority | [Engineering Domain 04 — Correlation](<../05 engineering-architecture-bible/04-correlation.md>) |
+| Founder Validation | Completed |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-006.1 — Conservative Correlation V1 as the authoritative and closed implementation of its defined Correlation scope.
+
+**Ratified Implementation Scope**
+
+- Deterministic relationship groups derived from existing persisted Engine V2 outputs
+- Repeated WGDC saturation represented as a repeated engineering pattern
+- Stable event, pull and evidence traceability
+- Conservative single-event and insufficient-data behaviour
+- Explicit contradiction and shared-signal handling
+- Preservation of owner-domain confidence, rank and engineering truth
+
+**Architectural Boundaries and Validation**
+
+Founder Validation confirmed repeated WGDC correlation for Christos' Supra, conservative N54 single-event behaviour and truthful B58 insufficient-data behaviour. Correlation does not establish root cause, global diagnosis, inspection direction or recommendation. Explanation and Decision retain their ratified ownership. No unrelated Engineering Domain ownership changed.
+
+**Known Limitations**
+
+- Existing events do not carry an explicit pull ID; association uses supplied event and pull boundaries.
+- V1 does not semantically correlate free-form evidence text.
+- Shared channels remain dependency rather than independent corroboration.
+- Root Cause generation, including the missing Lean Under Load Explanation capability, is outside WP-006.1.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
