@@ -643,6 +643,106 @@ Implementation remains Pending and requires separate Founder authority, validati
 
 ---
 
+### TS-RAT-010
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-010 |
+| Date | 31 July 2026 |
+| Artefact Type | Engineering Architecture |
+| Artefact Name | WP-007.0 — Engineering Explanation Architecture |
+| Permanent Work Package Identifier | WP-007.0 |
+| Authority | Founder |
+| Ratification Scope | Analysis-specific Engineering Explanation and internal Engineering Reasoning architecture |
+| Status | RATIFIED |
+| Architecture Artefact | [WP-007.0 Engineering Explanation Architecture](../08-engineering-work-packages/WP-007.0-engineering-explanation-architecture.md) |
+| Parent Work Package | [WP-007 Explanation Implementation](../08-engineering-work-packages/WP-007-explanation-implementation.md) |
+| Architecture Authority | [Engineering Domain 05 — Explanation](<../05 engineering-architecture-bible/05-explanation.md>) |
+| Founder Review | Completed |
+| Implementation Status | Pending; not authorised |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-007.0 — Engineering Explanation Architecture as the authoritative governing architecture for future WP-007 Explanation implementation.
+
+**Ratified Internal Explanation Architecture**
+
+- Context Qualification
+- Hypothesis Evaluation
+- Engineering Argument Construction
+- Comparative Adjudication
+- Confidence Derivation
+- Explanation Synthesis
+- Engineering Reasoning as an internal Explanation layer rather than a new Engineering Domain
+
+**Ratified First-Class Explanation Contracts**
+
+- ExplanationContext
+- HypothesisEvaluation
+- EngineeringArgument
+- CompetingExplanationSet
+- ExplanationAdjudication
+- ExplanationAssumption
+- ExplanationEvidenceAssessment
+- CalibrationRelevanceAssessment
+- CalibrationNonRelevanceAssessment
+- RejectedExplanation
+- DiscriminatingEvidenceRequirement
+- ExplanationConfidenceDerivation
+- ExplanationReasoningTrace
+- EngineeringExplanation
+- Reasoning-method identity, version and lifecycle
+
+**Confidence Derivation**
+
+A scalar confidence value alone is insufficient. Explanation Confidence preserves its scope, supporting and limiting factors, contradictory Evidence effects, unresolved assumption effects, missing dependency effects, Correlation influence, Knowledge qualification influence, applicability influence, comparative ambiguity, derivation method, method version, rationale and provenance.
+
+The architecture requires no universal arithmetic formula. Qualitative, ordinal, bounded, rule-based and numeric derivations remain permitted when explicit, governed, explainable and versioned.
+
+**Reasoning Traceability**
+
+The structured Explanation Reasoning Trace preserves input references, the hypothesis set, evaluation steps, Engineering Arguments, comparative adjudication, Confidence Derivations, final Explanation, reasoning-method versions, contract versions and provenance. It exposes engineering reasoning rather than private source-code execution mechanics.
+
+Historical explanations shall not be silently rewritten when reasoning methods improve.
+
+**Permanent Domain Boundaries**
+
+- Knowledge owns reusable engineering truth and premises.
+- Evidence owns current observations and measurements.
+- Correlation owns qualified relationships between current observations.
+- Explanation owns analysis-specific reasoning, hypotheses, Engineering Arguments, assumptions, contradictions, Confidence Derivation and conclusions.
+- Decision owns inspection priority, actions, recommendations, risk and guidance.
+- Presentation faithfully communicates published outputs without constructing missing reasoning.
+
+Explanation may publish comparative explanatory relevance, supported contributors, competing and Rejected Explanations, unresolved assumptions, confidence limitations and Evidence that would strengthen or weaken understanding.
+
+Explanation shall not instruct an engineer to inspect, test, change a calibration, enter a value, pursue a performance target, bypass a protection or accept engineering risk.
+
+**Architectural Boundaries**
+
+- This ratification is architecture and governance only.
+- It authorises no runtime implementation.
+- It changes no detector, Evidence, Correlation or Knowledge runtime.
+- It implements no Explanation, Decision or Presentation runtime behaviour.
+- It changes no persistence or database schema.
+- It creates no tests, configuration or deployment behaviour.
+- It does not modify or complete WP-007 Explanation Implementation.
+- It does not alter WP-004.3 or transfer Calibration Knowledge into Explanation.
+- It does not alter WP-006 or make Correlation causal.
+- It does not alter WP-011 or transfer reasoning into Presentation.
+- It does not alter the WP-003 Engineering Hold.
+
+**Dependencies and Qualifications**
+
+WP-007.0 is governed by the Engineering Constitution, Engineering Blueprint, ratified Engineering Architecture Bible, Cross-Domain Engineering Contracts, Production Contract and WP-007 Explanation Implementation.
+
+The existing WP-007 work-package history and identifier remain preserved. WP-007.0 provides its governing architectural definition.
+
+Implementation remains Pending and requires separate Founder authority, validation and ratification.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

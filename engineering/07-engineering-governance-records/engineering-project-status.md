@@ -38,6 +38,7 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 - [WP-003 Vehicle Identity Implementation](../08-engineering-work-packages/WP-003-vehicle-identity-implementation.md)
 - [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md)
 - [WP-004.3 Engineering Calibration Intelligence Architecture](../08-engineering-work-packages/WP-004.3-engineering-calibration-intelligence-architecture.md)
+- [WP-007.0 Engineering Explanation Architecture](../08-engineering-work-packages/WP-007.0-engineering-explanation-architecture.md)
 - [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md)
 - [WP-011.1 Engineering Graph Intelligence](../08-engineering-work-packages/WP-011.1-engineering-graph-intelligence.md)
 - [WP-011.2 Engineering Evidence Hierarchy](../08-engineering-work-packages/WP-011.2-engineering-evidence-hierarchy.md)
@@ -54,13 +55,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** WP-004.3 Engineering Calibration Intelligence Architecture complete and Founder approved; implementation pending
+**Current Engineering Phase:** WP-007.0 Engineering Explanation Architecture complete, Founder approved and Founder ratified; implementation pending
 
 **Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
 
-**Current Objective:** WP-004.3 Engineering Calibration Intelligence Architecture is complete, Founder approved and ratified under TS-RAT-009. It establishes canonical reusable Calibration Identity, Purpose, Engineering Intent, Engineering Objective, directional behaviour, relationship, qualification, provenance, conflict and lifecycle architecture within Knowledge. Implementation remains pending and is not authorised by architecture ratification.
+**Current Objective:** WP-007.0 Engineering Explanation Architecture is complete, Founder approved and ratified under TS-RAT-010. It establishes Engineering Reasoning as an internal Explanation layer and defines Context Qualification, Hypothesis Evaluation, Engineering Argument Construction, Comparative Adjudication, Confidence Derivation, Explanation Synthesis and structured reasoning traceability. Implementation remains pending and is not authorised by architecture ratification.
 
-**Next Authorised Objective:** No WP-004.3 implementation is authorised. WP-011.2 completion continues to depend on future WP-007 Explanation coverage for event families lacking authoritative Root Cause output, beginning with Lean Under Load. No WP-011.3 through WP-011.6 implementation is authorised.
+**Next Authorised Objective:** No WP-007 runtime implementation is authorised. WP-011.2 completion continues to depend on future separately authorised WP-007 Explanation coverage for event families lacking authoritative Root Cause output, beginning with Lean Under Load. No WP-004.3 or WP-011.3 through WP-011.6 implementation is authorised.
 
 **Next Subsystem Definition:** WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 is on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
@@ -139,8 +140,17 @@ WP-011.2 Engineering Evidence Hierarchy
     +-- NOT RATIFIED
             |
             v
-WP-007 Explanation coverage for unsupported event families
+WP-007.0 Engineering Explanation Architecture
     |
+    +-- ARCHITECTURE COMPLETE
+    +-- FOUNDER APPROVED
+    +-- FOUNDER RATIFIED
+    +-- IMPLEMENTATION PENDING
+            |
+            v
+WP-007 Explanation Implementation
+    |
+    +-- RUNTIME IMPLEMENTATION NOT AUTHORISED
     +-- LEAN UNDER LOAD ROOT CAUSE NOT IMPLEMENTED
 
 WP-006.1 Conservative Correlation V1
@@ -224,7 +234,8 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-005 Evidence Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006 Correlation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006.1 Conservative Correlation V1 | Architecture Ratified under TS-RAT-003 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-007; authoritative and closed |
-| WP-007 Explanation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
+| WP-007.0 Engineering Explanation Architecture | ARCHITECTURE COMPLETE; Founder Approved | IMPLEMENTATION PENDING; not authorised | Founder architectural review complete | ARCHITECTURE COMPLETE | Founder Ratified under TS-RAT-010 |
+| WP-007 Explanation Implementation | Governed by ratified WP-007.0; existing Work Package specification preserved | IMPLEMENTATION PENDING; not authorised by TS-RAT-010 | Runtime validation not started | PENDING FUTURE IMPLEMENTATION AUTHORITY | Implementation not ratified |
 | WP-008 Decision Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-009 Memory Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-010 Evolution Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
@@ -400,11 +411,57 @@ Founder review of the WP-003 Engineering Hold and ratification criteria. No furt
 
 ---
 
+## WP-007.0 Engineering Explanation Architecture
+
+**Architecture Status:** COMPLETE
+
+**Founder Approval Status:** APPROVED
+
+**Founder Ratification:** [TS-RAT-010](engineering-ratification-register.md#ts-rat-010)
+
+**Implementation Status:** PENDING; NOT AUTHORISED
+
+WP-007.0 establishes Engineering Reasoning as an explicit internal architectural layer within Explanation. It is not a new Engineering Domain, a replacement for Correlation, a Knowledge owner, a Decision mechanism or a Presentation function.
+
+### Ratified Internal Explanation Responsibilities
+
+- Context Qualification
+- Hypothesis Evaluation
+- Engineering Argument Construction
+- Comparative Adjudication
+- Confidence Derivation
+- Explanation Synthesis
+
+### Ratified First-Class Contracts
+
+- ExplanationContext
+- HypothesisEvaluation
+- EngineeringArgument
+- CompetingExplanationSet
+- ExplanationAdjudication
+- ExplanationAssumption
+- ExplanationEvidenceAssessment
+- CalibrationRelevanceAssessment
+- CalibrationNonRelevanceAssessment
+- RejectedExplanation
+- DiscriminatingEvidenceRequirement
+- ExplanationConfidenceDerivation
+- ExplanationReasoningTrace
+- EngineeringExplanation
+- Reasoning-method identity, version and lifecycle
+
+Knowledge retains reusable engineering truth and premises. Evidence retains current observations. Correlation retains qualified relationships between observations. Explanation owns analysis-specific reasoning and conclusions. Decision retains inspection priority, actions and guidance. Presentation communicates published outputs without constructing missing reasoning.
+
+The existing parent WP-007 Explanation Implementation work package remains preserved. TS-RAT-010 ratifies architecture only and does not establish runtime implementation, validation or completion.
+
+---
+
 ## Current Blockers and Qualifications
 
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
 - WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture is complete and Founder ratified, while implementation remains pending and unauthorised. Parent WP-004 completion has not been declared.
 - No additional WP-004.2 implementation is authorised.
+- WP-007.0 Engineering Explanation Architecture is complete and Founder ratified under [TS-RAT-010](engineering-ratification-register.md#ts-rat-010). WP-007 runtime implementation remains pending and unauthorised.
 - WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.
 - The Universal Engineering Presentation Refinement Implementation is complete and Founder ratified under [TS-RAT-008](engineering-ratification-register.md#ts-rat-008). Production build, regression validation and presentation validation completed successfully. The ratified scope is presentation-only and changes no engineering truth, detector behaviour, reasoning, correlation, persistence or platform-specific logic.
 - WP-011.2 is partially complete and not ratified. Presentation truthfully exposes the absence of Lean Under Load Root Cause output; future WP-007 Explanation coverage owns the missing capability.
