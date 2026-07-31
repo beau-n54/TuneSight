@@ -499,6 +499,150 @@ Founder Validation confirmed repeated WGDC correlation for Christos' Supra, cons
 
 ---
 
+### TS-RAT-008
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-008 |
+| Date | 31 July 2026 |
+| Artefact Type | Presentation Implementation |
+| Artefact Name | Universal Engineering Presentation Refinement Implementation |
+| Authority | Founder |
+| Ratification Scope | Universal presentation hierarchy, Intelligent Warnings presentation, Cylinder Timing Observation, XDF Calibration inspection presentation, telemetry RPM-axis contract, multi-pull presentation handling, humanisation and accessibility refinements |
+| Status | RATIFIED |
+| Architecture Authority | [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md) |
+| Founder Acceptance | Completed |
+| Production Build | Passed |
+| Regression Validation | Passed |
+| Presentation Validation | Passed |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies the Universal Engineering Presentation Refinement Implementation as the accepted presentation contract for TuneSight's universal Engineering Investigation surface.
+
+**Ratified Implementation Scope**
+
+- Universal Engineering Presentation refinement
+- Collapsible engineering evidence hierarchy
+- Refined Engineering Investigation reading order
+- Corrected Intelligent Warnings summary presentation
+- Event-driven Cylinder Timing Observation using qualified Engineering Event and event-scoped Explanation outputs
+- Separate Event Confidence and Cause Confidence presentation
+- Structured XDF Calibration inspection presentation
+- Truthful RPM-indexed and Sample Sequence telemetry modes
+- Deterministic multi-pull and RPM-reset presentation handling
+- Shared telemetry x-domain alignment
+- Presentation-only humanisation of engineering identifiers
+- Accessible native disclosure controls
+- Universal presentation contracts and regression validation
+
+**Universal and Platform-Neutral Scope**
+
+The implementation applies through shared presentation contracts across N54, B58 Gen1, B58TU / Supra and future supported platforms. No platform-specific presentation branch establishes or changes engineering truth.
+
+**Architectural Boundaries**
+
+- Engineering truth is unchanged.
+- The implementation is presentation-only.
+- Detector behaviour and event generation are unchanged.
+- Root-cause ranking and reasoning are unchanged.
+- Correlation logic and outputs are unchanged.
+- Persistence and database schema are unchanged.
+- XDF engineering authority and matching logic are unchanged.
+- Telemetry samples, event boundaries, confidence values and provenance remain unchanged.
+
+Presentation consumes qualified outputs from their authoritative owners and communicates them through one consistent engineering hierarchy. It does not infer conclusions from raw telemetry, upgrade confidence, fabricate evidence or create platform-specific engineering meaning.
+
+**Validation**
+
+- TypeScript no-emit validation passed.
+- Focused presentation lint validation passed within the accepted repository baseline.
+- Presentation, warning-summary, cylinder-intelligence, event-grouping, correlation, detector and telemetry-axis regression suites passed.
+- Production build completed successfully.
+- Git whitespace validation passed.
+
+**Dependencies and Qualifications**
+
+- This ratification applies only to the Universal Engineering Presentation Refinement Implementation.
+- It does not ratify new Detection, Evidence, Explanation, Correlation, Decision, Knowledge or Vehicle Identity capability.
+- It does not complete the missing Explanation coverage recorded against WP-011.2.
+- It does not alter or release the WP-003 Engineering Hold.
+- It does not authorise persistence, schema or platform-specific implementation changes.
+
+---
+
+### TS-RAT-009
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-009 |
+| Date | 31 July 2026 |
+| Artefact Type | Engineering Architecture |
+| Artefact Name | WP-004.3 — Engineering Calibration Intelligence Architecture |
+| Permanent Work Package Identifier | WP-004.3 |
+| Authority | Founder |
+| Ratification Scope | Canonical reusable Engineering Calibration Intelligence architecture within the Knowledge Engineering Domain |
+| Status | RATIFIED |
+| Architecture Artefact | [WP-004.3 Engineering Calibration Intelligence Architecture](../08-engineering-work-packages/WP-004.3-engineering-calibration-intelligence-architecture.md) |
+| Parent Work Package | [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md) |
+| Architecture Authority | [Engineering Domain 02 — Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>) |
+| Founder Review | Completed |
+| Implementation Status | Pending; not authorised |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-004.3 — Engineering Calibration Intelligence Architecture as the authoritative architecture for canonical reusable Calibration Knowledge within the WP-004 Knowledge implementation family.
+
+**Ratified Architectural Scope**
+
+- Stable Calibration Identity distinct from source table identity
+- Independently qualified Purpose Assertions
+- Engineering Intent as a first-class canonical Knowledge assertion
+- Permanent Purpose-versus-Engineering Intent distinction
+- Reusable Engineering Objective Knowledge
+- Governed extensible Calibration Kind and Engineering Objective vocabularies
+- Qualified Increase and Decrease Behaviour
+- Nonlinear Behaviour and Boundary Conditions
+- Potential Protective Responses without implied activation
+- First-class directional Engineering Relationships
+- Source representation and XDF relationship boundaries
+- Platform-neutral applicability
+- Per-assertion verification and confidence
+- Provenance, supporting and contradictory evidence
+- Conflict, unknown, version, supersession and lifecycle
+- Qualified lookup outcomes
+- Cross-Domain consumption contracts
+- Architectural invariants and phased implementation roadmap
+
+**Domain Ownership**
+
+Knowledge owns reusable calibration truth, Purpose, Engineering Intent, Engineering Objectives, behaviour and canonical relationships. Vehicle Identity owns current-system identity. Evidence owns observations. Explanation owns analysis-specific reasoning and calibration relevance. Decision owns current inspection priority and guidance. Presentation communicates published outputs without creating calibration meaning.
+
+**Architectural Boundaries**
+
+- This ratification is architecture and governance only.
+- It authorises no runtime implementation.
+- It changes no detector, Knowledge runtime, Explanation runtime, Decision runtime or Presentation implementation.
+- It changes no persistence or database schema.
+- It creates no tests or production behaviour.
+- It does not prescribe calibration values or performance targets.
+- It does not promote XDF names, filenames, addresses or keyword categorisation into authoritative Knowledge.
+- It does not alter WP-004.1 or WP-004.2.
+- It does not declare parent WP-004 complete.
+- It does not alter or release the WP-003 Engineering Hold.
+
+**Dependencies and Qualifications**
+
+WP-004.3 is governed by the Engineering Constitution, Engineering Blueprint, ratified Engineering Architecture Bible, Cross-Domain Engineering Contracts, Production Contract and WP-004 Knowledge Implementation.
+
+Purpose explains what a calibration does. Engineering Intent explains why it exists and which engineering objectives it serves. Both remain independently qualified, provenance-backed, applicability-aware, conflict-preserving and lifecycle-managed.
+
+Implementation remains Pending and requires separate Founder authority, validation and ratification.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
