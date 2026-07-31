@@ -20,6 +20,8 @@ export type GraphPoint = {
   [seriesId: string]: number | null;
 };
 
+export type HorizontalAxisMode = "rpm" | "sample_sequence";
+
 export type GraphRegion = {
   id: string;
   label: string;
@@ -182,6 +184,31 @@ export function getSeries(
   return [];
 }
 
+export function getRpmSeries(
+  telemetry: unknown,
+  aliases: readonly string[]
+): Array<number | null> {
+  if (!telemetry || typeof telemetry !== "object") {
+    return [];
+  }
+
+  const record = telemetry as TelemetryRecord;
+
+  for (const alias of aliases) {
+    const source = record[alias];
+    if (!Array.isArray(source) || source.length === 0) {
+      continue;
+    }
+
+    return source.map((value) => {
+      const rpm = Number(value);
+      return Number.isFinite(rpm) && rpm > 0 ? rpm : null;
+    });
+  }
+
+  return [];
+}
+
 export function resolveGraphSeries(
   telemetry: unknown,
   channels: readonly GraphChannel[]
@@ -196,29 +223,54 @@ export function resolveGraphSeries(
 
 export function buildGraphPoints(
   series: readonly GraphSeries[],
-  rpm: readonly number[]
+  rpm: readonly (number | null)[],
+  sharedSampleCount?: number,
+  forceSampleSequence = false
 ): {
   points: GraphPoint[];
   usesRpm: boolean;
   hasStoredRpm: boolean;
+  axisMode: HorizontalAxisMode;
 } {
-  const sampleCount = series.reduce(
+  const seriesSampleCount = series.reduce(
     (largest, item) => Math.max(largest, item.values.length),
     0
   );
-  const hasRpm = sampleCount > 0 && rpm.length === sampleCount;
+  const sampleCount = Math.max(
+    seriesSampleCount,
+    sharedSampleCount ?? 0
+  );
+  const rpmIsAligned = sampleCount > 0 && rpm.length === sampleCount;
+  const alignedRpm = rpmIsAligned
+    ? rpm.map((value) =>
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        value > 0
+          ? value
+          : null
+      )
+    : [];
+  const hasStoredRpm =
+    rpmIsAligned && alignedRpm.some((value) => value !== null);
+  const hasCompleteRpm =
+    sampleCount > 0 &&
+    rpmIsAligned &&
+    alignedRpm.every((value) => value !== null);
   const usesRpm =
-    hasRpm &&
-    rpm.every(
+    !forceSampleSequence &&
+    hasCompleteRpm &&
+    alignedRpm.every(
       (value, index) =>
-        index === 0 || value >= rpm[index - 1]
+        index === 0 ||
+        (value as number) >= (alignedRpm[index - 1] as number)
     );
 
   const points = Array.from({ length: sampleCount }, (_, index) => {
+    const recordedRpm = rpmIsAligned ? alignedRpm[index] ?? null : null;
     const point: GraphPoint = {
       index,
-      x: usesRpm ? rpm[index] : index,
-      rpm: hasRpm ? rpm[index] : null,
+      x: usesRpm ? (recordedRpm as number) : index,
+      rpm: recordedRpm,
     };
 
     for (const item of series) {
@@ -231,8 +283,23 @@ export function buildGraphPoints(
   return {
     points,
     usesRpm,
-    hasStoredRpm: hasRpm,
+    hasStoredRpm,
+    axisMode: usesRpm ? "rpm" : "sample_sequence",
   };
+}
+
+export function formatHorizontalAxisTick(
+  sampleCoordinate: number,
+  _points: readonly GraphPoint[],
+  usesRpm: boolean
+): string {
+  if (usesRpm) {
+    return Math.round(sampleCoordinate).toLocaleString();
+  }
+
+  const sampleIndex = Math.round(sampleCoordinate);
+
+  return String(sampleIndex + 1);
 }
 
 export function getHorizontalAxisPresentation(input: {

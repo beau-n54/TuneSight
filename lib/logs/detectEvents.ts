@@ -76,6 +76,252 @@ function normalizeWindow(
   };
 }
 
+type BoostDeviationDirection = "overshoot" | "undershoot";
+
+type BoostDeviationSample = {
+  index: number;
+  measuredBoost: number;
+  targetBoost: number;
+  boostError: number;
+  throttle: number;
+  wgdc: number | null;
+  rpm: number | null;
+  timestamp: number | null;
+};
+
+const BOOST_DEVIATION_THRESHOLD_PSI = 3;
+const BOOST_DEVIATION_MIN_THROTTLE = 60;
+const BOOST_DEVIATION_MIN_SAMPLES = 2;
+const BOOST_UNDERSHOOT_MIN_WGDC = 70;
+
+function isFiniteSample(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function eventIdForRegion(
+  type: "boost_overshoot" | "boost_undershoot",
+  pullIndex: number,
+  regionIndex: number
+): string {
+  return `${type}_${pullIndex + 1}_${regionIndex + 1}`;
+}
+
+function detectBoostDeviationRegions(args: {
+  direction: BoostDeviationDirection;
+  pullIndex: number;
+  startIndex: number;
+  endIndex: number;
+  boost: number[];
+  boostTarget: number[];
+  throttle: number[];
+  wgdc: number[];
+  rpm: number[];
+  timestamps: number[];
+}): DetectedEvent[] {
+  const {
+    direction,
+    pullIndex,
+    startIndex,
+    endIndex,
+    boost,
+    boostTarget,
+    throttle,
+    wgdc,
+    rpm,
+    timestamps,
+  } = args;
+  const eventType =
+    direction === "overshoot" ? "boost_overshoot" : "boost_undershoot";
+  const regions: BoostDeviationSample[][] = [];
+  let currentRegion: BoostDeviationSample[] = [];
+  const hasMeasuredBoost = boost
+    .slice(startIndex, endIndex + 1)
+    .some((value) => isFiniteSample(value) && value !== 0);
+  const hasTargetBoost = boostTarget
+    .slice(startIndex, endIndex + 1)
+    .some((value) => isFiniteSample(value) && value !== 0);
+
+  if (!hasMeasuredBoost || !hasTargetBoost) {
+    return [];
+  }
+
+  const finishRegion = () => {
+    if (currentRegion.length > 0) {
+      regions.push(currentRegion);
+      currentRegion = [];
+    }
+  };
+
+  for (let sampleIndex = startIndex; sampleIndex <= endIndex; sampleIndex++) {
+    const measuredBoost = boost[sampleIndex];
+    const targetBoost = boostTarget[sampleIndex];
+    const sampleThrottle = throttle[sampleIndex];
+
+    if (
+      !isFiniteSample(measuredBoost) ||
+      !isFiniteSample(targetBoost) ||
+      !isFiniteSample(sampleThrottle) ||
+      sampleThrottle <= BOOST_DEVIATION_MIN_THROTTLE
+    ) {
+      finishRegion();
+      continue;
+    }
+
+    const boostError = measuredBoost - targetBoost;
+    const qualifies =
+      direction === "overshoot"
+        ? boostError > BOOST_DEVIATION_THRESHOLD_PSI
+        : boostError < -BOOST_DEVIATION_THRESHOLD_PSI;
+
+    if (!qualifies) {
+      finishRegion();
+      continue;
+    }
+
+    currentRegion.push({
+      index: sampleIndex,
+      measuredBoost,
+      targetBoost,
+      boostError,
+      throttle: sampleThrottle,
+      wgdc: isFiniteSample(wgdc[sampleIndex]) ? wgdc[sampleIndex] : null,
+      rpm: isFiniteSample(rpm[sampleIndex]) ? rpm[sampleIndex] : null,
+      timestamp: isFiniteSample(timestamps[sampleIndex])
+        ? timestamps[sampleIndex]
+        : null,
+    });
+  }
+  finishRegion();
+
+  return regions.flatMap((region, regionIndex) => {
+    if (region.length < BOOST_DEVIATION_MIN_SAMPLES) {
+      return [];
+    }
+
+    const first = region[0];
+    const last = region[region.length - 1];
+    const hasRecordedDuration =
+      first.timestamp !== null &&
+      last.timestamp !== null &&
+      last.timestamp > first.timestamp;
+    const durationSec = hasRecordedDuration
+      ? last.timestamp! - first.timestamp!
+      : null;
+
+    if (
+      first.timestamp !== null &&
+      last.timestamp !== null &&
+      !hasRecordedDuration
+    ) {
+      return [];
+    }
+
+    const wgdcValues = region.flatMap((sample) =>
+      sample.wgdc === null ? [] : [sample.wgdc]
+    );
+    const avgWgdc = wgdcValues.length ? average(wgdcValues) : 0;
+
+    if (
+      direction === "undershoot" &&
+      avgWgdc < BOOST_UNDERSHOOT_MIN_WGDC
+    ) {
+      return [];
+    }
+
+    const peakSample = region.reduce((peak, sample) => {
+      return Math.abs(sample.boostError) > Math.abs(peak.boostError)
+        ? sample
+        : peak;
+    });
+    const measuredValues = region.map((sample) => sample.measuredBoost);
+    const targetValues = region.map((sample) => sample.targetBoost);
+    const errorValues = region.map((sample) => sample.boostError);
+    const throttleValues = region.map((sample) => sample.throttle);
+    const rpmValues = region.flatMap((sample) =>
+      sample.rpm === null ? [] : [sample.rpm]
+    );
+    const avgBoost = average(measuredValues);
+    const avgBoostTarget = average(targetValues);
+    const avgBoostError = average(errorValues);
+    const peakBoostError = peakSample.boostError;
+    const avgThrottle = average(throttleValues);
+    const minThrottle = min(throttleValues);
+    const rpmStart = first.rpm ?? 0;
+    const rpmEnd = last.rpm ?? 0;
+    const minRpm = rpmValues.length ? min(rpmValues) : 0;
+    const maxRpm = rpmValues.length ? max(rpmValues) : 0;
+    const severity =
+      direction === "undershoot"
+        ? Math.abs(avgBoostError) > BOOST_DEVIATION_THRESHOLD_PSI
+          ? ("high" as const)
+          : ("medium" as const)
+        : Math.abs(peakBoostError) > 5
+          ? ("high" as const)
+          : ("medium" as const);
+    const confidence =
+      direction === "overshoot"
+        ? avgThrottle > 70
+          ? 0.84
+          : 0.72
+        : avgWgdc > 70
+          ? 0.82
+          : 0.68;
+    const durationText =
+      durationSec === null
+        ? `${region.length} consecutive samples`
+        : `${durationSec.toFixed(2)} seconds`;
+    const deviationText =
+      direction === "overshoot" ? "exceeded" : "trailed";
+
+    return [
+      {
+        id: eventIdForRegion(eventType, pullIndex, regionIndex),
+        type: eventType,
+        severity,
+        confidence,
+        startIndex: first.index,
+        endIndex: last.index,
+        rpmStart,
+        rpmEnd,
+        supportingChannels: [
+          "boost",
+          "boost_target",
+          "wgdc",
+          "throttle",
+        ],
+        evidence: [
+          `Boost ${deviationText} target by up to ${Math.abs(peakBoostError).toFixed(1)} psi for ${durationText}`,
+          `Average aligned deviation was ${Math.abs(avgBoostError).toFixed(1)} psi across ${region.length} qualifying samples`,
+          `Average throttle during event was ${avgThrottle.toFixed(1)}%`,
+        ],
+        metrics: {
+          boostError: avgBoostError,
+          avgBoostError,
+          peakBoostError,
+          maxBoostError: Math.abs(peakBoostError),
+          avgBoost,
+          avgBoostTarget,
+          measuredBoostAtPeak: peakSample.measuredBoost,
+          targetBoostAtPeak: peakSample.targetBoost,
+          peakSampleIndex: peakSample.index,
+          avgWgdc,
+          wgdc: avgWgdc,
+          avgThrottle,
+          throttle: avgThrottle,
+          minThrottle,
+          startTime: first.timestamp,
+          endTime: last.timestamp,
+          durationSec,
+          qualifyingSampleCount: region.length,
+          minRpm,
+          maxRpm,
+          pullIndex,
+        },
+      },
+    ];
+  });
+}
+
 export function detectEvents(
   parsedLog: ParsedLog,
   pullWindows: PullWindow[],
@@ -138,12 +384,9 @@ export function detectEvents(
     const lpfpSlice = getSlice(lpfp, start, end);
     const afrSlice = getSlice(afr, start, end);
 
-    const avgBoost = average(boostSlice);
-    const avgBoostTarget = average(boostTargetSlice);
     const maxBoostError = Math.max(...boostTargetSlice.map((target, i) =>
           Math.abs(target - (boostSlice[i] ?? target))
         ));
-    const avgBoostError = avgBoostTarget - avgBoost;
     const avgWgdc = average(wgdcSlice);
     const avgThrottle = average(throttleSlice);
     const maxIat = max(iatSlice);
@@ -151,13 +394,9 @@ export function detectEvents(
     const minLpfp = min(lpfpSlice.filter((v) => v > 0));
     const minAfr = min(afrSlice.filter((v) => v > 0));
 
-    const earlyBoost = average(getSlice(boost, sections.early.start, sections.early.end));
     const midBoost = average(getSlice(boost, sections.mid.start, sections.mid.end));
     const lateBoost = average(getSlice(boost, sections.late.start, sections.late.end));
 
-    const earlyBoostTarget = average(
-      getSlice(boostTarget, sections.early.start, sections.early.end)
-    );
     const midBoostTarget = average(
       getSlice(boostTarget, sections.mid.start, sections.mid.end)
     );
@@ -165,7 +404,6 @@ export function detectEvents(
       getSlice(boostTarget, sections.late.start, sections.late.end)
     );
 
-    const earlyBoostError = earlyBoostTarget - earlyBoost;
     const midBoostError = midBoostTarget - midBoost;
     const lateBoostError = lateBoostTarget - lateBoost;
 
@@ -192,42 +430,20 @@ export function detectEvents(
     const earlyIat = max(getSlice(iat, sections.early.start, sections.early.end));
     const lateIat = max(getSlice(iat, sections.late.start, sections.late.end));
 
-    if (
-  hasMeaningfulData(boostSlice) &&
-  hasMeaningfulData(boostTargetSlice) &&
-  avgBoostError > 3 &&
-  avgWgdc >= 70 &&
-  avgThrottle > 60
-) {
-
-      events.push({
-        id: buildEventId("boost_undershoot", index),
-        type: "boost_undershoot",
-        severity: avgBoostError > 3 ? "high" : "medium",
-        confidence: avgWgdc > 70 ? 0.82 : 0.68,
+    events.push(
+      ...detectBoostDeviationRegions({
+        direction: "undershoot",
+        pullIndex: index,
         startIndex: start,
         endIndex: end,
-        rpmStart: rpm[start] ?? 0,
-        rpmEnd: rpm[end] ?? 0,
-        supportingChannels: ["boost", "boost_target", "wgdc", "throttle"],
-        evidence: [
-          `Average boost trailed target by ${avgBoostError.toFixed(1)} psi`,
-          `Average WGDC during event was ${avgWgdc.toFixed(1)}%`,
-          `Average throttle during event was ${avgThrottle.toFixed(1)}%`,
-        ],
-        metrics: {
-          avgBoost,
-          avgBoostTarget,
-          avgBoostError,
-          maxBoostError,
-          boostError: avgBoostError,
-          avgWgdc,
-          wgdc: avgWgdc,
-          avgThrottle,
-          throttle: avgThrottle,
-        },
-      });
-    }
+        boost,
+        boostTarget,
+        throttle,
+        wgdc,
+        rpm,
+        timestamps: parsedLog.timestamps,
+      })
+    );
 
     if (
       hasMeaningfulData(boostSlice) &&
@@ -258,49 +474,22 @@ export function detectEvents(
           wgdc: avgWgdc,
         },
       });
-        
+    }
 
-    if (
-      hasMeaningfulData(boostSlice) &&
-      hasMeaningfulData(boostTargetSlice) &&
-      avgBoostError < -3 &&
-      avgThrottle > 60
-    ) {
-  
-  events.push({
-    id: buildEventId("boost_overshoot", index),
-    type: "boost_overshoot",
-    severity: avgBoostError < -5 ? "high" : "medium",
-    confidence: avgThrottle > 70 ? 0.84 : 0.72,
-
-    startIndex: start,
-    endIndex: end,
-
-    rpmStart: rpm[start] ?? 0,
-    rpmEnd: rpm[end] ?? 0,
-
-    supportingChannels: [
-      "boost",
-      "boost_target",
-      "wgdc",
-      "throttle",
-    ],
-
-    evidence: [
-      `Average boost exceeded target by ${Math.abs(avgBoostError).toFixed(1)} psi`,
-      `Average throttle during event was ${avgThrottle.toFixed(1)}%`,
-    ],
-
-    metrics: {
-      avgBoost,
-      avgBoostTarget,
-      avgBoostError,
-      avgWgdc,
-      avgThrottle,
-    },
-  });
-}
-}
+    events.push(
+      ...detectBoostDeviationRegions({
+        direction: "overshoot",
+        pullIndex: index,
+        startIndex: start,
+        endIndex: end,
+        boost,
+        boostTarget,
+        throttle,
+        wgdc,
+        rpm,
+        timestamps: parsedLog.timestamps,
+      })
+    );
 
     if (hasMeaningfulData(wgdcSlice) && avgWgdc >= 78) {
       events.push({

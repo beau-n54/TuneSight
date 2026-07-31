@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildGraphPoints,
+  formatHorizontalAxisTick,
   getSeries,
+  getRpmSeries,
   getHorizontalAxisPresentation,
   hasRecordedTelemetry,
   resolveGraphSeries,
@@ -54,7 +56,27 @@ test("missing RPM never creates estimated engineering values", () => {
   );
 });
 
-test("multi-pull RPM resets use sample sequence without losing RPM", () => {
+test("placeholder RPM values retain the truthful Sample Sequence fallback", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 4, 2] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+
+  const result = buildGraphPoints(series, [0, 0, 0]);
+
+  assert.equal(result.usesRpm, false);
+  assert.equal(result.hasStoredRpm, false);
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [0, 1, 2]
+  );
+  assert.deepEqual(
+    result.points.map((point) => point.rpm),
+    [null, null, null]
+  );
+});
+
+test("multi-pull RPM resets preserve sample order with Sample Sequence", () => {
   const series = resolveGraphSeries(
     { boost: [1, 4, 2, 5] },
     [TELEMETRY_CHANNELS.boostActual]
@@ -75,6 +97,25 @@ test("multi-pull RPM resets use sample sequence without losing RPM", () => {
   );
 });
 
+test("separate pulls cannot become one continuous RPM sweep", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 2, 3, 4] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(
+    series,
+    [2000, 3000, 4000, 5000],
+    4,
+    true
+  );
+
+  assert.equal(result.axisMode, "sample_sequence");
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [0, 1, 2, 3]
+  );
+});
+
 test("axis labels distinguish RPM from sample sequence", () => {
   assert.deepEqual(
     getHorizontalAxisPresentation({
@@ -90,13 +131,167 @@ test("axis labels distinguish RPM from sample sequence", () => {
   assert.deepEqual(
     getHorizontalAxisPresentation({
       usesRpm: false,
-      hasStoredRpm: true,
+      hasStoredRpm: false,
     }),
     {
       label: "Sample Sequence",
-      note:
-        "Sample-sequenced record. Hover for exact recorded RPM.",
+      note: "Sample-sequenced record. RPM was not recorded.",
     }
+  );
+});
+
+test("visible axis labels use recorded RPM without changing sample coordinates", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 4, 2, 5] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(series, [2000, 3000, 4000, 5000]);
+
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [2000, 3000, 4000, 5000]
+  );
+  assert.deepEqual(
+    result.points.map((point) => point.rpm),
+    [2000, 3000, 4000, 5000]
+  );
+  assert.equal(
+    formatHorizontalAxisTick(2000, result.points, result.usesRpm),
+    "2,000"
+  );
+  assert.equal(
+    formatHorizontalAxisTick(4000, result.points, result.usesRpm),
+    "4,000"
+  );
+  assert.equal(
+    formatHorizontalAxisTick(2, result.points, false),
+    "3"
+  );
+});
+
+test("duplicate RPM values remain deterministic on the RPM domain", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 2, 3, 4] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(series, [2000, 2500, 2500, 3000]);
+
+  assert.equal(result.usesRpm, true);
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [2000, 2500, 2500, 3000]
+  );
+  assert.deepEqual(
+    result.points.map((point) => point.index),
+    [0, 1, 2, 3]
+  );
+});
+
+test("partially invalid RPM preserves sample identity and valid tooltip RPM", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 2, 3, 4] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const rpm = getRpmSeries(
+    { rpm: [1800, "invalid", 2800, 3400] },
+    ["rpm"]
+  );
+  const result = buildGraphPoints(series, rpm);
+
+  assert.equal(result.usesRpm, false);
+  assert.equal(result.hasStoredRpm, true);
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [0, 1, 2, 3]
+  );
+  assert.deepEqual(
+    result.points.map((point) => point.rpm),
+    [1800, null, 2800, 3400]
+  );
+});
+
+test("observed backward RPM sequence cannot claim an RPM-indexed axis", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 2, 3, 4, 5] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(
+    series,
+    [820, 815, 6348, 5921, 7000]
+  );
+
+  assert.equal(result.usesRpm, false);
+  assert.equal(result.axisMode, "sample_sequence");
+  assert.deepEqual(
+    result.points.map((point) => point.x),
+    [0, 1, 2, 3, 4]
+  );
+  assert.deepEqual(
+    getHorizontalAxisPresentation(result),
+    {
+      label: "Sample Sequence",
+      note: "Sample-sequenced record. Hover for exact recorded RPM.",
+    }
+  );
+});
+
+test("shared sample count gives every panel the same x-domain contract", () => {
+  const boost = resolveGraphSeries(
+    { boost: [1, 2, 3, 4] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const fuel = resolveGraphSeries(
+    { rail_pressure: [1000, 1200, 1400] },
+    [TELEMETRY_CHANNELS.highPressureFuel]
+  );
+  const rpm = [2000, 3000, 2500, 4000];
+
+  const boostResult = buildGraphPoints(boost, rpm, 4);
+  const fuelResult = buildGraphPoints(fuel, rpm, 4);
+
+  assert.equal(boostResult.axisMode, "sample_sequence");
+  assert.equal(fuelResult.axisMode, "sample_sequence");
+  assert.deepEqual(
+    fuelResult.points.map((point) => point.x),
+    [0, 1, 2, 3]
+  );
+});
+
+test("event regions retain sample identity in both axis modes", () => {
+  const series = resolveGraphSeries(
+    { boost: [1, 2, 3, 4] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const region = {
+    id: "event-1",
+    label: "Event",
+    startIndex: 1,
+    endIndex: 2,
+    kind: "event" as const,
+    supportingChannels: ["boost"],
+  };
+
+  const rpmPoints = buildGraphPoints(
+    series,
+    [2000, 2500, 3000, 3500]
+  ).points;
+  const samplePoints = buildGraphPoints(
+    series,
+    [2000, 3500, 2400, 4000]
+  ).points;
+
+  assert.deepEqual(
+    resolveRegionCoordinates([region], rpmPoints).map(({ x1, x2 }) => [
+      x1,
+      x2,
+    ]),
+    [[2500, 3000]]
+  );
+  assert.deepEqual(
+    resolveRegionCoordinates([region], samplePoints).map(
+      ({ x1, x2 }) => [x1, x2]
+    ),
+    [[1, 2]]
   );
 });
 

@@ -14,7 +14,8 @@ import {
 import {
   buildGraphPoints,
   formatGraphValue,
-  getSeries,
+  formatHorizontalAxisTick,
+  getRpmSeries,
   getHorizontalAxisPresentation,
   type GraphChannel,
   type GraphPoint,
@@ -303,12 +304,14 @@ function EngineeringTelemetryChart({
   telemetry,
   rpm,
   regions,
+  sharedSampleCount,
   wide = false,
 }: {
   definition: ChartDefinition;
   telemetry: unknown;
-  rpm: readonly number[];
+  rpm: readonly (number | null)[];
   regions: readonly GraphRegion[];
+  sharedSampleCount: number;
   wide?: boolean;
 }) {
   const series = useMemo(
@@ -316,8 +319,14 @@ function EngineeringTelemetryChart({
     [definition.channels, telemetry]
   );
   const { points, usesRpm, hasStoredRpm } = useMemo(
-    () => buildGraphPoints(series, rpm),
-    [rpm, series]
+    () =>
+      buildGraphPoints(
+        series,
+        rpm,
+        sharedSampleCount,
+        regions.filter((region) => region.kind === "pull").length > 1
+      ),
+    [regions, rpm, series, sharedSampleCount]
   );
   const horizontalAxis = getHorizontalAxisPresentation({
     usesRpm,
@@ -439,9 +448,11 @@ function EngineeringTelemetryChart({
                 }}
                 tick={{ fill: "#a1a1aa", fontSize: 11 }}
                 tickFormatter={(value) =>
-                  usesRpm
-                    ? Math.round(Number(value)).toLocaleString()
-                    : String(Math.round(Number(value)) + 1)
+                  formatHorizontalAxisTick(
+                    Number(value),
+                    points,
+                    usesRpm
+                  )
                 }
                 tickLine={{ stroke: "#52525b" }}
                 type="number"
@@ -563,7 +574,7 @@ export default function TelemetryGraphV1({
   events = [],
 }: TelemetryGraphV1Props) {
   const rpm = useMemo(
-    () => getSeries(telemetry, RPM_ALIASES),
+    () => getRpmSeries(telemetry, RPM_ALIASES),
     [telemetry]
   );
   const regions = useMemo(
@@ -573,6 +584,14 @@ export default function TelemetryGraphV1({
   const availableCharts = CHARTS.filter(
     (definition) =>
       resolveGraphSeries(telemetry, definition.channels).length > 0
+  );
+  const sharedSampleCount = Math.max(
+    0,
+    ...availableCharts.flatMap((definition) =>
+      resolveGraphSeries(telemetry, definition.channels).map(
+        (series) => series.values.length
+      )
+    )
   );
 
   return (
@@ -620,6 +639,7 @@ export default function TelemetryGraphV1({
                   definition={definition}
                   regions={regions}
                   rpm={rpm}
+                  sharedSampleCount={sharedSampleCount}
                   telemetry={telemetry}
                   wide={isWidePanel}
                 />
