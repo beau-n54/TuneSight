@@ -24,6 +24,7 @@ export type CalibrationKnowledgeDigestPolicy = Readonly<{
 export type CalibrationKnowledgeDigestDomain =
   | "calibration_knowledge_content"
   | "proposed_revision_envelope"
+  | "publication_source_identity"
   | "publication_instruction"
   | "publication_execution_result"
   | "publication_receipt"
@@ -84,6 +85,7 @@ export const CALIBRATION_KNOWLEDGE_DIGEST_POLICY_V1 = defineCalibrationKnowledge
 const DOMAIN_LABELS: Readonly<Record<CalibrationKnowledgeDigestDomain, string>> = Object.freeze({
   calibration_knowledge_content: "tunesight.calibration-knowledge.content",
   proposed_revision_envelope: "tunesight.calibration-knowledge.proposed-revision",
+  publication_source_identity: "tunesight.calibration-knowledge.publication-source",
   publication_instruction: "tunesight.calibration-knowledge.publication-instruction",
   publication_execution_result: "tunesight.calibration-knowledge.publication-execution-result",
   publication_receipt: "tunesight.calibration-knowledge.publication-receipt",
