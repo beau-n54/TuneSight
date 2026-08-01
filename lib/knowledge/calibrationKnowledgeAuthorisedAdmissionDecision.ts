@@ -3,7 +3,10 @@ import {
   type AdmissionDecisionOutcome,
   type AdmissionPolicyReference,
   type AdmissionStableIdentity,
+  type AdmissionAssertionChangeManifest,
+  type AdmissionLifecycleChangeManifest,
   type CalibrationKnowledgeAdmissionDecision,
+  type CalibrationKnowledgeAdmissionProposal,
   type PublicationOperation,
 } from "./calibrationKnowledgeAdmission.ts";
 import type { KnowledgeAuthorityReference } from "./calibrationKnowledge.ts";
@@ -23,7 +26,9 @@ export type CalibrationAdmissionDecisionAuthorityScope = Readonly<{
 
 export type AuthorisedCalibrationKnowledgeAdmissionDecisionInput = Readonly<{
   decisionIdentity: AdmissionStableIdentity;
+  proposal: CalibrationKnowledgeAdmissionProposal;
   proposalIdentity: AdmissionStableIdentity;
+  proposedRevisionBinding: CalibrationProposedRevisionDecisionBinding;
   evidencePackageIdentity: AdmissionStableIdentity;
   evidenceAuthorityAssessment: CalibrationKnowledgeEvidenceAuthorityAssessment;
   identityLineageConflictAssessment: CalibrationIdentityLineageConflictAssessment;
@@ -43,9 +48,22 @@ export type AuthorisedCalibrationKnowledgeAdmissionDecisionInput = Readonly<{
   contractVersion: string;
 }>;
 
+export type CalibrationProposedRevisionDecisionBinding = Readonly<{
+  revisionIdentity: AdmissionStableIdentity;
+  revisionNumber: string;
+  proposedObjectDigest: string;
+  proposedStableKnowledgeId: string;
+  proposedKnowledgeVersion: string;
+  expectedPredecessorStableKnowledgeId: string | null;
+  expectedPredecessorKnowledgeVersion: string | null;
+  assertionChangeManifest: AdmissionAssertionChangeManifest;
+  lifecycleChangeManifest: AdmissionLifecycleChangeManifest;
+}>;
+
 export type AuthorisedCalibrationKnowledgeAdmissionDecision = Readonly<{
   decision: CalibrationKnowledgeAdmissionDecision;
   proposalIdentity: AdmissionStableIdentity;
+  proposedRevisionBinding: CalibrationProposedRevisionDecisionBinding;
   evidencePackageIdentity: AdmissionStableIdentity;
   evidenceAuthorityAssessmentIdentity: AdmissionStableIdentity;
   identityLineageConflictAssessmentIdentity: AdmissionStableIdentity;
@@ -65,6 +83,7 @@ const outcomes: readonly AdmissionDecisionOutcome[] = ["invalid", "requires_evid
 const operations: readonly PublicationOperation[] = ["register", "enrich", "correct", "refine_applicability", "add_evidence", "record_dispute", "resolve_conflict", "supersede", "deprecate", "reject", "restore"];
 const acceptedOutcomes: readonly AdmissionDecisionOutcome[] = ["accepted_provisional", "accepted_authoritative", "accepted_lifecycle_change"];
 const lifecycleOperations: readonly PublicationOperation[] = ["record_dispute", "resolve_conflict", "supersede", "deprecate", "reject", "restore"];
+const operationByProposal: Readonly<Record<CalibrationKnowledgeAdmissionProposal["proposalKind"], PublicationOperation>> = { register_new: "register", enrich_existing: "enrich", correct_existing: "correct", refine_applicability: "refine_applicability", add_evidence: "add_evidence", record_dispute: "record_dispute", resolve_conflict: "resolve_conflict", supersede: "supersede", deprecate: "deprecate", reject: "reject", restore: "restore" };
 
 function requireNonBlank(value: string, field: string): void {
   if (!value.trim()) throw new Error(`${field} is required.`);
@@ -126,9 +145,29 @@ function deepCloneFreeze<T>(value: T): T {
   return value;
 }
 
+function sorted(values: readonly string[]): readonly string[] { return [...values].sort(); }
+function assertionManifestKey(value: AdmissionAssertionChangeManifest): string { return JSON.stringify({ addedAssertionIds: sorted(value.addedAssertionIds), amendedAssertionIds: sorted(value.amendedAssertionIds), retainedAssertionIds: sorted(value.retainedAssertionIds), supersededAssertionIds: sorted(value.supersededAssertionIds), removedFromCurrentAssertionIds: sorted(value.removedFromCurrentAssertionIds) }); }
+function lifecycleManifestKey(value: AdmissionLifecycleChangeManifest): string { return JSON.stringify([...value.changes].sort((left, right) => left.sequence - right.sequence || left.changeId.localeCompare(right.changeId))); }
+function validateProposedRevisionBinding(input: AuthorisedCalibrationKnowledgeAdmissionDecisionInput): CalibrationProposedRevisionDecisionBinding {
+  const revision = input.proposal.proposedRevision;
+  const binding = input.proposedRevisionBinding;
+  if (!sameIdentity(binding.revisionIdentity, revision.revisionIdentity)) throw new Error("Proposed revision identity does not match the exact authorised proposal revision.");
+  if (binding.revisionNumber !== revision.revisionIdentity.revision) throw new Error("Proposed revision number does not match the exact authorised proposal revision.");
+  if (binding.proposedObjectDigest !== revision.revisionIdentity.contentDigest) throw new Error("Proposed object digest does not match the exact authorised proposal revision.");
+  if (binding.proposedStableKnowledgeId !== revision.proposedStableKnowledgeId) throw new Error("Proposed stable Knowledge identity does not match the exact authorised proposal revision.");
+  if (binding.proposedKnowledgeVersion !== revision.proposedKnowledgeVersion) throw new Error("Proposed Knowledge version does not match the exact authorised proposal revision.");
+  if (binding.expectedPredecessorStableKnowledgeId !== revision.expectedPredecessorStableKnowledgeId) throw new Error("Expected predecessor stable Knowledge identity does not match the exact authorised proposal revision.");
+  if (binding.expectedPredecessorKnowledgeVersion !== revision.expectedPredecessorKnowledgeVersion) throw new Error("Expected predecessor Knowledge version does not match the exact authorised proposal revision.");
+  if (assertionManifestKey(binding.assertionChangeManifest) !== assertionManifestKey(revision.changeManifest)) throw new Error("Assertion change manifest does not match the exact authorised proposal revision.");
+  if (lifecycleManifestKey(binding.lifecycleChangeManifest) !== lifecycleManifestKey(revision.lifecycleChangeManifest)) throw new Error("Lifecycle-change manifest does not match the exact authorised proposal revision.");
+  return deepCloneFreeze({ revisionIdentity: revision.revisionIdentity, revisionNumber: revision.revisionIdentity.revision, proposedObjectDigest: revision.revisionIdentity.contentDigest, proposedStableKnowledgeId: revision.proposedStableKnowledgeId, proposedKnowledgeVersion: revision.proposedKnowledgeVersion, expectedPredecessorStableKnowledgeId: revision.expectedPredecessorStableKnowledgeId, expectedPredecessorKnowledgeVersion: revision.expectedPredecessorKnowledgeVersion, assertionChangeManifest: revision.changeManifest, lifecycleChangeManifest: revision.lifecycleChangeManifest });
+}
+
 export function constructAuthorisedCalibrationKnowledgeAdmissionDecision(input: AuthorisedCalibrationKnowledgeAdmissionDecisionInput): AuthorisedCalibrationKnowledgeAdmissionDecision {
   validateIdentity(input.decisionIdentity, "Decision");
   validateIdentity(input.proposalIdentity, "Proposal");
+  if (!sameIdentity(input.proposalIdentity, input.proposal.proposalIdentity)) throw new Error("Decision must bind the exact Admission Proposal identity and revision.");
+  const proposedRevisionBinding = validateProposedRevisionBinding(input);
   validateIdentity(input.evidencePackageIdentity, "Evidence package");
   if (!sameIdentity(input.proposalIdentity, input.evidenceAuthorityAssessment.proposalIdentity) || !sameIdentity(input.proposalIdentity, input.identityLineageConflictAssessment.proposalIdentity) || !sameIdentity(input.proposalIdentity, input.eligibilityAssessment.proposalIdentity)) throw new Error("Decision must bind the exact proposal identity and revision used by every assessment.");
   if (!sameIdentity(input.evidencePackageIdentity, input.evidenceAuthorityAssessment.evidencePackageIdentity)) throw new Error("Decision must bind the exact Evidence package identity and revision used by assessment.");
@@ -142,6 +181,7 @@ export function constructAuthorisedCalibrationKnowledgeAdmissionDecision(input: 
     if (input.evidenceAuthorityAssessment.authorityAssessments.some((item) => item.state !== "qualified")) throw new Error("Authoritative acceptance requires every assessed authority to remain qualified.");
   }
   const operation = input.identityLineageConflictAssessment.lineage.operation;
+  if (operationByProposal[input.proposal.proposalKind] !== operation) throw new Error("Assessed publication operation does not match the exact authorised proposal kind.");
   if (input.outcome === "accepted_lifecycle_change" && !lifecycleOperations.includes(operation)) throw new Error(`Lifecycle acceptance is incompatible with operation ${operation}.`);
   if (input.outcome !== "accepted_lifecycle_change" && accepted && lifecycleOperations.includes(operation)) throw new Error(`Operation ${operation} requires an accepted lifecycle-change decision.`);
   validateAuthorityScope(input.decisionAuthorityScope, input.decisionAuthority, input.outcome, operation, input.policy);
@@ -170,6 +210,7 @@ export function constructAuthorisedCalibrationKnowledgeAdmissionDecision(input: 
   const decisionBase = {
     decisionIdentity: input.decisionIdentity,
     proposalIdentity: input.proposalIdentity,
+    proposedRevisionBinding,
     assessmentIdentity: input.eligibilityAssessment.assessmentIdentity,
     decisionAuthority: input.decisionAuthority,
     decidedAt: input.decidedAt,
@@ -193,6 +234,7 @@ export function constructAuthorisedCalibrationKnowledgeAdmissionDecision(input: 
   return deepCloneFreeze({
     decision,
     proposalIdentity: input.proposalIdentity,
+    proposedRevisionBinding,
     evidencePackageIdentity: input.evidencePackageIdentity,
     evidenceAuthorityAssessmentIdentity: input.evidenceAuthorityAssessment.assessmentIdentity,
     identityLineageConflictAssessmentIdentity: input.identityLineageConflictAssessment.assessmentIdentity,
