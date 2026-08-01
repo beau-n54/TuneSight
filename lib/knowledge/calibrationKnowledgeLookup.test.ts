@@ -480,6 +480,43 @@ test("conflict preserves contradictory candidates and details", () => {
   assert.deepEqual(result.conflicts[0].candidateIds, ["candidate:1", "candidate:2"]);
 });
 
+test("one candidate can conflict with preserved qualified context", () => {
+  const match = candidate();
+  const contextAssertion = assertion({
+    id: "context:platform",
+    value: {
+      dimension: vocabulary("platform"),
+      values: ["platform:contradictory"],
+    },
+  });
+  const result = defineCalibrationKnowledgeLookupResult({
+    ...commonResult([match]),
+    query: {
+      ...canonicalQuery(),
+      context: { assertions: [contextAssertion] },
+    },
+    outcome: "conflict",
+    conflicts: [
+      {
+        conflictId: "conflict:context",
+        summary: "Qualified platform context contradicts candidate applicability.",
+        candidateIds: [match.candidateId],
+        contradictoryAssertionIds: [contextAssertion.assertionId],
+        provenance: [{ sourceType: "test", sourceIdentifier: "conflict-source" }],
+        unresolvedReason: "Candidate applicability and qualified context disagree.",
+      },
+    ],
+    unresolvedReason: "Material candidate-versus-context conflict remains unresolved.",
+  });
+
+  assert.equal(result.outcome, "conflict");
+  assert.deepEqual(result.conflicts[0].candidateIds, [match.candidateId]);
+  assert.deepEqual(result.conflicts[0].contradictoryAssertionIds, [
+    contextAssertion.assertionId,
+  ]);
+  assert.deepEqual(result.query.context.assertions[0], contextAssertion);
+});
+
 test("unknown, invalid, and runtime_unavailable remain distinct", () => {
   const unknown = defineCalibrationKnowledgeLookupResult({
     ...commonResult([]),
@@ -665,6 +702,74 @@ test("multiple-candidate and conflict identities remain unique and resolvable", 
         ],
       }),
     /Contradictory assertion identities must be unique/
+  );
+});
+
+test("single-candidate conflict invariants reject incomplete contradiction data", () => {
+  const match = candidate();
+  const contextAssertion = assertion({
+    id: "context:platform",
+    value: {
+      dimension: vocabulary("platform"),
+      values: ["platform:contradictory"],
+    },
+  });
+  const conflictBase = {
+    ...commonResult([match]),
+    query: {
+      ...canonicalQuery(),
+      context: { assertions: [contextAssertion] },
+    },
+    outcome: "conflict" as const,
+    unresolvedReason: "Conflict remains unresolved.",
+  };
+  const conflict = (
+    candidateIds: readonly string[],
+    contradictoryAssertionIds: readonly string[]
+  ) => ({
+    conflictId: "conflict:context",
+    summary: "Qualified context contradicts candidate applicability.",
+    candidateIds,
+    contradictoryAssertionIds,
+    provenance: [{ sourceType: "test", sourceIdentifier: "conflict-source" }],
+    unresolvedReason: "Candidate applicability and qualified context disagree.",
+  });
+
+  assert.throws(
+    () =>
+      defineCalibrationKnowledgeLookupResult({
+        ...conflictBase,
+        conflicts: [conflict([match.candidateId], [])],
+      }),
+    /requires at least one contradictory assertion identity/
+  );
+  assert.throws(
+    () =>
+      defineCalibrationKnowledgeLookupResult({
+        ...conflictBase,
+        conflicts: [
+          conflict(["candidate:missing"], [contextAssertion.assertionId]),
+        ],
+      }),
+    /is not preserved by the result/
+  );
+  assert.throws(
+    () =>
+      defineCalibrationKnowledgeLookupResult({
+        ...commonResult([]),
+        outcome: "conflict",
+        conflicts: [conflict([], [contextAssertion.assertionId])],
+        unresolvedReason: "Conflict without candidates is invalid.",
+      }),
+    /requires at least one contradictory candidate/
+  );
+  assert.throws(
+    () =>
+      defineCalibrationKnowledgeLookupResult({
+        ...conflictBase,
+        conflicts: [conflict([match.candidateId], ["candidate:assertion-only"])],
+      }),
+    /must preserve a contradictory qualified context assertion/
   );
 });
 

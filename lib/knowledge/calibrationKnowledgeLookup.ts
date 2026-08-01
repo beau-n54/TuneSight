@@ -431,21 +431,24 @@ function validateOutcome(result: CalibrationKnowledgeLookupResult): void {
       requireNonBlank(result.unresolvedReason, "Multiple-candidate unresolved reason");
       break;
     case "conflict": {
-      if (result.candidates.length < 2 || result.conflicts.length === 0) {
+      if (result.candidates.length === 0 || result.conflicts.length === 0) {
         throw new Error(
-          "conflict requires contradictory candidates and conflict details."
+          "conflict requires at least one contradictory candidate and conflict details."
         );
       }
       const candidateIds = new Set(
         result.candidates.map((candidate) => candidate.candidateId)
+      );
+      const contextAssertionIds = new Set(
+        result.query.context.assertions.map((assertion) => assertion.assertionId)
       );
       result.conflicts.forEach((conflict) => {
         requireNonBlank(conflict.conflictId, "Conflict identity");
         requireNonBlank(conflict.summary, "Conflict summary");
         requireNonBlank(conflict.unresolvedReason, "Conflict unresolved reason");
         validateProvenance(conflict.provenance, "Conflict");
-        if (conflict.candidateIds.length < 2) {
-          throw new Error("Conflict must preserve contradictory candidate identities.");
+        if (conflict.candidateIds.length === 0) {
+          throw new Error("Conflict must preserve at least one candidate identity.");
         }
         if (new Set(conflict.candidateIds).size !== conflict.candidateIds.length) {
           throw new Error("Conflict candidate identities must be unique.");
@@ -472,6 +475,16 @@ function validateOutcome(result: CalibrationKnowledgeLookupResult): void {
           conflict.contradictoryAssertionIds,
           "Contradictory assertion identity"
         );
+        if (
+          result.candidates.length === 1 &&
+          !conflict.contradictoryAssertionIds.some((assertionId) =>
+            contextAssertionIds.has(assertionId)
+          )
+        ) {
+          throw new Error(
+            "Single-candidate conflict must preserve a contradictory qualified context assertion."
+          );
+        }
       });
       requireNonBlank(result.unresolvedReason, "Conflict unresolved reason");
       break;
