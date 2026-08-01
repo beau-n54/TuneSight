@@ -532,7 +532,7 @@ test("unrecognized vocabulary cannot carry authoritative verification", () => {
         ...input,
         purposes: [authoritativePurpose],
       }),
-    /applicability vocabulary cannot be authoritative/
+    /unknown or unrecognized vocabulary cannot be authoritative/
   );
 });
 

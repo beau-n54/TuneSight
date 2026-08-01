@@ -265,14 +265,18 @@ function validateProvenance(
   );
 }
 
-function validateAssertion<T>(
+export function validateQualifiedAssertion<T>(
   assertion: QualifiedAssertion<T>,
-  field: string
+  field: string,
+  vocabularyReferences: readonly GovernedVocabularyReference[] = []
 ): void {
   requireNonBlank(assertion.assertionId, `${field} assertion identity`);
   requireNonBlank(assertion.version, `${field} assertion version`);
   validateLifecycle(assertion.lifecycle, field);
   validateApplicability(assertion.applicability, field);
+  vocabularyReferences.forEach((reference) =>
+    validateVocabulary(reference, field)
+  );
 
   assertion.provenance.forEach((item) => validateProvenance(item, field));
   assertion.supportingEvidence.forEach((item) =>
@@ -292,9 +296,14 @@ function validateAssertion<T>(
   }
 
   if (isAuthoritativeStockVariantStatus(assertion.verificationStatus)) {
-    if (assertion.applicability.scope.recognition !== "known") {
+    if (
+      assertion.applicability.scope.recognition !== "known" ||
+      vocabularyReferences.some(
+        (reference) => reference.recognition !== "known"
+      )
+    ) {
       throw new Error(
-        `${field} with unknown or unrecognized applicability vocabulary cannot be authoritative.`
+        `${field} with unknown or unrecognized vocabulary cannot be authoritative.`
       );
     }
 
@@ -344,16 +353,7 @@ function validateVocabularyQualification<T>(
   references: readonly GovernedVocabularyReference[],
   field: string
 ): void {
-  references.forEach((reference) => validateVocabulary(reference, field));
-
-  if (
-    references.some((reference) => reference.recognition !== "known") &&
-    isAuthoritativeStockVariantStatus(assertion.verificationStatus)
-  ) {
-    throw new Error(
-      `${field} with unknown or unrecognized vocabulary cannot be authoritative.`
-    );
-  }
+  validateQualifiedAssertion(assertion, field, references);
 }
 
 function cloneAndFreeze<T>(value: T): T {
@@ -379,8 +379,8 @@ function cloneAndFreeze<T>(value: T): T {
 export function defineCalibrationKnowledgeObject(
   input: CalibrationKnowledgeObject
 ): CalibrationKnowledgeObject {
-  validateAssertion(input.identity, "Calibration identity");
-  validateAssertion(input.canonicalName, "Canonical name");
+  validateQualifiedAssertion(input.identity, "Calibration identity");
+  validateQualifiedAssertion(input.canonicalName, "Canonical name");
 
   if (!input.identity.value) {
     throw new Error("Calibration identity value is required.");
@@ -399,9 +399,9 @@ export function defineCalibrationKnowledgeObject(
     validateProvenance(item, "Calibration Knowledge")
   );
 
-  validateAssertion(input.calibrationKind, "Calibration kind");
-  validateAssertion(input.primarySubsystem, "Primary subsystem");
-  validateAssertion(input.applicability, "Calibration applicability");
+  validateQualifiedAssertion(input.calibrationKind, "Calibration kind");
+  validateQualifiedAssertion(input.primarySubsystem, "Primary subsystem");
+  validateQualifiedAssertion(input.applicability, "Calibration applicability");
 
   if (input.calibrationKind.value) {
     validateVocabularyQualification(
@@ -431,15 +431,15 @@ export function defineCalibrationKnowledgeObject(
   }
 
   input.aliases.forEach((value) => {
-    validateAssertion(value, "Alias");
+    validateQualifiedAssertion(value, "Alias");
     if (value.value) requireNonBlank(value.value.name, "Alias name");
   });
   input.purposes.forEach((value) => {
-    validateAssertion(value, "Purpose");
+    validateQualifiedAssertion(value, "Purpose");
     if (value.value) requireNonBlank(value.value.summary, "Purpose summary");
   });
   input.engineeringIntents.forEach((value) => {
-    validateAssertion(value, "Engineering Intent");
+    validateQualifiedAssertion(value, "Engineering Intent");
     if (value.value) {
       requireNonBlank(value.value.summary, "Engineering Intent summary");
     }
@@ -465,7 +465,7 @@ export function defineCalibrationKnowledgeObject(
     }
   });
   input.relatedSubsystems.forEach((value) => {
-    validateAssertion(value, "Related subsystem");
+    validateQualifiedAssertion(value, "Related subsystem");
     if (value.value) {
       validateVocabularyQualification(
         value,
@@ -475,7 +475,7 @@ export function defineCalibrationKnowledgeObject(
     }
   });
   input.sourceRepresentations.forEach((value) => {
-    validateAssertion(value, "Source representation");
+    validateQualifiedAssertion(value, "Source representation");
     if (value.value) {
       requireNonBlank(value.value.sourceReferenceId, "Source reference identity");
       requireNonBlank(value.value.sourceIdentifier, "Source identifier");
@@ -487,7 +487,7 @@ export function defineCalibrationKnowledgeObject(
     }
   });
   input.relationships.forEach((value) => {
-    validateAssertion(value, "Calibration relationship");
+    validateQualifiedAssertion(value, "Calibration relationship");
     if (value.value) {
       requireNonBlank(value.value.relationshipId, "Relationship identity");
       requireNonBlank(value.value.sourceCalibrationId, "Relationship source");
@@ -502,7 +502,7 @@ export function defineCalibrationKnowledgeObject(
   });
 
   input.directionalBehaviours.forEach((assertion) => {
-    validateAssertion(assertion, "Directional behaviour");
+    validateQualifiedAssertion(assertion, "Directional behaviour");
     if (!assertion.value) return;
 
     requireNonBlank(
@@ -519,7 +519,7 @@ export function defineCalibrationKnowledgeObject(
       "Directional behaviour"
     );
     assertion.value.boundaryConditions.forEach((value) => {
-      validateAssertion(value, "Boundary condition");
+      validateQualifiedAssertion(value, "Boundary condition");
       if (value.value) {
         requireNonBlank(value.value.conditionId, "Boundary condition identity");
         requireNonBlank(value.value.quantity, "Boundary condition quantity");
@@ -535,7 +535,7 @@ export function defineCalibrationKnowledgeObject(
       }
     });
     assertion.value.nonlinearCharacteristics.forEach((value) => {
-      validateAssertion(value, "Nonlinear characteristic");
+      validateQualifiedAssertion(value, "Nonlinear characteristic");
       if (value.value) {
         validateVocabularyQualification(
           value,
@@ -545,7 +545,7 @@ export function defineCalibrationKnowledgeObject(
       }
     });
     assertion.value.potentialProtectiveResponses.forEach((value) => {
-      validateAssertion(value, "Potential protective response");
+      validateQualifiedAssertion(value, "Potential protective response");
       if (value.value) {
         requireNonBlank(
           value.value.responseId,
