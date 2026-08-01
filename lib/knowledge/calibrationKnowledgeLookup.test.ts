@@ -769,8 +769,49 @@ test("single-candidate conflict invariants reject incomplete contradiction data"
         ...conflictBase,
         conflicts: [conflict([match.candidateId], ["candidate:assertion-only"])],
       }),
-    /must preserve a contradictory qualified context assertion/
+    /is not preserved by the result/
   );
+});
+
+test("one candidate can preserve an internal qualified assertion conflict", () => {
+  const base = candidate();
+  const n54 = { ...applicability(), scope: vocabulary("platform_scoped"), platforms: ["N54"] };
+  const b58 = { ...applicability(), scope: vocabulary("platform_scoped"), platforms: ["B58"] };
+  const match = { ...base, knowledge: defineCalibrationKnowledgeObject({ ...base.knowledge, applicability: { ...base.knowledge.applicability, value: n54, applicability: n54 } }), applicabilityAssessment: { ...base.applicabilityAssessment, value: b58, applicability: b58 } };
+  const result = defineCalibrationKnowledgeLookupResult({
+    ...commonResult([match]),
+    outcome: "conflict",
+    conflicts: [{
+      conflictId: "conflict:internal",
+      summary: "Preserved applicability assertions materially disagree.",
+      candidateIds: [match.candidateId],
+      contradictoryAssertionIds: [match.knowledge.applicability.assertionId, match.applicabilityAssessment.assertionId],
+      applicabilityConflictEvidence: [{ kind: "applicability_conflict", leftAssertionId: match.knowledge.applicability.assertionId, rightAssertionId: match.applicabilityAssessment.assertionId, dimension: "platforms", leftValues: ["N54"], rightValues: ["B58"], rationale: "Qualified platform applicability is disjoint." }],
+      provenance: [{ sourceType: "test", sourceIdentifier: "internal-conflict" }],
+      unresolvedReason: "The preserved assertions require authorised resolution.",
+    }],
+    unresolvedReason: "Material candidate-internal conflict remains unresolved.",
+  });
+  assert.equal(result.outcome, "conflict");
+  assert.equal(result.query.context.assertions.length, 0);
+});
+
+test("compatible applicability cannot manufacture internal conflict", () => {
+  const match = candidate();
+  assert.throws(() => defineCalibrationKnowledgeLookupResult({ ...commonResult([match]), outcome: "conflict", conflicts: [{ conflictId: "conflict:compatible", summary: "Compatible assertions are not conflict.", candidateIds: [match.candidateId], contradictoryAssertionIds: [match.knowledge.applicability.assertionId, match.applicabilityAssessment.assertionId], applicabilityConflictEvidence: [{ kind: "applicability_conflict", leftAssertionId: match.knowledge.applicability.assertionId, rightAssertionId: match.applicabilityAssessment.assertionId, dimension: "platforms", leftValues: [], rightValues: [], rationale: "No material incompatibility exists." }], provenance: [{ sourceType: "test", sourceIdentifier: "compatible" }], unresolvedReason: "Invalid manufactured conflict." }], unresolvedReason: "Invalid manufactured conflict." }), /does not prove materially incompatible values/);
+});
+
+test("single-candidate internal conflict rejects insufficient and unresolved references", () => {
+  const match = candidate();
+  const build = (ids: readonly string[]) => defineCalibrationKnowledgeLookupResult({
+    ...commonResult([match]),
+    outcome: "conflict",
+    conflicts: [{ conflictId: "conflict:invalid-internal", summary: "Invalid internal conflict.", candidateIds: [match.candidateId], contradictoryAssertionIds: ids, provenance: [{ sourceType: "test", sourceIdentifier: "invalid-internal" }], unresolvedReason: "Conflict is incomplete." }],
+    unresolvedReason: "Conflict is incomplete.",
+  });
+  assert.throws(() => build([match.knowledge.applicability.assertionId]), /requires typed applicability conflict evidence/);
+  assert.throws(() => build([match.knowledge.applicability.assertionId, match.knowledge.applicability.assertionId]), /must be unique/);
+  assert.throws(() => build([match.knowledge.applicability.assertionId, "assertion:invented"]), /is not preserved by the result/);
 });
 
 test("reader contract is asynchronous and read-only", async () => {

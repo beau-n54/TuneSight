@@ -560,5 +560,19 @@ export function defineCalibrationKnowledgeObject(
     });
   });
 
+  const assertionIds = new Set<string>();
+  const registerAssertion = (assertion: QualifiedAssertion<unknown>) => {
+    if (assertionIds.has(assertion.assertionId)) {
+      throw new Error(`Calibration Knowledge assertion identity ${assertion.assertionId} is duplicated.`);
+    }
+    assertionIds.add(assertion.assertionId);
+  };
+  [input.identity, input.canonicalName, input.calibrationKind, input.primarySubsystem, input.applicability, ...input.aliases, ...input.purposes, ...input.engineeringIntents, ...input.relatedSubsystems, ...input.sourceRepresentations, ...input.relationships, ...input.directionalBehaviours].forEach(registerAssertion);
+  input.directionalBehaviours.forEach((assertion) => {
+    assertion.value?.boundaryConditions.forEach(registerAssertion);
+    assertion.value?.nonlinearCharacteristics.forEach(registerAssertion);
+    assertion.value?.potentialProtectiveResponses.forEach(registerAssertion);
+  });
+
   return cloneAndFreeze(input);
 }

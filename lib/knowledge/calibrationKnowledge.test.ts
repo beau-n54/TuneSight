@@ -135,6 +135,20 @@ test("defines an immutable canonical Calibration Knowledge object", () => {
   assert.equal(Reflect.set(result, "version", "2"), false);
 });
 
+test("rejects duplicate assertion identities across canonical locations", () => {
+  const base = minimalObject();
+  const duplicate = assertion({ id: "duplicate", value: { name: "Alias" } });
+  assert.throws(() => defineCalibrationKnowledgeObject({ ...base, aliases: [duplicate, duplicate] }), /assertion identity duplicate is duplicated/);
+  assert.throws(() => defineCalibrationKnowledgeObject({ ...base, aliases: [duplicate], sourceRepresentations: [assertion({ id: "duplicate", value: { sourceReferenceId: "source", sourceType: vocabulary("xdf"), sourceIdentifier: "source", axes: [], conversionMetadata: {} } })] }), /assertion identity duplicate is duplicated/);
+});
+
+test("rejects duplicate nested behaviour assertion identities", () => {
+  const base = minimalObject();
+  const boundary = assertion({ id: "nested:duplicate", value: { conditionId: "condition", quantity: "load", relationship: vocabulary("above"), valueDescription: "Above boundary" } });
+  const behaviour = assertion({ id: "behaviour", value: { direction: "increase" as const, response: vocabulary("increase"), manipulatedQuantity: "load", expectedEffect: "Effect", affectedSubsystems: [], preconditions: [], boundaryConditions: [boundary], nonlinearCharacteristics: [assertion({ id: "nested:duplicate", value: vocabulary("nonlinear") })], potentialProtectiveResponses: [], dependencyCalibrationIds: [], exceptions: [] } });
+  assert.throws(() => defineCalibrationKnowledgeObject({ ...base, directionalBehaviours: [behaviour] }), /assertion identity nested:duplicate is duplicated/);
+});
+
 test("requires repository-compatible provenance for authoritative assertions", () => {
   const cases = [
     {

@@ -91,6 +91,18 @@ export type CalibrationKnowledgeCandidate = Readonly<{
   limitations: readonly string[];
 }>;
 
+export type CalibrationKnowledgeApplicabilityDimension = keyof Omit<CalibrationApplicability, "scope" | "unresolvedReason">;
+
+export type CalibrationKnowledgeApplicabilityConflictEvidence = Readonly<{
+  kind: "applicability_conflict";
+  leftAssertionId: string;
+  rightAssertionId: string;
+  dimension: CalibrationKnowledgeApplicabilityDimension;
+  leftValues: readonly string[];
+  rightValues: readonly string[];
+  rationale: string;
+}>;
+
 export type CalibrationKnowledgeConflict = Readonly<{
   conflictId: string;
   summary: string;
@@ -98,6 +110,7 @@ export type CalibrationKnowledgeConflict = Readonly<{
   contradictoryAssertionIds: readonly string[];
   provenance: readonly KnowledgeProvenanceReference[];
   unresolvedReason: string;
+  applicabilityConflictEvidence?: readonly CalibrationKnowledgeApplicabilityConflictEvidence[];
 }>;
 
 type CalibrationKnowledgeLookupResultMetadata = Readonly<{
@@ -442,6 +455,33 @@ function validateOutcome(result: CalibrationKnowledgeLookupResult): void {
       const contextAssertionIds = new Set(
         result.query.context.assertions.map((assertion) => assertion.assertionId)
       );
+      const preservedAssertions: readonly QualifiedAssertion<unknown>[] = [
+        ...result.query.selectors,
+        ...result.query.context.assertions,
+        ...result.candidates.flatMap((candidate) => [
+          candidate.knowledge.identity,
+          candidate.knowledge.canonicalName,
+          ...candidate.knowledge.aliases,
+          ...candidate.knowledge.purposes,
+          ...candidate.knowledge.engineeringIntents,
+          candidate.knowledge.calibrationKind,
+          candidate.knowledge.primarySubsystem,
+          ...candidate.knowledge.relatedSubsystems,
+          candidate.knowledge.applicability,
+          ...candidate.knowledge.sourceRepresentations,
+          ...candidate.knowledge.directionalBehaviours.flatMap((assertion) => [
+            assertion,
+            ...(assertion.value?.boundaryConditions ?? []),
+            ...(assertion.value?.nonlinearCharacteristics ?? []),
+            ...(assertion.value?.potentialProtectiveResponses ?? []),
+          ]),
+          ...candidate.knowledge.relationships,
+          candidate.matchBasis,
+          candidate.applicabilityAssessment,
+        ]),
+      ];
+      const assertionIndex = new Map<string, QualifiedAssertion<unknown>[]>();
+      preservedAssertions.forEach((assertion) => assertionIndex.set(assertion.assertionId, [...(assertionIndex.get(assertion.assertionId) ?? []), assertion]));
       result.conflicts.forEach((conflict) => {
         requireNonBlank(conflict.conflictId, "Conflict identity");
         requireNonBlank(conflict.summary, "Conflict summary");
@@ -475,15 +515,41 @@ function validateOutcome(result: CalibrationKnowledgeLookupResult): void {
           conflict.contradictoryAssertionIds,
           "Contradictory assertion identity"
         );
-        if (
-          result.candidates.length === 1 &&
-          !conflict.contradictoryAssertionIds.some((assertionId) =>
-            contextAssertionIds.has(assertionId)
-          )
-        ) {
-          throw new Error(
-            "Single-candidate conflict must preserve a contradictory qualified context assertion."
-          );
+        const resolvedAssertions = conflict.contradictoryAssertionIds.map((assertionId) => {
+          const resolved = assertionIndex.get(assertionId) ?? [];
+          if (resolved.length === 0) {
+            throw new Error(
+              `Contradictory assertion ${assertionId} is not preserved by the result.`
+            );
+          }
+          if (resolved.length !== 1) {
+            throw new Error(`Contradictory assertion ${assertionId} does not resolve uniquely.`);
+          }
+          return resolved[0];
+        });
+        const hasContextConflict = conflict.contradictoryAssertionIds.some((assertionId) => contextAssertionIds.has(assertionId));
+        if (result.candidates.length === 1 && !hasContextConflict) {
+          const evidence = conflict.applicabilityConflictEvidence ?? [];
+          if (evidence.length === 0) throw new Error("Single-candidate internal conflict requires typed applicability conflict evidence.");
+          const covered = new Set<string>();
+          evidence.forEach((item) => {
+            requireNonBlank(item.rationale, "Applicability conflict rationale");
+            if (item.kind !== "applicability_conflict" || item.leftAssertionId === item.rightAssertionId) throw new Error("Applicability conflict requires two distinct assertion references.");
+            const left = assertionIndex.get(item.leftAssertionId) ?? [];
+            const right = assertionIndex.get(item.rightAssertionId) ?? [];
+            if (left.length !== 1 || right.length !== 1) throw new Error("Applicability conflict assertions must resolve uniquely.");
+            const leftApplicability = left[0].applicability;
+            const rightApplicability = right[0].applicability;
+            if (leftApplicability.scope.recognition !== "known" || rightApplicability.scope.recognition !== "known" || leftApplicability.unresolvedReason || rightApplicability.unresolvedReason) throw new Error("Applicability conflict requires known resolved applicability.");
+            const leftValues = [...new Set(item.leftValues)].sort();
+            const rightValues = [...new Set(item.rightValues)].sort();
+            const actualLeft = [...new Set(leftApplicability[item.dimension])].sort();
+            const actualRight = [...new Set(rightApplicability[item.dimension])].sort();
+            if (leftValues.length === 0 || rightValues.length === 0 || JSON.stringify(leftValues) !== JSON.stringify(actualLeft) || JSON.stringify(rightValues) !== JSON.stringify(actualRight) || leftValues.some((value) => rightValues.includes(value))) throw new Error("Applicability conflict evidence does not prove materially incompatible values.");
+            covered.add(item.leftAssertionId);
+            covered.add(item.rightAssertionId);
+          });
+          if (resolvedAssertions.length < 2 || conflict.contradictoryAssertionIds.some((id) => !covered.has(id))) throw new Error("Internal conflict assertions must be covered by typed applicability conflict evidence.");
         }
       });
       requireNonBlank(result.unresolvedReason, "Conflict unresolved reason");
