@@ -43,7 +43,7 @@ Runtime Implementation
 | Identifier | Title | Status |
 |---|---|---|
 | TS-STD-000 | [Engineering Standards Framework](TS-STD-000-engineering-standards-framework.md) | Founder Ratified |
-| TS-STD-001 | Engineering Truth Standard | Engineering Hold; not authorised, drafted or ratified |
+| TS-STD-001 | [Engineering Truth Standard](TS-STD-001-engineering-truth-standard.md) | Founder Ratified |
 
 ## Boundary
 

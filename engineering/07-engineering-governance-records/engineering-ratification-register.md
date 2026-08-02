@@ -839,6 +839,48 @@ Engineering Standards exist to preserve stable engineering obligations while all
 
 ---
 
+### TS-RAT-013
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-013 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-001 — Engineering Truth Standard |
+| Permanent Identifier | TS-STD-001 |
+| Authority | Founder |
+| Ratification Scope | Permanent obligations governing when TuneSight may represent, preserve and consume Engineering Truth |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-001 Engineering Truth Standard](../engineering-standards/TS-STD-001-engineering-truth-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-001 as the authoritative Engineering Truth Standard for TuneSight and as the first substantive Standard derived from TS-STD-000.
+
+**Ratified Governance Effect**
+
+- Engineering Truth remains subordinate to engineering reality.
+- Engineering Truth is established through governed qualification rather than certainty.
+- Exact scope, applicability, qualification, uncertainty, contradiction, identity, provenance, lifecycle and historical meaning remain preserved.
+- Evidence, authority, confidence, identity, semantics, admission and publication remain distinct responsibilities.
+- Artificial intelligence output alone never establishes Engineering Truth or independent authority.
+- All future Engineering Standards remain consistent with TS-STD-001 where applicable.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, runtime or deployment behaviour.
+- It admits, authorises and publishes no production Engineering Knowledge.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
