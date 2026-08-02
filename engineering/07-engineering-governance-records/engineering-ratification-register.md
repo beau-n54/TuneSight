@@ -881,6 +881,50 @@ The Founder ratifies TS-STD-001 as the authoritative Engineering Truth Standard 
 
 ---
 
+### TS-RAT-014
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-014 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-004 — Engineering Identity, Provenance and Traceability Standard |
+| Permanent Identifier | TS-STD-004 |
+| Authority | Founder |
+| Ratification Scope | Permanent obligations governing Engineering Identity, Revision, Representation, Reference, Provenance, Lineage, Traceability and Historical Reproducibility |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-004 Engineering Identity, Provenance and Traceability Standard](../engineering-standards/TS-STD-004-engineering-identity-provenance-traceability-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-004 as the authoritative Engineering Identity, Provenance and Traceability Standard and the fourth Engineering Standard within the TuneSight Engineering Standards family.
+
+**Ratified Governance Effect**
+
+- Engineering Identity remains subordinate to engineering reality.
+- Stable Identity, exact Revision, Representation, Reference, Provenance, Lineage, Traceability and Historical Reproducibility remain permanently distinct.
+- Identity collision, fragmentation, ambiguity, unresolved identity, split, merge, correction, replacement and supersession remain governed and historically visible.
+- Source-native identity, database identity, Registry identity, publication identity, receipt identity and digest identity do not independently establish canonical Engineering Identity.
+- Historical Reproducibility preserves exact historical understanding without promoting historical error into current Engineering Truth.
+- Current Engineering Identity and current Engineering Truth remain governed by the best qualified understanding available within their declared scope.
+- Future Engineering Standards remain consistent with TS-STD-004 where applicable.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It does not define Truth, Evidence, Qualification, Authority, Confidence, Ontology, Vocabulary or semantic equivalence.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, Registry, runtime or deployment behaviour.
+- It admits, authorises and publishes no production Engineering Knowledge.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

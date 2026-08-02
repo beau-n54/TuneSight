@@ -44,6 +44,11 @@ Runtime Implementation
 |---|---|---|
 | TS-STD-000 | [Engineering Standards Framework](TS-STD-000-engineering-standards-framework.md) | Founder Ratified |
 | TS-STD-001 | [Engineering Truth Standard](TS-STD-001-engineering-truth-standard.md) | Founder Ratified |
+| TS-STD-002 | Engineering Evidence Integrity Standard | Architecture complete; ready for drafting; not ratified |
+| TS-STD-003 | Engineering Qualification, Authority and Confidence Standard | Architecture complete; ready for drafting; not ratified |
+| TS-STD-004 | [Engineering Identity, Provenance and Traceability Standard](TS-STD-004-engineering-identity-provenance-traceability-standard.md) | Founder Ratified |
+| TS-STD-005 | Engineering Semantic Integrity Standard | Engineering Hold; not drafted or ratified |
+| TS-STD-006 | Engineering Knowledge Admission and Publication Integrity Standard | Engineering Hold; not drafted or ratified |
 
 ## Boundary
 
