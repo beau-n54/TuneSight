@@ -56,6 +56,8 @@ The eight Engineering Domains are:
 
 [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md) are the universal architectural standard by which these owners and consumers exchange qualified engineering truth. They are not a domain, runtime layer, framework or implementation interface.
 
+Within Knowledge, the foundational order is Engineering Ontology, Governed Vocabulary, Knowledge Entities, Engineering Assertions and Evidence. Ontology governs the nature of engineering concepts; Vocabulary governs their language; Knowledge records qualified engineering truth; and Evidence supports or contradicts that truth. These responsibilities shall not be collapsed.
+
 ## Standard Chapter Structure
 
 Each domain chapter defines:
@@ -85,6 +87,8 @@ Specialised detail may be added where it clarifies an established responsibility
 - Consumers use contract outputs and do not inspect another domain's internals to recreate truth.
 - Contradiction and uncertainty remain visible.
 - Architectural change occurs through Governance, not incidental implementation.
+- Ontology defines engineering reality, not software implementation or terminology.
+- No Knowledge Entity may introduce an ontology class outside the governed ontology architecture.
 
 ## Independence and Dependency
 

@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 31 July 2026
+**Last Updated:** 2 August 2026
 
 
 
@@ -55,13 +55,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** WP-007.0 Engineering Explanation Architecture complete, Founder approved and Founder ratified; implementation pending
+**Current Engineering Phase:** WP-004.5.1 Engineering Ontology Architecture Founder ratified; implementation remains on Engineering Hold
 
 **Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
 
-**Current Objective:** WP-007.0 Engineering Explanation Architecture is complete, Founder approved and ratified under TS-RAT-010. It establishes Engineering Reasoning as an internal Explanation layer and defines Context Qualification, Hypothesis Evaluation, Engineering Argument Construction, Comparative Adjudication, Confidence Derivation, Explanation Synthesis and structured reasoning traceability. Implementation remains pending and is not authorised by architecture ratification.
+**Current Objective:** WP-004.5.1 Engineering Ontology Architecture is Founder ratified under TS-RAT-011. Engineering Ontology is now a permanent architectural layer within Knowledge, preceding Governed Vocabulary and defining the categories of engineering reality that TuneSight may represent. No Ontology contracts, runtime behaviour or production Knowledge are authorised.
 
-**Next Authorised Objective:** No WP-007 runtime implementation is authorised. WP-011.2 completion continues to depend on future separately authorised WP-007 Explanation coverage for event families lacking authoritative Root Cause output, beginning with Lean Under Load. No WP-004.3 or WP-011.3 through WP-011.6 implementation is authorised.
+**Next Authorised Objective:** WP-004.5.2 Governed Vocabulary and Terminology Architecture remains future architecture work. TS-KO-000001 and all production Calibration Knowledge population remain on Engineering Hold. No Ontology, Vocabulary, Knowledge Entity, runtime or production implementation is authorised.
 
 **Next Subsystem Definition:** WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 is on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
@@ -91,6 +91,22 @@ Container metadata and engineering provenance remain preserved. Knowledge owns r
 The Founder-ratified WP-011.0 architecture defines how existing outputs shall be communicated through engineering conclusions, Evidence, interpretation, confidence, provenance and progressive disclosure. It changes no runtime behaviour and creates no engineering truth. WP-011.0 is the authoritative governing architecture for the existing WP-011 Presentation implementation family. The existing WP-005 Evidence and WP-011 Presentation identities remain unchanged.
 
 The universal Engineering Investigation surface now implements the Founder-ratified presentation architecture through a refined engineering hierarchy, progressive evidence disclosure, corrected Intelligent Warnings communication, event-driven Cylinder Timing Observation, structured XDF Calibration inspection presentation, accessible disclosure controls and one truthful telemetry-axis contract. Monotonic single-pull records may use an RPM-indexed engineering view; multi-pull, reset, incomplete or invalid RPM records retain Sample Sequence with recorded RPM available for inspection. These changes are presentation-only and apply without platform-specific branches across N54, B58 Gen1, B58TU / Supra and future supported platforms.
+
+The Founder-ratified Engineering Ontology amendment establishes the permanent Knowledge foundation:
+
+```text
+Engineering Ontology
+    ↓
+Governed Vocabulary
+    ↓
+Knowledge Entities
+    ↓
+Engineering Assertions
+    ↓
+Evidence
+```
+
+Ontology defines engineering reality rather than software implementation or terminology. Every Ontology revision requires architectural review and Founder ratification. This governance amendment introduces no implementation and does not admit any production Knowledge.
 
 ---
 
@@ -411,6 +427,30 @@ Founder review of the WP-003 Engineering Hold and ratification criteria. No furt
 
 ---
 
+## WP-004.5.1 Engineering Ontology Architecture
+
+**Architecture Status:** FOUNDER RATIFIED
+
+**Founder Ratification:** [TS-RAT-011](engineering-ratification-register.md#ts-rat-011)
+
+**Implementation Status:** ON ENGINEERING HOLD; NOT AUTHORISED
+
+Engineering Ontology is a permanent architectural layer within Knowledge. It defines the canonical categories of engineering reality recognised by TuneSight and remains distinct from Governed Vocabulary, Knowledge Entities, Engineering Assertions and Evidence.
+
+### Ratified Architectural Boundary
+
+- Ontology defines what kinds of engineering concepts exist.
+- Vocabulary defines what engineers call those concepts.
+- Knowledge Entities instantiate governed ontology classes.
+- Engineering Assertions make qualified claims about those entities.
+- Evidence supports or contradicts those claims.
+- Ontology defines no software implementation, current Evidence, reasoning, action or presentation.
+- Every Ontology revision requires explicit architectural review and Founder ratification.
+
+TS-KO-000001 and all production Calibration Knowledge population remain on Engineering Hold. WP-004.5.2 through WP-004.5.11 remain future architectural work and require separate Founder authority.
+
+---
+
 ## WP-007.0 Engineering Explanation Architecture
 
 **Architecture Status:** COMPLETE
@@ -460,6 +500,7 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
 - WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture is complete and Founder ratified, while implementation remains pending and unauthorised. Parent WP-004 completion has not been declared.
+- WP-004.5.1 Engineering Ontology Architecture is Founder ratified under [TS-RAT-011](engineering-ratification-register.md#ts-rat-011). Ontology implementation, TS-KO-000001 and production Knowledge population remain on Engineering Hold.
 - No additional WP-004.2 implementation is authorised.
 - WP-007.0 Engineering Explanation Architecture is complete and Founder ratified under [TS-RAT-010](engineering-ratification-register.md#ts-rat-010). WP-007 runtime implementation remains pending and unauthorised.
 - WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.

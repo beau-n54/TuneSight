@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
+
+import homepageBanner from "../homepage images/homepage banner.png";
 
 const classicPlatforms = ["N13", "N20", "N54", "N55"];
 const modernPlatforms = ["S55", "B58 Gen1", "B58 Gen2", "S58", "S63"];
@@ -8,10 +11,11 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white">
       <section className="max-w-7xl mx-auto px-6 py-8">
         <div className="bmw-border rounded-3xl overflow-hidden bg-zinc-950 mb-12 shadow-2xl shadow-blue-500/10">
-          <img
-            src="/tunesight-banner.jpeg"
-            alt="TuneSight BMW diagnostic platform"
+          <Image
+            src={homepageBanner}
+            alt="TuneSight — Engineering Intelligence for BMW Performance"
             className="w-full h-auto"
+            loading="eager"
           />
         </div>
 

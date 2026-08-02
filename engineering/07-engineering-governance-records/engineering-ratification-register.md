@@ -743,6 +743,55 @@ Implementation remains Pending and requires separate Founder authority, validati
 
 ---
 
+### TS-RAT-011
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-011 |
+| Date | 2 August 2026 |
+| Artefact Type | Constitutional Architecture Amendment |
+| Artefact Name | WP-004.5.1 — Engineering Ontology Architecture |
+| Permanent Work Package Identifier | WP-004.5.1 |
+| Authority | Founder |
+| Ratification Scope | Engineering Ontology as the governed model of engineering reality within the Knowledge Domain |
+| Status | RATIFIED |
+| Architecture Authority | [Engineering Domain 02 — Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>) |
+| Founder Review | Completed |
+| Implementation Status | On Engineering Hold; not authorised |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies Engineering Ontology as a permanent architectural layer within Engineering Domain 02 — Knowledge and as the foundation that precedes Governed Vocabulary, Knowledge Entities, Engineering Assertions and Evidence.
+
+**Engineering Reality Principle**
+
+- Reality exists independently of TuneSight.
+- Ontology models what kinds of engineering concepts exist.
+- Vocabulary defines the language used to describe those concepts.
+- Knowledge Entities instantiate governed ontology classes.
+- Engineering Assertions make qualified claims about those entities.
+- Evidence supports or contradicts those claims.
+- Explanation owns analysis-specific reasoning, Decision owns action and Presentation owns communication.
+
+TuneSight shall never confuse what an engineering concept is with what engineers call it. Ontology defines engineering reality, not software implementation, terminology, current Evidence or runtime behaviour.
+
+**Stability and Governance**
+
+Engineering Ontology is a high-governance architectural layer expected to evolve more slowly than Vocabulary, Knowledge Entities, Engineering Assertions, Evidence, relationships and downstream reasoning. Every Ontology revision requires explicit architectural review and Founder ratification. No Knowledge Entity may introduce an ontology class outside the governed Ontology architecture.
+
+**Architectural Boundaries**
+
+- Engineering Ontology remains inside Knowledge and is not a new Engineering Domain.
+- This ratification authorises architecture and governance only.
+- It creates no Ontology contract or implementation.
+- It changes no runtime, Registry, schema, API, persistence, test or production behaviour.
+- It admits, authorises and publishes no production Knowledge.
+- TS-KO-000001 remains on Engineering Hold.
+- WP-004.5.2 through WP-004.5.11 remain future work and require separate Founder authority.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

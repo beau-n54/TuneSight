@@ -146,6 +146,18 @@ These Articles shall govern the continued evolution of the platform.
 
 ---
 
+## Article XIII
+
+### Engineering Reality
+
+Reality exists independently of TuneSight.
+
+Engineering Ontology models the nature of engineering concepts. Governed Vocabulary defines the language used to describe them. Knowledge records qualified engineering truth. Evidence supports or contradicts that truth. Explanation reasons over it. Decision acts upon it. Presentation communicates it.
+
+TuneSight shall never confuse what an engineering concept is with what engineers call it. It shall not invent engineering reality; it shall discover, qualify and preserve it.
+
+---
+
 ## Closing Declaration
 
 The Engineering Constitution defines the immutable engineering laws of TuneSight.

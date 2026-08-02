@@ -20,6 +20,36 @@ Knowledge solely owns canonical reusable Knowledge Objects, Knowledge Relationsh
 
 Knowledge does not own the current system's Engineering Identity, runtime Evidence, analysis-specific Correlation, Explanation, Decision, user-specific Memory, Evolution proposals or Presentation.
 
+## Engineering Ontology
+
+Engineering Ontology is a permanent architectural layer within Knowledge. It defines the canonical categories of engineering reality recognised by TuneSight and answers: **What kind of engineering thing exists?**
+
+It does not define what a concept is called, where it is implemented or what Evidence currently supports it. Governed Vocabulary owns terminology. Knowledge Entities instantiate governed ontology classes. Engineering Assertions make qualified claims about those entities. Evidence supports or contradicts those claims.
+
+```text
+Engineering Ontology
+    ↓
+Governed Vocabulary
+    ↓
+Knowledge Entities
+    ↓
+Engineering Assertions
+    ↓
+Evidence
+```
+
+Ontology governs engineering existence. Vocabulary governs engineering language. Knowledge governs engineering truth. Evidence governs engineering support. Explanation governs analysis-specific reasoning. Decision governs engineering action. Presentation governs engineering communication.
+
+Reality exists independently of TuneSight. Ontology models that reality; TuneSight does not invent it.
+
+### Ontology Stability and Governance
+
+Engineering Ontology is expected to evolve more slowly than the layers built upon it. It changes only when the governed engineering model of reality itself requires revision.
+
+Every Ontology revision requires explicit architectural review and Founder ratification. No Knowledge Entity, Engineering Assertion, Vocabulary term, Evidence source, implementation type or consumer may redefine engineering reality or introduce an ungoverned ontology class.
+
+Engineering reality shall remain stable while engineering language may evolve and qualified engineering truth may grow. Those three concepts remain distinct.
+
 ## Responsibilities
 
 - Register and publish canonical reusable engineering truth.

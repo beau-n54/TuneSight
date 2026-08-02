@@ -135,6 +135,26 @@ Validated engineering knowledge.
 
 Canonical engineering knowledge.
 
+**Internal Knowledge Architecture**
+
+Knowledge preserves the following permanent separation:
+
+```text
+Engineering Ontology
+    ↓
+Governed Vocabulary
+    ↓
+Knowledge Entities
+    ↓
+Engineering Assertions
+    ↓
+Evidence
+```
+
+Engineering Ontology defines what kinds of engineering concepts exist. Governed Vocabulary defines the language used to describe those concepts. Knowledge Entities instantiate governed ontology classes. Engineering Assertions make qualified claims about those entities. Evidence supports or contradicts those claims.
+
+Ontology is an architectural layer within Knowledge, not a separate Engineering Domain. It defines engineering reality rather than software implementation, terminology, current Evidence or analysis-specific reasoning.
+
 ---
 
 ## Engineering Domain 3
