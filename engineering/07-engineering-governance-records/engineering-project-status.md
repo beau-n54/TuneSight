@@ -32,6 +32,8 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 ## Governing References
 
 - [Engineering Blueprint](../04-engineering-blueprint.md)
+- [Engineering Standards](../engineering-standards/README.md)
+- [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md)
 - [Engineering Architecture Bible](<../05 engineering-architecture-bible/README.md>)
 - [Engineering Domain 01 - Vehicle Identity](<../05 engineering-architecture-bible/01-vehicle-identity.md>)
 - [Engineering Domain 02 - Knowledge](<../05 engineering-architecture-bible/02-knowledge.md>)
@@ -55,13 +57,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** WP-004.5.1 Engineering Ontology Architecture Founder ratified; implementation remains on Engineering Hold
+**Current Engineering Phase:** TS-STD-000 Engineering Standards Framework Founder ratified; initial Engineering Standards suite architecture pending separate Founder authority
 
 **Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
 
-**Current Objective:** WP-004.5.1 Engineering Ontology Architecture is Founder ratified under TS-RAT-011. Engineering Ontology is now a permanent architectural layer within Knowledge, preceding Governed Vocabulary and defining the categories of engineering reality that TuneSight may represent. No Ontology contracts, runtime behaviour or production Knowledge are authorised.
+**Current Objective:** TS-STD-000 Engineering Standards Framework is Founder ratified under TS-RAT-012. Engineering Standards now occupy the permanent governance layer between Engineering Principles and the Engineering Blueprint. Every future Standard derives its authority from TS-STD-000 and remains conformant to it.
 
-**Next Authorised Objective:** WP-004.5.2 Governed Vocabulary and Terminology Architecture remains future architecture work. TS-KO-000001 and all production Calibration Knowledge population remain on Engineering Hold. No Ontology, Vocabulary, Knowledge Entity, runtime or production implementation is authorised.
+**Next Authorised Objective:** None under this instruction. TS-STD-001 remains on Engineering Hold pending separate Founder authority for the complete initial Engineering Standards suite architectural phase.
 
 **Next Subsystem Definition:** WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 is on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
@@ -107,6 +109,34 @@ Evidence
 ```
 
 Ontology defines engineering reality rather than software implementation or terminology. Every Ontology revision requires architectural review and Founder ratification. This governance amendment introduces no implementation and does not admit any production Knowledge.
+
+The Founder-ratified Engineering Standards governance layer establishes the permanent authority order:
+
+```text
+Founder Vision
+    ↓
+Engineering Manifesto
+    ↓
+Engineering Constitution
+    ↓
+Engineering Principles
+    ↓
+Engineering Standards
+    ↓
+Engineering Blueprint
+    ↓
+Engineering Architecture Bible
+    ↓
+Production Contract
+    ↓
+Work Packages
+    ↓
+Implementation Contracts
+    ↓
+Runtime Implementation
+```
+
+Standards define stable, assessable and implementation-independent obligations. They constrain applicable Architecture and implementation without owning either. Ratification of the Framework changes no runtime capability, contract, Work Package or production status.
 
 ---
 
@@ -427,6 +457,24 @@ Founder review of the WP-003 Engineering Hold and ratification criteria. No furt
 
 ---
 
+## TS-STD-000 Engineering Standards Framework
+
+**Framework Status:** FOUNDER RATIFIED
+
+**Founder Ratification:** [TS-RAT-012](engineering-ratification-register.md#ts-rat-012)
+
+**Implementation Status:** NOT APPLICABLE
+
+TS-STD-000 is the authoritative parent Framework for every future TuneSight Engineering Standard. It owns Standard and requirement identity, normative language, applicability, conformance, compatibility, lifecycle, traceability and the governance rules by which Standards evolve.
+
+Standards define obligations. They do not own Engineering Domains, Architecture, runtime behaviour, Work Packages, software contracts, Engineering Knowledge, Engineering Evidence or production authority.
+
+### Standards Engineering Hold
+
+TS-STD-001 Engineering Truth Standard is on Engineering Hold. It is not authorised, drafted, ratified or effective and establishes no current conformance obligation. The complete initial Engineering Standards suite must be investigated under separate Founder authority before any individual Standard is drafted.
+
+---
+
 ## WP-004.5.1 Engineering Ontology Architecture
 
 **Architecture Status:** FOUNDER RATIFIED
@@ -501,6 +549,7 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
 - WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture is complete and Founder ratified, while implementation remains pending and unauthorised. Parent WP-004 completion has not been declared.
 - WP-004.5.1 Engineering Ontology Architecture is Founder ratified under [TS-RAT-011](engineering-ratification-register.md#ts-rat-011). Ontology implementation, TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+- TS-STD-000 Engineering Standards Framework is Founder ratified under [TS-RAT-012](engineering-ratification-register.md#ts-rat-012). TS-STD-001 remains on Engineering Hold pending separate Founder authority for the initial Engineering Standards suite; no substantive Engineering Truth Standard is yet effective.
 - No additional WP-004.2 implementation is authorised.
 - WP-007.0 Engineering Explanation Architecture is complete and Founder ratified under [TS-RAT-010](engineering-ratification-register.md#ts-rat-010). WP-007 runtime implementation remains pending and unauthorised.
 - WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.

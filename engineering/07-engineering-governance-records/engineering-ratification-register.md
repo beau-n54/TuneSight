@@ -792,6 +792,53 @@ Engineering Ontology is a high-governance architectural layer expected to evolve
 
 ---
 
+### TS-RAT-012
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-012 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standards Framework |
+| Artefact Name | TS-STD-000 — Engineering Standards Framework |
+| Permanent Identifier | TS-STD-000 |
+| Authority | Founder |
+| Ratification Scope | Permanent architecture governing every TuneSight Engineering Standard |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-000 as the authoritative Engineering Standards Framework for the TuneSight Engineering Intelligence Platform.
+
+**Ratified Governance Effect**
+
+- Engineering Standards occupy the permanent governance layer between Engineering Principles and the Engineering Blueprint.
+- Engineering Standards define implementation-independent governed obligations.
+- Standards constrain applicable Architecture without becoming Architecture.
+- Standards constrain applicable implementation without becoming implementation.
+- Standards do not own Engineering Domains, runtime behaviour, Engineering Knowledge, Engineering Evidence, software implementation or production authority.
+- Every future TuneSight Engineering Standard derives its authority from TS-STD-000 and remains conformant to it.
+- Requirement identity, applicability, conformance, compatibility, lifecycle, traceability and normative language are permanent Framework responsibilities.
+
+**Engineering Standards Principle**
+
+Engineering Standards exist to preserve stable engineering obligations while allowing architecture and implementation to evolve without compromising engineering integrity.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only.
+- It changes no Architecture Bible responsibility, Cross-Domain Contract, Production Contract or Work Package.
+- It creates no implementation, runtime, test, schema, API, persistence or production behaviour.
+- It admits and publishes no Engineering Knowledge.
+- Ratification of TS-STD-000 does not establish conformance of any existing subject.
+- TS-STD-001 Engineering Truth Standard remains on Engineering Hold pending separate Founder authority for the complete initial Engineering Standards suite architectural phase. It is not authorised, drafted, ratified or effective.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
