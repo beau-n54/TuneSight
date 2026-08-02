@@ -47,8 +47,8 @@ Runtime Implementation
 | TS-STD-002 | [Engineering Evidence Integrity Standard](TS-STD-002-engineering-evidence-integrity-standard.md) | Founder Ratified |
 | TS-STD-003 | [Engineering Qualification, Authority and Confidence Standard](TS-STD-003-engineering-qualification-authority-confidence-standard.md) | Founder Ratified |
 | TS-STD-004 | [Engineering Identity, Provenance and Traceability Standard](TS-STD-004-engineering-identity-provenance-traceability-standard.md) | Founder Ratified |
-| TS-STD-005 | Engineering Semantic Integrity Standard | Engineering Hold; not drafted or ratified |
-| TS-STD-006 | Engineering Knowledge Admission and Publication Integrity Standard | Engineering Hold; not drafted or ratified |
+| TS-STD-005 | [Engineering Semantic Integrity Standard](TS-STD-005-engineering-semantic-integrity-standard.md) | Founder Ratified |
+| TS-STD-006 | Engineering Knowledge Admission and Publication Integrity Standard | Ready for Founder ratification; not ratified or effective |
 
 ## Boundary
 

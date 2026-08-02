@@ -1013,6 +1013,52 @@ The Founder ratifies TS-STD-003 as the authoritative Engineering Qualification, 
 
 ---
 
+### TS-RAT-017
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-017 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-005 — Engineering Semantic Integrity Standard |
+| Permanent Identifier | TS-STD-005 |
+| Authority | Founder |
+| Ratification Scope | Permanent obligations governing preservation of engineering meaning across concepts, terminology, propositions, relationships, representations, consumers and historical interpretation |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-005 Engineering Semantic Integrity Standard](../engineering-standards/TS-STD-005-engineering-semantic-integrity-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-005 as the authoritative Engineering Semantic Integrity Standard and the fifth substantive Engineering Standard within the TuneSight Engineering Standards family.
+
+**Ratified Governance Effect**
+
+- The permanent Engineering Semantic model preserves each stage from Engineering Reality through Consumers and Historical Interpretation without substitution.
+- Engineering Semantic Integrity and engineering meaning remain subordinate to engineering reality.
+- Identity, meaning, representation, labels, synonymy, similarity, equivalence, relationships, causation, classification, Qualification, terminology and Authority remain distinct.
+- Semantic ambiguity, conflict, context, scope, transformation, loss, compatibility and lifecycle remain explicit.
+- Manufacturer and source-native terminology remain governed mappings and do not become canonical merely through prevalence.
+- Consumer convenience cannot silently simplify, generalise, specialise or otherwise alter governed engineering meaning.
+- Presentation, serialization, persistence, transport, Explanation, reporting, translation and artificial intelligence assistance preserve meaning rather than redefine it.
+- Historical semantic meaning remains reproducible while current meaning reflects the best governed understanding available within declared scope.
+- Future Engineering Standards remain consistent with TS-STD-005 where applicable.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, Registry, runtime or deployment behaviour.
+- It creates no Ontology content, Vocabulary content or Knowledge content and admits, authorises or publishes no production Engineering Knowledge.
+- TS-STD-006 remains ready for Founder ratification but is not ratified or effective under this record.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
