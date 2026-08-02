@@ -1059,6 +1059,53 @@ The Founder ratifies TS-STD-005 as the authoritative Engineering Semantic Integr
 
 ---
 
+### TS-RAT-018
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-018 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-006 — Engineering Knowledge Admission and Publication Integrity Standard |
+| Permanent Identifier | TS-STD-006 |
+| Authority | Founder |
+| Ratification Scope | Permanent obligations governing Engineering Knowledge Admission, Publication and canonical lifecycle integrity |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-006 Engineering Knowledge Admission and Publication Integrity Standard](../engineering-standards/TS-STD-006-engineering-knowledge-admission-publication-integrity-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-006 as the authoritative Engineering Knowledge Admission and Publication Integrity Standard and the sixth substantive Engineering Standard within the TuneSight Engineering Standards family.
+
+**Ratified Governance Effect**
+
+- The permanent Engineering Knowledge lifecycle preserves every stage from Engineering Material through Current or Historical Knowledge without substitution.
+- Engineering Knowledge Admission, Canonical Knowledge and Publication remain subordinate to engineering reality.
+- Admission remains separate from Publication; eligibility, instruction, execution, Registry state and Receipt remain independently governed.
+- Admission outcomes preserve Invalid, Requires Evidence, Requires Authority, Assessment Incomplete, Unresolved, Conflict, Deferred, Rejected and Admitted distinctly.
+- Publication outcomes preserve Published, Idempotent Replay, Blocked, Failed, Indeterminate and Reconciled distinctly.
+- Registry membership does not establish Engineering Truth, Admission, Authority, Verification or current validity.
+- Composite Publication preserves atomicity, deterministic idempotency and retry lineage.
+- Correction, complete or partial supersession and withdrawal preserve append-only Publication history.
+- Historical Publication remains exactly reproducible, and consumers preserve current-versus-historical Knowledge distinctions.
+- TS-STD-001 through TS-STD-006 constitute the complete Founder-ratified Version 1 substantive Engineering Standards family.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, Registry, runtime or deployment behaviour.
+- It performs no production Admission, Publication Execution, Registry mutation or production Knowledge population.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+- No Version 2 Standard or conformance programme is authorised.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

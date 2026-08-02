@@ -48,8 +48,10 @@ Runtime Implementation
 | TS-STD-003 | [Engineering Qualification, Authority and Confidence Standard](TS-STD-003-engineering-qualification-authority-confidence-standard.md) | Founder Ratified |
 | TS-STD-004 | [Engineering Identity, Provenance and Traceability Standard](TS-STD-004-engineering-identity-provenance-traceability-standard.md) | Founder Ratified |
 | TS-STD-005 | [Engineering Semantic Integrity Standard](TS-STD-005-engineering-semantic-integrity-standard.md) | Founder Ratified |
-| TS-STD-006 | Engineering Knowledge Admission and Publication Integrity Standard | Ready for Founder ratification; not ratified or effective |
+| TS-STD-006 | [Engineering Knowledge Admission and Publication Integrity Standard](TS-STD-006-engineering-knowledge-admission-publication-integrity-standard.md) | Founder Ratified |
 
 ## Boundary
 
 Standards define obligations. They do not define Engineering Domains, Architecture, Work Packages, implementation, runtime behaviour, Engineering Knowledge, Engineering Evidence or production authority.
+
+TS-STD-001 through TS-STD-006 form the complete Founder-ratified Version 1 substantive Engineering Standards family. Completion at the governance level does not establish conformance, implementation or production authority.
