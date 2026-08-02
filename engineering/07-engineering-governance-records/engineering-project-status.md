@@ -35,6 +35,7 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 - [Engineering Standards](../engineering-standards/README.md)
 - [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md)
 - [TS-STD-001 Engineering Truth Standard](../engineering-standards/TS-STD-001-engineering-truth-standard.md)
+- [TS-STD-002 Engineering Evidence Integrity Standard](../engineering-standards/TS-STD-002-engineering-evidence-integrity-standard.md)
 - [TS-STD-004 Engineering Identity, Provenance and Traceability Standard](../engineering-standards/TS-STD-004-engineering-identity-provenance-traceability-standard.md)
 - [Engineering Architecture Bible](<../05 engineering-architecture-bible/README.md>)
 - [Engineering Domain 01 - Vehicle Identity](<../05 engineering-architecture-bible/01-vehicle-identity.md>)
@@ -59,13 +60,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** TS-STD-004 Engineering Identity, Provenance and Traceability Standard Founder ratified
+**Current Engineering Phase:** TS-STD-002 Engineering Evidence Integrity Standard Founder ratified
 
 **Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
 
-**Current Objective:** TS-STD-004 is Founder ratified under TS-RAT-014 as the authoritative Standard governing Engineering Identity, Revision, Representation, Reference, Provenance, Lineage, Traceability and Historical Reproducibility.
+**Current Objective:** TS-STD-002 is Founder ratified under TS-RAT-015 as the authoritative Standard governing Engineering Data, Observation, Evidence integrity, provenance, transformation, classification and historical Evidence preservation.
 
-**Next Authorised Objective:** None under this instruction. TS-STD-005 work, implementation, conformance assessment and production Knowledge population remain unauthorised.
+**Next Authorised Objective:** None under this instruction. Implementation, conformance assessment, production Evidence and production Knowledge population remain unauthorised.
 
 **Next Subsystem Definition:** WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 is on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
@@ -487,6 +488,22 @@ Ratification creates normative governance authority only. It establishes no subj
 
 ---
 
+## TS-STD-002 Engineering Evidence Integrity Standard
+
+**Standard Status:** FOUNDER RATIFIED
+
+**Founder Ratification:** [TS-RAT-015](engineering-ratification-register.md#ts-rat-015)
+
+**Implementation Status:** NOT APPLICABLE
+
+TS-STD-002 establishes the permanent model from Engineering Reality through Data, Observation and Engineering Evidence to Engineering Assertion, Qualification and Governed Engineering Truth. No stage may substitute for another.
+
+Evidence remains subordinate to engineering reality. Production observational Evidence remains permanently distinguishable from synthetic, simulated, replayed, benchmark, fixture, generated and training material. Evidence preserves identity, revision, provenance, custody, transformation, classification, limitations, uncertainty, conflict and history without establishing Authority or Truth.
+
+Ratification creates normative governance authority only. It establishes no existing subject conformance and authorises no implementation, runtime, admission, publication, Registry change, production Evidence or production Knowledge.
+
+---
+
 ## TS-STD-004 Engineering Identity, Provenance and Traceability Standard
 
 **Standard Status:** FOUNDER RATIFIED
@@ -578,7 +595,8 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture is complete and Founder ratified, while implementation remains pending and unauthorised. Parent WP-004 completion has not been declared.
 - WP-004.5.1 Engineering Ontology Architecture is Founder ratified under [TS-RAT-011](engineering-ratification-register.md#ts-rat-011). Ontology implementation, TS-KO-000001 and production Knowledge population remain on Engineering Hold.
 - TS-STD-000 Engineering Standards Framework is Founder ratified under [TS-RAT-012](engineering-ratification-register.md#ts-rat-012). TS-STD-001 Engineering Truth Standard is Founder ratified under [TS-RAT-013](engineering-ratification-register.md#ts-rat-013) and is authoritative; its ratification establishes no implementation or production Knowledge authority.
-- TS-STD-004 Engineering Identity, Provenance and Traceability Standard is Founder ratified under [TS-RAT-014](engineering-ratification-register.md#ts-rat-014). TS-STD-002 and TS-STD-003 are ready for drafting but not ratified; TS-STD-005 and TS-STD-006 remain on Engineering Hold.
+- TS-STD-002 Engineering Evidence Integrity Standard is Founder ratified under [TS-RAT-015](engineering-ratification-register.md#ts-rat-015). It establishes no implementation or production Evidence authority.
+- TS-STD-004 Engineering Identity, Provenance and Traceability Standard is Founder ratified under [TS-RAT-014](engineering-ratification-register.md#ts-rat-014). TS-STD-003 is ready for drafting but not ratified; TS-STD-005 and TS-STD-006 remain on Engineering Hold.
 - No additional WP-004.2 implementation is authorised.
 - WP-007.0 Engineering Explanation Architecture is complete and Founder ratified under [TS-RAT-010](engineering-ratification-register.md#ts-rat-010). WP-007 runtime implementation remains pending and unauthorised.
 - WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.

@@ -925,6 +925,49 @@ The Founder ratifies TS-STD-004 as the authoritative Engineering Identity, Prove
 
 ---
 
+### TS-RAT-015
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-015 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-002 — Engineering Evidence Integrity Standard |
+| Permanent Identifier | TS-STD-002 |
+| Authority | Founder |
+| Ratification Scope | Permanent integrity obligations governing Engineering Data, Observation and Evidence before Evidence may support or contradict Engineering Truth |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-002 Engineering Evidence Integrity Standard](../engineering-standards/TS-STD-002-engineering-evidence-integrity-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-002 as the authoritative Engineering Evidence Integrity Standard and the second substantive Engineering Standard within the TuneSight Engineering Standards family.
+
+**Ratified Governance Effect**
+
+- Engineering Data, Observation, Evidence, Assertion, Qualification and Governed Engineering Truth remain permanently distinct.
+- Engineering Evidence remains subordinate to engineering reality and preserves what was genuinely observed or truthfully derived under governed conditions.
+- Evidence identity, revision, provenance, custody, transformation, classification, limitations, uncertainty, conflict and historical meaning remain governed.
+- Supporting and Contradictory Evidence are relational roles; Missing, Incomplete and Conflicting Evidence remain distinct.
+- Production observational Evidence remains permanently distinguishable from synthetic, simulated, replayed, benchmark, fixture, generated and training material.
+- Evidence integrity does not independently establish Authority, Verification, Confidence, Qualification, admission, publication or Engineering Truth.
+- Future Engineering Standards remain consistent with TS-STD-002 where applicable.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, Registry, runtime or deployment behaviour.
+- It creates no production Evidence and admits, authorises or publishes no production Engineering Knowledge.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
