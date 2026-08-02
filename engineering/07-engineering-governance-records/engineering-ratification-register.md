@@ -968,6 +968,51 @@ The Founder ratifies TS-STD-002 as the authoritative Engineering Evidence Integr
 
 ---
 
+### TS-RAT-016
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-016 |
+| Date | 2 August 2026 |
+| Artefact Type | Engineering Standard |
+| Artefact Name | TS-STD-003 — Engineering Qualification, Authority and Confidence Standard |
+| Permanent Identifier | TS-STD-003 |
+| Authority | Founder |
+| Ratification Scope | Permanent multidimensional obligations governing Engineering Qualification, Authority, Verification and Confidence |
+| Status | RATIFIED |
+| Standards Artefact | [TS-STD-003 Engineering Qualification, Authority and Confidence Standard](../engineering-standards/TS-STD-003-engineering-qualification-authority-confidence-standard.md) |
+| Parent Framework | [TS-STD-000 Engineering Standards Framework](../engineering-standards/TS-STD-000-engineering-standards-framework.md) |
+| Standards Family | [TuneSight Engineering Standards](../engineering-standards/README.md) |
+| Founder Review | Completed |
+| Implementation Status | Not applicable |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies TS-STD-003 as the authoritative Engineering Qualification, Authority and Confidence Standard and the third substantive Engineering Standard within the TuneSight Engineering Standards family.
+
+**Ratified Governance Effect**
+
+- Qualification remains a multidimensional governed representation rather than a scalar status.
+- Engineering Qualification, Authority, Verification, Confidence, Applicability, Trust, Acceptance, Engineering Evidence and Engineering Truth remain permanently distinct.
+- Qualification and Authority remain subordinate to engineering reality and evolve only through governed processes.
+- Authority derives from an explicit, act-specific governed mandate and does not arise from expertise, confidence, plausibility or artificial intelligence output.
+- Verification remains exactly bounded and does not propagate between subjects, assertions, fields, objects or revisions.
+- Confidence remains independently identified, derived and inspectable and does not establish Authority, Verification, admission, publication or Engineering Truth.
+- Unknown, unresolved, candidate, provisional, disputed and conflict states remain first-class.
+- Historical Qualification and Authority remain reproducible while current representations preserve the best governed understanding available within declared scope.
+- Future Engineering Standards remain consistent with TS-STD-003 where applicable.
+
+**Architectural Boundaries**
+
+- This ratification creates normative governance authority only and establishes no existing subject conformance.
+- It changes no Engineering Domain ownership or Architecture.
+- It creates no implementation, contract, test, schema, API, persistence, Registry, runtime or deployment behaviour.
+- It creates no production Evidence and admits, authorises or publishes no production Engineering Knowledge.
+- TS-KO-000001 and production Knowledge population remain on Engineering Hold.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
