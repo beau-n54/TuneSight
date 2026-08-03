@@ -1,5 +1,5 @@
-import { getMissingCoreChannels, read } from "./helpers";
-import type { TranslatedLog, TranslatedLogRow } from "./types";
+import { getMissingCoreChannels, read } from "./helpers.ts";
+import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
 const MHD_ALIASES = {
   time: ["Time", "time", "TIME", "Time (s)", "Timestamp", "timestamp"],
@@ -102,8 +102,9 @@ const MHD_ALIASES = {
     "Throttle",
     "throttle",
     "Throttle Angle[%]",
-    "Accel. Pedal[%]",
   ],
+
+  acceleratorPedal: ["Accel. Pedal[%]", "Accel Ped. Pos. (%)"],
 
   timingCyl1: [
     "timing_correction_cyl_1",
@@ -183,6 +184,8 @@ export function translateMhdRows(
   const headers = Object.keys(rawRows[0] ?? {});
 
   const rows: TranslatedLogRow[] = rawRows.map((row) => {
+    const acceleratorPedal = read(row, MHD_ALIASES.acceleratorPedal);
+    const throttlePlate = read(row, MHD_ALIASES.throttle);
     const boostPsi = read(row, MHD_ALIASES.boost);
     const boostTargetPsi = read(row, MHD_ALIASES.boostTarget);
     const boostErrorPsi =
@@ -193,7 +196,7 @@ export function translateMhdRows(
     return {
       time: read(row, MHD_ALIASES.time),
       rpm: read(row, MHD_ALIASES.rpm),
-      throttle: read(row, MHD_ALIASES.throttle),
+      throttle: acceleratorPedal ?? throttlePlate,
       boostPsi,
       boostTargetPsi,
       boostErrorPsi,
