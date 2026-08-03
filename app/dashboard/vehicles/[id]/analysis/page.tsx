@@ -13,6 +13,10 @@ import {
   type CorrelationGroup,
 } from "@/lib/correlation/conservativeCorrelation";
 import { WorkshopDiagnosticCard } from "@/lib/components/diagnostics/WorkshopDiagnosticCard";
+import {
+  EngineeringWorkspaceShell,
+  WorkspaceReservedPanel,
+} from "@/components/EngineeringWorkspaceShell";
 import { groupDiagnosticEvents } from "@/lib/diagnostics/groupDiagnosticEvents";
 import { buildHistoricalDiagnosticEvents } from "@/lib/diagnostics/buildHistoricalDiagnosticEvents";
 import TelemetryGraphV1 from "./TelemetryGraphV1";
@@ -666,26 +670,50 @@ const groupedDiagnosticEvents =
           </div>
         </div>
 
-        <EngineeringSummaryCard
-          hasLog={!!latestLog}
-          hasSummary={!!latestSummary}
-          quickVerdict={engineV2?.quickVerdict}
-          verdictFlags={renderedVerdictFlags}
+        <EngineeringWorkspaceShell
+          summary={
+            <EngineeringSummaryCard
+              hasLog={!!latestLog}
+              hasSummary={!!latestSummary}
+              quickVerdict={engineV2?.quickVerdict}
+              verdictFlags={renderedVerdictFlags}
+            />
+          }
+          primaryResults={
+            scopedPrimaryResults.length > 0 ? (
+              <PrimaryEngineeringResults results={scopedPrimaryResults} />
+            ) : (
+              <WorkspaceReservedPanel title="No primary results available">
+                Primary engineering results will appear here when the existing
+                analysis produces scoped results for this record.
+              </WorkspaceReservedPanel>
+            )
+          }
+          telemetry={
+            <TelemetryGraphV1
+              events={engineV2?.events ?? []}
+              pullWindows={engineV2?.pullWindows ?? []}
+              telemetry={engineV2?.telemetry ?? null}
+            />
+          }
+          evidence={
+            <EngineeringCorrelationSurface result={correlationResult} />
+          }
+          investigation={
+            <WorkspaceReservedPanel title="Investigation workspace">
+              Detailed investigation surfaces remain below and retain their
+              existing engineering ownership. Shared focus synchronisation is
+              reserved for a later authorised slice.
+            </WorkspaceReservedPanel>
+          }
+          calibrationContext={
+            <WorkspaceReservedPanel title="Calibration context">
+              Calibration context is reserved for governed calibration material.
+              This shell does not infer, calculate or publish calibration
+              intelligence.
+            </WorkspaceReservedPanel>
+          }
         />
-
-        {scopedPrimaryResults.length > 0 && (
-          <PrimaryEngineeringResults
-            results={scopedPrimaryResults}
-          />
-        )}
-
-        <TelemetryGraphV1
-          events={engineV2?.events ?? []}
-          pullWindows={engineV2?.pullWindows ?? []}
-          telemetry={engineV2?.telemetry ?? null}
-        />
-
-        <EngineeringCorrelationSurface result={correlationResult} />
 
         <div className="grid gap-4 md:grid-cols-4">
           <InfoCard
