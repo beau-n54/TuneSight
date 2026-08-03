@@ -32,12 +32,24 @@ import {
   STANDARD_INSPECTION_PANEL_GEOMETRY,
   WIDE_INSPECTION_PANEL_GEOMETRY,
 } from "./analysisPresentation";
+import {
+  collectAuthoritativePulls,
+  DEFAULT_TELEMETRY_WORKSPACE_MODE,
+  eventsWithinPull,
+  sliceTelemetryToPull,
+  type TelemetryWorkspaceMode,
+  type TelemetryWorkspacePull,
+} from "./telemetryWorkspacePresentation";
 
 type PullWindowPresentation = {
   id?: string;
   startIndex?: number;
   endIndex?: number;
+  rpmStart?: number;
+  rpmEnd?: number;
+  durationSec?: number;
   quality?: "strong" | "usable" | "questionable";
+  issues?: readonly string[];
 };
 
 type EventPresentation = {
@@ -167,7 +179,9 @@ function buildRegions(
     return [
       {
         id: pull.id ?? `pull_${index + 1}`,
-        label: `Pull ${index + 1}${
+        label: `${
+          pull.id ? humanizeIdentifier(pull.id) : `Pull ${index + 1}`
+        }${
           pull.quality ? ` · ${humanizeIdentifier(pull.quality)}` : ""
         }`,
         startIndex: pull.startIndex,
@@ -305,6 +319,7 @@ function EngineeringTelemetryChart({
   rpm,
   regions,
   sharedSampleCount,
+  sourceStartIndex,
   wide = false,
 }: {
   definition: ChartDefinition;
@@ -312,6 +327,7 @@ function EngineeringTelemetryChart({
   rpm: readonly (number | null)[];
   regions: readonly GraphRegion[];
   sharedSampleCount: number;
+  sourceStartIndex: number;
   wide?: boolean;
 }) {
   const series = useMemo(
@@ -324,9 +340,10 @@ function EngineeringTelemetryChart({
         series,
         rpm,
         sharedSampleCount,
-        regions.filter((region) => region.kind === "pull").length > 1
+        regions.filter((region) => region.kind === "pull").length > 1,
+        sourceStartIndex
       ),
-    [regions, rpm, series, sharedSampleCount]
+    [regions, rpm, series, sharedSampleCount, sourceStartIndex]
   );
   const horizontalAxis = getHorizontalAxisPresentation({
     usesRpm,
@@ -573,14 +590,10 @@ export default function TelemetryGraphV1({
   pullWindows = [],
   events = [],
 }: TelemetryGraphV1Props) {
-  const rpm = useMemo(
-    () => getRpmSeries(telemetry, RPM_ALIASES),
-    [telemetry]
+  const [mode, setMode] = useState<TelemetryWorkspaceMode>(
+    DEFAULT_TELEMETRY_WORKSPACE_MODE
   );
-  const regions = useMemo(
-    () => buildRegions(pullWindows, events),
-    [events, pullWindows]
-  );
+  const [selectedPullId, setSelectedPullId] = useState<string | null>(null);
   const availableCharts = CHARTS.filter(
     (definition) =>
       resolveGraphSeries(telemetry, definition.channels).length > 0
@@ -593,6 +606,57 @@ export default function TelemetryGraphV1({
       )
     )
   );
+  const authoritativePulls = useMemo(
+    () => collectAuthoritativePulls(pullWindows, sharedSampleCount),
+    [pullWindows, sharedSampleCount]
+  );
+  const selectedPull =
+    authoritativePulls.find((pull) => pull.id === selectedPullId) ??
+    authoritativePulls[0] ??
+    null;
+  const isIndividualPull = mode === "individual_pull" && selectedPull !== null;
+  const visibleTelemetry = useMemo(
+    () =>
+      isIndividualPull
+        ? sliceTelemetryToPull(telemetry, selectedPull)
+        : telemetry,
+    [isIndividualPull, selectedPull, telemetry]
+  );
+  const visibleEvents = useMemo(
+    () =>
+      isIndividualPull
+        ? eventsWithinPull(events, selectedPull)
+        : events,
+    [events, isIndividualPull, selectedPull]
+  );
+  const visiblePulls: readonly PullWindowPresentation[] = useMemo(
+    () => (isIndividualPull ? [selectedPull] : pullWindows),
+    [isIndividualPull, pullWindows, selectedPull]
+  );
+  const rpm = useMemo(
+    () => getRpmSeries(visibleTelemetry, RPM_ALIASES),
+    [visibleTelemetry]
+  );
+  const regions = useMemo(
+    () => buildRegions(visiblePulls, visibleEvents),
+    [visibleEvents, visiblePulls]
+  );
+  const visibleCharts = CHARTS.filter(
+    (definition) =>
+      resolveGraphSeries(visibleTelemetry, definition.channels).length > 0
+  );
+  const visibleSampleCount = Math.max(
+    0,
+    ...visibleCharts.flatMap((definition) =>
+      resolveGraphSeries(visibleTelemetry, definition.channels).map(
+        (series) => series.values.length
+      )
+    )
+  );
+  const sourceStartIndex = isIndividualPull ? selectedPull.startIndex : 0;
+  const selectedPullEvents = selectedPull
+    ? eventsWithinPull(events, selectedPull)
+    : [];
 
   return (
     <section
@@ -625,9 +689,38 @@ export default function TelemetryGraphV1({
         </div>
       </header>
 
-      {availableCharts.length > 0 ? (
+      <div className="border-b border-zinc-800 bg-zinc-950 px-5 py-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-medium text-zinc-300">Telemetry view</p>
+            <div className="mt-2 inline-flex border border-zinc-700 p-1" role="group" aria-label="Telemetry viewing mode">
+              <button aria-pressed={mode === "engineer"} className="min-h-9 px-3 text-sm text-zinc-200 aria-pressed:bg-sky-500 aria-pressed:text-black" onClick={() => setMode("engineer")} type="button">Engineer View</button>
+              <button aria-pressed={mode === "individual_pull"} className="min-h-9 px-3 text-sm text-zinc-200 aria-pressed:bg-sky-500 aria-pressed:text-black disabled:cursor-not-allowed disabled:text-zinc-600" disabled={authoritativePulls.length === 0} onClick={() => setMode("individual_pull")} type="button">Individual Pull</button>
+            </div>
+          </div>
+
+          {authoritativePulls.length > 0 ? (
+            <label className="text-xs text-zinc-400">
+              Detected pull
+              <select className="mt-2 block min-h-10 w-full min-w-56 border border-zinc-700 bg-black px-3 text-sm text-zinc-100 sm:w-auto" disabled={mode !== "individual_pull"} onChange={(event) => setSelectedPullId(event.target.value)} value={selectedPull?.id ?? ""}>
+                {authoritativePulls.map((pull, index) => (
+                  <option key={pull.id} value={pull.id}>Pull {index + 1} · {humanizeIdentifier(pull.quality ?? "quality unresolved")}</option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <p className="max-w-xl text-sm text-amber-300">Individual Pull View unavailable: no authoritative pull identity and complete source boundaries are available.</p>
+          )}
+        </div>
+
+        {isIndividualPull && (
+          <PullMetadata pull={selectedPull} eventCount={selectedPullEvents.length} />
+        )}
+      </div>
+
+      {visibleCharts.length > 0 ? (
         <div className="grid gap-3 bg-black p-3 lg:grid-cols-2">
-          {availableCharts.map((definition) => {
+          {visibleCharts.map((definition) => {
             const isWidePanel = definition.id === "timing";
 
             return (
@@ -639,8 +732,9 @@ export default function TelemetryGraphV1({
                   definition={definition}
                   regions={regions}
                   rpm={rpm}
-                  sharedSampleCount={sharedSampleCount}
-                  telemetry={telemetry}
+                  sharedSampleCount={visibleSampleCount}
+                  sourceStartIndex={sourceStartIndex}
+                  telemetry={visibleTelemetry}
                   wide={isWidePanel}
                 />
               </div>
@@ -653,5 +747,36 @@ export default function TelemetryGraphV1({
         </div>
       )}
     </section>
+  );
+}
+
+function PullMetadata({
+  eventCount,
+  pull,
+}: {
+  eventCount: number;
+  pull: TelemetryWorkspacePull;
+}) {
+  const metadata = [
+    ["Source samples", `${pull.startIndex + 1}–${pull.endIndex + 1}`],
+    ...(typeof pull.rpmStart === "number" && typeof pull.rpmEnd === "number"
+      ? [["RPM range", `${Math.round(pull.rpmStart).toLocaleString()}–${Math.round(pull.rpmEnd).toLocaleString()} RPM`]]
+      : []),
+    ...(typeof pull.durationSec === "number"
+      ? [["Duration", `${pull.durationSec.toFixed(2)} s`]]
+      : []),
+    ...(pull.quality ? [["Pull quality", humanizeIdentifier(pull.quality)]] : []),
+    ["Detected events", String(eventCount)],
+  ];
+
+  return (
+    <dl className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+      {metadata.map(([label, value]) => (
+        <div className="border border-zinc-800 bg-black px-3 py-2" key={label}>
+          <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{label}</dt>
+          <dd className="mt-1 font-mono text-sm text-zinc-200">{value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

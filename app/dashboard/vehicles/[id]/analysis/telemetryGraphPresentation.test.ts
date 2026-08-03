@@ -116,6 +116,41 @@ test("separate pulls cannot become one continuous RPM sweep", () => {
   );
 });
 
+test("individual pull points retain exact source sample identity", () => {
+  const series = resolveGraphSeries(
+    { boost: [4, 6, 8] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(
+    series,
+    [2200, 2800, 3400],
+    3,
+    false,
+    7
+  );
+
+  assert.deepEqual(result.points.map(({ index }) => index), [7, 8, 9]);
+  assert.deepEqual(result.points.map(({ x }) => x), [2200, 2800, 3400]);
+});
+
+test("individual pull with non-monotonic RPM retains source Sample Sequence", () => {
+  const series = resolveGraphSeries(
+    { boost: [4, 6, 8] },
+    [TELEMETRY_CHANNELS.boostActual]
+  );
+  const result = buildGraphPoints(
+    series,
+    [2200, 3000, 2800],
+    3,
+    false,
+    7
+  );
+
+  assert.equal(result.axisMode, "sample_sequence");
+  assert.deepEqual(result.points.map(({ index }) => index), [7, 8, 9]);
+  assert.deepEqual(result.points.map(({ x }) => x), [7, 8, 9]);
+});
+
 test("axis labels distinguish RPM from sample sequence", () => {
   assert.deepEqual(
     getHorizontalAxisPresentation({

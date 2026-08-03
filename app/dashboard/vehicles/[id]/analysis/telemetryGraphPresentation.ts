@@ -225,7 +225,8 @@ export function buildGraphPoints(
   series: readonly GraphSeries[],
   rpm: readonly (number | null)[],
   sharedSampleCount?: number,
-  forceSampleSequence = false
+  forceSampleSequence = false,
+  sourceStartIndex = 0
 ): {
   points: GraphPoint[];
   usesRpm: boolean;
@@ -265,16 +266,17 @@ export function buildGraphPoints(
         (value as number) >= (alignedRpm[index - 1] as number)
     );
 
-  const points = Array.from({ length: sampleCount }, (_, index) => {
-    const recordedRpm = rpmIsAligned ? alignedRpm[index] ?? null : null;
+  const points = Array.from({ length: sampleCount }, (_, localIndex) => {
+    const sourceIndex = sourceStartIndex + localIndex;
+    const recordedRpm = rpmIsAligned ? alignedRpm[localIndex] ?? null : null;
     const point: GraphPoint = {
-      index,
-      x: usesRpm ? (recordedRpm as number) : index,
+      index: sourceIndex,
+      x: usesRpm ? (recordedRpm as number) : sourceIndex,
       rpm: recordedRpm,
     };
 
     for (const item of series) {
-      point[item.id] = item.values[index] ?? null;
+      point[item.id] = item.values[localIndex] ?? null;
     }
 
     return point;
@@ -335,8 +337,8 @@ export function resolveRegionCoordinates(
   points: readonly GraphPoint[]
 ): GraphRegionCoordinates[] {
   return regions.flatMap((region) => {
-    const start = points[region.startIndex];
-    const end = points[region.endIndex];
+    const start = points.find((point) => point.index === region.startIndex);
+    const end = points.find((point) => point.index === region.endIndex);
 
     if (!start || !end) {
       return [];
