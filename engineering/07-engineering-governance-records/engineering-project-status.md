@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 2 August 2026
+**Last Updated:** 17 August 2026
 
 
 
@@ -63,15 +63,15 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** WP-011.7 Engineering Workspace architecture complete; implementation not started or authorised
+**Current Engineering Phase:** WP-011.7 Engineering Workspace implementation in progress; Workspace Shell and current Telemetry Workspace presentation milestone Founder validated
 
-**Current Active Work Package:** WP-011.2 - Engineering Evidence Hierarchy
+**Current Active Work Package:** WP-011.7 - Engineering Workspace
 
-**Current Objective:** WP-011.7 is established as the capstone workspace-composition sibling within the WP-011 Engineering Presentation Intelligence family. It consumes existing WP-011 outputs without replacing them or changing their ownership, identity, status or dependency history.
+**Current Objective:** Preserve the Founder-accepted Engineering Workspace Shell and Telemetry Workspace presentation baseline while awaiting separate authority for the next WP-011.7 implementation milestone.
 
-**Next Authorised Objective:** None under this instruction. WP-011.7 implementation, Version 2 Standards work, conformance programmes and production Knowledge activity remain unauthorised.
+**Next Authorised Objective:** None under this instruction. Further WP-011.7 implementation, future channel-specific telemetry education, Version 2 Standards work, conformance programmes and production Knowledge activity require separate Founder authority.
 
-**Next Subsystem Definition:** WP-011.7 architecture is complete. WP-011.1 and WP-006.1 are authoritative and closed. WP-011.2 remains on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
+**Next Subsystem Definition:** WP-011.7 architecture remains complete. WP-011.7.1 and the current WP-011.7.2 Telemetry Workspace presentation milestone are Founder validated; remaining Workspace capabilities require separately bounded implementation authority. WP-011.2 remains on Engineering Hold with Founder Validation complete for its implemented scope and Founder Ratification not granted.
 
 **Current Engineering Hold:** WP-003 - Vehicle Identity Implementation; Knowledge integration dependency satisfied, formal hold disposition pending Founder review
 
@@ -98,7 +98,9 @@ Container metadata and engineering provenance remain preserved. Knowledge owns r
 
 The Founder-ratified WP-011.0 architecture defines how existing outputs shall be communicated through engineering conclusions, Evidence, interpretation, confidence, provenance and progressive disclosure. It changes no runtime behaviour and creates no engineering truth. WP-011.0 is the authoritative governing architecture for the existing WP-011 Presentation implementation family. The existing WP-005 Evidence and WP-011 Presentation identities remain unchanged.
 
-WP-011.7 Engineering Workspace is the architecture-complete capstone composition sibling within that family. It establishes persistent investigation context, synchronized Workspace Focus, coherent panel hierarchy, Calibration Context and future-compatible historical, comparison and live-session composition. It consumes exact owner-domain outputs without creating engineering truth or becoming the parent of WP-011.1 through WP-011.6. Implementation has not started and is not authorised.
+WP-011.7 Engineering Workspace is the architecture-complete capstone composition sibling within that family. Its Founder-validated implementation baseline now includes the persistent Workspace Shell and the current Telemetry Workspace presentation: complete-recording Engineer View, exact Individual Pull isolation, truthful Line presentation, presentation-only Engineering Terrain with an exact authoritative ridge, and context-aware view education. It consumes exact owner-domain outputs without creating engineering truth or becoming the parent of WP-011.1 through WP-011.6. Remaining Workspace implementation requires separate Founder authority.
+
+The current Engineering Terrain visual language is Founder accepted for this phase. Future Terrain visual refinement may be considered as part of a broader TuneSight product-wide presentation and visual upgrade rather than continued isolated WP-011.7.2 refinement. This is recorded as a deferred future enhancement, not a known defect, incomplete acceptance or failed validation.
 
 The universal Engineering Investigation surface now implements the Founder-ratified presentation architecture through a refined engineering hierarchy, progressive evidence disclosure, corrected Intelligent Warnings communication, event-driven Cylinder Timing Observation, structured XDF Calibration inspection presentation, accessible disclosure controls and one truthful telemetry-axis contract. Monotonic single-pull records may use an RPM-indexed engineering view; multi-pull, reset, incomplete or invalid RPM records retain Sample Sequence with recorded RPM available for inspection. These changes are presentation-only and apply without platform-specific branches across N54, B58 Gen1, B58TU / Supra and future supported platforms.
 
@@ -285,7 +287,7 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
 | WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
 | WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
-| WP-011.7 Engineering Workspace | ARCHITECTURE COMPLETE; capstone sibling governed by WP-011.0 | NOT STARTED; not authorised | Architecture accepted; implementation validation not started | ARCHITECTURE COMPLETE | Not Ratified |
+| WP-011.7 Engineering Workspace | ARCHITECTURE COMPLETE; capstone sibling governed by WP-011.0 | IN PROGRESS; Workspace Shell and current Telemetry Workspace presentation implemented | Founder visual and educational validation complete for WP-011.7.1 and the current WP-011.7.2 presentation milestone | IN PROGRESS; remaining slices require separate authority | Not Ratified as a completed Work Package |
 | WP-005 Evidence Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006 Correlation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006.1 Conservative Correlation V1 | Architecture Ratified under TS-RAT-003 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-007; authoritative and closed |
@@ -656,7 +658,8 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - WP-011.1 and WP-006.1 are complete, Founder validated and ratified within their defined scopes.
 - The Universal Engineering Presentation Refinement Implementation is complete and Founder ratified under [TS-RAT-008](engineering-ratification-register.md#ts-rat-008). Production build, regression validation and presentation validation completed successfully. The ratified scope is presentation-only and changes no engineering truth, detector behaviour, reasoning, correlation, persistence or platform-specific logic.
 - WP-011.2 is partially complete and not ratified. Presentation truthfully exposes the absence of Lean Under Load Root Cause output; future WP-007 Explanation coverage owns the missing capability.
-- WP-011.7 Engineering Workspace architecture is complete as a capstone sibling of WP-011.1 through WP-011.6. Implementation is not started or authorised, and every existing WP-011 identity, dependency and status remains unchanged.
+- WP-011.7 Engineering Workspace architecture is complete as a capstone sibling of WP-011.1 through WP-011.6. WP-011.7.1 and the current WP-011.7.2 Telemetry Workspace presentation milestone are implemented and Founder validated. Parent WP-011.7 remains in progress; every remaining implementation milestone requires separate Founder authority.
+- Primary Results scope communication, timing-event extent, B58 Gen1 logged-gear propagation, possible future AccelerationRun / GearSegment / ShiftEvent architecture and future channel-specific telemetry education remain separate open engineering items. None is closed or implemented by the accepted Telemetry Workspace milestone.
 - WP-001, WP-002, WP-005, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
 - Architecture Bible Ratification does not by itself establish runtime implementation, validation or Work Package completion.
 - Any pre-ratification status wording within the rewritten Architecture Bible is governed by the later explicit Founder ratification recorded in TS-RAT-003.

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   buildGraphPoints,
@@ -441,4 +442,132 @@ test("invalid source samples are not removed or shifted", () => {
     ),
     []
   );
+});
+
+test("visual refinement preserves linear exact-point rendering", () => {
+  const source = readFileSync(
+    new URL("./EngineeringLineRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(source, /type="linear"/);
+  assert.match(source, /isAnimationActive=\{false\}/);
+  assert.match(source, /Source sample \{point\.index \+ 1\}/);
+  assert.doesNotMatch(source, /type="monotone"|type="natural"/);
+});
+
+test("inspection controls communicate selection without colour alone", () => {
+  const source = readFileSync(
+    new URL("./TelemetryGraphV1.tsx", import.meta.url),
+    "utf8"
+  );
+  const lineRendererSource = readFileSync(
+    new URL("./EngineeringLineRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(source, /aria-pressed=\{effectiveFocusedChannel === item\.id\}/);
+  assert.match(source, /selected" : "available"/);
+  assert.match(source, /motion-reduce:transition-none/);
+  assert.match(lineRendererSource, /exact-point telemetry plot/);
+});
+
+test("plot surface and glow use explicit runtime-visible SVG treatments", () => {
+  const source = readFileSync(
+    new URL("./EngineeringLineRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(source, /backgroundSize:/);
+  assert.match(source, /56px 56px/);
+  assert.match(source, /14px 14px/);
+  assert.match(source, /filter=\{`url\(#\$\{glowFilterId\}\)`\}/);
+  assert.match(source, /focusedChannel === null\s*\? 0\.16/);
+  assert.match(source, /tooltipType="none"/);
+  assert.match(source, /new Map\(/);
+  assert.match(source, /String\(item\.dataKey\)/);
+});
+
+test("event regions remain exact without persistent plot labels", () => {
+  const source = readFileSync(
+    new URL("./EngineeringLineRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+  const referenceAreaStart = source.indexOf("<ReferenceArea");
+  const referenceAreaSource = source.slice(
+    referenceAreaStart,
+    source.indexOf("/>", referenceAreaStart)
+  );
+
+  assert.match(source, /x1=\{region\.x1\}/);
+  assert.match(source, /x2=\{region\.x2\}/);
+  assert.doesNotMatch(referenceAreaSource, /label=\{\{/);
+  assert.match(source, /Event: \{region\.label\}/);
+});
+
+test("Line and Terrain are independent renderers with one composition owner", () => {
+  const compositionSource = readFileSync(
+    new URL("./TelemetryGraphV1.tsx", import.meta.url),
+    "utf8"
+  );
+  const lineSource = readFileSync(
+    new URL("./EngineeringLineRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+  const terrainSource = readFileSync(
+    new URL("./EngineeringTerrainRenderer.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(compositionSource, /type GraphView = "line" \| "terrain"/);
+  assert.match(compositionSource, /<EngineeringLineRenderer/);
+  assert.match(compositionSource, /<EngineeringTerrainRenderer/);
+  assert.doesNotMatch(lineSource, /Terrain|terrain/);
+  assert.doesNotMatch(terrainSource, /from "recharts"/);
+});
+
+test("Terrain is the Individual Pull default and remains Individual Pull-only", () => {
+  const source = readFileSync(
+    new URL("./TelemetryGraphV1.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(source, /useState<GraphView>\("terrain"\)/);
+  assert.match(source, /\{isIndividualPull && \(\s*<div>\s*<p[^>]*>Graph View<\/p>/);
+  assert.match(source, /graphView=\{isIndividualPull \? graphView : "line"\}/);
+  assert.match(source, /focusedChannel \?\? series\[0\]\?\.id \?\? null/);
+  assert.match(source, /usesRpm=\{usesRpm\}/);
+  assert.match(source, /Select one channel to display the Terrain\./);
+  assert.match(source, />\s*3D Terrain\s*</);
+  assert.doesNotMatch(source, /terrain_3d|Graph Style/);
+});
+
+test("renderer switching preserves one exact GraphPoint input and channel state", () => {
+  const source = readFileSync(
+    new URL("./TelemetryGraphV1.tsx", import.meta.url),
+    "utf8"
+  );
+  const pointBindings = source.match(/points=\{points\}/g) ?? [];
+
+  assert.equal(pointBindings.length, 2);
+  assert.match(source, /focusedChannels\[definition\.id\] \?\? null/);
+  assert.match(source, /setFocusedChannels\(\(current\) => \(\{/);
+  assert.match(source, /\[definition\.id\]: channelId/);
+});
+
+test("live terrain controls survive a shared-route hard refresh", () => {
+  const source = readFileSync(
+    new URL("./TelemetryGraphV1.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(
+    source,
+    /TELEMETRY_WORKSPACE_QUERY_PARAMETER = "telemetryWorkspace"/
+  );
+  assert.match(source, /new URL\(window\.location\.href\)\.searchParams\.get\(/);
+  assert.match(source, /window\.history\.replaceState\(/);
+  assert.match(source, /authoritativePulls\.some\(/);
+  assert.match(source, /if \(!hasRestoredWorkspaceState\)/);
+  assert.doesNotMatch(source, /sessionStorage|localStorage/);
 });

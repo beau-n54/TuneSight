@@ -1,24 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildGraphPoints,
-  formatGraphValue,
-  formatHorizontalAxisTick,
   getRpmSeries,
   getHorizontalAxisPresentation,
   type GraphChannel,
-  type GraphPoint,
   type GraphRegion,
   resolveGraphSeries,
   resolveRegionCoordinates,
@@ -40,6 +27,11 @@ import {
   type TelemetryWorkspaceMode,
   type TelemetryWorkspacePull,
 } from "./telemetryWorkspacePresentation";
+import EngineeringLineRenderer from "./EngineeringLineRenderer";
+import EngineeringTerrainRenderer from "./EngineeringTerrainRenderer";
+import TelemetryViewEducation, {
+  type TelemetryEducationView,
+} from "./TelemetryViewEducation";
 
 type PullWindowPresentation = {
   id?: string;
@@ -73,6 +65,36 @@ type ChartDefinition = {
   channels: readonly GraphChannel[];
   domain?: readonly [number | "auto", number | "auto"];
 };
+
+type GraphView = "line" | "terrain";
+
+type TelemetryWorkspaceSessionState = {
+  focusedChannels: Readonly<Record<string, string | null>>;
+  graphView: GraphView;
+  mode: TelemetryWorkspaceMode;
+  selectedPullId: string | null;
+};
+
+const TELEMETRY_WORKSPACE_QUERY_PARAMETER = "telemetryWorkspace";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseFocusedChannels(
+  value: unknown
+): Readonly<Record<string, string | null>> {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string | null] =>
+        entry[1] === null || typeof entry[1] === "string"
+    )
+  );
+}
 
 const CHARTS: readonly ChartDefinition[] = [
   {
@@ -232,87 +254,6 @@ function regionSupportsChart(
   });
 }
 
-function GraphTooltip({
-  active,
-  payload,
-  regions,
-}: {
-  active?: boolean;
-  payload?: ReadonlyArray<{
-    dataKey?: string | number;
-    name?: string;
-    value?: number | string;
-    color?: string;
-    unit?: string;
-    payload?: GraphPoint;
-  }>;
-  regions: readonly GraphRegion[];
-}) {
-  if (!active || !payload?.length) {
-    return null;
-  }
-
-  const point = payload[0]?.payload;
-  if (!point) {
-    return null;
-  }
-
-  const activeRegions = regions.filter(
-    (region) =>
-      point.index >= region.startIndex &&
-      point.index <= region.endIndex
-  );
-
-  return (
-    <div className="min-w-56 border border-zinc-700 bg-zinc-950 p-3 text-xs shadow-xl shadow-black/50">
-      <p className="font-mono text-zinc-300">
-        {point.rpm !== null
-          ? `${Math.round(point.rpm)} RPM`
-          : `Sample ${point.index + 1}`}
-      </p>
-
-      <div className="mt-2 space-y-1.5">
-        {payload.map((item) => {
-          const value = Number(item.value);
-          const unit = item.unit ?? "";
-
-          return (
-            <div
-              key={String(item.dataKey)}
-              className="flex items-center justify-between gap-5"
-            >
-              <span className="flex items-center gap-2 text-zinc-400">
-                <span
-                  aria-hidden="true"
-                  className="h-0.5 w-4"
-                  style={{ backgroundColor: item.color }}
-                />
-                {item.name}
-              </span>
-              <span className="font-mono font-medium text-zinc-100">
-                {formatGraphValue(value, unit)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {activeRegions.length > 0 && (
-        <div className="mt-3 border-t border-zinc-800 pt-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            Active regions
-          </p>
-          {activeRegions.map((region) => (
-            <p key={region.id} className="mt-1 text-zinc-300">
-              {region.kind === "event" ? "Event" : "Pull"}: {region.label}
-            </p>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function EngineeringTelemetryChart({
   definition,
   telemetry,
@@ -320,6 +261,9 @@ function EngineeringTelemetryChart({
   regions,
   sharedSampleCount,
   sourceStartIndex,
+  focusedChannel,
+  graphView,
+  onFocusedChannelChange,
   wide = false,
 }: {
   definition: ChartDefinition;
@@ -328,6 +272,9 @@ function EngineeringTelemetryChart({
   regions: readonly GraphRegion[];
   sharedSampleCount: number;
   sourceStartIndex: number;
+  focusedChannel: string | null;
+  graphView: GraphView;
+  onFocusedChannelChange: (channelId: string | null) => void;
   wide?: boolean;
 }) {
   const series = useMemo(
@@ -353,9 +300,6 @@ function EngineeringTelemetryChart({
     () => resolveRegionCoordinates(regions, points),
     [points, regions]
   );
-  const [focusedChannel, setFocusedChannel] = useState<string | null>(
-    null
-  );
   const channelIds = useMemo(
     () => new Set(series.map((item) => item.id)),
     [series]
@@ -364,7 +308,12 @@ function EngineeringTelemetryChart({
     regionSupportsChart(region, channelIds)
   );
   const units = [...new Set(series.map((item) => item.unit))].join(" / ");
-
+  const effectiveFocusedChannel =
+    graphView === "terrain" ? (focusedChannel ?? series[0]?.id ?? null) : focusedChannel;
+  const terrainSeries =
+    effectiveFocusedChannel === null
+      ? null
+      : series.find((item) => item.id === effectiveFocusedChannel) ?? null;
   if (series.length === 0) {
     return null;
   }
@@ -372,13 +321,13 @@ function EngineeringTelemetryChart({
   return (
     <article
       aria-label={`${definition.title} Engineering Inspection Panel`}
-      className={`${TELEMETRY_PANEL_CLASS_NAME} ${
+      className={`${TELEMETRY_PANEL_CLASS_NAME} overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.14),_transparent_48%)] shadow-[0_16px_50px_rgba(2,132,199,0.08)] ${
         wide
           ? WIDE_INSPECTION_PANEL_GEOMETRY
           : STANDARD_INSPECTION_PANEL_GEOMETRY
       }`}
     >
-      <header className="overflow-y-auto border-b border-zinc-800 px-4 py-3">
+      <header className="overflow-y-auto border-b border-sky-950/70 bg-zinc-950/85 px-4 py-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-400">
@@ -398,9 +347,9 @@ function EngineeringTelemetryChart({
             role="group"
           >
             <button
-              aria-pressed={focusedChannel === null}
-              className="min-h-8 border border-zinc-700 px-2.5 text-xs text-zinc-300 transition hover:border-zinc-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-              onClick={() => setFocusedChannel(null)}
+              aria-pressed={effectiveFocusedChannel === null}
+              className="min-h-8 border border-zinc-700 bg-black/40 px-2.5 text-xs text-zinc-300 transition-colors motion-reduce:transition-none hover:border-zinc-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 aria-pressed:border-sky-500 aria-pressed:bg-sky-950/40 aria-pressed:text-sky-100"
+              onClick={() => onFocusedChannelChange(null)}
               type="button"
             >
               All
@@ -408,21 +357,24 @@ function EngineeringTelemetryChart({
             {series.map((item) => (
               <button
                 key={item.id}
-                aria-pressed={focusedChannel === item.id}
-                className="min-h-8 border px-2.5 text-xs transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                aria-label={`${item.label}, ${item.unit}, ${
+                  effectiveFocusedChannel === item.id ? "selected" : "available"
+                }`}
+                aria-pressed={effectiveFocusedChannel === item.id}
+                className="min-h-8 border bg-black/40 px-2.5 text-xs transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 aria-pressed:bg-zinc-900 aria-pressed:font-semibold"
                 onClick={() =>
-                  setFocusedChannel((current) =>
-                    current === item.id ? null : item.id
+                  onFocusedChannelChange(
+                    focusedChannel === item.id ? null : item.id
                   )
                 }
                 style={{
                   borderColor:
-                    focusedChannel === item.id
+                    effectiveFocusedChannel === item.id
                       ? item.color
                       : "#3f3f46",
                   color:
-                    focusedChannel === null ||
-                    focusedChannel === item.id
+                    effectiveFocusedChannel === null ||
+                    effectiveFocusedChannel === item.id
                       ? item.color
                       : "#71717a",
                 }}
@@ -438,138 +390,35 @@ function EngineeringTelemetryChart({
         </div>
       </header>
 
-      <div className="min-h-0 overflow-x-auto">
-        <div className="h-full min-w-[680px] px-2 py-3 lg:min-w-0">
-          <ResponsiveContainer height="100%" width="100%">
-            <LineChart
-              data={points}
-              margin={{ top: 14, right: 20, bottom: 24, left: 10 }}
-            >
-              <CartesianGrid
-                opacity={0.32}
-                stroke="#52525b"
-                strokeDasharray="2 6"
-                vertical={false}
-              />
-
-              <XAxis
-                allowDataOverflow={false}
-                dataKey="x"
-                domain={["dataMin", "dataMax"]}
-                label={{
-                  value: horizontalAxis.label,
-                  position: "insideBottom",
-                  offset: -16,
-                  fill: "#a1a1aa",
-                  fontSize: 11,
-                }}
-                tick={{ fill: "#a1a1aa", fontSize: 11 }}
-                tickFormatter={(value) =>
-                  formatHorizontalAxisTick(
-                    Number(value),
-                    points,
-                    usesRpm
-                  )
-                }
-                tickLine={{ stroke: "#52525b" }}
-                type="number"
-              />
-
-              <YAxis
-                domain={definition.domain ?? ["auto", "auto"]}
-                label={{
-                  value: units,
-                  angle: -90,
-                  position: "insideLeft",
-                  fill: "#a1a1aa",
-                  fontSize: 11,
-                }}
-                tick={{ fill: "#a1a1aa", fontSize: 11 }}
-                tickFormatter={(value) =>
-                  Math.abs(Number(value)) >= 1000
-                    ? Math.round(Number(value)).toLocaleString()
-                    : Number(value).toFixed(
-                        Math.abs(Number(value)) < 10 ? 1 : 0
-                      )
-                }
-                tickLine={{ stroke: "#52525b" }}
-                width={68}
-              />
-
-              {relevantRegions.map((region) => (
-                <ReferenceArea
-                  key={`${definition.id}-${region.id}`}
-                  fill={
-                    region.kind === "event"
-                      ? "#f59e0b"
-                      : "#38bdf8"
-                  }
-                  fillOpacity={region.kind === "event" ? 0.055 : 0.025}
-                  ifOverflow="hidden"
-                  stroke={
-                    region.kind === "event"
-                      ? "#f59e0b"
-                      : "#38bdf8"
-                  }
-                  strokeDasharray={
-                    region.kind === "event" ? "4 3" : "2 5"
-                  }
-                  strokeOpacity={0.55}
-                  x1={region.x1}
-                  x2={region.x2}
-                />
-              ))}
-
-              <Tooltip
-                content={
-                  <GraphTooltip
-                    regions={regions}
-                  />
-                }
-                cursor={{
-                  stroke: "#e4e4e7",
-                  strokeDasharray: "3 3",
-                  strokeOpacity: 0.55,
-                }}
-                filterNull
-                isAnimationActive={false}
-              />
-
-              {series.map((item) => (
-                <Line
-                  key={item.id}
-                  activeDot={{
-                    fill: "#09090b",
-                    r: 4,
-                    stroke: item.color,
-                    strokeWidth: 2,
-                  }}
-                  connectNulls={false}
-                  dataKey={item.id}
-                  dot={false}
-                  isAnimationActive={false}
-                  name={item.label}
-                  opacity={
-                    focusedChannel === null ||
-                    focusedChannel === item.id
-                      ? 1
-                      : 0.22
-                  }
-                  stroke={item.color}
-                  strokeDasharray={item.strokeDasharray}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={
-                    focusedChannel === item.id ? 2.75 : 1.8
-                  }
-                  type="linear"
-                  unit={item.unit}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      {graphView === "terrain" ? (
+        terrainSeries ? (
+          <EngineeringTerrainRenderer
+            chartTitle={definition.title}
+            domain={definition.domain}
+            points={points}
+            regions={relevantRegions}
+            series={terrainSeries}
+          />
+        ) : (
+          <div className="flex min-h-72 items-center justify-center bg-black/80 px-6 text-center text-sm text-zinc-400">
+            Select one channel to display the Terrain.
+          </div>
+        )
+      ) : (
+        <EngineeringLineRenderer
+          chartId={definition.id}
+          chartTitle={definition.title}
+          domain={definition.domain}
+          focusedChannel={focusedChannel}
+          horizontalAxisLabel={horizontalAxis.label}
+          points={points}
+          regions={regions}
+          relevantRegions={relevantRegions}
+          series={series}
+          units={units}
+          usesRpm={usesRpm}
+        />
+      )}
 
       <footer className="flex flex-wrap content-center items-center gap-x-4 gap-y-1 overflow-y-auto border-t border-zinc-800 px-4 py-2 text-[11px] text-zinc-500">
         <span>{points.length.toLocaleString()} unchanged samples</span>
@@ -594,6 +443,10 @@ export default function TelemetryGraphV1({
     DEFAULT_TELEMETRY_WORKSPACE_MODE
   );
   const [selectedPullId, setSelectedPullId] = useState<string | null>(null);
+  const [graphView, setGraphView] = useState<GraphView>("terrain");
+  const [focusedChannels, setFocusedChannels] = useState<
+    Readonly<Record<string, string | null>>
+  >({});
   const availableCharts = CHARTS.filter(
     (definition) =>
       resolveGraphSeries(telemetry, definition.channels).length > 0
@@ -610,6 +463,71 @@ export default function TelemetryGraphV1({
     () => collectAuthoritativePulls(pullWindows, sharedSampleCount),
     [pullWindows, sharedSampleCount]
   );
+  const [hasRestoredWorkspaceState, setHasRestoredWorkspaceState] =
+    useState(false);
+
+  useEffect(() => {
+    try {
+      const storedState = new URL(window.location.href).searchParams.get(
+        TELEMETRY_WORKSPACE_QUERY_PARAMETER
+      );
+      if (storedState) {
+        const parsedState: unknown = JSON.parse(storedState);
+        if (isRecord(parsedState)) {
+          if (
+            parsedState.mode === "engineer" ||
+            parsedState.mode === "individual_pull"
+          ) {
+            setMode(parsedState.mode);
+          }
+          if (
+            parsedState.graphView === "line" ||
+            parsedState.graphView === "terrain"
+          ) {
+            setGraphView(parsedState.graphView);
+          }
+          setSelectedPullId(
+            typeof parsedState.selectedPullId === "string" &&
+              authoritativePulls.some(
+                (pull) => pull.id === parsedState.selectedPullId
+              )
+              ? parsedState.selectedPullId
+              : null
+          );
+          setFocusedChannels(parseFocusedChannels(parsedState.focusedChannels));
+        }
+      }
+    } catch (error) {
+      console.warn("Unable to restore telemetry workspace URL state.", error);
+    } finally {
+      setHasRestoredWorkspaceState(true);
+    }
+  }, [authoritativePulls]);
+
+  useEffect(() => {
+    if (!hasRestoredWorkspaceState) {
+      return;
+    }
+
+    const sessionState: TelemetryWorkspaceSessionState = {
+      focusedChannels,
+      graphView,
+      mode,
+      selectedPullId,
+    };
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set(
+        TELEMETRY_WORKSPACE_QUERY_PARAMETER,
+        JSON.stringify(sessionState)
+      );
+      window.history.replaceState(window.history.state, "", url);
+    } catch (error) {
+      console.warn("Unable to preserve telemetry workspace URL state.", error);
+    }
+  }, [focusedChannels, graphView, hasRestoredWorkspaceState, mode, selectedPullId]);
+
   const selectedPull =
     authoritativePulls.find((pull) => pull.id === selectedPullId) ??
     authoritativePulls[0] ??
@@ -657,6 +575,11 @@ export default function TelemetryGraphV1({
   const selectedPullEvents = selectedPull
     ? eventsWithinPull(events, selectedPull)
     : [];
+  const educationView: TelemetryEducationView = isIndividualPull
+    ? graphView === "terrain"
+      ? "individual_pull_terrain"
+      : "individual_pull_line"
+    : "engineer";
 
   return (
     <section
@@ -711,7 +634,38 @@ export default function TelemetryGraphV1({
           ) : (
             <p className="max-w-xl text-sm text-amber-300">Individual Pull View unavailable: no authoritative pull identity and complete source boundaries are available.</p>
           )}
+
+          {isIndividualPull && (
+            <div>
+              <p className="text-xs font-medium text-zinc-300">Graph View</p>
+              <div
+                aria-label="Individual Pull graph view"
+                className="mt-2 flex w-full flex-wrap border border-zinc-700 p-1 sm:w-auto"
+                role="group"
+              >
+                <button
+                  aria-pressed={graphView === "line"}
+                  className="min-h-9 flex-1 px-3 text-sm text-zinc-200 transition-colors motion-reduce:transition-none aria-pressed:bg-sky-500 aria-pressed:font-semibold aria-pressed:text-black sm:flex-none"
+                  onClick={() => setGraphView("line")}
+                  type="button"
+                >
+                  Line
+                </button>
+                <button
+                  aria-pressed={graphView === "terrain"}
+                  className="min-h-9 flex-1 px-3 text-sm text-zinc-200 transition-colors motion-reduce:transition-none aria-pressed:bg-sky-500 aria-pressed:font-semibold aria-pressed:text-black sm:flex-none"
+                  onClick={() => setGraphView("terrain")}
+                  type="button"
+                >
+                  3D Terrain
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
+
+        <TelemetryViewEducation view={educationView} />
 
         {isIndividualPull && (
           <PullMetadata pull={selectedPull} eventCount={selectedPullEvents.length} />
@@ -730,6 +684,14 @@ export default function TelemetryGraphV1({
               >
                 <EngineeringTelemetryChart
                   definition={definition}
+                  focusedChannel={focusedChannels[definition.id] ?? null}
+                  graphView={isIndividualPull ? graphView : "line"}
+                  onFocusedChannelChange={(channelId) =>
+                    setFocusedChannels((current) => ({
+                      ...current,
+                      [definition.id]: channelId,
+                    }))
+                  }
                   regions={regions}
                   rpm={rpm}
                   sharedSampleCount={visibleSampleCount}
