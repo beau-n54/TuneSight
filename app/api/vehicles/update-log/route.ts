@@ -6,6 +6,12 @@ import {
   createSupabaseEvidencePersistenceDatabase,
   persistCandidateEvidenceSummary,
 } from "@/lib/analysis/evidenceCandidatePersistence";
+import { runDurableEvidenceProcessingAttempt } from "@/lib/analysis/durableEvidenceProcessingIntegration";
+import {
+  createSupabaseEvidenceLifecycleDatabase,
+  EvidenceLifecycleWriteError,
+  recordEvidenceProcessingFailure,
+} from "@/lib/analysis/evidenceLifecyclePersistence";
 import { qualifyEvidenceSource } from "@/lib/analysis/evidenceSourceQualification";
 import type { TranslatedLog } from "@/lib/logging/types";
 import type {
@@ -891,16 +897,41 @@ export async function POST(request: Request) {
     .single();
 
   if (insertError || !insertedLog) {
-    console.error(
-      "Initial log insert error:",
-      insertError?.message || "No log inserted"
-    );
+    console.error("Evidence source registration failed", {
+      failure: "source_registration_failure",
+      vehicleId,
+    });
 
     return NextResponse.redirect(
-      new URL(`/dashboard/vehicles/${vehicleId}/logs`, request.url),
+      new URL(
+        `/dashboard/vehicles/${vehicleId}/logs?evidence_status=registration_failed`,
+        request.url
+      ),
       { status: 303 }
     );
   }
+
+  const processingStartedAt = new Date().toISOString();
+  let trustedClient;
+  try {
+    trustedClient = createTrustedServerClient();
+  } catch {
+    console.error("Trusted Evidence persistence is unavailable", {
+      failure: "trusted_configuration_unavailable",
+      logId: insertedLog.id,
+    });
+    return NextResponse.redirect(
+      new URL(
+        `/dashboard/vehicles/${vehicleId}/logs?evidence_status=lifecycle_unavailable`,
+        request.url
+      ),
+      { status: 303 }
+    );
+  }
+
+  const lifecycleDatabase = createSupabaseEvidenceLifecycleDatabase(trustedClient);
+  const evidenceDatabase = createSupabaseEvidencePersistenceDatabase(trustedClient);
+  let durableSourcePath: string | null = null;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -920,20 +951,54 @@ export async function POST(request: Request) {
       });
 
     if (uploadError) {
-      console.error("Log upload error:", uploadError.message);
+      console.error("Raw Evidence source storage failed", {
+        failure: "raw_source_storage_failure",
+        logId: insertedLog.id,
+      });
+
+      let evidenceStatus = "processing_failed";
+      try {
+        await recordEvidenceProcessingFailure(
+          lifecycleDatabase,
+          {
+            logId: insertedLog.id,
+            expectedUserId: user.id,
+            processingStartedAt,
+            rawSourceStoragePath: null,
+            sourceAvailability: "unavailable",
+          },
+          "raw_source_storage",
+          null
+        );
+      } catch (error) {
+        if (error instanceof EvidenceLifecycleWriteError) {
+          evidenceStatus = "lifecycle_write_failed";
+          console.error("Durable Evidence lifecycle recording failed", {
+            failure: error.code,
+            logId: insertedLog.id,
+          });
+        }
+      }
 
       return NextResponse.redirect(
-        new URL(`/dashboard/vehicles/${vehicleId}/logs`, request.url),
+        new URL(
+          `/dashboard/vehicles/${vehicleId}/logs?evidence_status=${evidenceStatus}`,
+          request.url
+        ),
         { status: 303 }
       );
     }
+    durableSourcePath = filePath;
 
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("logs")
       .createSignedUrl(filePath, 60 * 60 * 24 * 365);
 
     if (signedUrlError) {
-      console.error("Signed URL error:", signedUrlError.message);
+      console.error("Log access URL creation failed", {
+        failure: "signed_url_creation_failure",
+        logId: insertedLog.id,
+      });
     }
 
     const { error: updateError } = await supabase
@@ -946,127 +1011,183 @@ export async function POST(request: Request) {
       .eq("user_id", user.id);
 
     if (updateError) {
-      console.error("Log row update error:", updateError.message);
+      console.error("Log source metadata update failed", {
+        failure: "source_metadata_update_failure",
+        logId: insertedLog.id,
+      });
     }
 
     const { headers, rows } = parseCSV(uploadedFileText);
-    const sourceQualification = qualifyEvidenceSource(
-      rows,
-      {
-        sourceLogId: insertedLog.id,
-        sourceAvailability: "available",
-      },
-      headers
-    );
+    const lifecycleContext = {
+      logId: insertedLog.id,
+      expectedUserId: user.id,
+      processingStartedAt,
+      rawSourceStoragePath: filePath,
+      sourceAvailability: "available" as const,
+    };
 
-    if (sourceQualification.kind !== "supported_and_usable") {
-      console.warn(
-        "Evidence source qualification blocked Evidence derivation:",
-        sourceQualification.outcome
-      );
-      return NextResponse.redirect(
-        new URL(`/dashboard/vehicles/${vehicleId}/logs`, request.url),
-        { status: 303 }
-      );
-    }
+    const attempt = await runDurableEvidenceProcessingAttempt({
+      lifecycleDatabase,
+      lifecycleContext,
+      qualify: () =>
+        qualifyEvidenceSource(
+          rows,
+          {
+            sourceLogId: insertedLog.id,
+            sourceAvailability: "available",
+          },
+          headers
+        ),
+      derive: async (sourceQualification) => {
+        const translatedLog = sourceQualification.translatedLog;
+        const { parsedLog, extracted } =
+          buildParsedLogFromTranslatedLog(translatedLog);
 
-    const translatedLog = sourceQualification.translatedLog;
-
-    const { parsedLog, extracted } =
-      buildParsedLogFromTranslatedLog(translatedLog);
-
-    const { data: vehicleRow } = await supabase
-      .from("vehicles")
-      .select("*")
-      .eq("id", vehicleId)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const vehicle = mapVehicleSetup(vehicleRow as Record<string, any> | null);
-
-    const { data: latestTune } = await supabase
-      .from("tunes")
-      .select("*")
-      .eq("vehicle_id", vehicleId)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const { data: latestTuneProfileRow } = latestTune
-      ? await supabase
-          .from("tune_profiles")
+        const { data: vehicleRow } = await supabase
+          .from("vehicles")
           .select("*")
-          .eq("tune_id", latestTune.id)
+          .eq("id", vehicleId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const vehicle = mapVehicleSetup(
+          vehicleRow as Record<string, any> | null
+        );
+
+        const { data: latestTune } = await supabase
+          .from("tunes")
+          .select("*")
+          .eq("vehicle_id", vehicleId)
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(1)
-          .maybeSingle()
-      : { data: null };
+          .maybeSingle();
 
-    const tuneProfile = mapTuneProfile(
-      latestTuneProfileRow as Record<string, any> | null
-    );
+        const { data: latestTuneProfileRow } = latestTune
+          ? await supabase
+              .from("tune_profiles")
+              .select("*")
+              .eq("tune_id", latestTune.id)
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle()
+          : { data: null };
 
-    const effectiveTuneProfile =
-      tuneProfile &&
-      Number(
-        (extracted as any).ethanolContent ??
-          (extracted as any).ethanol_content ??
-          0
-      ) >= 50 &&
-      (
-        (tuneProfile as any).fuelingIntent === "pump" ||
-        (tuneProfile as any).fueling_intent === "pump"
-      )
-        ? {
-            ...tuneProfile,
-            fuelingIntent: "full_ethanol",
-            fueling_intent: "full_ethanol",
-          }
-        : tuneProfile;
+        const tuneProfile = mapTuneProfile(
+          latestTuneProfileRow as Record<string, any> | null
+        );
 
-    const analysis = buildAnalysisResult({
-      parsedLog,
-      vehicle,
-      tuneProfile: effectiveTuneProfile as any,
+        const effectiveTuneProfile =
+          tuneProfile &&
+          Number(
+            (extracted as any).ethanolContent ??
+              (extracted as any).ethanol_content ??
+              0
+          ) >= 50 &&
+          (
+            (tuneProfile as any).fuelingIntent === "pump" ||
+            (tuneProfile as any).fueling_intent === "pump"
+          )
+            ? {
+                ...tuneProfile,
+                fuelingIntent: "full_ethanol",
+                fueling_intent: "full_ethanol",
+              }
+            : tuneProfile;
+
+        const analysis = buildAnalysisResult({
+          parsedLog,
+          vehicle,
+          tuneProfile: effectiveTuneProfile as any,
+        });
+
+        return {
+          loggerPlatform: translatedLog.platform,
+          summaryPayload: buildSummaryPayload({
+            headers,
+            rows,
+            extracted,
+            analysis,
+          }),
+        };
+      },
+      persist: (derived) =>
+        persistCandidateEvidenceSummary(evidenceDatabase, {
+          logId: insertedLog.id,
+          vehicleId,
+          userId: user.id,
+          summaryPayload: derived.summaryPayload,
+          processingContractVersion: "1.0",
+          loggerPlatform: derived.loggerPlatform,
+          sourceAvailability: "available",
+          processingStartedAt,
+        }),
     });
 
-    const summaryPayload = buildSummaryPayload({
-      headers,
-      rows,
-      extracted,
-      analysis,
-    });
-
-    const trustedDatabase = createSupabaseEvidencePersistenceDatabase(
-      createTrustedServerClient()
-    );
-    const promotion = await persistCandidateEvidenceSummary(trustedDatabase, {
-      logId: insertedLog.id,
-      vehicleId,
-      userId: user.id,
-      summaryPayload,
-      processingContractVersion: "1.0",
-      loggerPlatform: translatedLog.platform,
-      sourceAvailability: "available",
-      processingStartedAt: new Date().toISOString(),
-    });
-
-    if (promotion.resolution !== "confirmed_established") {
-      console.error("Evidence authority promotion incomplete:", {
-        resolution: promotion.resolution,
-        finding: promotion.finding,
-        logId: promotion.logId,
-        candidateSummaryId: promotion.candidateSummaryId,
+    if (attempt.status !== "confirmed_established") {
+      console.error("Evidence processing did not establish confirmed authority", {
+        status: attempt.status,
+        resolution: attempt.promotion?.resolution ?? null,
+        finding: attempt.promotion?.finding ?? null,
+        logId: insertedLog.id,
+        candidateSummaryId: attempt.promotion?.candidateSummaryId ?? null,
       });
     }
-  } catch (error) {
-    console.error("Log processing error:", error);
-  }
 
-  return NextResponse.redirect(
-    new URL(`/dashboard/vehicles/${vehicleId}/logs`, request.url),
-    { status: 303 }
-  );
+    const evidenceStatus =
+      attempt.status === "confirmed_established"
+        ? "established"
+        : attempt.status;
+    return NextResponse.redirect(
+      new URL(
+        `/dashboard/vehicles/${vehicleId}/logs?evidence_status=${evidenceStatus}`,
+        request.url
+      ),
+      { status: 303 }
+    );
+  } catch {
+    const failureStage =
+      durableSourcePath === null ? "raw_source_storage" : "source_classification";
+    console.error("Evidence source processing failed", {
+      failure:
+        failureStage === "raw_source_storage"
+          ? "raw_source_storage_failure"
+          : "source_classification_failure",
+      logId: insertedLog.id,
+    });
+
+    let evidenceStatus = "processing_failed";
+    try {
+      await recordEvidenceProcessingFailure(
+        lifecycleDatabase,
+        {
+          logId: insertedLog.id,
+          expectedUserId: user.id,
+          processingStartedAt,
+          rawSourceStoragePath: durableSourcePath,
+          sourceAvailability:
+            durableSourcePath === null ? "unavailable" : "available",
+        },
+        failureStage,
+        null
+      );
+    } catch (error) {
+      if (error instanceof EvidenceLifecycleWriteError) {
+        evidenceStatus = "lifecycle_write_failed";
+        console.error("Durable Evidence lifecycle recording failed", {
+          failure: error.code,
+          logId: insertedLog.id,
+        });
+      }
+    }
+
+    return NextResponse.redirect(
+      new URL(
+        `/dashboard/vehicles/${vehicleId}/logs?evidence_status=${evidenceStatus}`,
+        request.url
+      ),
+      { status: 303 }
+    );
+  }
 }
