@@ -1106,6 +1106,56 @@ The Founder ratifies TS-STD-006 as the authoritative Engineering Knowledge Admis
 
 ---
 
+### TS-RAT-019
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-019 |
+| Date | 17 August 2026 |
+| Artefact Type | Work Package Rectification Architecture |
+| Artefact Name | WP-005.0 — Evidence Production Contract Rectification Architecture |
+| Permanent Work Package Identifier | WP-005.0 |
+| Authority | Founder |
+| Ratification Scope | Bounded architecture required to rectify original WP-005 Evidence production-contract gaps before parent WP-005 completion |
+| Status | RATIFIED |
+| Architecture Artefact | [WP-005.0 Evidence Production Contract Rectification Architecture](../08-engineering-work-packages/WP-005.0-evidence-production-contract-rectification-architecture.md) |
+| Parent Work Package | [WP-005 Evidence Implementation](../08-engineering-work-packages/WP-005-evidence-implementation.md) |
+| Founder Review | Completed |
+| Implementation Status | Not Started; separate Founder authority required |
+| Parent WP-005 Completion | Not established; parent remains incomplete |
+| WP-005.1 Status | Engineering Run Intelligence runtime remains on Engineering Hold |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies WP-005.0 as the authoritative bounded rectification architecture required before WP-005 Evidence Implementation may be declared complete.
+
+**Ratified Governance Effect**
+
+- WP-005 remains the permanent Evidence implementation Work Package and retains Evidence-domain ownership.
+- Evidence processing terminates in exactly one governed state: `evidence_established`, `unsupported_source`, `invalid_or_incomplete_source`, `processing_failed` or `persistence_failed`.
+- Evidence computed only in memory is not authoritative; `evidence_established` requires durable persistence and downstream/reload availability.
+- Raw-source persistence and Evidence establishment remain separate engineering facts within a durable staged lifecycle.
+- Previously authoritative persisted Evidence shall never be destroyed before replacement Evidence has successfully become authoritative.
+- A narrowly bounded durable processing-state mechanism and, if proven necessary, a separately reviewed schema migration are architecturally permitted but not implemented or authorised by this ratification.
+- Retry preserves durable source or log identity, permits deterministic reprocessing and shall not destroy prior authoritative Evidence.
+- Legacy records shall not receive manufactured processing outcomes, method identities or provenance.
+- Original-WP-005 minimum source and transformation provenance shall be made explicit without introducing Analysis Snapshot architecture.
+- WP-005.0 implementation is ordered through six separately authorised slices from owner contract through focused completion-quality rectification.
+- Parent WP-005 remains incomplete until the full WP-005.0 completion gate, Founder Validation and required governance closure are satisfied.
+- WP-005.1 Engineering Run Intelligence runtime remains on Engineering Hold until WP-005.0 and parent WP-005 are formally closed.
+
+**Architectural Boundaries**
+
+- This ratification approves architecture only. It does not ratify WP-005 implementation completion.
+- It does not authorise runtime, contract, route, translator, persistence, schema, test, lint, Presentation or deployment changes.
+- It does not establish WP-005.1 as an active implementation Work Package.
+- It does not implement Gear Evidence, derived gear, GearSegment, ShiftEvent, AccelerationRun, Run Intelligence or Analysis Snapshot architecture.
+- It changes no WP-006 Correlation, WP-007 Explanation, WP-011 Presentation or Knowledge ownership.
+- It creates no production Evidence and changes no production state.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

@@ -46,6 +46,7 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 - [WP-003 Vehicle Identity Implementation](../08-engineering-work-packages/WP-003-vehicle-identity-implementation.md)
 - [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md)
 - [WP-004.3 Engineering Calibration Intelligence Architecture](../08-engineering-work-packages/WP-004.3-engineering-calibration-intelligence-architecture.md)
+- [WP-005.0 Evidence Production Contract Rectification Architecture](../08-engineering-work-packages/WP-005.0-evidence-production-contract-rectification-architecture.md)
 - [WP-007.0 Engineering Explanation Architecture](../08-engineering-work-packages/WP-007.0-engineering-explanation-architecture.md)
 - [WP-011.0 Engineering Presentation Intelligence Architecture](../08-engineering-work-packages/WP-011.0-engineering-presentation-intelligence-architecture.md)
 - [WP-011.1 Engineering Graph Intelligence](../08-engineering-work-packages/WP-011.1-engineering-graph-intelligence.md)
@@ -288,7 +289,8 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
 | WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
 | WP-011.7 Engineering Workspace | ARCHITECTURE COMPLETE; capstone sibling governed by WP-011.0 | IN PROGRESS; Workspace Shell and current Telemetry Workspace presentation implemented | Founder visual and educational validation complete for WP-011.7.1 and the current WP-011.7.2 presentation milestone | IN PROGRESS; remaining slices require separate authority | Not Ratified as a completed Work Package |
-| WP-005 Evidence Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
+| WP-005 Evidence Implementation | Architecture specification marked Ratified; governed rectification architecture established by WP-005.0 | Substantial implementation verified; bounded production-contract rectification remains NOT STARTED | Baseline verification complete; rectification validation pending | INCOMPLETE; WP-005.0 required before completion | Parent specification is marked Ratified; implementation completion is not ratified |
+| WP-005.0 Evidence Production Contract Rectification Architecture | ARCHITECTURE COMPLETE; Founder Approved | NOT STARTED; separate implementation authority required | Architecture review complete; runtime validation not started | ARCHITECTURE COMPLETE | Founder Ratified under TS-RAT-019; does not ratify parent WP-005 completion |
 | WP-006 Correlation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 | WP-006.1 Conservative Correlation V1 | Architecture Ratified under TS-RAT-003 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-007; authoritative and closed |
 | WP-007.0 Engineering Explanation Architecture | ARCHITECTURE COMPLETE; Founder Approved | IMPLEMENTATION PENDING; not authorised | Founder architectural review complete | ARCHITECTURE COMPLETE | Founder Ratified under TS-RAT-010 |
@@ -299,6 +301,20 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-011 Presentation Implementation | Architecture specification marked Ratified | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; implementation completion is unverified |
 
 The Ratified status printed within a Work Package specification identifies the governance status of that specification. It shall not be interpreted as evidence that implementation, validation or Work Package completion has occurred.
+
+---
+
+## WP-005 Evidence Production Contract Rectification
+
+The WP-005 repository baseline verification is complete. It confirmed substantial existing Evidence implementation, including deterministic PullWindows, events and source-aligned ranges, while identifying bounded original-WP-005 production-contract gaps in failure outcomes, persistence truthfulness and explicit source and transformation provenance.
+
+[WP-005.0 Evidence Production Contract Rectification Architecture](../08-engineering-work-packages/WP-005.0-evidence-production-contract-rectification-architecture.md) is Founder approved and Founder ratified under [TS-RAT-019](engineering-ratification-register.md#ts-rat-019). Its architecture is complete. Implementation has not started and requires separately bounded Founder authority for each rectification slice.
+
+Parent WP-005 remains incomplete. It shall not be declared complete until WP-005.0 implements and validates its governed terminal outcomes, durable source and Evidence lifecycle, authoritative replacement safety, minimum provenance, downstream failure gating and completion-quality baseline, followed by Founder Validation and required governance closure.
+
+WP-005.1 Engineering Run Intelligence architecture direction is Founder approved, but runtime implementation remains on Engineering Hold. WP-005.1 is not established as an active implementation Work Package. It may not begin until WP-005.0 implementation and validation, Founder Validation, parent WP-005 completion and required governance closure are complete.
+
+No Gear Evidence, derived gear, GearSegment, ShiftEvent, AccelerationRun, Analysis Snapshot architecture or Run Intelligence implementation is authorised by TS-RAT-019.
 
 ---
 
@@ -660,7 +676,8 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - WP-011.2 is partially complete and not ratified. Presentation truthfully exposes the absence of Lean Under Load Root Cause output; future WP-007 Explanation coverage owns the missing capability.
 - WP-011.7 Engineering Workspace architecture is complete as a capstone sibling of WP-011.1 through WP-011.6. WP-011.7.1 and the current WP-011.7.2 Telemetry Workspace presentation milestone are implemented and Founder validated. Parent WP-011.7 remains in progress; every remaining implementation milestone requires separate Founder authority.
 - Primary Results scope communication, timing-event extent, B58 Gen1 logged-gear propagation, possible future AccelerationRun / GearSegment / ShiftEvent architecture and future channel-specific telemetry education remain separate open engineering items. None is closed or implemented by the accepted Telemetry Workspace milestone.
-- WP-001, WP-002, WP-005, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
+- WP-001, WP-002, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
+- WP-005 baseline verification is complete and confirms substantial implementation, but bounded WP-005.0 rectification remains required. WP-005 therefore remains incomplete rather than complete or unverified. WP-005.0 architecture is Founder ratified under [TS-RAT-019](engineering-ratification-register.md#ts-rat-019), implementation is not started, and WP-005.1 runtime remains on Engineering Hold.
 - Architecture Bible Ratification does not by itself establish runtime implementation, validation or Work Package completion.
 - Any pre-ratification status wording within the rewritten Architecture Bible is governed by the later explicit Founder ratification recorded in TS-RAT-003.
 
