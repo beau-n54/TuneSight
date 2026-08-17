@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createTrustedServerClient } from "@/lib/supabase/trustedServer";
 import { buildAnalysisResult } from "@/lib/analysis/engine";
+import {
+  createSupabaseEvidencePersistenceDatabase,
+  persistCandidateEvidenceSummary,
+} from "@/lib/analysis/evidenceCandidatePersistence";
 import { qualifyEvidenceSource } from "@/lib/analysis/evidenceSourceQualification";
 import type { TranslatedLog } from "@/lib/logging/types";
 import type {
@@ -1027,8 +1032,6 @@ export async function POST(request: Request) {
       tuneProfile: effectiveTuneProfile as any,
     });
 
-    await supabase.from("log_summaries").delete().eq("log_id", insertedLog.id);
-
     const summaryPayload = buildSummaryPayload({
       headers,
       rows,
@@ -1036,15 +1039,27 @@ export async function POST(request: Request) {
       analysis,
     });
 
-    const { error: summaryError } = await supabase.from("log_summaries").insert({
-      log_id: insertedLog.id,
-      vehicle_id: vehicleId,
-      user_id: user.id,
-      ...summaryPayload,
+    const trustedDatabase = createSupabaseEvidencePersistenceDatabase(
+      createTrustedServerClient()
+    );
+    const promotion = await persistCandidateEvidenceSummary(trustedDatabase, {
+      logId: insertedLog.id,
+      vehicleId,
+      userId: user.id,
+      summaryPayload,
+      processingContractVersion: "1.0",
+      loggerPlatform: translatedLog.platform,
+      sourceAvailability: "available",
+      processingStartedAt: new Date().toISOString(),
     });
 
-    if (summaryError) {
-      console.error("Summary insert error:", summaryError.message);
+    if (promotion.resolution !== "confirmed_established") {
+      console.error("Evidence authority promotion incomplete:", {
+        resolution: promotion.resolution,
+        finding: promotion.finding,
+        logId: promotion.logId,
+        candidateSummaryId: promotion.candidateSummaryId,
+      });
     }
   } catch (error) {
     console.error("Log processing error:", error);
