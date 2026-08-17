@@ -1,4 +1,4 @@
-import { getMissingCoreChannels, read } from "./helpers";
+import { getMissingCoreChannels, read } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types";
 
 export function translateBm3Rows(rawRows: Record<string, unknown>[]): TranslatedLog {

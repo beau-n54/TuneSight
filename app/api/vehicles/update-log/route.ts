@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { translateLogRows } from "@/lib/logging/translator";
 import { createClient } from "@/lib/supabase/server";
 import { buildAnalysisResult } from "@/lib/analysis/engine";
+import { qualifyEvidenceSource } from "@/lib/analysis/evidenceSourceQualification";
+import type { TranslatedLog } from "@/lib/logging/types";
 import type {
   ParsedLog,
   TuneProfile,
@@ -211,7 +212,7 @@ function parseCSV(csvText: string): { headers: string[]; rows: NumericRow[] } {
 
   const lines = allLines.filter((line) => !line.startsWith("#"));
 
-  if (lines.length < 2) {
+  if (lines.length === 0) {
     return { headers: [], rows: [] };
   }
 
@@ -510,7 +511,7 @@ function buildParsedLog(rows: NumericRow[]): {
   };
 }
 
-function buildParsedLogFromTranslatedLog(translatedLog: ReturnType<typeof translateLogRows>): {
+function buildParsedLogFromTranslatedLog(translatedLog: TranslatedLog): {
   parsedLog: ParsedLog;
   extracted: ReturnType<typeof buildParsedLog>["extracted"];
 } {
@@ -944,7 +945,27 @@ export async function POST(request: Request) {
     }
 
     const { headers, rows } = parseCSV(uploadedFileText);
-    const translatedLog = translateLogRows(rows);
+    const sourceQualification = qualifyEvidenceSource(
+      rows,
+      {
+        sourceLogId: insertedLog.id,
+        sourceAvailability: "available",
+      },
+      headers
+    );
+
+    if (sourceQualification.kind !== "supported_and_usable") {
+      console.warn(
+        "Evidence source qualification blocked Evidence derivation:",
+        sourceQualification.outcome
+      );
+      return NextResponse.redirect(
+        new URL(`/dashboard/vehicles/${vehicleId}/logs`, request.url),
+        { status: 303 }
+      );
+    }
+
+    const translatedLog = sourceQualification.translatedLog;
 
     const { parsedLog, extracted } =
       buildParsedLogFromTranslatedLog(translatedLog);

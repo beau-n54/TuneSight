@@ -1,8 +1,8 @@
-import { translateBm3Rows } from "./bm3";
-import { translateDimsportRows } from "./dimsport";
-import { translateMhdRows } from "./mhd";
-import { translateProtoolRows } from "./protool";
-import { translateXhpRows } from "./xhp";
+import { translateBm3Rows } from "./bm3.ts";
+import { translateDimsportRows } from "./dimsport.ts";
+import { translateMhdRows } from "./mhd.ts";
+import { translateProtoolRows } from "./protool.ts";
+import { translateXhpRows } from "./xhp.ts";
 import type { TranslatedLog } from "./types";
 
 function hasHeader(lowerHeaders: string[], terms: string[]): boolean {
