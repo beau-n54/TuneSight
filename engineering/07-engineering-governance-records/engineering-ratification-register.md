@@ -1156,6 +1156,53 @@ The Founder ratifies WP-005.0 as the authoritative bounded rectification archite
 
 ---
 
+### TS-RAT-020
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-020 |
+| Date | 21 August 2026 |
+| Artefact Type | Work Package Implementation Completion |
+| Artefact Name | WP-005 — Evidence Implementation |
+| Permanent Work Package Identifier | WP-005 |
+| Authority | Founder |
+| Ratification Scope | Completion of WP-005.0 Evidence Production Contract Rectification and parent WP-005 Evidence Implementation following deterministic and physical production validation |
+| Status | RATIFIED — COMPLETE |
+| Governing Architecture | [WP-005.0 Evidence Production Contract Rectification Architecture](../08-engineering-work-packages/WP-005.0-evidence-production-contract-rectification-architecture.md) |
+| Parent Work Package | [WP-005 Evidence Implementation](../08-engineering-work-packages/WP-005-evidence-implementation.md) |
+| Founder Review | Completed |
+| Implementation Status | WP-005.0.1 through WP-005.0.6 complete |
+| Production Validation | Founder validated against deployment commit `0d3ae2d029ce42d87c7b8509a5b4645090e99b6c` |
+| WP-005 Completion | Complete |
+| WP-005.1 Status | Engineering Run Intelligence remains on Engineering Hold |
+| Superseded Status | Not superseded |
+
+**Ratification Declaration**
+
+The Founder ratifies completion of WP-005.0 Evidence Production Contract Rectification and parent WP-005 Evidence Implementation.
+
+**Ratified Governance Effect**
+
+- WP-005.0.1 through WP-005.0.6 are complete, and WP-005.0 is closed.
+- Parent WP-005 is complete.
+- The production migration established 200 legacy authority references, left 8 logs authority-null, retained all 208 legacy records as `legacy_unclassified` and preserved all 200 summaries.
+- Disposable PostgreSQL validation, production migration execution, post-migration schema and security audit, a 260-test deterministic completion gate and Founder physical production validation all passed.
+- The physical production validation used `N54_Native_MHD_Multi_Event_Comparison_Log.csv` as `WP-005 Founder Validation - MHD` and proved the supported upload, durable processing, Evidence persistence, authority establishment and authoritative reload path.
+- Production Evidence reached terminal `evidence_established` at `evidence_persistence`; its durable source identity, logger classification, processing metadata, authoritative summary, same-log/user/vehicle integrity, `engine_v2` payload and minimum Evidence provenance were present.
+- Browser refresh reconstructed the same authoritative analysis from persisted state.
+- Same-persisted-log UI reanalysis is not a supported product action and was not represented as physically tested. Its replacement and failure semantics remain covered by deterministic validation; no artificial production mutation was performed.
+- The authenticated summary INSERT compatibility bridge remains deliberately non-authoritative.
+
+**Architectural Boundaries**
+
+- This ratification records accepted implementation and production validation; it does not create new implementation authority.
+- `SUPABASE_SERVICE_ROLE_KEY` is recorded only as configured Sensitive and Production-only; no secret value is recorded or exposed.
+- WP-005.1 Engineering Run Intelligence remains on Engineering Hold and requires separate Founder authority.
+- No Analysis Snapshot or Run Intelligence architecture is introduced.
+- No Calibration or XDF work is authorised.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
