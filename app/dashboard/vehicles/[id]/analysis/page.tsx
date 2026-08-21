@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { validateBoostAgainstTune } from "@/lib/analysis/boostValidation";
-import { loadEvidenceReloadState } from "@/lib/analysis/authoritativeEvidenceReload";
+import { loadEvidenceReloadWithProvenance } from "@/lib/analysis/evidenceProvenance";
 import type { AnalysisWarning } from "@/lib/analysis/core/analysisWarning";
 import type { EnginePlatform } from "@/lib/analysis/core/analysisContext";
 import type { RootCauseEvidence } from "@/lib/analysis/rootCauseEngine";
@@ -292,7 +292,7 @@ export default async function AnalysisPage({ params }: PageProps) {
   }
 
   const evidenceReloadState = latestLog?.id
-    ? await loadEvidenceReloadState(
+    ? await loadEvidenceReloadWithProvenance(
         {
           loadLog: loadExactLog,
           loadSummary: loadExactSummary,

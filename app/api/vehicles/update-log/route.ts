@@ -1121,6 +1121,7 @@ export async function POST(request: Request) {
           processingContractVersion: "1.0",
           loggerPlatform: derived.loggerPlatform,
           sourceAvailability: "available",
+          rawSourceStoragePath: durableSourcePath,
           processingStartedAt,
         }),
     });

@@ -23,6 +23,7 @@ const input = (): CandidateEvidenceSummaryInput => ({
   processingContractVersion: "1.0",
   loggerPlatform: "mhd",
   sourceAvailability: "available",
+  rawSourceStoragePath: "user-1/vehicle-1/log-1.csv",
   processingStartedAt: "2026-08-18T00:00:00.000Z",
 });
 
@@ -161,7 +162,20 @@ test("candidate insertion preserves scalar and engine_v2 payload semantics", asy
   assert.equal(candidate?.max_boost, 22.1);
   assert.deepEqual(candidate?.summary, {
     rows_parsed: 42,
-    engine_v2: { quickVerdict: "Synthetic test verdict" },
+    engine_v2: {
+      quickVerdict: "Synthetic test verdict",
+      evidenceProvenance: {
+        provenanceContractVersion: "1.0",
+        logId: "log-1",
+        vehicleId: "vehicle-1",
+        userId: "user-1",
+        sourceAvailability: "available",
+        rawSourceStoragePath: "user-1/vehicle-1/log-1.csv",
+        loggerPlatform: "mhd",
+        processingContractVersion: "1.0",
+        processingStartedAt: "2026-08-18T00:00:00.000Z",
+      },
+    },
   });
   assert.equal(candidate?.log_id, "log-1");
   assert.equal(candidate?.vehicle_id, "vehicle-1");

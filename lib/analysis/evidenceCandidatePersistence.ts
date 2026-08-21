@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LoggerPlatform } from "../logging/types.ts";
 import type { EvidenceSourceAvailability } from "./evidenceProcessingOutcome.ts";
+import {
+  defineStoredEvidenceProvenanceV1,
+  type StoredEvidenceProvenanceV1,
+} from "./evidenceProvenance.ts";
 
 export const EVIDENCE_PROMOTION_RESOLUTIONS = Object.freeze([
   "confirmed_established",
@@ -41,6 +45,7 @@ export type CandidateEvidenceSummaryInput = Readonly<{
   processingContractVersion: "1.0";
   loggerPlatform: LoggerPlatform;
   sourceAvailability: EvidenceSourceAvailability;
+  rawSourceStoragePath: string | null;
   processingStartedAt: string;
 }>;
 
@@ -96,6 +101,74 @@ function isCandidateRow(value: unknown): value is CandidateSummaryRow {
     isRecord(value.summary) &&
     isRecord(value.summary.engine_v2)
   );
+}
+
+function candidateProvenance(
+  input: CandidateEvidenceSummaryInput
+): StoredEvidenceProvenanceV1 {
+  return defineStoredEvidenceProvenanceV1({
+    provenanceContractVersion: "1.0",
+    logId: input.logId,
+    vehicleId: input.vehicleId,
+    userId: input.userId,
+    sourceAvailability: input.sourceAvailability,
+    rawSourceStoragePath: input.rawSourceStoragePath,
+    loggerPlatform: input.loggerPlatform,
+    processingContractVersion: input.processingContractVersion,
+    processingStartedAt: input.processingStartedAt,
+  });
+}
+
+function candidatePayload(
+  input: CandidateEvidenceSummaryInput,
+  provenance: StoredEvidenceProvenanceV1
+): Readonly<Record<string, unknown>> {
+  if (
+    !isRecord(input.summaryPayload.summary) ||
+    !isRecord(input.summaryPayload.summary.engine_v2)
+  ) {
+    throw new Error("Candidate Evidence payload requires engine_v2.");
+  }
+  return {
+    ...input.summaryPayload,
+    summary: {
+      ...input.summaryPayload.summary,
+      engine_v2: {
+        ...input.summaryPayload.summary.engine_v2,
+        evidenceProvenance: provenance,
+      },
+    },
+    log_id: input.logId,
+    vehicle_id: input.vehicleId,
+    user_id: input.userId,
+  };
+}
+
+function verifiedProvenanceMatches(
+  row: CandidateSummaryRow,
+  expected: StoredEvidenceProvenanceV1
+): boolean {
+  if (!isRecord(row.summary) || !isRecord(row.summary.engine_v2)) return false;
+  const actual = row.summary.engine_v2.evidenceProvenance;
+  if (!isRecord(actual)) return false;
+  try {
+    const validated = defineStoredEvidenceProvenanceV1(
+      actual as StoredEvidenceProvenanceV1
+    );
+    return (
+      validated.provenanceContractVersion === expected.provenanceContractVersion &&
+      validated.logId === expected.logId &&
+      validated.vehicleId === expected.vehicleId &&
+      validated.userId === expected.userId &&
+      validated.sourceAvailability === expected.sourceAvailability &&
+      validated.rawSourceStoragePath === expected.rawSourceStoragePath &&
+      validated.loggerPlatform === expected.loggerPlatform &&
+      validated.processingContractVersion === expected.processingContractVersion &&
+      validated.processingStartedAt === expected.processingStartedAt
+    );
+  } catch {
+    return false;
+  }
 }
 
 function readAuthorityId(value: unknown): {
@@ -223,18 +296,20 @@ export async function persistCandidateEvidenceSummary(
   input: CandidateEvidenceSummaryInput
 ): Promise<EvidencePromotionOperationResult> {
   let inserted: DatabaseResult<unknown>;
+  let provenance: StoredEvidenceProvenanceV1 | null = null;
   try {
-    inserted = await database.insertCandidate({
-      ...input.summaryPayload,
-      log_id: input.logId,
-      vehicle_id: input.vehicleId,
-      user_id: input.userId,
-    });
+    provenance = candidateProvenance(input);
+    inserted = await database.insertCandidate(candidatePayload(input, provenance));
   } catch {
     inserted = { data: null, failed: true };
   }
 
-  if (inserted.failed || !isRecord(inserted.data) || typeof inserted.data.id !== "string") {
+  if (
+    provenance === null ||
+    inserted.failed ||
+    !isRecord(inserted.data) ||
+    typeof inserted.data.id !== "string"
+  ) {
     return notEstablished(input, null, "candidate_insert_failed");
   }
   const candidateSummaryId = inserted.data.id;
@@ -251,7 +326,8 @@ export async function persistCandidateEvidenceSummary(
     verified.data.id !== candidateSummaryId ||
     verified.data.log_id !== input.logId ||
     verified.data.user_id !== input.userId ||
-    verified.data.vehicle_id !== input.vehicleId
+    verified.data.vehicle_id !== input.vehicleId ||
+    !verifiedProvenanceMatches(verified.data, provenance)
   ) {
     return notEstablished(
       input,

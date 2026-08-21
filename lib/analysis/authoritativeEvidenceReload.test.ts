@@ -267,7 +267,7 @@ test("Explanation surfaces inherit only authoritative cross-reference Evidence",
 
 test("Presentation and telemetry reload from only authoritative engine_v2", () => {
   const page = analysisPageSource();
-  assert.match(page, /loadEvidenceReloadState/);
+  assert.match(page, /loadEvidenceReloadWithProvenance/);
   assert.match(page, /currentAuthority\.state === "available"/);
   assert.match(page, /<TelemetryGraphV1[\s\S]*engineV2\?\.telemetry/);
 });
