@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { validateBoostAgainstTune } from "@/lib/analysis/boostValidation";
+import { loadEvidenceReloadState } from "@/lib/analysis/authoritativeEvidenceReload";
 import type { AnalysisWarning } from "@/lib/analysis/core/analysisWarning";
 import type { EnginePlatform } from "@/lib/analysis/core/analysisContext";
 import type { RootCauseEvidence } from "@/lib/analysis/rootCauseEngine";
@@ -211,6 +212,7 @@ export default async function AnalysisPage({ params }: PageProps) {
   if (!user) {
     redirect("/login");
   }
+  const userId = user.id;
 
   const { data: vehicle, error: vehicleError } = await supabase
     .from("vehicles")
@@ -269,24 +271,75 @@ export default async function AnalysisPage({ params }: PageProps) {
     latestTuneProfile = (data as TuneProfileRow | null) || null;
   }
 
-  const { data: latestSummary } = latestLog
-  ? await supabase
+  async function loadExactLog(logId: string) {
+    const { data } = await supabase
+      .from("logs")
+      .select("*")
+      .eq("id", logId)
+      .eq("user_id", userId)
+      .eq("vehicle_id", vehicle.id)
+      .maybeSingle();
+    return data;
+  }
+
+  async function loadExactSummary(summaryId: string) {
+    const { data } = await supabase
       .from("log_summaries")
       .select("*")
-      .eq("log_id", latestLog.id)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-  : { data: null };
+      .eq("id", summaryId)
+      .maybeSingle();
+    return data;
+  }
 
-const { data: historicalSummaries } = await supabase
-  .from("log_summaries")
-  .select("*")
-  .eq("vehicle_id", vehicle.id)
-  .eq("user_id", user.id)
-  .order("created_at", { ascending: false })
-  .limit(5);
+  const evidenceReloadState = latestLog?.id
+    ? await loadEvidenceReloadState(
+        {
+          loadLog: loadExactLog,
+          loadSummary: loadExactSummary,
+        },
+        {
+          logId: latestLog.id,
+          expectedUserId: userId,
+          expectedVehicleId: vehicle.id,
+        }
+      )
+    : null;
+
+  const latestSummary =
+    evidenceReloadState?.currentAuthority.state === "available"
+      ? (evidenceReloadState.currentAuthority.summary as Awaited<
+          ReturnType<typeof loadExactSummary>
+        >)
+      : null;
+
+  const { data: historicalAuthorityLogs } = await supabase
+    .from("logs")
+    .select("authoritative_log_summary_id, created_at")
+    .eq("vehicle_id", vehicle.id)
+    .eq("user_id", user.id)
+    .not("authoritative_log_summary_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const historicalAuthorityIds = (historicalAuthorityLogs ?? []).flatMap(
+    (log) =>
+      typeof log.authoritative_log_summary_id === "string"
+        ? [log.authoritative_log_summary_id]
+        : []
+  );
+  const { data: historicalAuthorityRows } = historicalAuthorityIds.length
+    ? await supabase
+        .from("log_summaries")
+        .select("*")
+        .in("id", historicalAuthorityIds)
+    : { data: [] };
+  const historicalRowsById = new Map(
+    (historicalAuthorityRows ?? []).map((summary) => [summary.id, summary])
+  );
+  const historicalSummaries = historicalAuthorityIds.flatMap((summaryId) => {
+    const summary = historicalRowsById.get(summaryId);
+    return summary ? [summary] : [];
+  });
 
   const effectiveTuneProfile =
   latestTuneProfile &&
