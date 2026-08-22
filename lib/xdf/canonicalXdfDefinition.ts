@@ -57,6 +57,15 @@ export type XdfDefinitionRevision = Readonly<{
   title: string | null;
   description: string | null;
   primaryAddress: number | null;
+  addressSpace: Readonly<{
+    baseOffset: number | null;
+    subtractBaseOffset: boolean | null;
+    regions: readonly Readonly<{ startAddress: number; size: number; name: string | null }>[];
+  }>;
+  defaultDataLayout: Readonly<{
+    elementSizeBits: number | null;
+    signed: boolean | null;
+  }>;
   byteOrderMetadata: Readonly<{ lsbFirst: boolean | null; source: string | null }>;
   axes: readonly XdfAxisDefinition[];
   qualificationState: "structurally_interpreted" | "applicability_unresolved";
@@ -139,6 +148,8 @@ export function defineXdfDefinitionRevision(input: Omit<XdfDefinitionRevision, "
   const structuralPayload = {
     definitionKind: input.definitionKind,
     primaryAddress: input.primaryAddress,
+    addressSpace: input.addressSpace,
+    defaultDataLayout: input.defaultDataLayout,
     byteOrderMetadata: input.byteOrderMetadata,
     axes: input.axes,
   };
@@ -149,6 +160,9 @@ export function defineXdfDefinitionRevision(input: Omit<XdfDefinitionRevision, "
   });
   return Object.freeze({
     ...input,
+    addressSpace: Object.freeze({ ...input.addressSpace, regions: Object.freeze(input.addressSpace.regions.map((region) => Object.freeze({ ...region }))) }),
+    defaultDataLayout: Object.freeze({ ...input.defaultDataLayout }),
+    byteOrderMetadata: Object.freeze({ ...input.byteOrderMetadata }),
     axes: Object.freeze(input.axes.map((axis) => Object.freeze({ ...axis, embeddedData: Object.freeze({ ...axis.embeddedData }), equationVariables: Object.freeze([...axis.equationVariables]) }))),
     structuralDigest,
     sourceBindingDigest,

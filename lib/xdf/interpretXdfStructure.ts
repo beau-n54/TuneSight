@@ -116,7 +116,7 @@ function parseXml(xml: string): XmlNode {
 
 const children = (node: XmlNode, name: string) => node.children.filter((child) => child.name === name);
 const child = (node: XmlNode, name: string) => children(node, name)[0] ?? null;
-const SUPPORTED_ELEMENTS = new Set(["XDFFORMAT", "XDFHEADER", "DEFAULTS", "XDFTABLE", "TITLE", "DESCRIPTION", "XDFAXIS", "EMBEDDEDDATA", "INDEXCOUNT", "DATATYPE", "UNITS", "MATH", "VAR"]);
+const SUPPORTED_ELEMENTS = new Set(["XDFFORMAT", "XDFHEADER", "BASEOFFSET", "REGION", "DEFAULTS", "XDFTABLE", "TITLE", "DESCRIPTION", "XDFAXIS", "EMBEDDEDDATA", "INDEXCOUNT", "DATATYPE", "UNITS", "MATH", "VAR"]);
 function unsupportedElements(root: XmlNode): string[] {
   const names = new Set<string>();
   const visit = (node: XmlNode) => { if (!SUPPORTED_ELEMENTS.has(node.name)) names.add(node.name); node.children.forEach(visit); };
@@ -168,10 +168,19 @@ export function interpretXdfStructure(input: { xml: string; filename?: string | 
       return Object.freeze({ outcome: "unsupported", sourceArtifact: defineXdfSourceArtifact({ bytes, observedVersion: version, filename: input.filename, provenance: input.provenance, sourceRevision: input.sourceRevision }), definitions: [], findings: [{ code: "unsupported_version", path: "/XDFFORMAT/@version", message: `XDF version ${version ?? "absent"} is unsupported.` }] });
     }
     const sourceArtifact = defineXdfSourceArtifact({ bytes, observedVersion: version, filename: input.filename, provenance: input.provenance, sourceRevision: input.sourceRevision });
-    const defaults = child(child(root, "XDFHEADER") ?? root, "DEFAULTS");
+    const header = child(root, "XDFHEADER") ?? root;
+    const defaults = child(header, "DEFAULTS");
     const lsbFirstSource = defaults?.attributes.lsbfirst ?? null;
     if (lsbFirstSource !== null && lsbFirstSource !== "0" && lsbFirstSource !== "1") throw new XdfXmlError("invalid_byte_order", "DEFAULTS lsbfirst must be 0 or 1 when present.");
     const byteOrderMetadata = Object.freeze({ lsbFirst: lsbFirstSource === null ? null : lsbFirstSource === "1", source: lsbFirstSource });
+    const signedSource = defaults?.attributes.signed ?? null;
+    if (signedSource !== null && signedSource !== "0" && signedSource !== "1") throw new XdfXmlError("invalid_signedness", "DEFAULTS signed must be 0 or 1 when present.");
+    const defaultDataLayout = Object.freeze({ elementSizeBits: integer(defaults?.attributes.datasizeinbits, "Default element size"), signed: signedSource === null ? null : signedSource === "1" });
+    const base = child(header, "BASEOFFSET");
+    const subtractSource = base?.attributes.subtract ?? null;
+    if (subtractSource !== null && subtractSource !== "0" && subtractSource !== "1") throw new XdfXmlError("invalid_base_offset", "BASEOFFSET subtract must be 0 or 1 when present.");
+    const regions = children(header, "REGION").map((region) => Object.freeze({ startAddress: integer(region.attributes.startaddress, "Region start address") ?? 0, size: integer(region.attributes.size, "Region size") ?? 0, name: region.attributes.name ?? null }));
+    const addressSpace = Object.freeze({ baseOffset: integer(base?.attributes.offset, "Base offset"), subtractBaseOffset: subtractSource === null ? null : subtractSource === "1", regions: Object.freeze(regions) });
     const tableNodes = children(root, "XDFTABLE");
     if (tableNodes.length === 0) throw new XdfXmlError("missing_tables", "XDF contains no XDFTABLE definitions.");
     if (tableNodes.length > XDF_STRUCTURAL_LIMITS.maximumTables) return Object.freeze({ outcome: "unsupported", sourceArtifact, definitions: [], findings: [{ code: "table_limit", path: "/XDFFORMAT", message: "XDF exceeds the supported table limit." }] });
@@ -189,7 +198,7 @@ export function interpretXdfStructure(input: { xml: string; filename?: string | 
     const definitions = drafts.map((draft, index) => {
       const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: draft.primaryAddress, axisRoles: draft.axes.map((value) => value.axisId), conflict: draft.key !== null && (counts.get(draft.key) ?? 0) > 1 });
       if (identity.status !== "derived") findings.push({ code: `definition_identity_${identity.status}`, path: `/XDFFORMAT/XDFTABLE[${index + 1}]`, message: identity.unresolvedReason ?? "Definition identity is unresolved." });
-      return defineXdfDefinitionRevision({ identity, sourceArtifactDigest: sourceArtifact.sourceDigest, definitionKind: "table", title: text(child(draft.table, "TITLE")), description: text(child(draft.table, "DESCRIPTION")), primaryAddress: draft.primaryAddress, byteOrderMetadata, axes: draft.axes, qualificationState: "applicability_unresolved" });
+      return defineXdfDefinitionRevision({ identity, sourceArtifactDigest: sourceArtifact.sourceDigest, definitionKind: "table", title: text(child(draft.table, "TITLE")), description: text(child(draft.table, "DESCRIPTION")), primaryAddress: draft.primaryAddress, addressSpace, defaultDataLayout, byteOrderMetadata, axes: draft.axes, qualificationState: "applicability_unresolved" });
     });
     return Object.freeze({ outcome: "structurally_interpreted", sourceArtifact: Object.freeze({ ...sourceArtifact, qualificationState: "structurally_interpreted" as const }), definitions: Object.freeze(definitions), findings: Object.freeze(findings) });
   } catch (error) {
