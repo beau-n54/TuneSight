@@ -283,8 +283,8 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-001 Engineering Foundation Verification | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
 | WP-002 Repository Architecture Foundation | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
 | WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED; WP-004.2 Knowledge integration dependency satisfied | Founder production validation completed across the accepted WP-004.2 scope; formal WP-003 hold disposition remains pending | ENGINEERING HOLD pending Founder review | Not ratified as a completed Work Package |
-| WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified, WP-004.2 complete and WP-004.3 implementation pending | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed; WP-004.3 architecture reviewed | IN PROGRESS | WP-004.1 and WP-004.2 implementation scopes and WP-004.3 architecture are ratified; parent Work Package completion has not been declared |
-| WP-004.3 Engineering Calibration Intelligence Architecture | ARCHITECTURE COMPLETE; Founder Approved | IMPLEMENTATION PENDING; not authorised | Founder architectural review complete | ARCHITECTURE COMPLETE | Founder Ratified under TS-RAT-009 |
+| WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified, WP-004.2 complete and WP-004.3 canonical Knowledge contracts complete | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed; WP-004.3 deterministic contract and synthetic publication validation passed | IN PROGRESS | WP-004.1 and WP-004.2 implementation scopes, WP-004.3 architecture and the WP-004.3 contract reconciliation are ratified; parent Work Package completion has not been declared |
+| WP-004.3 Engineering Calibration Intelligence Architecture | ARCHITECTURE COMPLETE; Founder Approved | CANONICAL KNOWLEDGE CONTRACT IMPLEMENTATION COMPLETE; runtime integration and production population not started | Dedicated deterministic contract testing and synthetic publication validation complete | CONTRACT BOUNDARY COMPLETE; broader Calibration/XDF product incomplete | Founder Ratified under TS-RAT-009; implementation reconciliation recorded under TS-RAT-021 |
 | WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
 | WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
 | WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
@@ -383,7 +383,7 @@ Knowledge is included within the complete Engineering Architecture Bible ratific
 
 **Work Package Status:** IN PROGRESS
 
-WP-004 remains governed as a parent Work Package. WP-004.1 is ratified, WP-004.2 is complete and ratified within its defined scope, and WP-004.3 architecture is complete and Founder ratified with implementation pending. No unsupported parent completion claim is made.
+WP-004 remains governed as a parent Work Package. WP-004.1 is ratified, WP-004.2 is complete and ratified within its defined scope, and WP-004.3 architecture and canonical Knowledge contract boundary are complete and Founder ratified. Runtime Calibration Knowledge integration and production Calibration Knowledge population have not started. No unsupported parent completion claim is made.
 
 **First Capability:** WP-004.1 Stock Variant Knowledge Engine
 
@@ -464,7 +464,11 @@ The permanent ratification is recorded as [TS-RAT-004](engineering-ratification-
 
 **Founder Ratification:** [TS-RAT-009](engineering-ratification-register.md#ts-rat-009)
 
-**Implementation Status:** PENDING; NOT AUTHORISED
+**Implementation Status:** CANONICAL KNOWLEDGE CONTRACT BOUNDARY COMPLETE
+
+**Runtime Integration Status:** NOT STARTED
+
+**Production Calibration Knowledge Population:** NOT STARTED
 
 WP-004.3 establishes the architecture for canonical reusable Engineering Calibration Intelligence within Knowledge. It permanently distinguishes Purpose, which explains what a calibration does, from Engineering Intent, which explains why the calibration exists and which engineering objectives it serves.
 
@@ -486,11 +490,30 @@ WP-004.3 establishes the architecture for canonical reusable Engineering Calibra
 - Qualified lookup and Cross-Domain Contracts
 - Platform-neutral phased implementation roadmap
 
-Knowledge owns reusable calibration truth. Explanation retains analysis-specific reasoning, Decision retains current inspection guidance and Presentation retains communication only. WP-004.3 changes no runtime behaviour and authorises no implementation, schema, detector, Explanation, Decision or Presentation work.
+Knowledge owns reusable calibration truth. Explanation retains analysis-specific reasoning, Decision retains current inspection guidance and Presentation retains communication only. The completed implementation establishes canonical contracts, deterministic contract tests and synthetic publication validation only. It establishes no runtime Calibration Knowledge integration, production Calibration Knowledge population, production Registry or publication workflow, schema, detector, Explanation, Decision or Presentation change.
+
+The Founder accepts the permanent authority sequence:
+
+Definition Authority
+
+→ Calibration Authority
+
+→ Runtime Evidence
+
+A source XDF definition requires qualified applicability and semantic validity. Once sufficiently qualified and deterministically decoded, its values constitute authoritative Evidence of the instructions encoded in the exact Calibration revision. Those instructions do not prove actual runtime behaviour; Runtime Evidence establishes what occurred.
+
+The broader Calibration/XDF capability remains incomplete. Future separately authorised architecture shall preserve Stock Calibration, Current Modified Calibration, TuneSight Suggested Calibration and Working Calibration as distinct states and shall address qualified definitions, extraction, comparison, Knowledge and coherence, recommendations, manual editing, immutable revision lineage, deterministic reconstruction, validation and export.
+
+The Founder has established two parallel near-term programme directions where dependencies permit:
+
+- Calibration: qualified definitions through validated export;
+- Native Vehicle Data: Vehicle Interface, ECU/DME identification, qualified channels, Live Telemetry, Direct TuneSight Logging, durable WP-005 Evidence ingestion and Diagnostics, with programming/flashing later.
+
+Imported third-party logs remain supported. Native acquisition and Direct Logging do not automatically constitute WP-005.1 Engineering Run Intelligence. WP-005.1 remains on Engineering Hold. No permanent new Work Package identifiers or implementation authority are created by this governance reconciliation.
 
 ### Next Authorised Objective
 
-Founder review of the WP-003 Engineering Hold and ratification criteria. No further WP-004.2 implementation and no WP-004.3 implementation are authorised.
+Separate Founder authority is required for the next bounded Calibration architecture and for Vehicle Interface / Native Vehicle Data architecture. No Calibration, Vehicle Interface, Live Telemetry, Direct Logging, Diagnostics or flashing implementation is authorised by this reconciliation.
 
 ---
 
@@ -674,7 +697,7 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 ## Current Blockers and Qualifications
 
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
-- WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture is complete and Founder ratified, while implementation remains pending and unauthorised. Parent WP-004 completion has not been declared.
+- WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture and canonical Knowledge contract implementation are complete and Founder ratified within that boundary under TS-RAT-009 and TS-RAT-021. Runtime integration and production Calibration Knowledge population have not started. The broader Calibration/XDF product remains incomplete, and parent WP-004 completion has not been declared.
 - WP-004.5.1 Engineering Ontology Architecture is Founder ratified under [TS-RAT-011](engineering-ratification-register.md#ts-rat-011). Ontology implementation, TS-KO-000001 and production Knowledge population remain on Engineering Hold.
 - TS-STD-000 Engineering Standards Framework is Founder ratified under [TS-RAT-012](engineering-ratification-register.md#ts-rat-012). TS-STD-001 Engineering Truth Standard is Founder ratified under [TS-RAT-013](engineering-ratification-register.md#ts-rat-013) and is authoritative; its ratification establishes no implementation or production Knowledge authority.
 - TS-STD-002 Engineering Evidence Integrity Standard is Founder ratified under [TS-RAT-015](engineering-ratification-register.md#ts-rat-015). It establishes no implementation or production Evidence authority.

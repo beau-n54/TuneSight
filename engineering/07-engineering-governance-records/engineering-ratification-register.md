@@ -1203,6 +1203,61 @@ The Founder ratifies completion of WP-005.0 Evidence Production Contract Rectifi
 
 ---
 
+### TS-RAT-021
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-021 |
+| Date | 22 August 2026 |
+| Artefact Type | Architecture and Implementation Governance Reconciliation |
+| Artefact Name | WP-004.3 — Engineering Calibration Intelligence |
+| Permanent Work Package Identifier | WP-004.3 |
+| Authority | Founder |
+| Ratification Scope | Reconciliation of the Founder-ratified WP-004.3 architecture with the subsequently completed canonical Calibration Knowledge contract implementation and synthetic validation |
+| Status | RATIFIED — CONTRACT BOUNDARY COMPLETE |
+| Architecture Artefact | [WP-004.3 Engineering Calibration Intelligence Architecture](../08-engineering-work-packages/WP-004.3-engineering-calibration-intelligence-architecture.md) |
+| Parent Work Package | [WP-004 Knowledge Implementation](../08-engineering-work-packages/WP-004-knowledge-implementation.md) |
+| Original Architecture Ratification | TS-RAT-009; preserved without historical amendment |
+| Contract Implementation | Complete within the WP-004.3 canonical Knowledge boundary |
+| Contract Validation | Dedicated deterministic contract testing and synthetic Calibration Knowledge publication validation complete |
+| Runtime Integration | Not started |
+| Production Calibration Knowledge | Not populated |
+| Parent WP-004 Completion | Not established; parent remains incomplete |
+| WP-005.1 Status | Engineering Run Intelligence remains on Engineering Hold |
+| Superseded Status | Does not supersede TS-RAT-009; reconciles subsequent accepted implementation |
+
+**Ratification Declaration**
+
+The Founder ratifies the governance reconciliation of WP-004.3. Its canonical Calibration Knowledge architecture remains authoritative within its scope, and the subsequently completed contract implementation and synthetic validation are accepted as complete within that boundary.
+
+**Ratified Governance Effect**
+
+- TS-RAT-009 remains the historically authoritative record of the original architecture-only ratification.
+- Canonical Calibration Knowledge contracts, dedicated deterministic tests and synthetic publication validation were subsequently completed, committed and pushed to `origin/main`.
+- Runtime Calibration Knowledge integration has not started.
+- Production Calibration Knowledge population has not started.
+- No production Calibration Knowledge Registry or publication workflow is operating.
+- The broader Calibration/XDF product capability remains incomplete and requires separately Founder-authorised architecture, implementation, physical validation and production validation.
+- Parent WP-004 remains incomplete.
+- Definition Authority determines what qualified calibration data means. Calibration Authority establishes the instructions encoded in an exact Calibration revision after qualified applicability and deterministic decoding. Runtime Evidence establishes what occurred in operation. These authority boundaries shall not be collapsed.
+- The future Calibration Workspace preserves four distinct states: Stock Calibration, Current Modified Calibration, TuneSight Suggested Calibration and Working Calibration.
+- The broader Calibration direction includes qualified Definition revisions, calibrated-value extraction, Stock/Modified comparison, Knowledge and coherence, evidence-backed recommendations, a genuine Manual Calibration Editor, immutable Calibration Revision lineage, deterministic reconstruction, validation and exportable Calibration artifacts.
+- Calibration and Native Vehicle Data may proceed as parallel near-term engineering tracks where dependencies permit, through separately authorised incremental architecture, implementation and validation cycles.
+- Vehicle Interface architecture, ECU/DME identification, qualified Live Telemetry and Direct TuneSight Logging are near-term Founder priorities. Native acquisition may feed the completed WP-005 Evidence boundary without automatically introducing WP-005.1 Engineering Run Intelligence.
+- Diagnostics follows the Vehicle Interface and native-acquisition foundation. A DTC is Evidence of a reported module condition and not automatic proof of root cause.
+- ECU/DME programming and flashing remain intended later capabilities and shall not delay Vehicle Interface, identification, Live Telemetry, Direct Logging or Diagnostics.
+- No permanent new Calibration or Native Vehicle Data Work Package identifier is created by this reconciliation.
+
+**Architectural and Implementation Boundaries**
+
+- This reconciliation creates no new runtime, test, schema, persistence, configuration, Supabase or deployment authority.
+- It does not authorise Calibration, Vehicle Interface, Live Telemetry, Direct Logging, Diagnostics or flashing implementation.
+- It does not populate production Calibration Knowledge or operate a production Calibration Registry/publication workflow.
+- WP-005.1 Engineering Run Intelligence remains on Engineering Hold and requires separate Founder authority.
+- The intentional intermediate product loop may use TuneSight validation/export, a supported external flashing tool, TuneSight live logging, analysis and refinement before native flashing exists.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
