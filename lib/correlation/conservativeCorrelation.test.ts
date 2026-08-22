@@ -6,7 +6,7 @@ import {
 } from "./conservativeCorrelation.ts";
 
 const wgdcInput: ConservativeCorrelationInput = {
-  analysisId: "analysis-christos",
+  analysisId: "analysis-thirdParty",
   pullWindows: [
     { id: "pull-1", startIndex: 0, endIndex: 100 },
     { id: "pull-2", startIndex: 101, endIndex: 200 },

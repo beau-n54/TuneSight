@@ -105,14 +105,14 @@ const eligibility = (state: CalibrationPublicationEligibilityAssessment["state"]
 
 const allOutcomes: readonly AdmissionDecisionOutcome[] = ["invalid", "requires_evidence", "requires_authority", "identity_unresolved", "conflict", "deferred", "rejected", "accepted_provisional", "accepted_authoritative", "accepted_lifecycle_change", "superseded_proposal"];
 const allOperations: readonly PublicationOperation[] = ["register", "enrich", "correct", "refine_applicability", "add_evidence", "record_dispute", "resolve_conflict", "supersede", "deprecate", "reject", "restore"];
-const authorityScope = (): CalibrationAdmissionDecisionAuthorityScope => ({ scopeId: "scope:admission", scopeVersion: "1", authorityId: "founder:beau", permittedOutcomes: allOutcomes, permittedOperations: allOperations, permittedPolicyIds: ["eligibility-policy"], limitations: ["Records governance authority only."] });
+const authorityScope = (): CalibrationAdmissionDecisionAuthorityScope => ({ scopeId: "scope:admission", scopeVersion: "1", authorityId: "founder:founder", permittedOutcomes: allOutcomes, permittedOperations: allOperations, permittedPolicyIds: ["eligibility-policy"], limitations: ["Records governance authority only."] });
 
 function input(outcome: AdmissionDecisionOutcome = "deferred", state: CalibrationPublicationEligibilityAssessment["state"] = "eligible"): AuthorisedCalibrationKnowledgeAdmissionDecisionInput {
   const admissionProposal=proposal();
   return {
     decisionIdentity: identity("decision:1"), proposal:admissionProposal, proposalIdentity, proposedRevisionBinding:revisionBinding(admissionProposal), evidencePackageIdentity,
     evidenceAuthorityAssessment: evidenceAssessment(), identityLineageConflictAssessment: identityAssessment(), eligibilityAssessment: eligibility(state), policy: admissionPolicy(),
-    decisionAuthority: { authorityType: "founder", authorityIdentifier: "founder:beau" }, decisionAuthorityScope: authorityScope(), outcome,
+    decisionAuthority: { authorityType: "founder", authorityIdentifier: "founder:founder" }, decisionAuthorityScope: authorityScope(), outcome,
     decisionDate: "2026-08-01", decidedAt: "2026-08-01T05:00:00Z", rationale: "Record the authorised decision.",
     acceptedFindingIds: [], rejectedFindingIds: [], unresolvedConditions: [], publicationInstructionId: outcome.startsWith("accepted_") ? "instruction:future" : null,
     supersededDecisionIdentity: null, contractVersion: "1",

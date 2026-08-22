@@ -356,8 +356,8 @@ Founder binaries remain provisional or unresolved where authoritative evidence i
 - WP-004 implementation provides the required Knowledge capability. **Satisfied by WP-004.2.**
 - Founder Validation is repeated. **Satisfied.**
 - N54 regression remains valid. **Satisfied within Founder Validation.**
-- Beau's F30 B58 Gen1 stock and modified binaries are tested. **Satisfied within Founder Validation.**
-- Christos' Supra stock and modified binaries are tested. **Satisfied within Founder Validation.**
+- Founder's F30 B58 Gen1 stock and modified binaries are tested. **Satisfied within Founder Validation.**
+- third-party' Supra stock and modified binaries are tested. **Satisfied within Founder Validation.**
 - Unknown or a qualified non-authoritative outcome remains where authoritative provenance is unavailable. **Satisfied.**
 - WP-003 passes Founder review before ratification. **Pending formal Founder decision.**
 
@@ -419,8 +419,8 @@ WP-004.1 completed Implementation, Founder Code Audit, Physical Founder Validati
 - An explicit verified fixture returned `exact_verified`.
 - Multiple same-ROM variants resolved independently.
 - A modified or unmatched binary was not promoted.
-- Beau's F30 founder binary remained `unknown`.
-- Christos' Supra founder binary remained `unknown`.
+- Founder's F30 founder binary remained `unknown`.
+- third-party' Supra founder binary remained `unknown`.
 - A contradictory ROM Family returned `conflict`.
 - The production Knowledge registry remained unchanged during validation.
 - No founder binary was registered.

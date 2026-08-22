@@ -133,8 +133,8 @@ function reportCase(input: {
 
 function main(): void {
   const libraryRoot = requiredArgument("library-root");
-  const beauPath = requiredArgument("beau-f30");
-  const christosPath = requiredArgument("christos-supra");
+  const founderPath = requiredArgument("founder-f30");
+  const thirdPartyPath = requiredArgument("thirdParty-supra");
   const loaded = loadRomLibrary(libraryRoot);
   const registry = loaded.stockVariantRegistry;
   const initialVariantCount = registry.variants.length;
@@ -297,45 +297,45 @@ function main(): void {
     })
   );
 
-  const beauIdentity = readBinaryIdentity(beauPath);
-  const beauLookup = registry.lookup({
-    sha256: beauIdentity.sha256,
-    binarySizeBytes: beauIdentity.binarySizeBytes,
+  const founderIdentity = readBinaryIdentity(founderPath);
+  const founderLookup = registry.lookup({
+    sha256: founderIdentity.sha256,
+    binarySizeBytes: founderIdentity.binarySizeBytes,
   });
   results.push(
     reportCase({
-      caseName: "Case 5: Beau F30 Founder Binary",
-      identity: beauIdentity,
-      lookup: beauLookup,
+      caseName: "Case 5: Founder F30 Founder Binary",
+      identity: founderIdentity,
+      lookup: founderLookup,
       expectations: [
         {
-          description: "Unexpected Beau F30 SHA-256.",
-          passes: beauIdentity.sha256 === "90b8c0f7994dcb0c8f913256590162c0e11b3b9032eaca097ead9f9546cd038e",
+          description: "Unexpected Founder F30 SHA-256.",
+          passes: founderIdentity.sha256 === "c87d3bcca93d755eb5e8bb7c9644bb39aa8f7be5ddb25d111aab35ffc2528181",
         },
-        { description: "Founder binary must not be exact_verified.", passes: beauLookup.status !== "exact_verified" },
-        { description: "Expected unknown without registered exact knowledge.", passes: beauLookup.status === "unknown" },
+        { description: "Founder binary must not be exact_verified.", passes: founderLookup.status !== "exact_verified" },
+        { description: "Expected unknown without registered exact knowledge.", passes: founderLookup.status === "unknown" },
       ],
     })
   );
 
-  const christosIdentity = readBinaryIdentity(christosPath);
-  const christosLookup = registry.lookup({
-    sha256: christosIdentity.sha256,
-    binarySizeBytes: christosIdentity.binarySizeBytes,
+  const thirdPartyIdentity = readBinaryIdentity(thirdPartyPath);
+  const thirdPartyLookup = registry.lookup({
+    sha256: thirdPartyIdentity.sha256,
+    binarySizeBytes: thirdPartyIdentity.binarySizeBytes,
   });
   results.push(
     reportCase({
-      caseName: "Case 6: Christos Supra Founder Binary",
-      identity: christosIdentity,
-      lookup: christosLookup,
+      caseName: "Case 6: third-party Supra Founder Binary",
+      identity: thirdPartyIdentity,
+      lookup: thirdPartyLookup,
       expectations: [
         {
-          description: "Unexpected Christos Supra SHA-256.",
-          passes: christosIdentity.sha256 === "e98c31bea631a1964d801e4ebbe4cd97e98c6daec08c348eb94c82d130c35341",
+          description: "Unexpected third-party Supra SHA-256.",
+          passes: thirdPartyIdentity.sha256 === "6e6ef5b49235bb370744aedeb6dda9b3d8623a32e96723b2d3f56f6467cc751a",
         },
-        { description: "Founder binary must not be exact_verified.", passes: christosLookup.status !== "exact_verified" },
-        { description: "Expected unknown without registered exact knowledge.", passes: christosLookup.status === "unknown" },
-        { description: "No numeric ROM may be assigned.", passes: christosLookup.romFamily === null },
+        { description: "Founder binary must not be exact_verified.", passes: thirdPartyLookup.status !== "exact_verified" },
+        { description: "Expected unknown without registered exact knowledge.", passes: thirdPartyLookup.status === "unknown" },
+        { description: "No numeric ROM may be assigned.", passes: thirdPartyLookup.romFamily === null },
       ],
     })
   );

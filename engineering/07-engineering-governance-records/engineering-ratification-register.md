@@ -183,8 +183,8 @@ This ratification approves the following capability:
 - The production registry contained 196 variants after validation.
 - A real legacy reference resolved as a provisional exact candidate.
 - An explicitly verified fixture resolved as exact verified.
-- Beau's F30 founder binary remained unknown.
-- Christos' Supra founder binary remained unknown.
+- Founder's F30 founder binary remained unknown.
+- third-party' Supra founder binary remained unknown.
 - A contradictory ROM Family produced conflict.
 - No production Knowledge mutation occurred.
 
@@ -205,8 +205,8 @@ It does not:
 - complete WP-004;
 - release WP-003 from Engineering Hold;
 - connect Vehicle Identity to the Knowledge registry;
-- classify Beau's binary as Stock;
-- classify Christos' binary as Stock; or
+- classify Founder's binary as Stock;
+- classify third-party' binary as Stock; or
 - ratify any future Knowledge subsystem.
 
 WP-004 remains IN PROGRESS. WP-003 return criteria and the current Engineering Hold remain governed by the [Engineering Project Status](engineering-project-status.md).
@@ -330,8 +330,8 @@ TuneSight now analyses both BIN and the proven 8 MiB MG1/86T0 DTF Engineering Bi
 **Founder and Production Validation Evidence**
 
 - N54 stock and modified validation passed.
-- Beau's B58 Founder datasets preserved truthful qualified outcomes.
-- Christos' Supra datasets preserved truthful qualified outcomes.
+- Founder's B58 Founder datasets preserved truthful qualified outcomes.
+- third-party' Supra datasets preserved truthful qualified outcomes.
 - The supported Founder DTF resolved into EngineeringBinary and completed parsing, Vehicle Identity, Runtime Knowledge, comparison and persistence.
 - Unsupported DTF validation produced a bounded in-app failure without a tune, tune-profile or Tune History entry.
 - Successful results remained present after refresh.
@@ -445,7 +445,7 @@ The Founder ratifies WP-011.1 — Engineering Graph Intelligence as the authorit
 
 **Architectural Boundaries and Validation**
 
-Founder Validation confirmed the implementation against Christos' Supra, N54 and B58 Founder states. Presentation does not alter telemetry, detection, Evidence, Correlation, Explanation, confidence, engineering conclusions or provenance. No unrelated Engineering Domain ownership changed.
+Founder Validation confirmed the implementation against third-party' Supra, N54 and B58 Founder states. Presentation does not alter telemetry, detection, Evidence, Correlation, Explanation, confidence, engineering conclusions or provenance. No unrelated Engineering Domain ownership changed.
 
 **Known Limitations**
 
@@ -488,7 +488,7 @@ The Founder ratifies WP-006.1 — Conservative Correlation V1 as the authoritati
 
 **Architectural Boundaries and Validation**
 
-Founder Validation confirmed repeated WGDC correlation for Christos' Supra, conservative N54 single-event behaviour and truthful B58 insufficient-data behaviour. Correlation does not establish root cause, global diagnosis, inspection direction or recommendation. Explanation and Decision retain their ratified ownership. No unrelated Engineering Domain ownership changed.
+Founder Validation confirmed repeated WGDC correlation for third-party' Supra, conservative N54 single-event behaviour and truthful B58 insufficient-data behaviour. Correlation does not establish root cause, global diagnosis, inspection direction or recommendation. Explanation and Decision retain their ratified ownership. No unrelated Engineering Domain ownership changed.
 
 **Known Limitations**
 
