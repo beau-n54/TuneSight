@@ -34,6 +34,13 @@ export type XdfAxisDefinition = Readonly<{
   axisId: string;
   indexCount: number | null;
   dataType: string | null;
+  dataTypeMetadata: Readonly<{
+    kind: "integer" | "unsupported" | "unresolved";
+    resolution: "explicit" | "header_default" | "unresolved";
+    sourceValue: string | null;
+  }>;
+  representation: "address_backed" | "static_literal" | "calculated" | "external_reference" | "unresolved";
+  literalLabels: readonly Readonly<{ index: string | null; value: string }>[];
   units: string | null;
   embeddedData: XdfEmbeddedData;
   equationSource: string | null;
@@ -43,7 +50,7 @@ export type XdfAxisDefinition = Readonly<{
 export type XdfDefinitionIdentity = Readonly<{
   status: "derived" | "unresolved" | "conflicting";
   stableId: string | null;
-  derivationBasis: "kind-primary-address-axis-roles" | null;
+  derivationBasis: "kind-primary-address-storage-layout" | null;
   unresolvedReason: string | null;
 }>;
 
@@ -65,6 +72,8 @@ export type XdfDefinitionRevision = Readonly<{
   defaultDataLayout: Readonly<{
     elementSizeBits: number | null;
     signed: boolean | null;
+    floatingPoint: boolean | null;
+    outputType: string | null;
   }>;
   byteOrderMetadata: Readonly<{ lsbFirst: boolean | null; source: string | null }>;
   axes: readonly XdfAxisDefinition[];
@@ -122,7 +131,7 @@ export function defineXdfSourceArtifact(input: {
 export function deriveDefinitionIdentity(input: {
   definitionKind: "table";
   primaryAddress: number | null;
-  axisRoles: readonly string[];
+  storageLayout: readonly Readonly<Record<string, unknown>>[];
   conflict?: boolean;
 }): XdfDefinitionIdentity {
   if (input.primaryAddress === null) {
@@ -134,12 +143,12 @@ export function deriveDefinitionIdentity(input: {
   const qualifiedDigest = digest("tunesight.xdf.definition-identity.v1", {
     definitionKind: input.definitionKind,
     primaryAddress: input.primaryAddress,
-    axisRoles: [...input.axisRoles].sort(),
+    storageLayout: input.storageLayout,
   });
   return Object.freeze({
     status: "derived",
     stableId: `xdf-definition:${qualifiedDigest.slice("sha256:".length)}`,
-    derivationBasis: "kind-primary-address-axis-roles",
+    derivationBasis: "kind-primary-address-storage-layout",
     unresolvedReason: null,
   });
 }
@@ -163,7 +172,7 @@ export function defineXdfDefinitionRevision(input: Omit<XdfDefinitionRevision, "
     addressSpace: Object.freeze({ ...input.addressSpace, regions: Object.freeze(input.addressSpace.regions.map((region) => Object.freeze({ ...region }))) }),
     defaultDataLayout: Object.freeze({ ...input.defaultDataLayout }),
     byteOrderMetadata: Object.freeze({ ...input.byteOrderMetadata }),
-    axes: Object.freeze(input.axes.map((axis) => Object.freeze({ ...axis, embeddedData: Object.freeze({ ...axis.embeddedData }), equationVariables: Object.freeze([...axis.equationVariables]) }))),
+    axes: Object.freeze(input.axes.map((axis) => Object.freeze({ ...axis, dataTypeMetadata: Object.freeze({ ...axis.dataTypeMetadata }), literalLabels: Object.freeze(axis.literalLabels.map((label) => Object.freeze({ ...label }))), embeddedData: Object.freeze({ ...axis.embeddedData }), equationVariables: Object.freeze([...axis.equationVariables]) }))),
     structuralDigest,
     sourceBindingDigest,
     revisionId: `xdf-definition-revision:${structuralDigest.slice("sha256:".length)}`,

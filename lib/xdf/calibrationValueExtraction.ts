@@ -16,8 +16,10 @@ export type RawValueShape =
 
 export type RawAxisEvidence = Readonly<{
   axisId: string;
-  outcome: "extracted" | "unavailable" | "unsupported";
+  outcome: "extracted" | "static_literal" | "unavailable" | "unsupported";
+  representation: XdfAxisDefinition["representation"];
   shape: RawValueShape | null;
+  literalValues: readonly string[];
   offsets: readonly number[];
   finding: string | null;
 }>;
@@ -69,8 +71,8 @@ function checkedSum(left: number, right: number, label: string): number {
 function layout(definition: XdfDefinitionRevision, axis: XdfAxisDefinition): { widthBits: 8 | 16 | 32; widthBytes: number; signed: boolean; endianness: "little" | "big"; rows: number; columns: number; rowStride: number; columnStride: number } | string {
   const width = axis.embeddedData.elementSizeBits ?? definition.defaultDataLayout.elementSizeBits;
   if (width !== 8 && width !== 16 && width !== 32) return "Only 8-bit, 16-bit and 32-bit integer widths are supported.";
-  if (axis.dataType === null) return "XDF datatype is unresolved.";
-  if (axis.dataType !== "0") return `XDF datatype ${axis.dataType} is unsupported.`;
+  if (axis.dataTypeMetadata.kind === "unresolved") return "XDF datatype is unresolved.";
+  if (axis.dataTypeMetadata.kind === "unsupported" || axis.dataType !== "0") return `XDF datatype ${axis.dataTypeMetadata.sourceValue ?? axis.dataType ?? "unknown"} is unsupported.`;
   if (definition.defaultDataLayout.signed === null) return "Signedness is unresolved.";
   if (definition.byteOrderMetadata.lsbFirst === null) return "Byte order is unresolved.";
   const rows = axis.embeddedData.rowCount ?? 1;
@@ -153,8 +155,9 @@ export function extractRawCalibrationValues(binary: EngineeringBinary, definitio
   const extracted = extractAxis(binary.bytes, definition, valueAxis);
   if (typeof extracted === "string") return Object.freeze({ ...base, outcome: "invalid", resolvedAddress: null, datatype: null, widthBits: null, signed: null, endianness: null, shape: null, offsets: Object.freeze([]), axes: Object.freeze([]), findings: Object.freeze([extracted]) });
   const axes = definition.axes.filter((axis) => axis !== valueAxis).map((axis) => {
+    if (axis.representation === "static_literal") return Object.freeze({ axisId: axis.axisId, outcome: "static_literal" as const, representation: axis.representation, shape: null, literalValues: Object.freeze(axis.literalLabels.map((label) => label.value)), offsets: Object.freeze([]), finding: null });
     const result = extractAxis(binary.bytes, definition, axis);
-    return typeof result === "string" ? Object.freeze({ axisId: axis.axisId, outcome: result.includes("no directly") ? "unavailable" as const : "unsupported" as const, shape: null, offsets: Object.freeze([]), finding: result }) : Object.freeze({ axisId: axis.axisId, outcome: "extracted" as const, shape: result.shape, offsets: Object.freeze(result.offsets), finding: null });
+    return typeof result === "string" ? Object.freeze({ axisId: axis.axisId, outcome: result.includes("no directly") ? "unavailable" as const : "unsupported" as const, representation: axis.representation, shape: null, literalValues: Object.freeze([]), offsets: Object.freeze([]), finding: result }) : Object.freeze({ axisId: axis.axisId, outcome: "extracted" as const, representation: axis.representation, shape: result.shape, literalValues: Object.freeze([]), offsets: Object.freeze(result.offsets), finding: null });
   });
   return Object.freeze({ ...base, outcome: "extracted", resolvedAddress: extracted.address, datatype: "integer", widthBits: extracted.widthBits, signed: extracted.signed, endianness: extracted.endianness, shape: extracted.shape, offsets: Object.freeze(extracted.offsets), axes: Object.freeze(axes), findings: Object.freeze([]) });
 }

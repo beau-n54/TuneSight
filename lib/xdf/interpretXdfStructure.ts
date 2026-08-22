@@ -116,7 +116,7 @@ function parseXml(xml: string): XmlNode {
 
 const children = (node: XmlNode, name: string) => node.children.filter((child) => child.name === name);
 const child = (node: XmlNode, name: string) => children(node, name)[0] ?? null;
-const SUPPORTED_ELEMENTS = new Set(["XDFFORMAT", "XDFHEADER", "BASEOFFSET", "REGION", "DEFAULTS", "XDFTABLE", "TITLE", "DESCRIPTION", "XDFAXIS", "EMBEDDEDDATA", "INDEXCOUNT", "DATATYPE", "UNITS", "MATH", "VAR"]);
+const SUPPORTED_ELEMENTS = new Set(["XDFFORMAT", "XDFHEADER", "BASEOFFSET", "REGION", "DEFAULTS", "XDFTABLE", "TITLE", "DESCRIPTION", "XDFAXIS", "EMBEDDEDDATA", "INDEXCOUNT", "DATATYPE", "UNITS", "MATH", "VAR", "LABEL", "DALINK", "EMBEDINFO"]);
 function unsupportedElements(root: XmlNode): string[] {
   const names = new Set<string>();
   const visit = (node: XmlNode) => { if (!SUPPORTED_ELEMENTS.has(node.name)) names.add(node.name); node.children.forEach(visit); };
@@ -131,8 +131,10 @@ function text(node: XmlNode | null, maximum = XDF_STRUCTURAL_LIMITS.maximumMetad
 }
 function integer(value: string | null | undefined, field: string, allowNegative = false): number | null {
   if (value === null || value === undefined || value === "") return null;
-  if (!/^-?(?:0x[0-9a-f]+|\d+)$/i.test(value)) throw new XdfXmlError("invalid_number", `${field} is not an integer.`);
-  const parsed = Number(value);
+  let parsed: number;
+  if (/^-?0x[0-9a-f]+$/i.test(value) || /^-?\d+$/.test(value)) parsed = Number(value);
+  else if (/^[0-9a-f]*[a-f][0-9a-f]*$/i.test(value)) parsed = Number.parseInt(value, 16);
+  else throw new XdfXmlError("invalid_number", `${field} is not an integer.`);
   if (!Number.isSafeInteger(parsed) || (!allowNegative && parsed < 0)) throw new XdfXmlError("invalid_number", `${field} is outside the supported range.`);
   return parsed;
 }
@@ -147,12 +149,20 @@ function embedded(axis: XmlNode): XdfEmbeddedData {
     typeFlags: a.mmedtypeflags ?? null,
   });
 }
-function axis(node: XmlNode): XdfAxisDefinition {
+function axis(node: XmlNode, defaults: XdfDefinitionRevision["defaultDataLayout"]): XdfAxisDefinition {
   const math = child(node, "MATH"); const equation = math?.attributes.equation ?? null;
   if (equation !== null && equation.length > XDF_STRUCTURAL_LIMITS.maximumEquationLength) throw new XdfXmlError("equation_limit", "XDF equation exceeds the inert-source limit.");
+  const dataType = text(child(node, "DATATYPE"));
+  const dataTypeMetadata = dataType !== null
+    ? Object.freeze({ kind: dataType === "0" ? "integer" as const : "unsupported" as const, resolution: "explicit" as const, sourceValue: dataType })
+    : defaults.floatingPoint === false
+      ? Object.freeze({ kind: "integer" as const, resolution: "header_default" as const, sourceValue: "DEFAULTS float=0" })
+      : Object.freeze({ kind: defaults.floatingPoint === true ? "unsupported" as const : "unresolved" as const, resolution: "unresolved" as const, sourceValue: defaults.floatingPoint === true ? "DEFAULTS float=1" : null });
+  const embeddedData = embedded(node); const labels = children(node, "LABEL").map((label) => Object.freeze({ index: label.attributes.index ?? null, value: label.attributes.value ?? label.text.trim() }));
+  const representation = embeddedData.address !== null ? "address_backed" as const : labels.length > 0 ? "static_literal" as const : child(node, "DALINK") ? "external_reference" as const : equation !== null ? "calculated" as const : "unresolved" as const;
   return Object.freeze({
     axisId: node.attributes.id ?? "unidentified", indexCount: integer(text(child(node, "INDEXCOUNT")), "Axis index count"),
-    dataType: text(child(node, "DATATYPE")), units: text(child(node, "UNITS")), embeddedData: embedded(node),
+    dataType: dataTypeMetadata.kind === "integer" ? "0" : dataType, dataTypeMetadata, representation, literalLabels: Object.freeze(labels), units: text(child(node, "UNITS")), embeddedData,
     equationSource: equation, equationVariables: Object.freeze(math ? children(math, "VAR").map((value) => value.attributes.id ?? "unidentified") : []),
   });
 }
@@ -175,7 +185,9 @@ export function interpretXdfStructure(input: { xml: string; filename?: string | 
     const byteOrderMetadata = Object.freeze({ lsbFirst: lsbFirstSource === null ? null : lsbFirstSource === "1", source: lsbFirstSource });
     const signedSource = defaults?.attributes.signed ?? null;
     if (signedSource !== null && signedSource !== "0" && signedSource !== "1") throw new XdfXmlError("invalid_signedness", "DEFAULTS signed must be 0 or 1 when present.");
-    const defaultDataLayout = Object.freeze({ elementSizeBits: integer(defaults?.attributes.datasizeinbits, "Default element size"), signed: signedSource === null ? null : signedSource === "1" });
+    const floatingPointSource = defaults?.attributes.float ?? null;
+    if (floatingPointSource !== null && floatingPointSource !== "0" && floatingPointSource !== "1") throw new XdfXmlError("invalid_datatype_default", "DEFAULTS float must be 0 or 1 when present.");
+    const defaultDataLayout = Object.freeze({ elementSizeBits: integer(defaults?.attributes.datasizeinbits, "Default element size"), signed: signedSource === null ? null : signedSource === "1", floatingPoint: floatingPointSource === null ? null : floatingPointSource === "1", outputType: defaults?.attributes.outputtype ?? null });
     const base = child(header, "BASEOFFSET");
     const subtractSource = base?.attributes.subtract ?? null;
     if (subtractSource !== null && subtractSource !== "0" && subtractSource !== "1") throw new XdfXmlError("invalid_base_offset", "BASEOFFSET subtract must be 0 or 1 when present.");
@@ -188,16 +200,19 @@ export function interpretXdfStructure(input: { xml: string; filename?: string | 
       const axes = children(table, "XDFAXIS");
       if (axes.length === 0) throw new XdfXmlError("missing_axes", "XDFTABLE contains no XDFAXIS structure.");
       if (axes.length > XDF_STRUCTURAL_LIMITS.maximumAxesPerTable) throw new XdfXmlError("axis_limit", "XDFTABLE exceeds the supported axis limit.");
-      const parsedAxes = axes.map(axis); const valueAxis = parsedAxes.find((value) => value.axisId.toLowerCase() === "z") ?? parsedAxes.at(-1) ?? null;
+      const parsedAxes = axes.map((value) => axis(value, defaultDataLayout)); const valueAxis = parsedAxes.find((value) => value.axisId.toLowerCase() === "z") ?? parsedAxes.at(-1) ?? null;
       const primaryAddress = valueAxis?.embeddedData.address ?? parsedAxes.find((value) => value.embeddedData.address !== null)?.embeddedData.address ?? null;
-      const key = primaryAddress === null ? null : `${primaryAddress}\0${parsedAxes.map((value) => value.axisId).sort().join("\0")}`;
-      return { table, axes: parsedAxes, primaryAddress, key };
+      const storageLayout = parsedAxes.map((value) => ({ axisId: value.axisId, embeddedData: value.embeddedData, dataTypeKind: value.dataTypeMetadata.kind })).sort((left, right) => left.axisId.localeCompare(right.axisId));
+      const key = primaryAddress === null ? null : JSON.stringify({ primaryAddress, storageLayout });
+      const representationKey = JSON.stringify({ storageLayout, representations: parsedAxes.map((value) => ({ axisId: value.axisId, units: value.units, equationSource: value.equationSource, literalLabels: value.literalLabels })).sort((left, right) => left.axisId.localeCompare(right.axisId)) });
+      return { table, axes: parsedAxes, primaryAddress, storageLayout, key, representationKey };
     });
-    const counts = new Map<string, number>(); for (const draft of drafts) if (draft.key) counts.set(draft.key, (counts.get(draft.key) ?? 0) + 1);
+    const representations = new Map<string, Set<string>>(); const occurrences = new Map<string, number>(); for (const draft of drafts) if (draft.key) { const values = representations.get(draft.key) ?? new Set<string>(); values.add(draft.representationKey); representations.set(draft.key, values); occurrences.set(draft.key, (occurrences.get(draft.key) ?? 0) + 1); }
     const findings: XdfStructuralFinding[] = unsupportedElements(root).map((name) => ({ code: "unsupported_construct", path: `//${name}`, message: `${name} is preserved only as an explicitly unsupported XDF construct in this slice.` }));
     const definitions = drafts.map((draft, index) => {
-      const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: draft.primaryAddress, axisRoles: draft.axes.map((value) => value.axisId), conflict: draft.key !== null && (counts.get(draft.key) ?? 0) > 1 });
+      const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: draft.primaryAddress, storageLayout: draft.storageLayout, conflict: draft.key !== null && (representations.get(draft.key)?.size ?? 0) > 1 });
       if (identity.status !== "derived") findings.push({ code: `definition_identity_${identity.status}`, path: `/XDFFORMAT/XDFTABLE[${index + 1}]`, message: identity.unresolvedReason ?? "Definition identity is unresolved." });
+      else if (draft.key !== null && (occurrences.get(draft.key) ?? 0) > 1) findings.push({ code: "definition_identity_alias", path: `/XDFFORMAT/XDFTABLE[${index + 1}]`, message: "Definition is an exact structural alias of another source entry." });
       return defineXdfDefinitionRevision({ identity, sourceArtifactDigest: sourceArtifact.sourceDigest, definitionKind: "table", title: text(child(draft.table, "TITLE")), description: text(child(draft.table, "DESCRIPTION")), primaryAddress: draft.primaryAddress, addressSpace, defaultDataLayout, byteOrderMetadata, axes: draft.axes, qualificationState: "applicability_unresolved" });
     });
     return Object.freeze({ outcome: "structurally_interpreted", sourceArtifact: Object.freeze({ ...sourceArtifact, qualificationState: "structurally_interpreted" as const }), definitions: Object.freeze(definitions), findings: Object.freeze(findings) });

@@ -10,16 +10,18 @@ function binary(values: readonly number[]): EngineeringBinary {
   return result.engineeringBinary;
 }
 
-function revision(input: { address?: number; width?: number; signed?: boolean | null; lsbFirst?: boolean | null; rows?: number; columns?: number; majorStrideBits?: number; minorStrideBits?: number; dataType?: string | null; baseOffset?: number; subtract?: boolean; axisAddress?: number | null; title?: string }): XdfDefinitionRevision {
+function revision(input: { address?: number; width?: number; signed?: boolean | null; lsbFirst?: boolean | null; rows?: number; columns?: number; majorStrideBits?: number; minorStrideBits?: number; dataType?: string | null; baseOffset?: number; subtract?: boolean; axisAddress?: number | null; axisLiteralValues?: readonly string[]; title?: string }): XdfDefinitionRevision {
   const address = input.address ?? 0;
   const axis = (axisId: string, embeddedAddress: number | null, rowCount: number, columnCount: number): XdfAxisDefinition => ({
-    axisId, indexCount: columnCount, dataType: input.dataType === undefined ? "0" : input.dataType, units: axisId === "z" ? "not-converted" : "axis-unit",
+    axisId, indexCount: columnCount, dataType: input.dataType === undefined ? "0" : input.dataType,
+    dataTypeMetadata: input.dataType === null ? { kind: "unresolved", resolution: "unresolved", sourceValue: null } : input.dataType !== undefined && input.dataType !== "0" ? { kind: "unsupported", resolution: "explicit", sourceValue: input.dataType } : { kind: "integer", resolution: "explicit", sourceValue: "0" },
+    representation: axisId === "x" && input.axisLiteralValues ? "static_literal" : embeddedAddress === null ? "unresolved" : "address_backed", literalLabels: axisId === "x" ? (input.axisLiteralValues ?? []).map((value, index) => ({ index: String(index), value })) : [], units: axisId === "z" ? "not-converted" : "axis-unit",
     embeddedData: { address: embeddedAddress, addressSource: embeddedAddress === null ? null : `0x${embeddedAddress.toString(16)}`, elementSizeBits: input.width ?? 8, rowCount, columnCount, majorStrideBits: input.majorStrideBits ?? 0, minorStrideBits: input.minorStrideBits ?? 0, typeFlags: null },
     equationSource: "X", equationVariables: ["X"],
   });
   const axes = [axis("x", input.axisAddress ?? null, 1, input.columns ?? 1), axis("z", address, input.rows ?? 1, input.columns ?? 1)];
-  const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: address, axisRoles: axes.map((value) => value.axisId) });
-  return defineXdfDefinitionRevision({ identity, sourceArtifactDigest: "sha256:xdf-source", definitionKind: "table", title: input.title ?? "Fixture", description: null, primaryAddress: address, addressSpace: { baseOffset: input.baseOffset ?? 0, subtractBaseOffset: input.subtract ?? false, regions: [] }, defaultDataLayout: { elementSizeBits: input.width ?? 8, signed: input.signed === undefined ? false : input.signed }, byteOrderMetadata: { lsbFirst: input.lsbFirst === undefined ? true : input.lsbFirst, source: input.lsbFirst === false ? "0" : "1" }, axes, qualificationState: "applicability_unresolved" });
+  const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: address, storageLayout: axes.map((value) => ({ axisId: value.axisId, embeddedData: value.embeddedData, dataTypeKind: value.dataTypeMetadata.kind })) });
+  return defineXdfDefinitionRevision({ identity, sourceArtifactDigest: "sha256:xdf-source", definitionKind: "table", title: input.title ?? "Fixture", description: null, primaryAddress: address, addressSpace: { baseOffset: input.baseOffset ?? 0, subtractBaseOffset: input.subtract ?? false, regions: [] }, defaultDataLayout: { elementSizeBits: input.width ?? 8, signed: input.signed === undefined ? false : input.signed, floatingPoint: false, outputType: "1" }, byteOrderMetadata: { lsbFirst: input.lsbFirst === undefined ? true : input.lsbFirst, source: input.lsbFirst === false ? "0" : "1" }, axes, qualificationState: "applicability_unresolved" });
 }
 
 test("binds extraction Evidence to exact binary and exact Definition Revision", () => {
@@ -77,6 +79,13 @@ test("preserves unavailable externally represented axes", () => {
   const result = extractRawCalibrationValues(binary([1]), revision({ axisAddress: null }));
   assert.equal(result.axes[0].outcome, "unavailable");
   assert.match(result.axes[0].finding ?? "", /no directly embedded address/);
+});
+
+test("preserves static literal axes separately from binary raw values", () => {
+  const result = extractRawCalibrationValues(binary([1, 2]), revision({ columns: 2, axisLiteralValues: ["1000", "2000"] }));
+  assert.equal(result.axes[0].outcome, "static_literal");
+  assert.deepEqual(result.axes[0].literalValues, ["1000", "2000"]);
+  assert.deepEqual(result.shape?.values, [1, 2]);
 });
 
 test("allows an exact boundary read and rejects out-of-bounds, negative, unsafe and overflowed layouts", () => {

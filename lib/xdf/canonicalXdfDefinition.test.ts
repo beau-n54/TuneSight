@@ -11,6 +11,9 @@ const axis = (address = 0x1234): XdfAxisDefinition => ({
   axisId: "z",
   indexCount: 4,
   dataType: "0",
+  dataTypeMetadata: { kind: "integer", resolution: "explicit", sourceValue: "0" },
+  representation: "address_backed",
+  literalLabels: [],
   units: "hPa",
   embeddedData: {
     address,
@@ -36,14 +39,15 @@ test("XDF source identity is byte-derived and filename-independent", () => {
 });
 
 test("stable Definition identity excludes display metadata and source ordering", () => {
-  const first = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, axisRoles: ["z", "x", "y"] });
-  const reordered = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, axisRoles: ["y", "z", "x"] });
+  const layout = [{ axisId: "x", address: 1 }, { axisId: "y", address: 2 }, { axisId: "z", address: 3 }];
+  const first = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, storageLayout: layout });
+  const reordered = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, storageLayout: layout });
   assert.equal(first.stableId, reordered.stableId);
   assert.equal(first.status, "derived");
 });
 
 test("Definition revision digest is canonical and material-structure-sensitive", () => {
-  const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, axisRoles: ["z"] });
+  const identity = deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 0x1234, storageLayout: [{ axisId: "z", address: 0x1234 }] });
   const create = (title: string, valueAxis: XdfAxisDefinition) => defineXdfDefinitionRevision({
     identity,
     sourceArtifactDigest: "sha256:source",
@@ -52,7 +56,7 @@ test("Definition revision digest is canonical and material-structure-sensitive",
     description: null,
     primaryAddress: valueAxis.embeddedData.address,
     addressSpace: { baseOffset: 0, subtractBaseOffset: false, regions: [] },
-    defaultDataLayout: { elementSizeBits: 16, signed: false },
+    defaultDataLayout: { elementSizeBits: 16, signed: false, floatingPoint: false, outputType: "1" },
     byteOrderMetadata: { lsbFirst: false, source: "0" },
     axes: [valueAxis],
     qualificationState: "applicability_unresolved",
@@ -68,6 +72,6 @@ test("Definition revision digest is canonical and material-structure-sensitive",
 });
 
 test("missing and conflicting structural identity remain explicit", () => {
-  assert.equal(deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: null, axisRoles: ["z"] }).status, "unresolved");
-  assert.equal(deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 1, axisRoles: ["z"], conflict: true }).status, "conflicting");
+  assert.equal(deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: null, storageLayout: [] }).status, "unresolved");
+  assert.equal(deriveDefinitionIdentity({ definitionKind: "table", primaryAddress: 1, storageLayout: [], conflict: true }).status, "conflicting");
 });

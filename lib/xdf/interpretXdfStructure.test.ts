@@ -43,6 +43,7 @@ test("discovers multiple tables and preserves structural fields without executin
   assert.equal(result.definitions[0].axes[1].embeddedData.elementSizeBits, 16);
   assert.equal(result.definitions[0].axes[1].embeddedData.columnCount, 2);
   assert.equal(result.definitions[0].axes[1].units, "hPa");
+  assert.deepEqual(result.definitions[0].axes[1].dataTypeMetadata, { kind: "integer", resolution: "explicit", sourceValue: "0" });
   assert.deepEqual(result.definitions[0].byteOrderMetadata, { lsbFirst: false, source: "0" });
   assert.equal(result.definitions[0].axes[1].equationSource, equation);
   assert.equal(globalThis.__xdfEquationExecuted, false);
@@ -59,11 +60,42 @@ test("stable identity survives unrelated table insertion and reordering", () => 
   assert.equal(targetFirst.structuralDigest, targetReordered.structuralDigest);
 });
 
-test("duplicate structural identities are explicit conflicts", () => {
+test("exact structural duplicates are aliases while representation disagreements remain conflicts", () => {
   const result = interpretXdfStructure({ xml: document(table("One", "0x100") + table("Two", "0x100")), provenance: "synthetic fixture" });
   assert.equal(result.outcome, "structurally_interpreted");
-  assert.ok(result.definitions.every((definition) => definition.identity.status === "conflicting"));
-  assert.equal(result.findings.filter((finding) => finding.code === "definition_identity_conflicting").length, 2);
+  assert.ok(result.definitions.every((definition) => definition.identity.status === "derived"));
+  assert.equal(result.definitions[0].identity.stableId, result.definitions[1].identity.stableId);
+  assert.equal(result.findings.filter((finding) => finding.code === "definition_identity_alias").length, 2);
+  const conflict = interpretXdfStructure({ xml: document(table("One", "0x100", "X*2") + table("Two", "0x100", "X*3")), provenance: "synthetic fixture" });
+  assert.ok(conflict.definitions.every((definition) => definition.identity.status === "conflicting"));
+});
+
+test("different storage layouts sharing a primary address receive distinct stable identities", () => {
+  const first = table("Eight bit", "0x100").replace('mmedelementsizebits="16"', 'mmedelementsizebits="8"');
+  const result = interpretXdfStructure({ xml: document(first + table("Sixteen bit", "0x100")), provenance: "synthetic shared storage" });
+  assert.ok(result.definitions.every((definition) => definition.identity.status === "derived"));
+  assert.notEqual(result.definitions[0].identity.stableId, result.definitions[1].identity.stableId);
+});
+
+test("inherits integer datatype from explicit header defaults and preserves provenance", () => {
+  const xml = `<?xml version="1.0"?><XDFFORMAT version="1.70"><XDFHEADER><DEFAULTS datasizeinbits="16" signed="0" lsbfirst="1" float="0" outputtype="1"/></XDFHEADER><XDFTABLE><XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="100a" mmedelementsizebits="16"/><MATH equation="X"><VAR id="X"/></MATH></XDFAXIS></XDFTABLE></XDFFORMAT>`;
+  const result = interpretXdfStructure({ xml, provenance: "synthetic inherited datatype" });
+  assert.equal(result.outcome, "structurally_interpreted");
+  assert.equal(result.definitions[0].primaryAddress, 0x100a);
+  assert.deepEqual(result.definitions[0].axes[0].dataTypeMetadata, { kind: "integer", resolution: "header_default", sourceValue: "DEFAULTS float=0" });
+});
+
+test("preserves genuinely absent datatype semantics as unresolved", () => {
+  const xml = `<?xml version="1.0"?><XDFFORMAT version="1.70"><XDFHEADER><DEFAULTS signed="0" lsbfirst="1"/></XDFHEADER><XDFTABLE><XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x100" mmedelementsizebits="16"/></XDFAXIS></XDFTABLE></XDFFORMAT>`;
+  const result = interpretXdfStructure({ xml, provenance: "synthetic unresolved datatype" });
+  assert.deepEqual(result.definitions[0].axes[0].dataTypeMetadata, { kind: "unresolved", resolution: "unresolved", sourceValue: null });
+});
+
+test("classifies static literal axes without representing them as binary-backed", () => {
+  const xml = `<?xml version="1.0"?><XDFFORMAT version="1.60"><XDFHEADER><DEFAULTS signed="0" lsbfirst="0" float="0"/></XDFHEADER><XDFTABLE><XDFAXIS id="x"><EMBEDDEDDATA/><LABEL index="0" value="10"/><LABEL index="1" value="20"/></XDFAXIS><XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x10" mmedelementsizebits="8"/><datatype>0</datatype></XDFAXIS></XDFTABLE></XDFFORMAT>`;
+  const result = interpretXdfStructure({ xml, provenance: "synthetic static axis" });
+  assert.equal(result.definitions[0].axes[0].representation, "static_literal");
+  assert.deepEqual(result.definitions[0].axes[0].literalLabels, [{ index: "0", value: "10" }, { index: "1", value: "20" }]);
 });
 
 test("unimplemented XDF elements are reported rather than silently treated as supported", () => {
