@@ -12,3 +12,4 @@ export * from "./applicabilityPublicationRegistry";
 export * from "./romLayoutApplicability";
 export * from "./romLayoutApplicabilityPublication";
 export * from "./n54GovernedApplicabilityAdmission";
+export * from "./qualifiedCalibrationExtraction";
