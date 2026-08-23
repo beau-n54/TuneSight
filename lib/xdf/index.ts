@@ -8,3 +8,4 @@ export * from "./calibrationValueExtraction";
 export * from "./definitionRomApplicability";
 export * from "./applicabilityEvidenceProposal";
 export * from "./applicabilityAuthorityDecision";
+export * from "./applicabilityPublicationRegistry";
