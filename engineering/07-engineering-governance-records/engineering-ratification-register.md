@@ -1258,6 +1258,93 @@ The Founder ratifies the governance reconciliation of WP-004.3. Its canonical Ca
 
 ---
 
+### TS-RAT-022
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-022 |
+| Date | 23 August 2026 |
+| Artefact Type | Local Implementation Milestone Governance Reconciliation |
+| Artefact Name | Canonical XDF Foundation and Native Vehicle Data Foundation |
+| Permanent Work Package Identifier | No new permanent Work Package identifier created |
+| Authority | Founder |
+| Ratification Scope | Governance acceptance of five sequential local implementation milestones for canonical XDF interpretation, generic raw Calibration extraction, BMW master-library blocker resolution, read-only Native Vehicle Data and THOR/MHD synthetic Live Telemetry transport |
+| Status | RATIFIED — ACCEPTED LOCAL MILESTONES; BOUNDED VALIDATION ONLY |
+| Calibration Architecture | [WP-004.3 Engineering Calibration Intelligence Architecture](../08-engineering-work-packages/WP-004.3-engineering-calibration-intelligence-architecture.md) |
+| Calibration Slice Records | [WP-004.3.1 XDF Definition Foundation](../08-engineering-work-packages/WP-004.3.1-xdf-definition-foundation.md); [WP-004.3.2 Generic Calibration Value Extraction](../08-engineering-work-packages/WP-004.3.2-generic-calibration-value-extraction.md); [WP-004.3.3 BMW Master Definition Blocker Resolution](../08-engineering-work-packages/WP-004.3.3-bmw-master-definition-blocker-resolution.md) |
+| Native Vehicle Data Records | [Native Vehicle Data Foundation](../08-engineering-work-packages/native-vehicle-data-foundation.md); [THOR/MHD Live Telemetry Transport](../08-engineering-work-packages/thor-mhd-live-telemetry-transport.md) |
+| Local Commit Range | `8befe4ff0e3205b37e78745fe9d25b5d2128827a` through `f7399235336a33a31bddf83f7a6460e0d0e08336`, sequentially above `origin/main` checkpoint `1727b49b586ae4c6b8323bd91e5a4b0507464b41` at reconciliation time |
+| Implementation State | Implemented locally; Founder accepted |
+| Deterministic / Synthetic Validation | Complete within the bounded local slice contracts |
+| Physical Validation | Not performed; Founder away from vehicles |
+| Production Validation | Not performed |
+| Pushed to Origin | No; five milestones remained local at reconciliation time |
+| Deployed | No |
+| Runtime Calibration Integration | Not started |
+| Production Calibration Knowledge | Not populated |
+| WP-005.1 Status | Engineering Run Intelligence remains on Engineering Hold |
+| Historical Ratifications | TS-RAT-009 and TS-RAT-021 remain intact and are not superseded |
+| Superseded Status | Does not supersede any prior ratification |
+
+**Ratification Declaration**
+
+The Founder accepts the five identified local implementation milestones and reconciles their bounded implementation and validation state into central governance. This record distinguishes local implementation and deterministic or synthetic validation from physical validation, production validation, origin publication and deployment. It creates no further implementation authority.
+
+**Accepted Local Commit Chain**
+
+1. `8befe4ff0e3205b37e78745fe9d25b5d2128827a` — Establish canonical XDF definition foundation.
+2. `4f7594d9f37e2bcebedb7e39f2a90cb2b4444151` — Implement generic calibration value extraction.
+3. `d10d866ffd3e6ad7d568927e8465028eaf1b5b93` — Resolve BMW XDF extraction blockers.
+4. `0a6734b9bd0ea723d4dae0e7ff12d4161dc8358b` — Establish native vehicle data foundation.
+5. `f7399235336a33a31bddf83f7a6460e0d0e08336` — Prepare THOR and MHD live telemetry transport.
+
+**Calibration Milestone Effect**
+
+- The canonical XDF foundation establishes exact XDF Source Artifact identity, stable Definition identity independent of source ordering, immutable Definition Revision, bounded deterministic structured interpretation, explicit unsupported and invalid states, inert equation source and rejection of arbitrary equation execution.
+- It establishes neither exact ROM applicability nor semantic Calibration authority and has no production runtime wiring.
+- Generic raw Calibration extraction binds an exact Engineering Binary and exact Definition Revision to raw Calibration Value Evidence. Applicable support includes 8/16/32-bit integers, signed and unsigned values, byte order, scalar/1D/2D layouts, strides, checked address translation, base offsets and regions, raw axes, exact binary/Definition binding, bounds validation and safe-integer validation.
+- The extractor is platform-neutral. No N54- or B58-specific extraction engine, engineering-value conversion or tuning recommendation is established.
+- Deterministic traversal confirms 99 XDF files discovered, 99 structurally readable, 105,335 Definitions discovered, 105,202 extraction-capable and 133 intentionally conflicted: approximately 99.87% extraction readiness, not 100%.
+- The remaining 49 conflict groups comprise 133 entries across 22 XDF files and five BMW family directories. They concern units, conversion representation/equation source or both. No remaining conflict concerns width, signedness, byte order, dimensions, stride, datatype or axis structure. They are representation conflicts rather than parser failures and remain intentionally unresolved pending sufficient authority.
+- N54 and B58 are physical-validation platforms, not architectural Calibration limits. The BMW master library is the current source of coverage rather than a permanent ceiling; the architecture remains extensible to every deterministically interpretable BMW engine, ECU, DME, ROM and XDF Definition, including platforms and definitions not currently present.
+
+**Native Vehicle Data Milestone Effect**
+
+- The read-only foundation owns adapter and transport observations, immutable session lifecycle, ECU/DME identity observations, runtime Channel Definitions, Channel Observations and synthetic Live Telemetry within its bounded domain.
+- Its operations are limited to `discover`, `open`, `connect`, `identify`, `read`, `stream` and `disconnect`. It exposes no write, coding, adaptation, actuation, DTC clearing, reset, programming or flashing operation.
+- The THOR/MHD milestone establishes provisional evidence-qualified THOR and MHD Orange profiles, a Windows local Vehicle Bridge architecture, bounded read-only transport and security contracts, multi-channel Live Telemetry, RPM, actual charge-pressure and separate target-pressure Channel architecture, canonical pressure representation, deterministic kPa/bar/psi conversion and synthetic RPM plus pressure telemetry.
+- The Founder owns a physically pink THOR adapter and a physically orange MHD adapter. Colour is descriptive only and does not establish technical identity.
+- Both milestones are synthetically validated and not physically vehicle-validated.
+
+**Adapter Priority and Physical Hold**
+
+- The Founder intends to validate both owned adapters and prefers MHD Orange for normal TuneSight use if it can be technically qualified and supplies the required capability.
+- THOR remains an important supported candidate and currently has stronger publicly evidenced endpoint information. TuneSight does not architecturally require THOR merely because it may be easier to validate first. The MHD Orange endpoint and framing remain unknown and shall not be represented as established.
+- Both adapters remain independent physical-validation targets. The Founder is away from the vehicles; neither adapter has been physically validated, no real DME communication has occurred through the new Vehicle Interface, and no live vehicle RPM or pressure has been observed.
+- The first complete physical milestone is connect, identify DME, qualify RPM and actual boost/charge-pressure Channels, display live RPM and live boost/pressure, and disconnect cleanly. Target/requested boost should also be acquired only where genuinely available and qualified; it shall not be fabricated.
+- N54 is presently the strongest initial validation vector for the CAN-era adapter evidence. B58/ENET compatibility for the owned adapters remains unproven, and an independently qualified ENET-capable transport may be required.
+
+**Product and Programme Boundaries**
+
+- Direct TuneSight Logging remains a near-term priority. Live Channel Streams are architecturally suitable for future recording, a durable native source and WP-005 Evidence candidacy, but durable native recording and native WP-005 integration are not implemented and Direct Logging is not complete.
+- Native acquisition does not by itself require WP-005.1. WP-005.1 remains on Engineering Hold and requires separate Founder authority.
+- Diagnostics, DTC reading and DTC clearing have not begun. Future DTC clearing requires explicit user authority and separate engineering controls.
+- Flashing architecture implementation and DME programming have not begun. Flashing remains later and shall not delay Calibration, Vehicle Interface, Live Telemetry, Direct Logging or Diagnostics.
+- The full TuneSight-styled Calibration Workshop, `Open Calibration Workshop` dashboard action and Manual Calibration Editor do not exist. The future Workshop preserves Stock, Current Modified, TuneSight Suggested and Working Calibration states and may take practical workflow inspiration from TunerPro without visually copying it.
+- Existing Analysis Calibration Inspection and cross-reference presentation remains provisional. Exact Definition identity, axes and comparison handoff may be unavailable, including observed `Wastegate Duty Cycle Base` cases. The intended future handoff from Analysis finding through a qualified exact Calibration Definition into the relevant Workshop table and operating region is not implemented.
+- Exact Definition-to-ROM applicability qualification is the strongest next Calibration authority gate before engineering-value conversion or semantic Calibration claims. It is not implemented or authorised by this record.
+- Calibration and Native Vehicle Data remain parallel tracks. Their accepted development cycle is architecture, review, bounded implementation, testing, physical validation where possible, governance and continuation. Neither entire-programme Calibration completion nor temporary vehicle unavailability blocks unrelated work on the other track after separate authority.
+
+**Governance Boundaries**
+
+- TS-RAT-009 remains historically intact as the original WP-004.3 architecture ratification.
+- TS-RAT-021 remains historically intact as the canonical Calibration Knowledge contract governance reconciliation.
+- These five local milestones were not pushed, deployed, production-integrated, physically vehicle-validated or production-validated at reconciliation time.
+- This record creates no production Calibration Knowledge, production Calibration runtime or completed product-capability claim.
+- It authorises no further Calibration implementation, physical Vehicle Interface work, Direct Logging, Diagnostics, DTC clearing, flashing or Calibration Workshop work.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
