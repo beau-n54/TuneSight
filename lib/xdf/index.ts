@@ -10,3 +10,5 @@ export * from "./applicabilityEvidenceProposal";
 export * from "./applicabilityAuthorityDecision";
 export * from "./applicabilityPublicationRegistry";
 export * from "./romLayoutApplicability";
+export * from "./romLayoutApplicabilityPublication";
+export * from "./n54GovernedApplicabilityAdmission";
