@@ -6,3 +6,4 @@ export * from "./canonicalXdfDefinition";
 export * from "./interpretXdfStructure";
 export * from "./calibrationValueExtraction";
 export * from "./definitionRomApplicability";
+export * from "./applicabilityEvidenceProposal";
