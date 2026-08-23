@@ -7,3 +7,4 @@ export * from "./interpretXdfStructure";
 export * from "./calibrationValueExtraction";
 export * from "./definitionRomApplicability";
 export * from "./applicabilityEvidenceProposal";
+export * from "./applicabilityAuthorityDecision";
