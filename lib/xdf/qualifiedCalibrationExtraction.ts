@@ -3,6 +3,7 @@ import type { EngineeringBinary } from "../tunes/binaryContainer.ts";
 import { assessDefinitionExtractionCapability, extractRawCalibrationValues, type CalibrationValueExtractionEvidence } from "./calibrationValueExtraction.ts";
 import { defineXdfDefinitionRevision, type XdfDefinitionRevision } from "./canonicalXdfDefinition.ts";
 import type { DefinitionSetRevision, EngineeringBinaryIdentity } from "./definitionRomApplicability.ts";
+import { verifyQualifiedBinaryLayoutMembership, type QualifiedBinaryToRomLayoutMembership } from "./binaryRomLayoutMembership.ts";
 import { lookupActiveRomLayoutApplicability, type QualifiedRomLayoutApplicabilityRelationship, type RomLayoutApplicabilityRegistrySnapshot, type RomLayoutRegistryLookup } from "./romLayoutApplicabilityPublication.ts";
 
 export const QUALIFIED_CALIBRATION_EXTRACTION_CONTRACT = "tunesight.qualified-calibration-extraction.v1" as const;
@@ -18,6 +19,7 @@ export type QualifiedCalibrationExtractionRequest = Readonly<{
   expectedRelationshipRevision: string;
   definitionSet: DefinitionSetRevision;
   definition: XdfDefinitionRevision;
+  binaryLayoutMembership?: QualifiedBinaryToRomLayoutMembership | null;
 }>;
 
 export type QualifiedApplicabilityAuthorityChain = Readonly<{
@@ -79,7 +81,7 @@ function freeze<T>(value:T):T{if(Array.isArray(value))return Object.freeze(value
 
 export function constructQualifiedCalibrationExtractionRequest(input:Omit<QualifiedCalibrationExtractionRequest,"requestId"|"contractVersion">):QualifiedCalibrationExtractionRequest{
   const binaryBytes=input.engineeringBinary.bytes;const digestValue=createHash("sha256").update(binaryBytes).digest("hex");
-  const requestId=`qualified-calibration-extraction-request:${digest("tunesight.qualified-calibration-extraction-request.v1",{exactBinaryDigest:digestValue,romLayoutId:input.romLayoutId,registrySnapshotId:input.registrySnapshot.snapshotId,expectedRelationshipId:input.expectedRelationshipId,expectedRelationshipRevision:input.expectedRelationshipRevision,definitionSetRevisionId:input.definitionSet.revisionId,definitionRevisionId:input.definition.revisionId,definitionSourceBindingDigest:input.definition.sourceBindingDigest})}`;
+  const requestId=`qualified-calibration-extraction-request:${digest("tunesight.qualified-calibration-extraction-request.v1",{exactBinaryDigest:digestValue,romLayoutId:input.romLayoutId,registrySnapshotId:input.registrySnapshot.snapshotId,expectedRelationshipId:input.expectedRelationshipId,expectedRelationshipRevision:input.expectedRelationshipRevision,definitionSetRevisionId:input.definitionSet.revisionId,definitionRevisionId:input.definition.revisionId,definitionSourceBindingDigest:input.definition.sourceBindingDigest,binaryLayoutMembershipRevision:input.binaryLayoutMembership?.membershipRevision??null})}`;
   return Object.freeze({requestId,contractVersion:QUALIFIED_CALIBRATION_EXTRACTION_CONTRACT,...input});
 }
 
@@ -92,8 +94,8 @@ export function extractQualifiedCalibrationValue(request:QualifiedCalibrationExt
   if(lookup.outcome!=="exact_active")return rejected(request,lookup,null,"layout_unqualified",`Qualified ROM-layout lookup returned ${lookup.outcome}; exactly one active relationship is required.`);
   const relationship=lookup.relationships[0]!;
   if(relationship.relationshipId!==request.expectedRelationshipId||relationship.relationshipRevision!==request.expectedRelationshipRevision)return rejected(request,lookup,relationship,"relationship_mismatch","The active relationship does not match the exact relationship requested.");
-  const binaryMembership=relationship.supportingExactBinaries.find((item)=>item.binaryDigest===exactDigest&&item.byteLength===binaryBytes.byteLength);
-  if(!binaryMembership||!binaryMembership.internalRomIdentifiers.some((identifier)=>request.binaryIdentity.internalRomIdentifiers.includes(identifier)))return rejected(request,lookup,relationship,"binary_layout_membership_unqualified","The exact Engineering Binary has no qualified subordinate membership Evidence for this ROM Layout Identity.");
+  const binaryMembership=relationship.supportingExactBinaries.find((item)=>item.binaryDigest===exactDigest&&item.byteLength===binaryBytes.byteLength),historicallyAdmitted=Boolean(binaryMembership&&binaryMembership.internalRomIdentifiers.some((identifier)=>request.binaryIdentity.internalRomIdentifiers.includes(identifier))),newlyQualified=Boolean(request.binaryLayoutMembership&&verifyQualifiedBinaryLayoutMembership({membership:request.binaryLayoutMembership,binaryIdentity:request.binaryIdentity,romLayoutId:request.romLayoutId,relationship,definitionSet:request.definitionSet}));
+  if(!historicallyAdmitted&&!newlyQualified)return rejected(request,lookup,relationship,"binary_layout_membership_unqualified","The exact Engineering Binary has neither historical subordinate Evidence nor a verified qualified binary-to-layout membership record.");
   if(relationship.definitionSetId!==request.definitionSet.definitionSetId||relationship.definitionSetRevisionId!==request.definitionSet.revisionId||relationship.sourceArtifactDigest!==request.definitionSet.sourceArtifactDigest)return rejected(request,lookup,relationship,"definition_set_mismatch","The Definition Set does not match the exact active qualified relationship.");
   const member=request.definitionSet.definitionRevisionIds.includes(request.definition.revisionId)&&request.definitionSet.definitionSourceBindingDigests.includes(request.definition.sourceBindingDigest)&&request.definition.sourceArtifactDigest===request.definitionSet.sourceArtifactDigest;
   if(!member)return rejected(request,lookup,relationship,"definition_membership_invalid","The Definition Revision is not a member of the exact qualified Definition Set Revision.");
