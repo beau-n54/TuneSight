@@ -3,10 +3,12 @@ import test from "node:test";
 import type { WorkshopDefinitionDetail } from "./viewModel.ts";
 import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel, capabilitiesForDefinition, moveSelectedCell } from "./visualizationModel.ts";
 import { deriveWorkshopLayout } from "./workspaceLayout.ts";
+import { bindDefinitionKnowledge } from "./definitionKnowledgeBinding.ts";
 
 function detail(shape: "scalar"|"1D"|"2D", rows: number, columns: number, available=true): WorkshopDefinitionDetail {
   const cells=available?Array.from({length:rows*columns},(_,index)=>({index,row:Math.floor(index/columns),column:index%columns,referenceValue:index,currentValue:index+(index===1?1:0),changed:index===1,signedDelta:index===1?1:0,percentageDelta:0,percentageState:"available",units:"unit",referenceRawValue:index,currentRawValue:index,referenceRawOffset:index,currentRawOffset:index,equationRevision:"eq"})):[];
-  return {summary:{key:"instance",occurrence:0,definitionIdentity:"definition",definitionRevision:"revision",title:"Source title",description:null,shape,units:"unit",outcome:available?"changed":"comparison_unavailable",changedCellCount:available?1:0,available},rows,columns,axes:[{id:"X",units:"x-unit",values:Array.from({length:columns},(_,i)=>i*10)},{id:"Y",units:"y-unit",values:Array.from({length:rows},(_,i)=>i*5)}],cells,unavailableStage:available?null:"conversion",findings:[],equationRevision:"eq",sourceArtifactDigest:"digest"};
+  const identity={key:"instance",occurrence:0,definitionIdentity:"definition",definitionRevision:"revision",title:"Source title",description:null,shape,units:"unit",outcome:available?"changed" as const:"comparison_unavailable" as const,changedCellCount:available?1:0,available};
+  return {summary:{...identity,semantic:bindDefinitionKnowledge(identity,[])},rows,columns,axes:[{id:"X",units:"x-unit",values:Array.from({length:columns},(_,i)=>i*10)},{id:"Y",units:"y-unit",values:Array.from({length:rows},(_,i)=>i*5)}],cells,unavailableStage:available?null:"conversion",findings:[],equationRevision:"eq",sourceArtifactDigest:"digest",information:{} as never};
 }
 
 test("shape capability rules reject fabricated geometry",()=>{assert.deepEqual(capabilitiesForDefinition(detail("scalar",1,1)),{grid:true,twoDimensional:false,threeDimensional:false,reason2d:"A scalar has no qualified line axis.",reason3d:"A scalar has no two-axis surface geometry."});assert.equal(capabilitiesForDefinition(detail("1D",1,4)).twoDimensional,true);assert.equal(capabilitiesForDefinition(detail("1D",1,4)).threeDimensional,false);assert.equal(capabilitiesForDefinition(detail("2D",3,4)).threeDimensional,true);assert.equal(capabilitiesForDefinition(detail("2D",3,4,false)).grid,false)});

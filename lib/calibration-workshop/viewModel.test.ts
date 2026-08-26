@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { bindDefinitionKnowledge } from "./definitionKnowledgeBinding.ts";
 import type { QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDataset.ts";
 import type { QualifiedCalibrationComparisonEvidence } from "../xdf/qualifiedCalibrationComparison.ts";
 import {
@@ -74,11 +75,23 @@ test("selected Grid and cell delta data remain presentation-only", () => {
   assert.equal(model.selectedDefinition.cells[1]?.referenceRawOffset, 101);
 });
 
+test("every generated Definition retains structural information without semantic Knowledge", () => {
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
+  assert.equal(model.definitions.every((definition) => definition.semantic.outcome === "unavailable"), true);
+  assert.equal(model.capabilities.semanticKnowledge, false);
+  assert.equal(model.selectedDefinition.information.workshopInstanceIdentity, model.selectedDefinition.summary.key);
+  assert.equal(model.selectedDefinition.information.definitionSetRevision, "set:1");
+  assert.equal(model.selectedDefinition.information.units, model.selectedDefinition.summary.units);
+  assert.equal(model.selectedDefinition.information.axes.length, 1);
+  assert.equal(model.selectedDefinition.information.sourceCategory, null);
+});
+
 test("conflict is retained as a distinct future presentation state", () => {
   const conflict = { ...modelDefinition("revision:conflict"), outcome: "representation_conflict", available: false } as const;
   assert.deepEqual(filterWorkshopDefinitions([conflict], "", "conflict"), [conflict]);
 });
 
 function modelDefinition(key: string) {
-  return { key, occurrence: 0, definitionIdentity: null, definitionRevision: key, title: "Conflict", description: null, shape: "unavailable" as const, units: null, outcome: "comparison_unavailable" as const, changedCellCount: 0, available: false };
+  const identity = { key, occurrence: 0, definitionIdentity: null, definitionRevision: key, title: "Conflict", description: null, shape: "unavailable" as const, units: null, outcome: "comparison_unavailable" as const, changedCellCount: 0, available: false };
+  return { ...identity, semantic: bindDefinitionKnowledge(identity, []) };
 }

@@ -3,6 +3,7 @@ import type {
   DefinitionComparisonEvidence,
   QualifiedCalibrationComparisonEvidence,
 } from "../xdf/qualifiedCalibrationComparison.ts";
+import { bindDefinitionKnowledge, type WorkshopKnowledgeRecord, type WorkshopSemanticBinding } from "./definitionKnowledgeBinding.ts";
 
 export type WorkshopFilter =
   | "all"
@@ -34,6 +35,7 @@ export type WorkshopDefinitionSummary = Readonly<{
   outcome: DefinitionComparisonEvidence["outcome"];
   changedCellCount: number;
   available: boolean;
+  semantic: WorkshopSemanticBinding;
 }>;
 
 export type WorkshopAxis = Readonly<{
@@ -70,6 +72,31 @@ export type WorkshopDefinitionDetail = Readonly<{
   findings: readonly string[];
   equationRevision: string | null;
   sourceArtifactDigest: string;
+  information: Readonly<{
+    workshopInstanceIdentity: string;
+    definitionIdentity: string | null;
+    definitionRevision: string;
+    definitionSetRevision: string;
+    shape: WorkshopDefinitionSummary["shape"];
+    dimensions: Readonly<{ rows: number; columns: number }>;
+    units: string | null;
+    axes: readonly WorkshopAxis[];
+    sourceDescription: string | null;
+    sourceCategory: string | null;
+    availability: boolean;
+    comparisonOutcome: DefinitionComparisonEvidence["outcome"];
+    changedCellCount: number;
+    axisChangeState: "unchanged" | "changed" | "unavailable";
+    referenceRole: string;
+    currentRole: string;
+    romLayoutId: string;
+    referenceDatasetId: string;
+    currentDatasetId: string;
+    datasetProvenance: readonly string[];
+    sourceArtifactDigest: string;
+    equationRevision: string | null;
+    limitations: readonly string[];
+  }>;
 }>;
 
 export type WorkshopViewModel = Readonly<{
@@ -100,7 +127,7 @@ export type WorkshopViewModel = Readonly<{
   capabilities: Readonly<{
     readOnly: true;
     mutation: false;
-    semanticKnowledge: false;
+    semanticKnowledge: boolean;
     suggestedCalibration: false;
     workingCalibration: false;
   }>;
@@ -130,13 +157,14 @@ export function buildWorkshopDefinitionSummaries(
     datasetRevision: string;
     definitionSetRevision: string;
   }>,
+  knowledgeRecords: readonly WorkshopKnowledgeRecord[] = [],
 ): readonly WorkshopDefinitionSummary[] {
   const occurrences = new Map<string, number>();
   return deepFreeze(
     comparison.definitions.map((definition) => {
       const occurrence = occurrences.get(definition.definitionRevisionId) ?? 0;
       occurrences.set(definition.definitionRevisionId, occurrence + 1);
-      return summarizeDefinition(definition, identityContext, occurrence);
+      return summarizeDefinition(definition, identityContext, occurrence, knowledgeRecords);
     }),
   );
 }
@@ -148,8 +176,9 @@ function summarizeDefinition(
     definitionSetRevision: string;
   }>,
   occurrence: number,
+  knowledgeRecords: readonly WorkshopKnowledgeRecord[] = [],
 ): WorkshopDefinitionSummary {
-  return {
+  const identity = {
     key: [
       "workshop-definition-instance",
       identityContext.datasetRevision,
@@ -170,6 +199,7 @@ function summarizeDefinition(
       definition.referenceEngineeringEvidence !== null &&
       definition.modifiedEngineeringEvidence !== null,
   };
+  return { ...identity, semantic: bindDefinitionKnowledge(identity, knowledgeRecords) };
 }
 
 export function filterWorkshopDefinitions(
@@ -228,6 +258,16 @@ export function buildWorkshopDefinitionDetail(
   definition: DefinitionComparisonEvidence,
   reference: QualifiedCalibrationDataset,
   summary: WorkshopDefinitionSummary,
+  context?: Readonly<{
+    definitionSetRevision: string;
+    romLayoutId: string;
+    referenceDatasetId: string;
+    currentDatasetId: string;
+    referenceRole: string;
+    currentRole: string;
+    datasetProvenance: readonly string[];
+    limitations: readonly string[];
+  }>,
 ): WorkshopDefinitionDetail {
   const referenceEvidence = definition.referenceEngineeringEvidence;
   const currentEvidence = definition.modifiedEngineeringEvidence;
@@ -275,6 +315,31 @@ export function buildWorkshopDefinitionDetail(
     findings: [...new Set([...(datasetRecord?.findings ?? []), ...definition.findings])],
     equationRevision: definition.equationRevision,
     sourceArtifactDigest: definition.sourceArtifactDigest,
+    information: {
+      workshopInstanceIdentity: summary.key,
+      definitionIdentity: summary.definitionIdentity,
+      definitionRevision: summary.definitionRevision,
+      definitionSetRevision: context?.definitionSetRevision ?? reference.definitionSetRevisionId,
+      shape: summary.shape,
+      dimensions: { rows: definition.dimensions?.rows ?? 0, columns: definition.dimensions?.columns ?? 0 },
+      units: summary.units,
+      axes: axisValues(definition),
+      sourceDescription: summary.description,
+      sourceCategory: null,
+      availability: summary.available,
+      comparisonOutcome: summary.outcome,
+      changedCellCount: summary.changedCellCount,
+      axisChangeState: definition.axisComparisons.some((axis) => axis.outcome === "changed") ? "changed" : definition.axisComparisons.some((axis) => axis.outcome === "comparison_unavailable") ? "unavailable" : "unchanged",
+      referenceRole: context?.referenceRole ?? "Reference",
+      currentRole: context?.currentRole ?? "Current",
+      romLayoutId: context?.romLayoutId ?? reference.romLayoutId,
+      referenceDatasetId: context?.referenceDatasetId ?? reference.datasetId,
+      currentDatasetId: context?.currentDatasetId ?? "Unavailable",
+      datasetProvenance: context?.datasetProvenance ?? reference.provenance,
+      sourceArtifactDigest: definition.sourceArtifactDigest,
+      equationRevision: definition.equationRevision,
+      limitations: context?.limitations ?? [],
+    },
   });
 }
 
@@ -283,13 +348,14 @@ export function buildWorkshopViewModel(input: {
   current: QualifiedCalibrationDataset;
   comparison: QualifiedCalibrationComparisonEvidence;
   selectedKey?: string | null;
+  knowledgeRecords?: readonly WorkshopKnowledgeRecord[];
 }): WorkshopViewModel {
   const { reference, current, comparison } = input;
   const identityContext = {
     datasetRevision: reference.datasetRevision,
     definitionSetRevision: reference.definitionSetRevisionId,
   };
-  const definitions = buildWorkshopDefinitionSummaries(comparison, identityContext);
+  const definitions = buildWorkshopDefinitionSummaries(comparison, identityContext, input.knowledgeRecords ?? []);
   const selectedKey = selectWorkshopDefinitionKey(definitions, input.selectedKey);
   const selectedIndex = definitions.findIndex((definition) => definition.key === selectedKey);
   const selected = comparison.definitions[selectedIndex];
@@ -323,13 +389,22 @@ export function buildWorkshopViewModel(input: {
       changedCells: comparison.totalChangedCells,
     },
     definitions,
-    selectedDefinition: buildWorkshopDefinitionDetail(selected, reference, selectedSummary),
+    selectedDefinition: buildWorkshopDefinitionDetail(selected, reference, selectedSummary, {
+      definitionSetRevision: reference.definitionSetRevisionId,
+      romLayoutId: reference.romLayoutId,
+      referenceDatasetId: reference.datasetId,
+      currentDatasetId: current.datasetId,
+      referenceRole: comparison.reference.role,
+      currentRole: comparison.modified.role,
+      datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])],
+      limitations: [...new Set([...reference.limitations, ...current.limitations])],
+    }),
     provenance: [...new Set([...reference.provenance, ...current.provenance])],
     limitations: [...new Set([...reference.limitations, ...current.limitations, "This controlled fixture is not derived from the selected vehicle.", "Engineering semantic interpretation is not yet bound."])],
     capabilities: {
       readOnly: true,
       mutation: false,
-      semanticKnowledge: false,
+      semanticKnowledge: definitions.some((definition) => definition.semantic.outcome === "exact" || definition.semantic.outcome === "partial"),
       suggestedCalibration: false,
       workingCalibration: false,
     },
