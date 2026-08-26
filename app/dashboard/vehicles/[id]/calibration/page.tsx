@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { developmentCalibrationWorkshopProvider } from "@/lib/calibration-workshop/developmentFixtureProvider";
+import { developmentCalibrationWorkshopProvider } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
 
 type PageProps = {
