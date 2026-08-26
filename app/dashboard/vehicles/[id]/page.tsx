@@ -114,6 +114,27 @@ export default async function VehicleDashboardPage({ params }: PageProps) {
             value="Open Analysis"
           />
         </div>
+
+        <Link
+          href={`/dashboard/vehicles/${vehicle.id}/calibration`}
+          className="bmw-border group block rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-900 to-blue-950/30 p-6 text-white transition hover:bg-zinc-800"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
+                Calibration
+              </p>
+              <h2 className="mt-2 text-2xl font-bold">Open Calibration Workshop</h2>
+              <p className="mt-2 text-sm text-zinc-400">
+                Explore qualified calibration evidence and reference/current differences.
+              </p>
+              <p className="mt-2 text-xs text-amber-200/80">
+                Development Evidence preview; live vehicle Dataset integration is not yet active.
+              </p>
+            </div>
+            <span className="text-2xl text-blue-300 transition group-hover:translate-x-1" aria-hidden="true">→</span>
+          </div>
+        </Link>
       </div>
     </main>
   );
