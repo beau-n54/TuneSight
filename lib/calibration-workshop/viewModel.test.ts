@@ -55,12 +55,15 @@ test("Workshop View Model preserves fixture truth, complete universe and four st
 
 test("literal search and Evidence filters are deterministic", () => {
   const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
-  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "searchable", "all").map((item) => item.key), ["revision:changed"]);
-  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "changed").map((item) => item.key), ["revision:changed"]);
-  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "unchanged").map((item) => item.key), ["revision:unchanged"]);
-  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "unavailable").map((item) => item.key), ["revision:unavailable"]);
-  assert.equal(selectWorkshopDefinitionKey(model.definitions), "revision:changed");
-  assert.equal(selectWorkshopDefinitionKey(model.definitions, "revision:unchanged"), "revision:unchanged");
+  const changedKey = model.definitions[0]!.key;
+  const unchangedKey = model.definitions[1]!.key;
+  const unavailableKey = model.definitions[2]!.key;
+  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "searchable", "all").map((item) => item.key), [changedKey]);
+  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "changed").map((item) => item.key), [changedKey]);
+  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "unchanged").map((item) => item.key), [unchangedKey]);
+  assert.deepEqual(filterWorkshopDefinitions(model.definitions, "", "unavailable").map((item) => item.key), [unavailableKey]);
+  assert.equal(selectWorkshopDefinitionKey(model.definitions), changedKey);
+  assert.equal(selectWorkshopDefinitionKey(model.definitions, unchangedKey), unchangedKey);
 });
 
 test("selected Grid and cell delta data remain presentation-only", () => {
@@ -77,5 +80,5 @@ test("conflict is retained as a distinct future presentation state", () => {
 });
 
 function modelDefinition(key: string) {
-  return { key, definitionIdentity: null, definitionRevision: key, title: "Conflict", description: null, shape: "unavailable" as const, units: null, outcome: "comparison_unavailable" as const, changedCellCount: 0, available: false };
+  return { key, occurrence: 0, definitionIdentity: null, definitionRevision: key, title: "Conflict", description: null, shape: "unavailable" as const, units: null, outcome: "comparison_unavailable" as const, changedCellCount: 0, available: false };
 }

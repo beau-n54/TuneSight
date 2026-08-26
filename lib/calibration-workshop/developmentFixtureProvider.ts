@@ -1,15 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import { cache } from "react";
 import { collectInternalIdentityObservations, type InternalIdentityObservation } from "../xdf/applicabilityEvidenceProposal.ts";
 import type { XdfDefinitionRevision } from "../xdf/canonicalXdfDefinition.ts";
 import { defineDefinitionSetRevision, identifyEngineeringBinary, type DefinitionSetRevision, type EngineeringBinaryIdentity } from "../xdf/definitionRomApplicability.ts";
 import { interpretXdfStructure } from "../xdf/interpretXdfStructure.ts";
 import { N54_CURRENT_GOVERNED_REVIEW_REFERENCES, N54_CURRENT_ROM_LAYOUT_REGISTRY } from "../xdf/n54GovernedApplicabilityAdmission.ts";
-import { compareQualifiedCalibrationDatasets, constructQualifiedCalibrationDatasetComparisonRequest } from "../xdf/qualifiedCalibrationComparison.ts";
-import { constructQualifiedCalibrationDatasetRequest, materializeQualifiedCalibrationDataset, type QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDataset.ts";
+import { compareQualifiedCalibrationDatasets, constructQualifiedCalibrationDatasetComparisonRequest, QUALIFIED_CALIBRATION_COMPARISON_CONTRACT } from "../xdf/qualifiedCalibrationComparison.ts";
+import { constructQualifiedCalibrationDatasetRequest, materializeQualifiedCalibrationDataset, QUALIFIED_CALIBRATION_DATASET_CONTRACT, type QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDataset.ts";
 import { defineRomLayoutIdentity, type RomLayoutIdentity, type RomLayoutMarker } from "../xdf/romLayoutApplicability.ts";
-import { constructQualifiedRomLayoutDiscoveryRegistry, type RomLayoutMembershipAuthority } from "../xdf/romLayoutDiscovery.ts";
+import { constructQualifiedRomLayoutDiscoveryRegistry, constructRomLayoutDiscoveryRequest, discoverAndQualifyBinaryRomLayout, ROM_LAYOUT_DISCOVERY_CONTRACT, type RomLayoutMembershipAuthority } from "../xdf/romLayoutDiscovery.ts";
 import { resolveBinaryContainer, type EngineeringBinary } from "../tunes/binaryContainer.ts";
 import { buildWorkshopViewModel, type WorkshopViewModel } from "./viewModel.ts";
 
@@ -110,12 +109,35 @@ export function constructWorkshopDiscoveryRegistry(layouts: readonly RomLayoutId
   });
 }
 
-const loadFixtureMaterial = cache(async (): Promise<FixtureMaterial> => {
+const FIXTURE_CACHE_KEY = [
+  QUALIFIED_CALIBRATION_DATASET_CONTRACT,
+  QUALIFIED_CALIBRATION_COMPARISON_CONTRACT,
+  ROM_LAYOUT_DISCOVERY_CONTRACT,
+  N54_CURRENT_ROM_LAYOUT_REGISTRY.snapshotId,
+  ...N54_CURRENT_GOVERNED_REVIEW_REFERENCES.flatMap(({ review }) => [
+    review.romLayoutId,
+    review.definitionSetRevisionId,
+    review.sourceArtifactDigest,
+    ...review.supportingExactBinaries.map((binary) => binary.binaryDigest),
+  ]),
+].join("|");
+const fixtureMaterialCache = new Map<string, Promise<FixtureMaterial>>();
+
+async function materializeFixture(): Promise<FixtureMaterial> {
+  const profile = process.env.TUNESIGHT_WORKSHOP_PROFILE === "1";
+  const timings: Record<string, number> = {};
+  let mark = performance.now();
+  const record = (name: string) => {
+    const now = performance.now();
+    timings[name] = Math.round(now - mark);
+    mark = now;
+  };
   const cohort = VOCABULARY.map((identity) => {
     const source = parseSource(identity);
     const original = exactBinary(identity, "original");
     return Object.freeze({ identity, source, original, layout: fixtureLayout(identity, source, original) });
   });
+  record("authorityLayoutAssemblyMs");
   const fixture = cohort.find((item) => item.identity === "IJE0S");
   if (!fixture) throw new Error("Controlled IJE0S Workshop fixture is unavailable.");
   const { source, original: referenceBinary, layout } = fixture;
@@ -124,6 +146,26 @@ const loadFixtureMaterial = cache(async (): Promise<FixtureMaterial> => {
   if (!relationship) throw new Error("Workshop fixture has no active governed relationship.");
   const authority: RomLayoutMembershipAuthority = { layout, relationship, definitionSet: source.set, definitions: source.definitions };
   const discoveryRegistry = constructWorkshopDiscoveryRegistry(cohort.map((item) => item.layout));
+  record("discoveryRegistryAssemblyMs");
+  const profileDiscovery = (binary: ExactBinary, sourceRole: "stock_candidate" | "mapswitch") => {
+    if (!profile) return;
+    const request = constructRomLayoutDiscoveryRequest({
+      engineeringBinary: binary.engineering,
+      binaryIdentity: binary.identity,
+      observations: binary.observations,
+      qualifiedRegistry: discoveryRegistry,
+      independentlyQualifiedEcuFamily: null,
+      provenance: ["Controlled Workshop performance diagnostic"],
+    });
+    discoverAndQualifyBinaryRomLayout({
+      request,
+      membershipAuthorities: [authority],
+      credibleRomIdentifiers: VOCABULARY,
+      sourceRole,
+      sourceProvenance: ["Controlled Workshop performance diagnostic"],
+      qualifiedAt: null,
+    });
+  };
   const materialize = (binary: ExactBinary, sourceRole: "stock_candidate" | "mapswitch") => {
     const result = materializeQualifiedCalibrationDataset(constructQualifiedCalibrationDatasetRequest({
       engineeringBinary: binary.engineering,
@@ -139,23 +181,46 @@ const loadFixtureMaterial = cache(async (): Promise<FixtureMaterial> => {
     if (!result.dataset) throw new Error(`Workshop fixture Dataset failed: ${result.finding}`);
     return result.dataset;
   };
+  profileDiscovery(referenceBinary, "stock_candidate");
+  record("referenceDiscoveryMembershipMs");
   const reference = materialize(referenceBinary, "stock_candidate");
+  record("referenceDatasetMaterializationMs");
+  profileDiscovery(currentBinary, "mapswitch");
+  record("currentDiscoveryMembershipMs");
   const current = materialize(currentBinary, "mapswitch");
+  record("currentDatasetMaterializationMs");
   const comparison = compareQualifiedCalibrationDatasets(constructQualifiedCalibrationDatasetComparisonRequest({ reference, modified: current }));
+  record("datasetComparisonMs");
   if (comparison.status === "rejected") throw new Error(`Workshop fixture comparison failed: ${comparison.finding}`);
+  if (profile) console.info("TUNESIGHT_WORKSHOP_PROFILE", JSON.stringify({ cacheKey: FIXTURE_CACHE_KEY, ...timings, totalMaterializationMs: Object.values(timings).reduce((sum, value) => sum + value, 0) }));
   return Object.freeze({ reference, current, comparison });
-});
+}
+
+function loadFixtureMaterial(): Promise<FixtureMaterial> {
+  const cached = fixtureMaterialCache.get(FIXTURE_CACHE_KEY);
+  if (cached) return cached;
+  const pending = materializeFixture().catch((error) => {
+    fixtureMaterialCache.delete(FIXTURE_CACHE_KEY);
+    throw error;
+  });
+  fixtureMaterialCache.set(FIXTURE_CACHE_KEY, pending);
+  return pending;
+}
 
 export const developmentCalibrationWorkshopProvider: CalibrationWorkshopProvider = Object.freeze({
   async loadVehicleWorkshop(vehicleId: string, userId: string, selectedDefinition?: string | null) {
     if (!vehicleId.trim() || !userId.trim()) throw new Error("Vehicle and user identity are required.");
+    const providerStarted = performance.now();
     const material = await loadFixtureMaterial();
+    const adaptationStarted = performance.now();
     if (material.comparison.status === "rejected") throw new Error(material.comparison.finding);
-    return buildWorkshopViewModel({
+    const workshop = buildWorkshopViewModel({
       reference: material.reference,
       current: material.current,
       comparison: material.comparison.evidence,
       selectedKey: selectedDefinition,
     });
+    if (process.env.TUNESIGHT_WORKSHOP_PROFILE === "1") console.info("TUNESIGHT_WORKSHOP_VIEW_MODEL_PROFILE", JSON.stringify({ adaptationMs: Math.round(performance.now() - adaptationStarted), totalProviderLoadMs: Math.round(performance.now() - providerStarted), cacheKey: FIXTURE_CACHE_KEY }));
+    return workshop;
   },
 });

@@ -24,6 +24,7 @@ export type WorkshopStateSlot = Readonly<{
 
 export type WorkshopDefinitionSummary = Readonly<{
   key: string;
+  occurrence: number;
   definitionIdentity: string | null;
   definitionRevision: string;
   title: string;
@@ -125,17 +126,38 @@ function shapeOf(
 
 export function buildWorkshopDefinitionSummaries(
   comparison: QualifiedCalibrationComparisonEvidence,
+  identityContext: Readonly<{
+    datasetRevision: string;
+    definitionSetRevision: string;
+  }>,
 ): readonly WorkshopDefinitionSummary[] {
+  const occurrences = new Map<string, number>();
   return deepFreeze(
-    comparison.definitions.map(summarizeDefinition),
+    comparison.definitions.map((definition) => {
+      const occurrence = occurrences.get(definition.definitionRevisionId) ?? 0;
+      occurrences.set(definition.definitionRevisionId, occurrence + 1);
+      return summarizeDefinition(definition, identityContext, occurrence);
+    }),
   );
 }
 
 function summarizeDefinition(
   definition: DefinitionComparisonEvidence,
+  identityContext: Readonly<{
+    datasetRevision: string;
+    definitionSetRevision: string;
+  }>,
+  occurrence: number,
 ): WorkshopDefinitionSummary {
   return {
-    key: definition.definitionRevisionId,
+    key: [
+      "workshop-definition-instance",
+      identityContext.datasetRevision,
+      identityContext.definitionSetRevision,
+      definition.definitionRevisionId,
+      `occurrence-${occurrence}`,
+    ].join(":"),
+    occurrence,
     definitionIdentity: definition.definitionIdentity,
     definitionRevision: definition.definitionRevisionId,
     title: definition.title?.trim() || "Untitled Definition",
@@ -205,14 +227,14 @@ function axisValues(
 export function buildWorkshopDefinitionDetail(
   definition: DefinitionComparisonEvidence,
   reference: QualifiedCalibrationDataset,
+  summary: WorkshopDefinitionSummary,
 ): WorkshopDefinitionDetail {
-  const summary = summarizeDefinition(definition);
   const referenceEvidence = definition.referenceEngineeringEvidence;
   const currentEvidence = definition.modifiedEngineeringEvidence;
   const changes = new Map(definition.changedCells.map((cell) => [cell.index, cell]));
-  const datasetRecord = reference.definitions.find(
+  const datasetRecord = reference.definitions.filter(
     (item) => item.definitionRevisionId === definition.definitionRevisionId,
-  );
+  )[summary.occurrence];
   const cells = referenceEvidence && currentEvidence
     ? referenceEvidence.engineeringValues.map((referenceValue, index) => {
         const currentValue = currentEvidence.engineeringValues[index]!;
@@ -263,12 +285,16 @@ export function buildWorkshopViewModel(input: {
   selectedKey?: string | null;
 }): WorkshopViewModel {
   const { reference, current, comparison } = input;
-  const definitions = buildWorkshopDefinitionSummaries(comparison);
+  const identityContext = {
+    datasetRevision: reference.datasetRevision,
+    definitionSetRevision: reference.definitionSetRevisionId,
+  };
+  const definitions = buildWorkshopDefinitionSummaries(comparison, identityContext);
   const selectedKey = selectWorkshopDefinitionKey(definitions, input.selectedKey);
-  const selected = comparison.definitions.find(
-    (definition) => definition.definitionRevisionId === selectedKey,
-  );
-  if (!selected) throw new Error("Qualified comparison contains no selectable Definition.");
+  const selectedIndex = definitions.findIndex((definition) => definition.key === selectedKey);
+  const selected = comparison.definitions[selectedIndex];
+  const selectedSummary = definitions[selectedIndex];
+  if (!selected || !selectedSummary) throw new Error("Qualified comparison contains no selectable Definition.");
 
   return deepFreeze({
     source: {
@@ -297,7 +323,7 @@ export function buildWorkshopViewModel(input: {
       changedCells: comparison.totalChangedCells,
     },
     definitions,
-    selectedDefinition: buildWorkshopDefinitionDetail(selected, reference),
+    selectedDefinition: buildWorkshopDefinitionDetail(selected, reference, selectedSummary),
     provenance: [...new Set([...reference.provenance, ...current.provenance])],
     limitations: [...new Set([...reference.limitations, ...current.limitations, "This controlled fixture is not derived from the selected vehicle.", "Engineering semantic interpretation is not yet bound."])],
     capabilities: {
