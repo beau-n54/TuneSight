@@ -1,97 +1,33 @@
 "use client";
-
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { filterWorkshopDefinitions, type WorkshopFilter, type WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
+import { buildCalibrationVisualizationModel, capabilitiesForDefinition, type CalibrationVisualState, type SliceDirection, type WorkshopViewMode } from "@/lib/calibration-workshop/visualizationModel";
+import CalibrationPlot2D from "./CalibrationPlot2D";
+import CalibrationSurface3D from "./CalibrationSurface3D";
+import { deriveWorkshopLayout } from "@/lib/calibration-workshop/workspaceLayout";
 
-const FILTERS: readonly { id: WorkshopFilter; label: string }[] = [
-  { id: "all", label: "All" }, { id: "changed", label: "Changed" },
-  { id: "unchanged", label: "Unchanged" }, { id: "unavailable", label: "Unavailable" },
-  { id: "axis_changed", label: "Axis Changed" }, { id: "value_and_axis_changed", label: "Value + Axis" },
-  { id: "conflict", label: "Conflict" },
-];
+const FILTERS: readonly { id: WorkshopFilter; label: string }[] = [{id:"all",label:"All"},{id:"changed",label:"Changed"},{id:"unchanged",label:"Unchanged"},{id:"unavailable",label:"Unavailable"},{id:"axis_changed",label:"Axis Changed"},{id:"value_and_axis_changed",label:"Value + Axis"},{id:"conflict",label:"Conflict"}];
+const VIEW_LABELS: Record<WorkshopViewMode,string>={grid:"Grid","2d":"2D","3d":"3D"};
+const pretty=(value:string)=>value.replaceAll("_"," ").replace(/\b\w/g,(letter)=>letter.toUpperCase());
+const number=(value:number)=>Number.isInteger(value)?value.toLocaleString():Number(value.toPrecision(7)).toLocaleString();
 
-function prettyOutcome(value: string) {
-  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+export default function WorkshopClient({workshop,vehicleId}:{workshop:WorkshopViewModel;vehicleId:string}){
+ const [search,setSearch]=useState(""),[filter,setFilter]=useState<WorkshopFilter>("all"),[selectedCell,setSelectedCell]=useState(0),[view,setView]=useState<WorkshopViewMode>("grid"),[explorerCollapsed,setExplorerCollapsed]=useState(false),[inspectorCollapsed,setInspectorCollapsed]=useState(false),[focus,setFocus]=useState(false),[visualState,setVisualState]=useState<CalibrationVisualState>("current"),[sliceDirection,setSliceDirection]=useState<SliceDirection>("row"),[sliceIndex,setSliceIndex]=useState(0);
+ const definitions=useMemo(()=>filterWorkshopDefinitions(workshop.definitions,search,filter),[workshop.definitions,search,filter]),detail=workshop.selectedDefinition,visual=useMemo(()=>buildCalibrationVisualizationModel(detail),[detail]),capabilities=useMemo(()=>capabilitiesForDefinition(detail),[detail]),cell=detail.cells[selectedCell]??detail.cells[0]??null;
+ const {explorerVisible,inspectorVisible,columns}=deriveWorkshopLayout({explorerCollapsed,inspectorCollapsed,focusWorkspace:focus});
+ return <section className={`grid gap-4 ${columns}`} data-focus-workspace={focus}>
+  {explorerVisible?<Explorer workshop={workshop} vehicleId={vehicleId} detail={detail} definitions={definitions} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onCollapse={()=>setExplorerCollapsed(true)}/>:!focus&&<button type="button" onClick={()=>setExplorerCollapsed(false)} aria-label="Expand Calibration Explorer" className="bmw-border hidden min-h-40 rounded-2xl bg-zinc-950 px-3 text-xs uppercase tracking-[.14em] text-blue-300 xl:block [writing-mode:vertical-rl]">Explorer</button>}
+  <main className="bmw-border min-w-0 rounded-2xl bg-zinc-950 p-4 sm:p-5">
+   <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 2xl:flex-row 2xl:items-end 2xl:justify-between"><div><p className="text-xs uppercase tracking-[.16em] text-blue-300">Calibration Workspace</p><h2 className="mt-1 text-xl font-semibold">{detail.summary.title}</h2><p className="mt-1 text-xs text-zinc-500">{detail.rows} × {detail.columns} · {detail.summary.units||"units not supplied"}</p></div><div className="flex flex-wrap items-center gap-2"><div className="flex rounded-lg border border-zinc-700 bg-black p-1" aria-label="Calibration view mode">{(["grid","2d","3d"] as const).map(mode=>{const enabled=mode==="grid"?capabilities.grid:mode==="2d"?capabilities.twoDimensional:capabilities.threeDimensional;return <button key={mode} type="button" disabled={!enabled} title={enabled?`${VIEW_LABELS[mode]} view`:mode==="2d"?capabilities.reason2d||"Unavailable":capabilities.reason3d||"Unavailable"} onClick={()=>setView(mode)} className={`rounded-md px-4 py-2 text-xs font-semibold ${view===mode?"bg-blue-500/20 text-blue-200":enabled?"text-zinc-400 hover:text-white":"cursor-not-allowed text-zinc-700"}`}>{VIEW_LABELS[mode]}</button>})}</div>{!explorerVisible&&!focus&&<button type="button" onClick={()=>setExplorerCollapsed(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-xs">Show Explorer</button>}{!inspectorVisible&&!focus&&<button type="button" onClick={()=>setInspectorCollapsed(false)} className="rounded-lg border border-zinc-700 px-3 py-2 text-xs">Show Inspector</button>}<button type="button" aria-pressed={focus} onClick={()=>setFocus(value=>!value)} className="rounded-lg border border-blue-400/40 px-3 py-2 text-xs text-blue-200">{focus?"Restore Workspace":"Focus Workspace"}</button></div></div>
+   {!detail.summary.available?<Unavailable detail={detail}/>:<>{view==="grid"&&<Grid detail={detail} selected={selectedCell} onSelect={setSelectedCell} rowAxis={visual.rowAxis} columnAxis={visual.columnAxis}/>} {view==="2d"&&<div className="mt-5"><div className="mb-4 flex flex-wrap items-center gap-3">{detail.summary.shape==="2D"&&<><select aria-label="Slice direction" value={sliceDirection} onChange={event=>{setSliceDirection(event.target.value as SliceDirection);setSliceIndex(0)}} className="rounded-lg border border-zinc-700 bg-black px-3 py-2 text-sm"><option value="row">Row slice</option><option value="column">Column slice</option></select><label className="text-xs text-zinc-400">Slice<input type="number" min={0} max={(sliceDirection==="row"?detail.rows:detail.columns)-1} value={sliceIndex} onChange={event=>setSliceIndex(Number(event.target.value))} className="ml-2 w-20 rounded border border-zinc-700 bg-black px-2 py-1"/></label></>}<span className="text-xs text-zinc-500">Reference grey · Current blue · changed points amber-ringed</span></div><CalibrationPlot2D model={visual} direction={detail.summary.shape==="1D"?"row":sliceDirection} sliceIndex={detail.summary.shape==="1D"?0:sliceIndex} onSelect={setSelectedCell}/></div>}{view==="3d"&&<div className="mt-5"><div className="mb-4 flex items-center gap-2"><span className="text-xs text-zinc-500">Surface state</span>{(["reference","current"] as const).map(state=><button key={state} type="button" onClick={()=>setVisualState(state)} className={`rounded-lg border px-3 py-2 text-xs ${visualState===state?"border-blue-400 bg-blue-400/15 text-blue-200":"border-zinc-700 text-zinc-400"}`}>{state==="reference"?"Reference":"Current Modified"}</button>)}</div><CalibrationSurface3D model={visual} detail={detail} state={visualState} selectedCell={selectedCell} onSelect={setSelectedCell}/></div>}</>}
+  </main>
+  {inspectorVisible?<Inspector workshop={workshop} cell={cell} detail={detail} onCollapse={()=>setInspectorCollapsed(true)}/>:!focus&&<button type="button" onClick={()=>setInspectorCollapsed(false)} aria-label="Expand Cell Inspector" className="bmw-border hidden min-h-40 rounded-2xl bg-zinc-950 px-3 text-xs uppercase tracking-[.14em] text-blue-300 xl:block [writing-mode:vertical-rl]">Inspector</button>}
+  <details className="bmw-border rounded-2xl bg-zinc-950 p-5 xl:col-span-full"><summary className="cursor-pointer font-semibold text-zinc-200">Grid, 2D and 3D view guidance</summary><div className="mt-4 grid gap-4 text-sm leading-6 text-zinc-400 md:grid-cols-3"><p><strong className="text-zinc-200">Grid:</strong> the primary exact-value matrix preserving qualified order and REF/CUR values.</p><p><strong className="text-zinc-200">2D:</strong> a 1D line or selected row/column slice revealing shape without flattening a full surface.</p><p><strong className="text-zinc-200">3D:</strong> a two-axis surface whose height is Reference or Current engineering value. Shape does not establish quality, safety, or recommendation.</p><p className="md:col-span-3">Amber-ringed points are changed-cell Evidence only. Parameter purpose and system relationships remain reserved for future qualified Calibration Knowledge.</p></div></details>
+ </section>
 }
 
-function formatValue(value: number) {
-  return Number.isInteger(value) ? value.toLocaleString() : Number(value.toPrecision(7)).toLocaleString();
-}
-
-export default function WorkshopClient({ workshop, vehicleId }: { workshop: WorkshopViewModel; vehicleId: string }) {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<WorkshopFilter>("all");
-  const [selectedCell, setSelectedCell] = useState(0);
-  const definitions = useMemo(() => filterWorkshopDefinitions(workshop.definitions, search, filter), [workshop.definitions, search, filter]);
-  const detail = workshop.selectedDefinition;
-  const cell = detail.cells[selectedCell] ?? detail.cells[0] ?? null;
-  const columnAxis = detail.axes.find((axis) => axis.values.length === detail.columns);
-  const rowAxis = detail.axes.find((axis) => axis.values.length === detail.rows && axis !== columnAxis);
-
-  return (
-    <section className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
-      <aside className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 xl:max-h-[900px]">
-        <div className="flex items-center justify-between">
-          <div><p className="text-xs uppercase tracking-[0.16em] text-blue-300">Calibration Explorer</p><h2 className="mt-1 text-xl font-semibold">All Maps</h2></div>
-          <span className="text-xs text-zinc-500">{definitions.length}/{workshop.definitions.length}</span>
-        </div>
-        <label className="mt-4 block text-xs text-zinc-500" htmlFor="definition-search">Literal search</label>
-        <input id="definition-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Title, identity, revision, units…" className="mt-2 w-full rounded-lg border border-zinc-700 bg-black px-3 py-2 text-sm outline-none focus:border-blue-400" />
-        <div className="mt-3 flex flex-wrap gap-2">
-          {FILTERS.map((item) => <button key={item.id} type="button" onClick={() => setFilter(item.id)} className={`rounded-full border px-2.5 py-1 text-xs ${filter === item.id ? "border-blue-400 bg-blue-400/15 text-blue-200" : "border-zinc-800 text-zinc-400 hover:border-zinc-600"}`}>{item.label}</button>)}
-        </div>
-        <div className="mt-4 max-h-[650px] space-y-2 overflow-y-auto pr-1">
-          {definitions.map((definition) => (
-            <Link key={definition.key} href={`/dashboard/vehicles/${vehicleId}/calibration?definition=${encodeURIComponent(definition.key)}`} scroll={false} className={`block rounded-xl border p-3 transition ${definition.key === detail.summary.key ? "border-blue-400/60 bg-blue-400/10" : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"}`}>
-              <p className="truncate text-sm font-medium text-zinc-100">{definition.title}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-zinc-400">
-                <span className="rounded bg-black px-1.5 py-0.5">{definition.shape}</span>
-                {definition.units && <span className="rounded bg-black px-1.5 py-0.5">{definition.units}</span>}
-                <span className={definition.available ? "text-zinc-400" : "text-amber-300"}>{prettyOutcome(definition.outcome)}</span>
-                {definition.changedCellCount > 0 && <span className="text-blue-300">{definition.changedCellCount} changed</span>}
-              </div>
-            </Link>
-          ))}
-          {definitions.length === 0 && <p className="rounded-xl border border-dashed border-zinc-800 p-4 text-sm text-zinc-500">No Definitions match this literal search and Evidence filter.</p>}
-        </div>
-      </aside>
-
-      <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
-        <div className="flex flex-col gap-2 border-b border-zinc-800 pb-4 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="text-xs uppercase tracking-[0.16em] text-blue-300">Read-only Grid</p><h2 className="mt-1 text-xl font-semibold">{detail.summary.title}</h2></div>
-          <p className="text-xs text-zinc-500">Reference / Current Modified</p>
-        </div>
-        {!detail.summary.available ? (
-          <div className="mt-5 rounded-xl border border-amber-400/25 bg-amber-400/10 p-5">
-            <p className="font-semibold text-amber-200">Definition unavailable</p>
-            <p className="mt-2 text-sm text-zinc-300">Stage: {detail.unavailableStage || "Unspecified"}</p>
-            {detail.findings.map((finding) => <p key={finding} className="mt-2 text-sm leading-6 text-zinc-400">{finding}</p>)}
-          </div>
-        ) : (
-          <div className="mt-5 overflow-x-auto pb-2">
-            <table className="min-w-max border-separate border-spacing-1 text-xs">
-              <thead><tr><th className="sticky left-0 z-10 bg-zinc-950 p-2 text-left text-zinc-500">{rowAxis?.id || "Row"} \ {columnAxis?.id || "Column"}</th>{Array.from({ length: detail.columns }, (_, column) => <th key={`column-${column}`} className="min-w-28 p-2 font-mono font-normal text-zinc-400">{String(columnAxis?.values[column] ?? column)}{columnAxis?.units ? ` ${columnAxis.units}` : ""}</th>)}</tr></thead>
-              <tbody>{Array.from({ length: detail.rows }, (_, row) => <tr key={`row-${row}`}><th className="sticky left-0 z-10 bg-zinc-950 p-2 text-left font-mono font-normal text-zinc-400">{String(rowAxis?.values[row] ?? row)}{rowAxis?.units ? ` ${rowAxis.units}` : ""}</th>{Array.from({ length: detail.columns }, (_, column) => { const index = row * detail.columns + column; const item = detail.cells[index]; const cellKey = `cell-${row}-${column}`; if (!item) return <td key={cellKey} className="border border-zinc-800 p-3 text-zinc-600">—</td>; return <td key={cellKey}><button type="button" onClick={() => setSelectedCell(index)} className={`w-full min-w-28 rounded-lg border p-2 text-left font-mono transition ${index === selectedCell ? "border-blue-300 ring-1 ring-blue-300/40" : item.changed ? "border-blue-400/35 bg-blue-400/10 hover:border-blue-300" : "border-zinc-800 bg-zinc-900 hover:border-zinc-600"}`}><span className="block text-[10px] text-zinc-500">REF {formatValue(item.referenceValue)}</span><span className="mt-1 block text-zinc-100">CUR {formatValue(item.currentValue)}</span></button></td>; })}</tr>)}</tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <aside className="space-y-5">
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-blue-300">Cell Inspector</p>
-          {cell ? <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm"><dt className="text-zinc-500">Coordinates</dt><dd className="font-mono">R{cell.row} C{cell.column}</dd><dt className="text-zinc-500">Reference</dt><dd className="font-mono">{formatValue(cell.referenceValue)}</dd><dt className="text-zinc-500">Current</dt><dd className="font-mono">{formatValue(cell.currentValue)}</dd><dt className="text-zinc-500">Signed delta</dt><dd className="font-mono">{cell.signedDelta > 0 ? "+" : ""}{formatValue(cell.signedDelta)}</dd><dt className="text-zinc-500">Percentage</dt><dd className="font-mono">{cell.percentageDelta === null ? cell.percentageState.replaceAll("_", " ") : `${formatValue(cell.percentageDelta)}%`}</dd><dt className="text-zinc-500">Units</dt><dd>{cell.units || "Not supplied"}</dd><dt className="text-zinc-500">Raw offsets</dt><dd className="font-mono text-xs">0x{cell.referenceRawOffset.toString(16)} / 0x{cell.currentRawOffset.toString(16)}</dd></dl> : <p className="mt-3 text-sm text-zinc-500">No qualified cell is available.</p>}
-        </section>
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-blue-300">Definition Information</p>
-          <h3 className="mt-2 font-semibold">{detail.summary.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-zinc-400">{detail.summary.description || "No source description supplied."}</p>
-          <dl className="mt-4 space-y-2 text-xs"><div><dt className="text-zinc-500">Shape</dt><dd>{detail.summary.shape} · {detail.rows} × {detail.columns}</dd></div><div><dt className="text-zinc-500">Outcome</dt><dd>{prettyOutcome(detail.summary.outcome)}</dd></div><div><dt className="text-zinc-500">ROM Layout</dt><dd className="break-all font-mono">{workshop.source.romLayoutId}</dd></div><div><dt className="text-zinc-500">Definition revision</dt><dd className="break-all font-mono">{detail.summary.definitionRevision}</dd></div><div><dt className="text-zinc-500">Source digest</dt><dd className="break-all font-mono">{detail.sourceArtifactDigest}</dd></div></dl>
-          <p className="mt-4 border-l-2 border-amber-300/60 pl-3 text-xs leading-5 text-amber-100">Engineering semantic interpretation not yet bound.</p>
-        </section>
-        <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"><summary className="cursor-pointer text-sm font-semibold">Provenance & limitations</summary><div className="mt-3 space-y-3 text-xs leading-5 text-zinc-400">{workshop.provenance.map((value) => <p key={value}>{value}</p>)}{workshop.limitations.map((value) => <p key={value} className="text-amber-100/80">{value}</p>)}</div></details>
-      </aside>
-    </section>
-  );
-}
+function Explorer({workshop,vehicleId,detail,definitions,search,filter,onSearch,onFilter,onCollapse}:{workshop:WorkshopViewModel;vehicleId:string;detail:WorkshopViewModel["selectedDefinition"];definitions:WorkshopViewModel["definitions"];search:string;filter:WorkshopFilter;onSearch:(v:string)=>void;onFilter:(v:WorkshopFilter)=>void;onCollapse:()=>void}){return <aside className="bmw-border rounded-2xl bg-zinc-950 p-4 xl:max-h-[940px]"><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[.16em] text-blue-300">Calibration Explorer</p><h2 className="mt-1 text-xl font-semibold">All Maps</h2></div><button type="button" onClick={onCollapse} aria-label="Collapse Calibration Explorer" className="rounded-lg border border-zinc-700 px-3 py-2 text-xs">Collapse</button></div><label className="mt-4 block text-xs text-zinc-500" htmlFor="definition-search">Literal search</label><input id="definition-search" value={search} onChange={e=>onSearch(e.target.value)} placeholder="Title, identity, revision, units…" className="mt-2 w-full rounded-lg border border-zinc-700 bg-black px-3 py-2 text-sm outline-none focus:border-blue-400"/><div className="mt-3 flex flex-wrap gap-2">{FILTERS.map(item=><button key={item.id} type="button" onClick={()=>onFilter(item.id)} className={`rounded-full border px-2.5 py-1 text-xs ${filter===item.id?"border-blue-400 bg-blue-400/15 text-blue-200":"border-zinc-800 text-zinc-400"}`}>{item.label}</button>)}</div><p className="mt-3 text-xs text-zinc-500">{definitions.length}/{workshop.definitions.length}</p><div className="mt-3 max-h-[690px] space-y-2 overflow-y-auto">{definitions.map(definition=><Link key={definition.key} href={`/dashboard/vehicles/${vehicleId}/calibration?definition=${encodeURIComponent(definition.key)}`} scroll={false} className={`block rounded-xl border p-3 ${definition.key===detail.summary.key?"border-blue-400/60 bg-blue-400/10":"border-zinc-800 bg-zinc-900"}`}><p className="truncate text-sm font-medium">{definition.title}</p><div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-zinc-400"><span>{definition.shape}</span><span>{pretty(definition.outcome)}</span>{definition.changedCellCount>0&&<span className="text-blue-300">{definition.changedCellCount} changed</span>}</div></Link>)}{!definitions.length&&<p className="p-4 text-sm text-zinc-500">No matching Definitions.</p>}</div></aside>}
+function Unavailable({detail}:{detail:WorkshopViewModel["selectedDefinition"]}){return <div className="mt-5 rounded-xl border border-amber-400/25 bg-amber-400/10 p-5"><p className="font-semibold text-amber-200">Definition unavailable</p><p className="mt-2 text-sm">Stage: {detail.unavailableStage||"Unspecified"}</p>{detail.findings.map(finding=><p key={finding} className="mt-2 text-sm text-zinc-400">{finding}</p>)}</div>}
+function Grid({detail,selected,onSelect,rowAxis,columnAxis}:{detail:WorkshopViewModel["selectedDefinition"];selected:number;onSelect:(v:number)=>void;rowAxis:ReturnType<typeof buildCalibrationVisualizationModel>["rowAxis"];columnAxis:ReturnType<typeof buildCalibrationVisualizationModel>["columnAxis"]}){return <div className="mt-5 max-h-[680px] overflow-auto"><table className="min-w-max border-separate border-spacing-1 text-xs"><thead className="sticky top-0 z-20 bg-zinc-950"><tr><th className="sticky left-0 z-30 bg-zinc-950 p-2">{rowAxis.id} \ {columnAxis.id}</th>{Array.from({length:detail.columns},(_,c)=><th key={`column-${c}`} className="min-w-28 p-2 font-mono font-normal">{String(columnAxis.values[c])}</th>)}</tr></thead><tbody>{Array.from({length:detail.rows},(_,r)=><tr key={`row-${r}`}><th className="sticky left-0 z-10 bg-zinc-950 p-2 font-mono font-normal">{String(rowAxis.values[r])}</th>{Array.from({length:detail.columns},(_,c)=>{const i=r*detail.columns+c,item=detail.cells[i],key=`cell-${r}-${c}`;return item?<td key={key}><button type="button" aria-label={`Cell row ${r} column ${c}${item.changed?", changed":""}`} onClick={()=>onSelect(i)} className={`w-full min-w-28 rounded-lg border p-2 text-left font-mono ${i===selected?"border-blue-300 ring-1 ring-blue-300/40":item.changed?"border-blue-400/35 bg-blue-400/10":"border-zinc-800 bg-zinc-900"}`}><span className="block text-[10px] text-zinc-500">REF {number(item.referenceValue)}</span><span className="block">CUR {number(item.currentValue)}</span>{item.changed&&<span className="block text-[9px] text-blue-300">CHANGED</span>}</button></td>:<td key={key}>—</td>})}</tr>)}</tbody></table></div>}
+function Inspector({workshop,cell,detail,onCollapse}:{workshop:WorkshopViewModel;cell:WorkshopViewModel["selectedDefinition"]["cells"][number]|null;detail:WorkshopViewModel["selectedDefinition"];onCollapse:()=>void}){return <aside className="bmw-border space-y-5 rounded-2xl bg-zinc-950 p-5"><div className="flex justify-between"><p className="text-xs uppercase tracking-[.16em] text-blue-300">Cell Inspector</p><button type="button" onClick={onCollapse} aria-label="Collapse Cell Inspector" className="rounded border border-zinc-700 px-2 py-1 text-xs">Collapse</button></div>{cell?<dl className="grid grid-cols-2 gap-3 text-sm"><dt className="text-zinc-500">Coordinates</dt><dd>R{cell.row} C{cell.column}</dd><dt className="text-zinc-500">Reference</dt><dd>{number(cell.referenceValue)}</dd><dt className="text-zinc-500">Current</dt><dd>{number(cell.currentValue)}</dd><dt className="text-zinc-500">Signed delta</dt><dd>{number(cell.signedDelta)}</dd><dt className="text-zinc-500">Units</dt><dd>{cell.units||"Not supplied"}</dd></dl>:<p>No qualified cell.</p>}<div className="border-t border-zinc-800 pt-4"><p className="text-xs uppercase tracking-[.16em] text-blue-300">Definition Information</p><h3 className="mt-2 font-semibold">{detail.summary.title}</h3><p className="mt-2 text-sm text-zinc-400">{detail.summary.description||"No source description supplied."}</p><p className="mt-3 text-xs">{detail.summary.shape} · {detail.rows} × {detail.columns}</p><p className="mt-4 border-l-2 border-amber-300/60 pl-3 text-xs text-amber-100">Engineering semantic interpretation not yet bound.</p></div><details><summary className="cursor-pointer text-sm font-semibold">Provenance & limitations</summary><div className="mt-3 text-xs text-zinc-400">{workshop.provenance.map(value=><p key={value}>{value}</p>)}{workshop.limitations.map(value=><p key={value} className="text-amber-100/80">{value}</p>)}</div></details></aside>}
