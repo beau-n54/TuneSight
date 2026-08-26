@@ -41,6 +41,18 @@ export type CalibrationVisualizationModel = Readonly<{
   surface: readonly CalibrationSurfacePoint[];
 }>;
 
+export type CalibrationSurfaceTriangle = Readonly<{
+  id: string;
+  cellIndices: readonly [number, number, number];
+  points: readonly [CalibrationSurfacePoint, CalibrationSurfacePoint, CalibrationSurfacePoint];
+}>;
+
+export type CalibrationSurfaceMesh = Readonly<{
+  available: boolean;
+  triangles: readonly CalibrationSurfaceTriangle[];
+  reason: string | null;
+}>;
+
 export function capabilitiesForDefinition(detail: WorkshopDefinitionDetail): WorkshopViewCapabilities {
   if (!detail.summary.available || detail.cells.length === 0) {
     return Object.freeze({ grid: false, twoDimensional: false, threeDimensional: false, reason2d: "Qualified engineering values are unavailable.", reason3d: "Qualified engineering values are unavailable." });
@@ -112,4 +124,30 @@ export function moveSelectedCell(detail: WorkshopDefinitionDetail, current: numb
   const row = Math.max(0, Math.min(detail.rows - 1, cell.row + deltaRow));
   const column = Math.max(0, Math.min(detail.columns - 1, cell.column + deltaColumn));
   return row * detail.columns + column;
+}
+
+export function buildCalibrationSurfaceMesh(model: CalibrationVisualizationModel): CalibrationSurfaceMesh {
+  const rows = model.rowAxis.values.length;
+  const columns = model.columnAxis.values.length;
+  if (!model.capabilities.threeDimensional || rows < 2 || columns < 2) {
+    return Object.freeze({ available: false, triangles: Object.freeze([]), reason: "Qualified two-axis surface geometry is unavailable." });
+  }
+  const byCoordinate = new Map(model.surface.map((point) => [`${point.row}:${point.column}`, point]));
+  const triangles: CalibrationSurfaceTriangle[] = [];
+  for (let row = 0; row < rows - 1; row += 1) {
+    for (let column = 0; column < columns - 1; column += 1) {
+      const topLeft = byCoordinate.get(`${row}:${column}`);
+      const topRight = byCoordinate.get(`${row}:${column + 1}`);
+      const bottomLeft = byCoordinate.get(`${row + 1}:${column}`);
+      const bottomRight = byCoordinate.get(`${row + 1}:${column + 1}`);
+      if (!topLeft || !topRight || !bottomLeft || !bottomRight) {
+        return Object.freeze({ available: false, triangles: Object.freeze([]), reason: "Surface cells do not form a complete qualified rectangular mesh." });
+      }
+      triangles.push(
+        Object.freeze({ id: `${row}:${column}:a`, cellIndices: Object.freeze([topLeft.cellIndex, bottomLeft.cellIndex, topRight.cellIndex] as const), points: Object.freeze([topLeft, bottomLeft, topRight] as const) }),
+        Object.freeze({ id: `${row}:${column}:b`, cellIndices: Object.freeze([topRight.cellIndex, bottomLeft.cellIndex, bottomRight.cellIndex] as const), points: Object.freeze([topRight, bottomLeft, bottomRight] as const) }),
+      );
+    }
+  }
+  return Object.freeze({ available: true, triangles: Object.freeze(triangles), reason: null });
 }
