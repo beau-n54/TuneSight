@@ -9,6 +9,8 @@ import {
   selectWorkshopDefinitionKey,
 } from "./viewModel.ts";
 
+const source = { label: "Fixture A → Fixture B", fixtureIdentity: "fixture:generic" } as const;
+
 const engineering = (values: readonly number[]) => ({
   engineeringValues: values,
   axes: [{ axisId: "X", outcome: "identity", units: "rpm", engineeringValues: values.map((_, index) => index * 1000), literalValues: [] }],
@@ -37,7 +39,7 @@ const comparison = {
 } as QualifiedCalibrationComparisonEvidence;
 
 test("Workshop View Model preserves fixture truth, complete universe and four states", () => {
-  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
   assert.equal(model.source.kind, "development_fixture");
   assert.equal(model.states[0]?.availability, "available");
   assert.equal(model.states[0]?.sourceRole, "Stock Candidate");
@@ -55,7 +57,7 @@ test("Workshop View Model preserves fixture truth, complete universe and four st
 });
 
 test("literal search and Evidence filters are deterministic", () => {
-  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
   const changedKey = model.definitions[0]!.key;
   const unchangedKey = model.definitions[1]!.key;
   const unavailableKey = model.definitions[2]!.key;
@@ -68,7 +70,7 @@ test("literal search and Evidence filters are deterministic", () => {
 });
 
 test("selected Grid and cell delta data remain presentation-only", () => {
-  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
   assert.equal(model.selectedDefinition.cells.length, 2);
   assert.equal(model.selectedDefinition.cells[1]?.signedDelta, 1);
   assert.equal(model.selectedDefinition.cells[1]?.percentageDelta, 50);
@@ -76,7 +78,7 @@ test("selected Grid and cell delta data remain presentation-only", () => {
 });
 
 test("every generated Definition retains structural information without semantic Knowledge", () => {
-  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison });
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
   assert.equal(model.definitions.every((definition) => definition.semantic.outcome === "unavailable"), true);
   assert.equal(model.capabilities.semanticKnowledge, false);
   assert.equal(model.selectedDefinition.information.workshopInstanceIdentity, model.selectedDefinition.summary.key);

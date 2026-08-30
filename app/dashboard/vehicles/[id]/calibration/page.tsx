@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { developmentCalibrationWorkshopProvider } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
+import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ definition?: string }>;
+  searchParams: Promise<{ definition?: string | string[]; previewRom?: string | string[] }>;
 };
 
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const { definition } = await searchParams;
+  const query = await searchParams;
+  const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
+  const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
+  const previewSelection = selectN54PreviewRom(requestedPreviewRom);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -24,10 +27,29 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     .single();
   if (error || !vehicle) notFound();
 
+  if (previewSelection.status === "invalid") {
+    return (
+      <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6">
+        <div className="mx-auto max-w-4xl space-y-6">
+          <Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 transition hover:text-white">← Back to Vehicle</Link>
+          <section className="rounded-2xl border border-amber-400/35 bg-amber-400/10 p-6" role="alert">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">Development Evidence Preview unavailable</p>
+            <h1 className="mt-3 text-2xl font-bold">Unknown preview ROM: {previewSelection.requested}</h1>
+            <p className="mt-2 text-sm text-amber-50">No fixture was loaded and no fallback ROM was selected. Choose one governed current N54 preview.</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={`/dashboard/vehicles/${vehicle.id}/calibration?previewRom=${rom}`} className="rounded-lg border border-amber-200/30 px-3 py-2 font-mono text-sm text-amber-100 hover:bg-amber-200/10">{rom}</Link>)}
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   const workshop = await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(
     vehicle.id,
     user.id,
     definition,
+    previewSelection.rom,
   );
 
   return (
@@ -52,11 +74,14 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
         </header>
 
         <section className="rounded-2xl border border-amber-400/35 bg-amber-400/10 p-5" role="status">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">Development Evidence Preview</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">Development Evidence Preview — {previewSelection.rom}</p>
           <p className="mt-2 text-sm leading-6 text-amber-50">
             This Workshop displays controlled qualified Calibration Evidence for interface development. It is not derived from this vehicle.
           </p>
           <p className="mt-2 font-mono text-xs text-amber-200/70">{workshop.source.label} · {workshop.source.fixtureIdentity}</p>
+          <div className="mt-4 flex flex-wrap gap-2" aria-label="Select development preview ROM">
+            {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={`/dashboard/vehicles/${vehicle.id}/calibration?previewRom=${rom}`} aria-current={rom === previewSelection.rom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewSelection.rom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
+          </div>
         </section>
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Calibration states">

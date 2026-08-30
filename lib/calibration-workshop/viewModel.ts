@@ -151,6 +151,12 @@ function shapeOf(
   return "scalar";
 }
 
+function sourceRoleLabel(role: QualifiedCalibrationDataset["sourceRole"]): string {
+  if (role === "stock_candidate") return "Stock Candidate";
+  if (role === "mapswitch") return "MapSwitch";
+  return role;
+}
+
 export function buildWorkshopDefinitionSummaries(
   comparison: QualifiedCalibrationComparisonEvidence,
   identityContext: Readonly<{
@@ -347,6 +353,10 @@ export function buildWorkshopViewModel(input: {
   reference: QualifiedCalibrationDataset;
   current: QualifiedCalibrationDataset;
   comparison: QualifiedCalibrationComparisonEvidence;
+  source: Readonly<{
+    label: string;
+    fixtureIdentity: string;
+  }>;
   selectedKey?: string | null;
   knowledgeRecords?: readonly WorkshopKnowledgeRecord[];
 }): WorkshopViewModel {
@@ -365,16 +375,16 @@ export function buildWorkshopViewModel(input: {
   return deepFreeze({
     source: {
       kind: "development_fixture",
-      label: "IJE0S Original → IJE0S MapSwitch",
-      fixtureIdentity: "n54-ije0s-original-mapswitch-v1",
+      label: input.source.label,
+      fixtureIdentity: input.source.fixtureIdentity,
       romLayoutId: reference.romLayoutId,
       referenceDatasetId: reference.datasetId,
       currentDatasetId: current.datasetId,
       comparisonId: comparison.comparisonId,
     },
     states: [
-      { id: "reference", label: "Reference", availability: "available", sourceRole: "Stock Candidate", datasetId: reference.datasetId, message: "Qualified reference Dataset" },
-      { id: "current", label: "Current Modified", availability: "available", sourceRole: "MapSwitch", datasetId: current.datasetId, message: "Qualified current Dataset" },
+      { id: "reference", label: "Reference", availability: "available", sourceRole: sourceRoleLabel(reference.sourceRole), datasetId: reference.datasetId, message: "Qualified reference Dataset" },
+      { id: "current", label: "Current Modified", availability: "available", sourceRole: sourceRoleLabel(current.sourceRole), datasetId: current.datasetId, message: "Qualified current Dataset" },
       { id: "suggested", label: "TuneSight Suggested", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
       { id: "working", label: "Working Calibration", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
     ],
