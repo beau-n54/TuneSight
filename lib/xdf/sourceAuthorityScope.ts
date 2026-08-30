@@ -4,7 +4,7 @@ export const SOURCE_AUTHORITY_RECORD_CONTRACT = "tunesight.xdf-source-authority-
 
 export type SourceAuthorityClass = "explicit_source_authority" | "governed_evidence_review" | "authoritative_stock_variant_relationship";
 export type SourceAuthorityScopeBinding = Readonly<{ sourceArtifactId: string; sourceArtifactDigest: string; definitionSetId: string; definitionSetRevision: string; family: string }>;
-export type SourceAuthorityRecord = Readonly<{ authorityId: string; authorityRevision: string; contractVersion: typeof SOURCE_AUTHORITY_RECORD_CONTRACT; authorityClass: SourceAuthorityClass; lineage: readonly string[]; scope: readonly SourceAuthorityScopeBinding[]; provenance: readonly string[]; limitations: readonly string[] }>;
+export type SourceAuthorityRecord = Readonly<{ authorityId: string; authorityRevision: string; contractVersion: typeof SOURCE_AUTHORITY_RECORD_CONTRACT; authorityClass: SourceAuthorityClass; founderAuthorityId: string; authorizedAt: string; lineage: readonly string[]; scope: readonly SourceAuthorityScopeBinding[]; evidenceBasis: readonly string[]; provenance: readonly string[]; limitations: readonly string[] }>;
 export type SourceAuthorityScopeResult = Readonly<{ outcome: "in_scope" | "out_of_scope"; authorityId: string; authorityRevision: string; binding: SourceAuthorityScopeBinding; findings: readonly string[] }>;
 
 function canonical(value: unknown): string {
@@ -25,13 +25,14 @@ function normalizeBinding(value: SourceAuthorityScopeBinding): SourceAuthoritySc
   return freeze(binding);
 }
 
-export function constructSourceAuthorityRecord(input: Readonly<{ authorityClass: SourceAuthorityClass; lineage: readonly string[]; scope: readonly SourceAuthorityScopeBinding[]; provenance: readonly string[]; limitations: readonly string[] }>): SourceAuthorityRecord {
+export function constructSourceAuthorityRecord(input: Readonly<{ authorityClass: SourceAuthorityClass; founderAuthorityId: string; authorizedAt: string; lineage: readonly string[]; scope: readonly SourceAuthorityScopeBinding[]; evidenceBasis: readonly string[]; provenance: readonly string[]; limitations: readonly string[] }>): SourceAuthorityRecord {
   const scope = [...new Map(input.scope.map((value) => { const normalized = normalizeBinding(value); return [bindingKey(normalized), normalized]; })).values()].sort((left, right) => bindingKey(left).localeCompare(bindingKey(right)));
   if (!scope.length) throw new Error("Source authority cannot exist without an explicitly bounded exact scope.");
-  const lineage = strings(input.lineage, "Source lineage"); const provenance = strings(input.provenance, "Source authority provenance"); const limitations = strings(input.limitations, "Source authority limitations");
-  const identity = { authorityClass: input.authorityClass, lineage, scope };
+  const founderAuthorityId = input.founderAuthorityId.trim(); if (!founderAuthorityId) throw new Error("Founder authority identity is required."); const authorizedAt = new Date(input.authorizedAt); if (!Number.isFinite(authorizedAt.valueOf()) || authorizedAt.toISOString() !== input.authorizedAt) throw new Error("Authority timestamp must be supplied in canonical UTC form.");
+  const lineage = strings(input.lineage, "Source lineage"); const evidenceBasis = strings(input.evidenceBasis, "Source authority Evidence basis"); const provenance = strings(input.provenance, "Source authority provenance"); const limitations = strings(input.limitations, "Source authority limitations");
+  const identity = { authorityClass: input.authorityClass, founderAuthorityId, lineage, scope };
   const authorityId = `xdf-source-authority:${digest("tunesight.xdf-source-authority-identity.v1", identity)}`;
-  const material = { ...identity, provenance, limitations, contractVersion: SOURCE_AUTHORITY_RECORD_CONTRACT };
+  const material = { ...identity, authorizedAt: input.authorizedAt, evidenceBasis, provenance, limitations, contractVersion: SOURCE_AUTHORITY_RECORD_CONTRACT };
   return freeze({ authorityId, authorityRevision: `xdf-source-authority-revision:${digest("tunesight.xdf-source-authority-revision.v1", material)}`, ...material });
 }
 
