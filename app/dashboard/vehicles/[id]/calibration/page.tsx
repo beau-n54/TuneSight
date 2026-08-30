@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
+import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -37,7 +38,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
             <h1 className="mt-3 text-2xl font-bold">Unknown preview ROM: {previewSelection.requested}</h1>
             <p className="mt-2 text-sm text-amber-50">No fixture was loaded and no fallback ROM was selected. Choose one governed current N54 preview.</p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={`/dashboard/vehicles/${vehicle.id}/calibration?previewRom=${rom}`} className="rounded-lg border border-amber-200/30 px-3 py-2 font-mono text-sm text-amber-100 hover:bg-amber-200/10">{rom}</Link>)}
+              {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={buildWorkshopDeepLink({vehicleId:vehicle.id,previewRom:rom})} className="rounded-lg border border-amber-200/30 px-3 py-2 font-mono text-sm text-amber-100 hover:bg-amber-200/10">{rom}</Link>)}
             </div>
           </section>
         </div>
@@ -80,7 +81,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           </p>
           <p className="mt-2 font-mono text-xs text-amber-200/70">{workshop.source.label} · {workshop.source.fixtureIdentity}</p>
           <div className="mt-4 flex flex-wrap gap-2" aria-label="Select development preview ROM">
-            {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={`/dashboard/vehicles/${vehicle.id}/calibration?previewRom=${rom}`} aria-current={rom === previewSelection.rom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewSelection.rom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
+            {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={buildWorkshopDeepLink({vehicleId:vehicle.id,previewRom:rom})} aria-current={rom === previewSelection.rom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewSelection.rom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
           </div>
         </section>
 
@@ -111,7 +112,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           ))}
         </section>
 
-        <WorkshopClient workshop={workshop} vehicleId={vehicle.id} />
+        <WorkshopClient workshop={workshop} vehicleId={vehicle.id} previewRom={previewSelection.rom} />
 
         <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
           <summary className="cursor-pointer font-semibold text-zinc-200">Workshop concepts and evidence boundaries</summary>
