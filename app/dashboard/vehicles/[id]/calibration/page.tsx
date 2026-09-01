@@ -4,10 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
+import { readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
+import UploadCalibration from "./upload-calibration";
+import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ definition?: string | string[]; previewRom?: string | string[] }>;
+  searchParams: Promise<{ definition?: string | string[]; previewRom?: string | string[]; session?: string | string[] }>;
 };
 
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
@@ -15,6 +18,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
   const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
+  const subscriberSession = Array.isArray(query.session) ? query.session[0] : query.session;
   const previewSelection = selectN54PreviewRom(requestedPreviewRom);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -28,7 +32,13 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     .single();
   if (error || !vehicle) notFound();
 
-  if (previewSelection.status === "invalid") {
+  const subscriberResult = subscriberSession ? readSubscriberWorkshopSession(subscriberSession, user.id, vehicle.id) : null;
+  if (subscriberSession && (!subscriberResult || subscriberResult.status !== "workshop_ready")) {
+    const result = subscriberResult;
+    return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className={`rounded-2xl border p-6 ${result?.coverage?.outcome === "CONFLICT" ? "border-red-400/40 bg-red-400/10" : "border-amber-400/35 bg-amber-400/10"}`} role="alert"><p className="text-xs font-bold uppercase tracking-[0.18em]">{result?.title ?? "Calibration session unavailable"}</p><h2 className="mt-3 text-2xl font-bold">{result?.message ?? "The bounded localhost session expired or is unavailable. Re-open the Calibration file."}</h2>{result&&<dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">ROM/software</dt><dd>{result.identity ?? "Not established"}</dd><dt className="text-zinc-500">Container</dt><dd>{result.container ?? "Unresolved"}</dd><dt className="text-zinc-500">Byte size</dt><dd>{result.byteLength?.toLocaleString() ?? "Unavailable"}</dd><dt className="text-zinc-500">Binary digest</dt><dd className="break-all font-mono text-xs">{result.digest ?? "Unavailable"}</dd><dt className="text-zinc-500">Definition coverage</dt><dd>{result.coverage?.outcome ?? "INVALID"}</dd></dl>}{result?.coverage?.findings.map(finding=><p key={finding} className="mt-3 text-sm text-zinc-300">{finding}</p>)}{result?.coverage?.discoveryPackage&&<p className="mt-3 break-all font-mono text-xs text-zinc-400">Discovery Evidence: {result.coverage.discoveryPackage.packageRevision}</p>}<p className="mt-4 text-sm">TuneSight did not guess or fall back to a Development Evidence Preview.</p></section></div></main>;
+  }
+
+  if (!subscriberSession && previewSelection.status === "invalid") {
     return (
       <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6">
         <div className="mx-auto max-w-4xl space-y-6">
@@ -46,12 +56,9 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     );
   }
 
-  const workshop = await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(
-    vehicle.id,
-    user.id,
-    definition,
-    previewSelection.rom,
-  );
+  const subscriberSuccess = subscriberResult?.status === "workshop_ready" ? subscriberResult : null;
+  const previewRom = previewSelection.status === "valid" ? previewSelection.rom : undefined;
+  const workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6">
@@ -71,19 +78,20 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
               </p>
             </div>
             <p className="font-mono text-xs text-zinc-500">READ-ONLY WORKSPACE</p>
+            <UploadCalibration vehicleId={vehicle.id}/>
           </div>
         </header>
 
-        <section className="rounded-2xl border border-amber-400/35 bg-amber-400/10 p-5" role="status">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">Development Evidence Preview — {previewSelection.rom}</p>
+        {subscriberSuccess ? <section className="rounded-2xl border border-blue-400/35 bg-blue-400/10 p-5" role="status"><p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">Subscriber Calibration — Current</p><p className="mt-2 text-sm text-blue-50">This Workshop was materialized from the uploaded binary through exact governed Definition coverage. It is not the Development Evidence Preview.</p><dl className="mt-4 grid gap-2 text-xs sm:grid-cols-2"><dt className="text-zinc-400">ROM/software</dt><dd>{subscriberSuccess.identity}</dd><dt className="text-zinc-400">Container / bytes</dt><dd>{subscriberSuccess.container} · {subscriberSuccess.byteLength.toLocaleString()}</dd><dt className="text-zinc-400">Exact digest</dt><dd className="break-all font-mono">{subscriberSuccess.digest}</dd><dt className="text-zinc-400">Coverage</dt><dd>{subscriberSuccess.coverage.outcome}</dd></dl></section> : <section className="rounded-2xl border border-amber-400/35 bg-amber-400/10 p-5" role="status">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">Development Evidence Preview — {previewRom}</p>
           <p className="mt-2 text-sm leading-6 text-amber-50">
             This Workshop displays controlled qualified Calibration Evidence for interface development. It is not derived from this vehicle.
           </p>
           <p className="mt-2 font-mono text-xs text-amber-200/70">{workshop.source.label} · {workshop.source.fixtureIdentity}</p>
           <div className="mt-4 flex flex-wrap gap-2" aria-label="Select development preview ROM">
-            {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={buildWorkshopDeepLink({vehicleId:vehicle.id,previewRom:rom})} aria-current={rom === previewSelection.rom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewSelection.rom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
+            {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={buildWorkshopDeepLink({vehicleId:vehicle.id,previewRom:rom})} aria-current={rom === previewRom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewRom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
           </div>
-        </section>
+        </section>}
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Calibration states">
           {workshop.states.map((state) => (
@@ -112,13 +120,13 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           ))}
         </section>
 
-        <WorkshopClient workshop={workshop} vehicleId={vehicle.id} previewRom={previewSelection.rom} />
+        <WorkshopClient workshop={workshop} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />
 
         <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
           <summary className="cursor-pointer font-semibold text-zinc-200">Workshop concepts and evidence boundaries</summary>
           <div className="mt-4 grid gap-4 text-sm leading-6 text-zinc-400 md:grid-cols-2 xl:grid-cols-4">
             <p><strong className="text-zinc-200">Reference:</strong> the qualified comparison baseline. Stock Candidate is not Verified Stock.</p>
-            <p><strong className="text-zinc-200">Current Modified:</strong> the qualified MapSwitch Dataset compared against Reference.</p>
+            <p><strong className="text-zinc-200">Current Calibration:</strong> {subscriberSuccess ? "the qualified Dataset materialized from the subscriber-supplied binary." : "the qualified MapSwitch Dataset compared against Reference."}</p>
             <p><strong className="text-zinc-200">Changed cells:</strong> measured engineering-value differences; a change is Evidence, not danger.</p>
             <p><strong className="text-zinc-200">Unavailable:</strong> no numeric value is substituted when extraction or conversion cannot qualify a Definition.</p>
             <p><strong className="text-zinc-200">Engineering values:</strong> raw bytes converted under the bound Definition equation and units.</p>

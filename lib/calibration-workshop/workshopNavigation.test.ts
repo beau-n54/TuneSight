@@ -50,3 +50,11 @@ test("a Definition selector from another ROM resolves to the selected-ROM defaul
     assert.match(selected, new RegExp(`^${rom}:`));
   }
 });
+
+test("subscriber navigation preserves only the opaque session and selected Definition", () => {
+  const url = new URL(buildWorkshopDeepLink({ vehicleId: "vehicle", subscriberSession: "opaque-session", definition: "table:key" }), "http://localhost");
+  assert.equal(url.searchParams.get("session"), "opaque-session");
+  assert.equal(url.searchParams.get("definition"), "table:key");
+  assert.equal(url.searchParams.has("previewRom"), false);
+  assert.throws(() => buildWorkshopDeepLink({ vehicleId: "vehicle", previewRom: "IJE0S", subscriberSession: "session" }), /exactly one/);
+});

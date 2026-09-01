@@ -101,7 +101,7 @@ export type WorkshopDefinitionDetail = Readonly<{
 
 export type WorkshopViewModel = Readonly<{
   source: Readonly<{
-    kind: "development_fixture";
+    kind: "development_fixture" | "subscriber_upload";
     label: string;
     fixtureIdentity: string;
     romLayoutId: string;
@@ -356,6 +356,7 @@ export function buildWorkshopViewModel(input: {
   source: Readonly<{
     label: string;
     fixtureIdentity: string;
+    kind?: "development_fixture" | "subscriber_upload";
   }>;
   selectedKey?: string | null;
   knowledgeRecords?: readonly WorkshopKnowledgeRecord[];
@@ -374,7 +375,7 @@ export function buildWorkshopViewModel(input: {
 
   return deepFreeze({
     source: {
-      kind: "development_fixture",
+      kind: input.source.kind ?? "development_fixture",
       label: input.source.label,
       fixtureIdentity: input.source.fixtureIdentity,
       romLayoutId: reference.romLayoutId,
@@ -384,7 +385,7 @@ export function buildWorkshopViewModel(input: {
     },
     states: [
       { id: "reference", label: "Reference", availability: "available", sourceRole: sourceRoleLabel(reference.sourceRole), datasetId: reference.datasetId, message: "Qualified reference Dataset" },
-      { id: "current", label: "Current Modified", availability: "available", sourceRole: sourceRoleLabel(current.sourceRole), datasetId: current.datasetId, message: "Qualified current Dataset" },
+      { id: "current", label: "Current Calibration", availability: "available", sourceRole: sourceRoleLabel(current.sourceRole), datasetId: current.datasetId, message: input.source.kind === "subscriber_upload" ? "Qualified subscriber-supplied Current Dataset" : "Qualified current Dataset" },
       { id: "suggested", label: "TuneSight Suggested", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
       { id: "working", label: "Working Calibration", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
     ],
@@ -410,7 +411,7 @@ export function buildWorkshopViewModel(input: {
       limitations: [...new Set([...reference.limitations, ...current.limitations])],
     }),
     provenance: [...new Set([...reference.provenance, ...current.provenance])],
-    limitations: [...new Set([...reference.limitations, ...current.limitations, "This controlled fixture is not derived from the selected vehicle.", "Engineering semantic interpretation is not yet bound."])],
+    limitations: [...new Set([...reference.limitations, ...current.limitations, ...(input.source.kind === "subscriber_upload" ? ["Uploaded bytes are session-scoped and were not persisted."] : ["This controlled fixture is not derived from the selected vehicle."]), "Engineering semantic interpretation is not yet bound."])],
     capabilities: {
       readOnly: true,
       mutation: false,
