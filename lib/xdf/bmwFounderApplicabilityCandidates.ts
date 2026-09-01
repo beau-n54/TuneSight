@@ -1,0 +1,34 @@
+import { createHash } from "node:crypto";
+import type { ApplicabilityAuthorityAssessment } from "./applicabilityAuthorityDecision.ts";
+import type { CalibrationApplicabilityEvidencePackage } from "./calibrationApplicabilityEvidenceFactory.ts";
+import type { SourceAuthorityFounderReviewRow } from "./sourceAuthorityFounderReview.ts";
+import { assessSourceAuthorityScope, type SourceAuthorityRecord } from "./sourceAuthorityScope.ts";
+
+export const REVIEWED_APPLICABILITY_DECISION_CANDIDATE_CONTRACT = "tunesight.reviewed-applicability-decision-candidate.v1" as const;
+export type ReviewedApplicabilityDecisionCandidate = Readonly<{ candidateId: string; candidateRevision: string; contractVersion: typeof REVIEWED_APPLICABILITY_DECISION_CANDIDATE_CONTRACT; romSoftwareIdentity: string; sourceArtifactId: string; definitionSetRevision: string; authorityRevision: string; founderReviewRevision: string; evidencePackageRevision: string; assessmentRevision: string; hardGates: readonly Readonly<{ gate: string; passed: boolean; finding: string }>[]; eligibility: "eligible_for_founder_decision" | "ineligible"; decisionState: "candidate_only_pending_founder_review"; publicationState: "not_authorized"; publicationSideEffects: readonly [] }>;
+export type ReviewedApplicabilityCandidateCohort = Readonly<{ cohortId: string; cohortRevision: string; candidates: readonly ReviewedApplicabilityDecisionCandidate[]; eligible: number; ineligible: number; decisionsAccepted: 0; publicationSideEffects: readonly [] }>;
+const hash = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+const freeze = <T>(value: T): T => { if (Array.isArray(value)) return Object.freeze(value.map(freeze)) as T; if (value && typeof value === "object") return Object.freeze(Object.fromEntries(Object.entries(value).map(([key, item]) => [key, freeze(item)]))) as T; return value; };
+
+export function constructReviewedApplicabilityDecisionCandidate(input: Readonly<{ review: SourceAuthorityFounderReviewRow; authority: SourceAuthorityRecord; evidencePackage: CalibrationApplicabilityEvidencePackage; assessment: ApplicabilityAuthorityAssessment }>): ReviewedApplicabilityDecisionCandidate {
+  const { review, authority, evidencePackage, assessment } = input, scope = assessSourceAuthorityScope(authority, review.exactScope), primary = evidencePackage.binaries.find((binary) => binary.role === "stock_original") ?? evidencePackage.binaries[0];
+  const gates = freeze([
+    { gate: "exact_authority_scope", passed: scope.outcome === "in_scope", finding: scope.findings[0]! },
+    { gate: "unchanged_founder_review", passed: review.authorityState === "pending_founder_authority" && review.publicationState === "not_published", finding: "Candidate binds the unchanged accepted Founder review revision." },
+    { gate: "complete_extraction", passed: review.completeExtraction.attempts > 0 && review.completeExtraction.attempts === review.completeExtraction.successful && review.completeExtraction.blocked === 0 && review.completeExtraction.outOfBounds === 0 && review.completeExtraction.unsupported === 0, finding: "Every responsible binary passed complete extraction validation." },
+    { gate: "complete_conversion", passed: review.completeConversion.converted + review.completeConversion.identityNoOp === review.completeExtraction.attempts && review.completeConversion.invalidNumeric === 0 && review.completeConversion.malformed === 0 && review.completeConversion.unavailable === 0, finding: "Every extracted Definition converted or used an explicit identity/no-op equation." },
+    { gate: "technical_conflicts", passed: review.representationConflicts === 0 && !Object.values(evidencePackage.conflicts).some((items) => items.length), finding: "No technical or representation conflict is recorded." },
+    { gate: "package_source_binding", passed: evidencePackage.source.artifactId === review.exactScope.sourceArtifactId && evidencePackage.source.definitionSetRevision === review.exactScope.definitionSetRevision, finding: "Evidence package binds the exact reviewed source scope." },
+    { gate: "assessment_binding", passed: Boolean(primary) && assessment.proposalRevision === primary?.proposal.proposalRevision, finding: "Assessment binds the primary exact-binary proposal." },
+    { gate: "authority_assessment", passed: assessment.outcome === "reviewable_for_exact_applicability" && assessment.exactAcceptanceEligible, finding: `Authority assessment outcome is ${assessment.outcome}.` },
+  ]);
+  const identity = { romSoftwareIdentity: review.romSoftwareIdentity, sourceArtifactId: review.sourceArtifactId, definitionSetRevision: review.definitionSetRevision, authorityId: authority.authorityId };
+  const material = { ...identity, authorityRevision: authority.authorityRevision, founderReviewRevision: review.reviewRevision, evidencePackageRevision: evidencePackage.packageRevision, assessmentRevision: assessment.assessmentRevision, hardGates: gates, eligibility: gates.every((gate) => gate.passed) ? "eligible_for_founder_decision" as const : "ineligible" as const, decisionState: "candidate_only_pending_founder_review" as const, publicationState: "not_authorized" as const, publicationSideEffects: [] as const, contractVersion: REVIEWED_APPLICABILITY_DECISION_CANDIDATE_CONTRACT };
+  return freeze({ candidateId: `reviewed-applicability-decision-candidate:${hash(identity)}`, candidateRevision: `reviewed-applicability-decision-candidate-revision:${hash(material)}`, ...material, publicationSideEffects: Object.freeze([]) as readonly [] });
+}
+
+export function constructReviewedApplicabilityCandidateCohort(candidates: readonly ReviewedApplicabilityDecisionCandidate[]): ReviewedApplicabilityCandidateCohort {
+  if (candidates.length !== 54 || new Set(candidates.map((candidate) => candidate.candidateId)).size !== 54) throw new Error("Reviewed BMW applicability cohort requires exactly 54 independent candidates.");
+  if (candidates.some((candidate) => candidate.decisionState !== "candidate_only_pending_founder_review" || candidate.publicationState !== "not_authorized" || candidate.publicationSideEffects.length)) throw new Error("Reviewed cohort cannot accept or publish a relationship.");
+  const ordered = [...candidates].sort((a, b) => a.romSoftwareIdentity.localeCompare(b.romSoftwareIdentity)); return freeze({ cohortId: `reviewed-applicability-candidate-cohort:${hash(ordered.map((item) => item.candidateId))}`, cohortRevision: `reviewed-applicability-candidate-cohort-revision:${hash(ordered.map((item) => item.candidateRevision))}`, candidates: ordered, eligible: ordered.filter((item) => item.eligibility === "eligible_for_founder_decision").length, ineligible: ordered.filter((item) => item.eligibility === "ineligible").length, decisionsAccepted: 0 as const, publicationSideEffects: Object.freeze([]) as readonly [] });
+}

@@ -1,0 +1,24 @@
+import { createHash } from "node:crypto";
+
+export const COVERAGE_BLOCKER_AUDIT_CONTRACT = "tunesight.coverage-blocker-audit.v1" as const;
+export type AuditedMarker = Readonly<{ identifier: string; encoding: "ascii" | "hex_encoded"; offsets: readonly number[]; multiplicity: number; classification: "candidate_specific" | "common_shared" }>;
+export type AuditedBinary = Readonly<{ filename: string; digest: string; byteLength: number; containerType: string; stockState: "candidate" | "unknown"; markers: readonly AuditedMarker[]; extraction: Readonly<{ attempted: number; successful: number; blocked: number }>; conversion: Readonly<{ converted: number; identityNoOp: number; invalid: number; unavailable: number }> }>;
+export type RepresentationConflict = Readonly<{ definitionRevision: string; title: string; units: readonly string[]; equations: readonly string[]; storageSignatures: readonly string[] }>;
+export type CoverageSourceAudit = Readonly<{ family: string; romSoftwareIdentity: string; sourceArtifactId: string; sourceRevision: string; definitionSetRevision: string; sourceDescription: string | null; categories: readonly string[]; binaries: readonly AuditedBinary[]; conflicts: readonly RepresentationConflict[]; provenance: readonly string[]; founderReferenceRelationships: readonly string[] }>;
+export type ConflictClass = Readonly<{ classId: "units_only" | "equation_only" | "units_and_equation" | "storage_layout"; occurrences: number; sourceCount: number; relationshipEffect: "individual_tables_blocked" | "whole_relationship_requires_exception_review"; definitionRevisions: readonly string[] }>;
+export type CoverageBlockerAudit = Readonly<{ auditId: string; auditRevision: string; contractVersion: typeof COVERAGE_BLOCKER_AUDIT_CONTRACT; familyLabel: string; sources: readonly CoverageSourceAudit[]; platformAssignments: Readonly<Record<string, "N55" | "S55" | "N13" | "ambiguous">>; separationRules: readonly string[]; conflictClasses: readonly ConflictClass[]; authorityGranted: false; publicationSideEffects: readonly [] }>;
+
+function freeze<T>(value: T): T { if (Array.isArray(value)) return Object.freeze(value.map(freeze)) as T; if (value && typeof value === "object") return Object.freeze(Object.fromEntries(Object.entries(value).map(([key, item]) => [key, freeze(item)]))) as T; return value; }
+function conflictClass(conflict: RepresentationConflict): ConflictClass["classId"] { if (new Set(conflict.storageSignatures).size > 1) return "storage_layout"; const units = new Set(conflict.units).size > 1, equations = new Set(conflict.equations).size > 1; return units && equations ? "units_and_equation" : units ? "units_only" : "equation_only"; }
+
+export function constructCoverageBlockerAudit(input: Readonly<{ familyLabel: string; sources: readonly CoverageSourceAudit[]; repositoryPlatformEvidence?: Readonly<Record<string, "N55" | "S55" | "N13">>; separationRules?: readonly string[] }>): CoverageBlockerAudit {
+  if (!input.familyLabel.trim() || !input.sources.length || new Set(input.sources.map((source) => `${source.romSoftwareIdentity}:${source.sourceArtifactId}:${source.definitionSetRevision}`)).size !== input.sources.length) throw new Error("Coverage audit requires a nonempty family and unique exact ROM/source scopes.");
+  const sources = [...input.sources].sort((a, b) => a.romSoftwareIdentity.localeCompare(b.romSoftwareIdentity));
+  const platformAssignments: Record<string, "N55" | "S55" | "N13" | "ambiguous"> = Object.fromEntries(sources.map((source) => [source.romSoftwareIdentity, input.repositoryPlatformEvidence?.[source.romSoftwareIdentity] ?? "ambiguous"]));
+  const conflicts = sources.flatMap((source) => source.conflicts.map((conflict) => ({ source: source.sourceArtifactId, conflict })));
+  const conflictClasses = (["units_only", "equation_only", "units_and_equation", "storage_layout"] as const).flatMap((classId) => { const matching = conflicts.filter(({ conflict }) => conflictClass(conflict) === classId); return matching.length ? [{ classId, occurrences: matching.length, sourceCount: new Set(matching.map(({ source }) => source)).size, relationshipEffect: "whole_relationship_requires_exception_review" as const, definitionRevisions: [...new Set(matching.map(({ conflict }) => conflict.definitionRevision))].sort() }] : []; });
+  const separationRules = [...new Set(input.separationRules ?? [])].sort();
+  const material = { contractVersion: COVERAGE_BLOCKER_AUDIT_CONTRACT, familyLabel: input.familyLabel, sources, platformAssignments, separationRules, conflictClasses, authorityGranted: false as const, publicationSideEffects: [] as const };
+  const hash = createHash("sha256").update(JSON.stringify(material)).digest("hex");
+  return freeze({ auditId: `coverage-blocker-audit:${createHash("sha256").update(input.familyLabel).digest("hex")}`, auditRevision: `coverage-blocker-audit-revision:${hash}`, ...material, publicationSideEffects: Object.freeze([]) as readonly [] });
+}
