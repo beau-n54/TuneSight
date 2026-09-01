@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
-import { readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
+import { isSubscriberWorkshopSessionId, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import UploadCalibration from "./upload-calibration";
 import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 
@@ -18,7 +18,8 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
   const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
-  const subscriberSession = Array.isArray(query.session) ? query.session[0] : query.session;
+  const requestedSubscriberSession = Array.isArray(query.session) ? query.session[0] : query.session;
+  const subscriberSession = isSubscriberWorkshopSessionId(requestedSubscriberSession) ? requestedSubscriberSession : undefined;
   const previewSelection = selectN54PreviewRom(requestedPreviewRom);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -31,6 +32,8 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     .eq("user_id", user.id)
     .single();
   if (error || !vehicle) notFound();
+
+  if (requestedSubscriberSession && !subscriberSession) redirect(`/dashboard/vehicles/${vehicle.id}/calibration`);
 
   const subscriberResult = subscriberSession ? readSubscriberWorkshopSession(subscriberSession, user.id, vehicle.id) : null;
   if (subscriberSession && (!subscriberResult || subscriberResult.status !== "workshop_ready")) {
