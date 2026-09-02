@@ -6,6 +6,7 @@ import { buildSubscriberWorkshop, loadSubscriberCalibration, SUBSCRIBER_CALIBRAT
 
 const observedAt = "2026-09-02T00:00:00.000Z";
 const load = (name: string) => new Uint8Array(fs.readFileSync(`BMW-XDFs-master/N54/${name}`));
+const loadB58 = (name: string) => new Uint8Array(fs.readFileSync(`BMW-XDFs-master/B58gen1/${name}`));
 
 test("an uploaded N54 BIN alone establishes exact coverage and a subscriber Current Dataset", async (context) => {
   const bytes = load("IJE0S_MapSwitchBase.bin");
@@ -68,4 +69,41 @@ test("unsupported, conflicting, invalid, and oversized inputs fail closed", asyn
 
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(), fileName: "empty.bin", mimeType: null, observedAt })).status, "invalid_upload");
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES + 1), fileName: "large.bin", mimeType: null, observedAt })).status, "invalid_upload");
+});
+
+test("real B58 Gen1 cohort binaries resolve exact identities but remain outside unpublished Workshop coverage", async () => {
+  const fixtures = [
+    ["00003076501103_original.bin", "00003076501103"],
+    ["00003076501D02_original.bin", "00003076501D02"],
+    ["000030765A3C06_original.bin", "000030765A3C06"],
+    ["00003081501102_original.bin", "00003081501102"],
+    ["00003081501D04_original.bin", "00003081501D04"],
+    ["00007972000705_original.bin", "00007972000705"],
+  ] as const;
+
+  for (const [fileName, identity] of fixtures) {
+    const bytes = loadB58(fileName);
+    const result = await loadSubscriberCalibration({ bytes, fileName, mimeType: "application/octet-stream", observedAt });
+    assert.equal(result.status, "coverage_unavailable", identity);
+    assert.equal(result.identity, identity);
+    assert.equal(result.byteLength, bytes.byteLength);
+    assert.equal(result.coverage?.outcome, "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
+    assert.doesNotMatch(JSON.stringify(result), /Development Evidence Preview|development_fixture|MapSwitch Dataset/);
+  }
+});
+
+test("B58 identity resolution scans the full payload and does not infer identity from an eight-MiB file", async () => {
+  const identity = "00007972000705";
+  const unidentified = new Uint8Array(8 * 1024 * 1024);
+  const unknown = await loadSubscriberCalibration({ bytes: unidentified, fileName: "custom-tune.bin", mimeType: null, observedAt });
+  assert.equal(unknown.status, "coverage_unavailable");
+  assert.equal(unknown.identity, null);
+  assert.equal(unknown.coverage?.outcome, "INVALID");
+
+  const marker = new Uint8Array(Buffer.from(identity, "hex"));
+  unidentified.set(marker, unidentified.byteLength - marker.byteLength - 1);
+  const recognized = await loadSubscriberCalibration({ bytes: unidentified, fileName: "custom-tune.bin", mimeType: null, observedAt });
+  assert.equal(recognized.status, "coverage_unavailable");
+  assert.equal(recognized.identity, identity);
+  assert.equal(recognized.coverage?.outcome, "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
 });
