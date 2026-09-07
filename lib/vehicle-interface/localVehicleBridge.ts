@@ -9,12 +9,14 @@ export type BridgeRequest = Readonly<
   | { kind: "disconnect"; sessionAssociation: string; profileRevision: string }
 >;
 
-export type BridgePolicy = Readonly<{ bindAddress: "127.0.0.1" | "::1"; maximumPayloadBytes: number; maximumChannelsPerRequest: number; maximumSamplesPerRequest: number; allowedChannelRevisionIds: readonly string[] }>;
+export type BridgePolicy = Readonly<{ bindAddress: "127.0.0.1" | "::1"; sessionAuthenticationToken: string; sessionAssociation: string; maximumPayloadBytes: number; maximumChannelsPerRequest: number; maximumSamplesPerRequest: number; allowedChannelRevisionIds: readonly string[] }>;
 
-export function validateBridgeRequest(input: { request: BridgeRequest; profile: VehicleAdapterProfile; policy: BridgePolicy; encodedPayloadBytes: number }): BridgeRequest {
+export function validateBridgeRequest(input: { request: BridgeRequest; profile: VehicleAdapterProfile; policy: BridgePolicy; encodedPayloadBytes: number; authenticationToken: string }): BridgeRequest {
   const { request, profile, policy } = input;
   if (policy.bindAddress !== "127.0.0.1" && policy.bindAddress !== "::1") throw new Error("Vehicle bridge must bind to loopback.");
+  if (policy.sessionAuthenticationToken.length < 32 || input.authenticationToken !== policy.sessionAuthenticationToken) throw new Error("Bridge request authentication failed.");
   if (!request.sessionAssociation.trim()) throw new Error("Bridge request requires explicit TuneSight session association.");
+  if (request.sessionAssociation !== policy.sessionAssociation) throw new Error("Bridge request is outside its authorised vehicle session.");
   if (input.encodedPayloadBytes < 0 || input.encodedPayloadBytes > policy.maximumPayloadBytes) throw new Error("Bridge request exceeds its payload limit.");
   if (request.kind !== "discover" && request.profileRevision !== profile.profileRevision) throw new Error("Bridge request profile revision is not authorised.");
   if (request.kind === "connect") {

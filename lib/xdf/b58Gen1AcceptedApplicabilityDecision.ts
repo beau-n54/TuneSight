@@ -3,8 +3,8 @@ import type { ApplicabilityProposal } from "./applicabilityEvidenceProposal.ts";
 import { B58_GEN1_00007972000705_SOURCE_AUTHORITY } from "./b58Gen1AcceptedSourceAuthority.ts";
 import type { ReviewedApplicabilityDecisionCandidate } from "./bmwFounderApplicabilityCandidates.ts";
 
-export const B58_GEN1_00007972000705_ACCEPTED_APPLICABILITY_CANDIDATE_ID = "reviewed-applicability-decision-candidate:f6263d59a3935769f226d2e70d36791975dcfd2ff3e2221d4786d7698ad1b55d" as const;
-export const B58_GEN1_00007972000705_ACCEPTED_APPLICABILITY_CANDIDATE_REVISION = "reviewed-applicability-decision-candidate-revision:de4cda8a624574db227cbf216e6b95fb6c5c69d82c9fb10552f1ae8e83abf986" as const;
+export const B58_GEN1_00007972000705_ACCEPTED_APPLICABILITY_CANDIDATE_ID = "reviewed-applicability-decision-candidate:1c8f20506e6256d8b9c13d9422a6372311c18bd69a6d9c8f6b4ed2f2177695a4" as const;
+export const B58_GEN1_00007972000705_ACCEPTED_APPLICABILITY_CANDIDATE_REVISION = "reviewed-applicability-decision-candidate-revision:53253eb8a7ddebb418ead0000b3b2ad1e224301cf6e96d288b45cd17767a0106" as const;
 export const B58_GEN1_00007972000705_APPLICABILITY_DECIDED_AT = "2026-09-07T00:00:00.000Z" as const;
 export const B58_GEN1_FOUNDER_APPLICABILITY_AUTHORITY: ApplicabilityDecisionAuthority = Object.freeze({ authorityId: "applicability-decision-authority:tunesight-founder-founder-b58-gen1-00007972000705", authorityClass: "founder", authorityRevision: "applicability-decision-authority-revision:2026-09-07-00007972000705", provenance: Object.freeze(["Founder Founder explicitly accepted the exact immutable applicability Decision Candidate for 00007972000705.", "Acceptance is Definition Set applicability only; Stock, semantic Knowledge and publication remain separate."]), permittedOutcomes: Object.freeze(["accept_exact_applicability"] as const), acceptedPathways: Object.freeze(["governed_evidence_review"] as const) });
 

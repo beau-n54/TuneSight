@@ -115,6 +115,10 @@ export default async function VehicleDashboardPage({ params }: PageProps) {
           />
         </div>
 
+        <Link href={`/dashboard/vehicles/${vehicle.id}/telemetry`} className="bmw-border group block rounded-2xl bg-gradient-to-r from-blue-950/50 via-zinc-900 to-zinc-900 p-6 text-white transition hover:bg-zinc-800">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Vehicle connection · Read only</p><h2 className="mt-2 text-2xl font-bold">Live Telemetry</h2><p className="mt-2 text-sm text-zinc-400">Connect through the bounded local bridge, identify the DME and expose only qualified live channels.</p></div><span className="text-2xl text-blue-300 transition group-hover:translate-x-1" aria-hidden="true">→</span></div>
+        </Link>
+
         <Link
           href={`/dashboard/vehicles/${vehicle.id}/calibration`}
           className="bmw-border group block rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-900 to-blue-950/30 p-6 text-white transition hover:bg-zinc-800"

@@ -25,11 +25,13 @@ test("shared WiFi serial boundary preserves profile-specific endpoint truth", ()
   assert.deepEqual(THOR_WIFI_PROFILE.endpoints.map(({ host, port }) => ({ host, port })), [{ host: "192.168.4.1", port: 23 }]); assert.equal(MHD_ORANGE_PROFILE.endpoints.length, 0); assert.ok(MHD_ORANGE_PROFILE.unknownProperties.some((value) => value.includes("IP address")));
 });
 
-test("bridge is loopback scoped and accepts only profile endpoints and qualified channels", () => {
-  const channel = rpm(); const policy: BridgePolicy = { bindAddress: "127.0.0.1", maximumPayloadBytes: 4096, maximumChannelsPerRequest: 4, maximumSamplesPerRequest: 100, allowedChannelRevisionIds: [channel.revisionId] };
-  const connected = validateBridgeRequest({ request: { kind: "connect", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, endpoint: { host: "192.168.4.1", port: 23, protocol: "tcp" } }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128 }); assert.ok(Object.isFrozen(connected));
-  assert.throws(() => validateBridgeRequest({ request: { kind: "connect", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, endpoint: { host: "8.8.8.8", port: 53, protocol: "udp" } }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128 }), /not allowlisted/);
-  assert.throws(() => validateBridgeRequest({ request: { kind: "read_channels", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, channelRevisionIds: ["arbitrary"], maximumSamples: 1 }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128 }), /not allowlisted/);
+test("bridge is authenticated, vehicle-session scoped and accepts only profile endpoints and qualified channels", () => {
+  const channel = rpm(); const token = "a".repeat(32); const policy: BridgePolicy = { bindAddress: "127.0.0.1", sessionAuthenticationToken: token, sessionAssociation: "web-session-1", maximumPayloadBytes: 4096, maximumChannelsPerRequest: 4, maximumSamplesPerRequest: 100, allowedChannelRevisionIds: [channel.revisionId] };
+  const connected = validateBridgeRequest({ request: { kind: "connect", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, endpoint: { host: "192.168.4.1", port: 23, protocol: "tcp" } }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128, authenticationToken: token }); assert.ok(Object.isFrozen(connected));
+  assert.throws(() => validateBridgeRequest({ request: { kind: "connect", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, endpoint: { host: "8.8.8.8", port: 53, protocol: "udp" } }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128, authenticationToken: token }), /not allowlisted/);
+  assert.throws(() => validateBridgeRequest({ request: { kind: "read_channels", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision, channelRevisionIds: ["arbitrary"], maximumSamples: 1 }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 128, authenticationToken: token }), /not allowlisted/);
+  assert.throws(() => validateBridgeRequest({ request: { kind: "identify", sessionAssociation: "other", profileRevision: THOR_WIFI_PROFILE.profileRevision }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 64, authenticationToken: token }), /outside/);
+  assert.throws(() => validateBridgeRequest({ request: { kind: "identify", sessionAssociation: "web-session-1", profileRevision: THOR_WIFI_PROFILE.profileRevision }, profile: THOR_WIFI_PROFILE, policy, encodedPayloadBytes: 64, authenticationToken: "wrong" }), /authentication/);
 });
 
 test("pressure conversions preserve canonical kPa deterministically", () => {
