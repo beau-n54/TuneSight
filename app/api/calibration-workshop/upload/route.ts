@@ -4,6 +4,7 @@ import { createSubscriberWorkshopSession } from "@/lib/calibration-workshop/subs
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();

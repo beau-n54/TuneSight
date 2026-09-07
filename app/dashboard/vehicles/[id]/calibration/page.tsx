@@ -13,6 +13,10 @@ type PageProps = {
   searchParams: Promise<{ definition?: string | string[]; previewRom?: string | string[]; session?: string | string[] }>;
 };
 
+// Cold, fail-closed Dataset materialization parses controlled XDF/BIN Evidence.
+// Deployment platforms consume this static route value from the Next build output.
+export const maxDuration = 60;
+
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
   const { id } = await params;
   const query = await searchParams;
