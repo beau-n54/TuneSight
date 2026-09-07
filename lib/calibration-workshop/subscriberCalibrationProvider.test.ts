@@ -107,3 +107,15 @@ test("B58 identity resolution scans the full payload and does not infer identity
   assert.equal(recognized.identity, identity);
   assert.equal(recognized.coverage?.outcome, "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
 });
+
+test("a governed B58 Gen2 primary marker resolves despite a disclosed ancillary identity marker", async () => {
+  const bytes = new Uint8Array(8 * 1024 * 1024), primary = Buffer.from("00005D553C8C05", "hex"), ancillary = Buffer.from("00005D553C7805", "hex");
+  for (const offset of [524613, 7339265, 8388111]) bytes.set(primary, offset);
+  bytes.set(ancillary, 131371);
+  const result = await loadSubscriberCalibration({ bytes, fileName: "subscriber.bin", mimeType: "application/octet-stream", observedAt });
+  assert.equal(result.status, "coverage_unavailable");
+  assert.equal(result.identity, "00005D553C8C05");
+  assert.equal(result.coverage?.outcome, "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
+  assert.ok(result.coverage?.discoveryPackage?.provenance.some((item) => item.includes("repeated-marker profile")));
+  assert.doesNotMatch(JSON.stringify(result), /Development Evidence Preview|development_fixture/);
+});

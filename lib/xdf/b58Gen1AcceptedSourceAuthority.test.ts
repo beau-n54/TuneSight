@@ -1,0 +1,42 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { resolveBinaryContainer } from "../tunes/binaryContainer.ts";
+import { assessApplicabilityAuthority } from "./applicabilityAuthorityDecision.ts";
+import { B58_GEN1_00007972000705_SOURCE_AUTHORITY } from "./b58Gen1AcceptedSourceAuthority.ts";
+import { B58_GEN1_SOURCE_AUTHORITY_DECISION_CANDIDATES } from "./b58Gen1SourceAuthorityCandidates.ts";
+import { constructReviewedApplicabilityDecisionCandidate } from "./bmwFounderApplicabilityCandidates.ts";
+import { validateCompleteDefinitionSet } from "./bmwMasterFullValidation.ts";
+import { constructCalibrationApplicabilityEvidencePackage } from "./calibrationApplicabilityEvidenceFactory.ts";
+import { defineDefinitionSetRevision } from "./definitionRomApplicability.ts";
+import { interpretXdfStructure } from "./interpretXdfStructure.ts";
+import { constructSourceAuthorityFounderReviewRow } from "./sourceAuthorityFounderReview.ts";
+import { assessSourceAuthorityScope } from "./sourceAuthorityScope.ts";
+
+const root = path.resolve("BMW-XDFs-master/B58gen1");
+const rom = "00007972000705";
+
+test("accepted 00007972000705 Source Authority is exact and advances only to an unpublished applicability candidate", { timeout: 180_000 }, (context) => {
+  const parsed = interpretXdfStructure({ xml: fs.readFileSync(path.join(root, `${rom}.xdf`), "utf8"), filename: `${rom}.xdf`, provenance: `Accepted B58 Gen1 Source Authority ${rom}` });
+  assert.equal(parsed.outcome, "structurally_interpreted");
+  const source = parsed.sourceArtifact!, definitionSet = defineDefinitionSetRevision({ sourceArtifact: source, definitions: parsed.definitions });
+  const bytes = new Uint8Array(fs.readFileSync(path.join(root, `${rom}_original.bin`))), resolved = resolveBinaryContainer({ bytes, fileName: `${rom}_original.bin` });
+  assert.equal(resolved.status, "resolved");
+  const binary = resolved.engineeringBinary!, binaryDigest = createHash("sha256").update(binary.bytes).digest("hex");
+  const validation = validateCompleteDefinitionSet({ sourceDigest: source.sourceDigest, definitionSetRevision: definitionSet.revisionId, binary, binaryDigest, definitions: parsed.definitions });
+  const acceptedCandidate = B58_GEN1_SOURCE_AUTHORITY_DECISION_CANDIDATES[0]!;
+  assert.equal(assessSourceAuthorityScope(B58_GEN1_00007972000705_SOURCE_AUTHORITY, acceptedCandidate.scope).outcome, "in_scope");
+  const review = constructSourceAuthorityFounderReviewRow({ candidate: acceptedCandidate, sourceArtifactRevision: source.sourceRevision ?? source.sourceDigest, definitionCount: parsed.definitions.length, validations: [validation], identityEvidenceSummary: [`Exact hex-encoded ${rom} occurs at governed offsets 262469, 6814977 and 7863823.`], stockReferenceState: "stock_candidate" });
+  const evidencePackage = constructCalibrationApplicabilityEvidencePackage({ sourceArtifact: source, definitionSet, definitions: parsed.definitions, sourcePath: `B58gen1/${rom}.xdf`, sourceFamily: "B58gen1", sourceStatus: "current", claimedIdentities: [rom], binaryCandidates: [{ engineeringBinary: binary, role: "stock_original", provenance: [validation.validationRevision], stockVariantKnowledge: null, credibleIdentities: [{ identifier: rom, kind: "calibration_identifier", confidence: "known_identity", reason: "Exact governed B58 Gen1 identity", encodings: ["hex_encoded"], classification: "candidate_specific" }] }], sourceProvenance: B58_GEN1_00007972000705_SOURCE_AUTHORITY.provenance, sourceAuthority: "established", authorityProvenance: [B58_GEN1_00007972000705_SOURCE_AUTHORITY.authorityRevision], limitations: B58_GEN1_00007972000705_SOURCE_AUTHORITY.limitations });
+  const proposal = evidencePackage.binaries[0]!.proposal;
+  const assessment = assessApplicabilityAuthority({ proposal, acceptedAuthorityPathways: ["governed_evidence_review"], xdfIdentityAvailable: true, sourceRelationshipKnown: true });
+  const candidate = constructReviewedApplicabilityDecisionCandidate({ review, authority: B58_GEN1_00007972000705_SOURCE_AUTHORITY, evidencePackage, assessment });
+  assert.equal(assessment.outcome, "reviewable_for_exact_applicability");
+  assert.equal(candidate.eligibility, "eligible_for_founder_decision");
+  assert.equal(candidate.decisionState, "candidate_only_pending_founder_review");
+  assert.equal(candidate.publicationState, "not_authorized");
+  assert.deepEqual(candidate.publicationSideEffects, []);
+  context.diagnostic(`B58_GEN1_00007972000705_ACCEPTED_SOURCE_AUTHORITY ${JSON.stringify({ authority: B58_GEN1_00007972000705_SOURCE_AUTHORITY, evidencePackageRevision: evidencePackage.packageRevision, assessment, candidate })}`);
+});
