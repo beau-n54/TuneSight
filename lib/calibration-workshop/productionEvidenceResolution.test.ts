@@ -25,5 +25,5 @@ test("production-style cold provider path reaches a governed Workshop View Model
   assert.equal(workshop.source.label, "IJE0S Original → IJE0S MapSwitch");
   assert.equal(workshop.comparison.totalDefinitions, 739);
   assert.ok(workshop.definitions.length === 739 && workshop.selectedDefinition !== null);
-  assert.ok(elapsedMs < 60_000, `cold provider exceeded production budget: ${Math.round(elapsedMs)} ms`);
+  assert.ok(elapsedMs < 8_000, `cold provider repeated full-binary work or exceeded the production CPU budget: ${Math.round(elapsedMs)} ms`);
 });
