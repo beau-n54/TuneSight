@@ -157,26 +157,53 @@ function constructN54PreviewFixtureDescriptorWithTrace(identity: N54PreviewRom, 
   const cached = fixtureDescriptorCache.get(identity);
   if (cached) return cached;
   const configuration = CONFIGURATIONS[identity];
-  const run = <T,>(stage: "RESOURCE_RESOLUTION" | "AUTHORITY_LAYOUT", operation: () => T) => diagnosticTrace ? diagnosticTrace.run(stage, operation) : operation();
+  const run = <T,>(stage: "RESOURCE_RESOLUTION" | "AUTHORITY_LAYOUT" | "RELATIONSHIP_MEMBERSHIP" | "DEFINITION_SET_BINDING" | "BINARY_IDENTITY", operation: () => T, safeFailureCode?: string) => diagnosticTrace ? diagnosticTrace.run(stage, operation, safeFailureCode) : operation();
   const source = run("RESOURCE_RESOLUTION", () => parseSource(configuration));
   const referenceBinary = run("RESOURCE_RESOLUTION", () => exactBinary(identity, configuration.referenceFile));
   const modifiedBinary = run("RESOURCE_RESOLUTION", () => exactBinary(identity, configuration.modifiedFile));
   const layout = run("AUTHORITY_LAYOUT", () => fixtureLayout(identity, source, referenceBinary));
-  const review = N54_CURRENT_GOVERNED_REVIEW_REFERENCES.find((item) => item.identity === identity)?.review;
-  const relationship = N54_CURRENT_ROM_LAYOUT_REGISTRY.relationships.find((value) => value.romLayoutId === layout.layoutId);
-  if (!review || !relationship) throw new Error(`Workshop fixture ${identity} has no active governed relationship.`);
-  if (source.set.revisionId !== review.definitionSetRevisionId || source.set.sourceArtifactDigest !== review.sourceArtifactDigest) throw new Error(`Workshop fixture ${identity} Definition source differs from governed authority.`);
-  for (const binary of [referenceBinary, modifiedBinary]) if (binary.identity.softwareIdentity !== identity) throw new Error(`Workshop fixture ${identity} contains a mismatched binary identity.`);
+  const review = run("RELATIONSHIP_MEMBERSHIP", () => {
+    const value = N54_CURRENT_GOVERNED_REVIEW_REFERENCES.find((item) => item.identity === identity)?.review;
+    if (!value) throw new Error("Workshop fixture has no governed review membership.");
+    return value;
+  });
+  const relationship = run("RELATIONSHIP_MEMBERSHIP", () => {
+    const value = N54_CURRENT_ROM_LAYOUT_REGISTRY.relationships.find((item) => item.romLayoutId === layout.layoutId);
+    if (!value) throw new Error("Workshop fixture has no active governed relationship.");
+    return value;
+  });
+  run("DEFINITION_SET_BINDING", () => {
+    if (source.set.revisionId !== review.definitionSetRevisionId || source.set.sourceArtifactDigest !== review.sourceArtifactDigest) throw new Error("Workshop fixture Definition source differs from governed authority.");
+  });
+  run("BINARY_IDENTITY", () => {
+    if (referenceBinary.identity.softwareIdentity !== identity) throw new Error("Workshop fixture contains a mismatched binary identity.");
+  }, "REFERENCE_REJECTION");
+  run("BINARY_IDENTITY", () => {
+    if (modifiedBinary.identity.softwareIdentity !== identity) throw new Error("Workshop fixture contains a mismatched binary identity.");
+  }, "CURRENT_REJECTION");
   const cacheKey = [QUALIFIED_CALIBRATION_DATASET_CONTRACT, QUALIFIED_CALIBRATION_COMPARISON_CONTRACT, ROM_LAYOUT_DISCOVERY_CONTRACT, N54_CURRENT_ROM_LAYOUT_REGISTRY.snapshotId, layout.layoutId, source.set.revisionId, source.set.sourceArtifactDigest, referenceBinary.identity.digest, modifiedBinary.identity.digest].join("|");
   const descriptor = Object.freeze({ configuration, source, referenceBinary, modifiedBinary, layout, relationship, cacheKey });
   fixtureDescriptorCache.set(identity, descriptor);
   return descriptor;
 }
 
-export function assertN54PreviewFixtureDescriptor(descriptor: N54PreviewFixtureDescriptor): void {
+export function assertN54PreviewFixtureDescriptor(descriptor: N54PreviewFixtureDescriptor): void;
+export function assertN54PreviewFixtureDescriptor(descriptor: N54PreviewFixtureDescriptor, diagnosticTrace: WorkshopDiagnosticTrace): void;
+export function assertN54PreviewFixtureDescriptor(descriptor: N54PreviewFixtureDescriptor, diagnosticTrace?: WorkshopDiagnosticTrace): void {
   const identity = descriptor.configuration.identity;
-  if (descriptor.referenceBinary.identity.softwareIdentity !== identity || descriptor.modifiedBinary.identity.softwareIdentity !== identity) throw new Error(`Workshop fixture ${identity} contains a mismatched binary identity.`);
-  if (!descriptor.layout.romSoftwareIdentifiers.includes(identity) || descriptor.relationship.romLayoutId !== descriptor.layout.layoutId || descriptor.relationship.definitionSetRevisionId !== descriptor.source.set.revisionId) throw new Error(`Workshop fixture ${identity} descriptor chain differs from governed authority.`);
+  const run = <T,>(stage: "RELATIONSHIP_MEMBERSHIP" | "DEFINITION_SET_BINDING" | "BINARY_IDENTITY", operation: () => T, safeFailureCode?: string) => diagnosticTrace instanceof WorkshopDiagnosticTrace ? diagnosticTrace.run(stage, operation, safeFailureCode) : operation();
+  run("RELATIONSHIP_MEMBERSHIP", () => {
+    if (!descriptor.layout.romSoftwareIdentifiers.includes(identity) || descriptor.relationship.romLayoutId !== descriptor.layout.layoutId) throw new Error("Workshop fixture descriptor relationship differs from governed authority.");
+  });
+  run("DEFINITION_SET_BINDING", () => {
+    if (descriptor.relationship.definitionSetRevisionId !== descriptor.source.set.revisionId) throw new Error("Workshop fixture Definition Set differs from governed authority.");
+  });
+  run("BINARY_IDENTITY", () => {
+    if (descriptor.referenceBinary.identity.softwareIdentity !== identity) throw new Error("Workshop fixture contains a mismatched binary identity.");
+  }, "REFERENCE_REJECTION");
+  run("BINARY_IDENTITY", () => {
+    if (descriptor.modifiedBinary.identity.softwareIdentity !== identity) throw new Error("Workshop fixture contains a mismatched binary identity.");
+  }, "CURRENT_REJECTION");
 }
 
 const fixtureMaterialCache = new Map<string, Promise<FixtureMaterial>>();
@@ -190,7 +217,7 @@ async function materializeFixture(descriptor: N54PreviewFixtureDescriptor, diagn
     timings[name] = Math.round(now - mark);
     mark = now;
   };
-  diagnosticTrace.run("AUTHORITY_LAYOUT", () => assertN54PreviewFixtureDescriptor(descriptor));
+  assertN54PreviewFixtureDescriptor(descriptor, diagnosticTrace);
   const cohort = diagnosticTrace.run("AUTHORITY_LAYOUT", () => VOCABULARY.map((identity) => constructN54PreviewFixtureDescriptorWithTrace(identity, diagnosticTrace)));
   record("authorityLayoutAssemblyMs");
   const { source, referenceBinary, modifiedBinary: currentBinary, layout, relationship, configuration } = descriptor;

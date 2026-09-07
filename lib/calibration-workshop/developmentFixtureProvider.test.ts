@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { assertN54PreviewFixtureDescriptor, clearDevelopmentFixtureCacheForTests, constructN54PreviewFixtureDescriptor, constructWorkshopDiscoveryRegistry, developmentCalibrationWorkshopProvider, selectN54PreviewRom, type N54PreviewRom } from "./developmentFixtureProvider.ts";
+import { publicWorkshopFailureDiagnostic, WorkshopDiagnosticTrace } from "./workshopFailureDiagnostic.ts";
 import { filterWorkshopDefinitions } from "./viewModel.ts";
 import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel, moveSelectedCell } from "./visualizationModel.ts";
 
@@ -98,6 +99,24 @@ test("mismatched descriptor chain fails closed", () => {
   const ije = constructN54PreviewFixtureDescriptor("IJE0S");
   const ina = constructN54PreviewFixtureDescriptor("INA0S");
   assert.throws(() => assertN54PreviewFixtureDescriptor({ ...ije, modifiedBinary: ina.modifiedBinary }), /mismatched binary identity/);
+});
+
+test("descriptor governance failures retain exact privacy-safe diagnostic boundaries", () => {
+  const ije = constructN54PreviewFixtureDescriptor("IJE0S"), ina = constructN54PreviewFixtureDescriptor("INA0S");
+  const cases = [
+    { descriptor: { ...ije, relationship: ina.relationship }, errorId: "CW-RELATIONSHIP_MEMBERSHIP-GOVERNANCE_REJECTION", stage: "RELATIONSHIP_MEMBERSHIP" },
+    { descriptor: { ...ije, source: ina.source }, errorId: "CW-DEFINITION_SET_BINDING-GOVERNANCE_REJECTION", stage: "DEFINITION_SET_BINDING" },
+    { descriptor: { ...ije, referenceBinary: ina.referenceBinary }, errorId: "CW-BINARY_IDENTITY-REFERENCE_REJECTION", stage: "BINARY_IDENTITY" },
+    { descriptor: { ...ije, modifiedBinary: ina.modifiedBinary }, errorId: "CW-BINARY_IDENTITY-CURRENT_REJECTION", stage: "BINARY_IDENTITY" },
+  ] as const;
+  for (const item of cases) {
+    let caught: unknown;
+    try { assertN54PreviewFixtureDescriptor(item.descriptor, new WorkshopDiagnosticTrace()); } catch (error) { caught = error; }
+    const diagnostic = publicWorkshopFailureDiagnostic(caught), serialized = JSON.stringify(diagnostic);
+    assert.equal(diagnostic.errorId, item.errorId);
+    assert.equal(diagnostic.stage, item.stage);
+    assert.doesNotMatch(serialized, /IJE0S|INA0S|sha256|xdf-definition-set|rom-layout/i);
+  }
 });
 
 test("unknown preview selectors never fall back and absence has one documented default", () => {

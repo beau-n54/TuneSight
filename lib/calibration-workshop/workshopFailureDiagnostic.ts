@@ -1,4 +1,4 @@
-export const WORKSHOP_FAILURE_STAGES = ["RESOURCE_RESOLUTION", "AUTHORITY_LAYOUT", "REFERENCE_DATASET", "CURRENT_DATASET", "COMPARISON", "VIEW_MODEL", "UNKNOWN"] as const;
+export const WORKSHOP_FAILURE_STAGES = ["RESOURCE_RESOLUTION", "AUTHORITY_LAYOUT", "RELATIONSHIP_MEMBERSHIP", "DEFINITION_SET_BINDING", "BINARY_IDENTITY", "REFERENCE_DATASET", "CURRENT_DATASET", "COMPARISON", "VIEW_MODEL", "UNKNOWN"] as const;
 export type WorkshopFailureStage = (typeof WORKSHOP_FAILURE_STAGES)[number];
 export type WorkshopFailureClassification = "RESOURCE_MISSING" | "RESOURCE_ACCESS_DENIED" | "MEMORY_LIMIT" | "GOVERNANCE_REJECTION" | "STAGE_FAILURE";
 export type PublicWorkshopFailureDiagnostic = Readonly<{ errorId: string; stage: WorkshopFailureStage; classification: WorkshopFailureClassification; elapsedMs: number; completedStageTimings: Readonly<Partial<Record<WorkshopFailureStage, number>>> }>;
@@ -20,14 +20,15 @@ function classification(error: unknown): WorkshopFailureClassification {
 export class WorkshopDiagnosticTrace {
   private readonly started = performance.now();
   private readonly timings: Partial<Record<WorkshopFailureStage, number>> = {};
-  run<T>(stage: WorkshopFailureStage, operation: () => T): T {
+  run<T>(stage: WorkshopFailureStage, operation: () => T, safeFailureCode?: string): T {
     const started = performance.now();
     try { const result = operation(); this.timings[stage] = Math.round((this.timings[stage] ?? 0) + performance.now() - started); return result; }
-    catch (error) { throw this.wrap(stage, error); }
+    catch (error) { throw this.wrap(stage, error, safeFailureCode); }
   }
-  wrap(stage: WorkshopFailureStage, error: unknown): WorkshopFailureDiagnosticError {
+  wrap(stage: WorkshopFailureStage, error: unknown, safeFailureCode?: string): WorkshopFailureDiagnosticError {
     if (error instanceof WorkshopFailureDiagnosticError) return error;
-    const kind = classification(error), diagnostic = Object.freeze({ errorId: `CW-${stage}-${kind}`, stage, classification: kind, elapsedMs: Math.round(performance.now() - this.started), completedStageTimings: Object.freeze({ ...this.timings }) });
+    const kind = classification(error), code = safeFailureCode && /^[A-Z][A-Z0-9_]*$/.test(safeFailureCode) ? safeFailureCode : kind;
+    const diagnostic = Object.freeze({ errorId: `CW-${stage}-${code}`, stage, classification: kind, elapsedMs: Math.round(performance.now() - this.started), completedStageTimings: Object.freeze({ ...this.timings }) });
     return new WorkshopFailureDiagnosticError(diagnostic, error);
   }
 }
