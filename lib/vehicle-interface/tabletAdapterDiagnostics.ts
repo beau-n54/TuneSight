@@ -1,0 +1,14 @@
+import type { VehicleAdapterProfile } from "./adapterProfiles.ts";
+
+export const TABLET_ADAPTER_DIAGNOSTICS_CONTRACT = "tunesight.tablet-adapter-diagnostics.v1" as const;
+export type TabletPlatformCapability = Readonly<{ browserRawTcpUdp: false; browserGatewayInspection: false; companionRequired: true; internetDuringAdapterWifi: "cellular_may_remain" | "unavailable_on_wifi_only_tablet" | "unknown" }>;
+export type AdapterDiscoveryReport = Readonly<{ contractVersion: typeof TABLET_ADAPTER_DIAGNOSTICS_CONTRACT; profileRevision: string; observedSsid: string | null; localAddress: string | null; gateway: string | null; reachableEndpoints: readonly Readonly<{ host: string; port: number; protocol: "tcp" | "udp"; reachable: boolean | null }>[]; protocolHandshake: "not_attempted" | "accepted" | "rejected" | "timeout"; bmwDiagnosticEndpoint: string | null; finding: string; operations: readonly ["discover", "connect", "identify", "read", "stream", "disconnect"] }>;
+
+export function assessTabletCapability(input: { hasCellularData: boolean }): TabletPlatformCapability { return Object.freeze({ browserRawTcpUdp: false, browserGatewayInspection: false, companionRequired: true, internetDuringAdapterWifi: input.hasCellularData ? "cellular_may_remain" : "unavailable_on_wifi_only_tablet" }); }
+export function createAdapterDiscoveryReport(input: { profile: VehicleAdapterProfile; observedSsid?: string | null; localAddress?: string | null; gateway?: string | null; endpointResults?: readonly Readonly<{ host: string; port: number; protocol: "tcp" | "udp"; reachable: boolean | null }>[]; protocolHandshake?: AdapterDiscoveryReport["protocolHandshake"]; bmwDiagnosticEndpoint?: string | null; finding: string }): AdapterDiscoveryReport {
+  const allowed = new Set(input.profile.endpoints.map((endpoint) => `${endpoint.protocol}:${endpoint.host}:${endpoint.port}`));
+  const endpoints = input.endpointResults ?? input.profile.endpoints.map(({ host, port, protocol }) => ({ host, port, protocol, reachable: null }));
+  if (endpoints.some((endpoint) => !allowed.has(`${endpoint.protocol}:${endpoint.host}:${endpoint.port}`))) throw new Error("Adapter diagnostic endpoint is not profile-allowlisted.");
+  if (!input.finding.trim()) throw new Error("Adapter diagnostic finding is required.");
+  return Object.freeze({ contractVersion: TABLET_ADAPTER_DIAGNOSTICS_CONTRACT, profileRevision: input.profile.profileRevision, observedSsid: input.observedSsid ?? null, localAddress: input.localAddress ?? null, gateway: input.gateway ?? null, reachableEndpoints: Object.freeze(endpoints.map((endpoint) => Object.freeze({ ...endpoint }))), protocolHandshake: input.protocolHandshake ?? "not_attempted", bmwDiagnosticEndpoint: input.bmwDiagnosticEndpoint ?? null, finding: input.finding, operations: Object.freeze(["discover", "connect", "identify", "read", "stream", "disconnect"] as const) });
+}
