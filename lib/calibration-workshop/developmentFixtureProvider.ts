@@ -11,6 +11,7 @@ import { defineRomLayoutIdentity, type RomLayoutIdentity, type RomLayoutMarker }
 import { constructQualifiedRomLayoutDiscoveryRegistry, constructRomLayoutDiscoveryRequest, discoverAndQualifyBinaryRomLayout, ROM_LAYOUT_DISCOVERY_CONTRACT, type RomLayoutMembershipAuthority } from "../xdf/romLayoutDiscovery.ts";
 import { resolveBinaryContainer, type EngineeringBinary } from "../tunes/binaryContainer.ts";
 import { buildWorkshopViewModel, type WorkshopViewModel } from "./viewModel.ts";
+import { WorkshopDiagnosticTrace } from "./workshopFailureDiagnostic.ts";
 
 export type ExactBinary = Readonly<{
   engineering: EngineeringBinary;
@@ -151,14 +152,16 @@ export type N54PreviewFixtureDescriptor = Readonly<{
 
 const fixtureDescriptorCache = new Map<N54PreviewRom, N54PreviewFixtureDescriptor>();
 
-export function constructN54PreviewFixtureDescriptor(identity: N54PreviewRom): N54PreviewFixtureDescriptor {
+export function constructN54PreviewFixtureDescriptor(identity: N54PreviewRom): N54PreviewFixtureDescriptor { return constructN54PreviewFixtureDescriptorWithTrace(identity); }
+function constructN54PreviewFixtureDescriptorWithTrace(identity: N54PreviewRom, diagnosticTrace?: WorkshopDiagnosticTrace): N54PreviewFixtureDescriptor {
   const cached = fixtureDescriptorCache.get(identity);
   if (cached) return cached;
   const configuration = CONFIGURATIONS[identity];
-  const source = parseSource(configuration);
-  const referenceBinary = exactBinary(identity, configuration.referenceFile);
-  const modifiedBinary = exactBinary(identity, configuration.modifiedFile);
-  const layout = fixtureLayout(identity, source, referenceBinary);
+  const run = <T,>(stage: "RESOURCE_RESOLUTION" | "AUTHORITY_LAYOUT", operation: () => T) => diagnosticTrace ? diagnosticTrace.run(stage, operation) : operation();
+  const source = run("RESOURCE_RESOLUTION", () => parseSource(configuration));
+  const referenceBinary = run("RESOURCE_RESOLUTION", () => exactBinary(identity, configuration.referenceFile));
+  const modifiedBinary = run("RESOURCE_RESOLUTION", () => exactBinary(identity, configuration.modifiedFile));
+  const layout = run("AUTHORITY_LAYOUT", () => fixtureLayout(identity, source, referenceBinary));
   const review = N54_CURRENT_GOVERNED_REVIEW_REFERENCES.find((item) => item.identity === identity)?.review;
   const relationship = N54_CURRENT_ROM_LAYOUT_REGISTRY.relationships.find((value) => value.romLayoutId === layout.layoutId);
   if (!review || !relationship) throw new Error(`Workshop fixture ${identity} has no active governed relationship.`);
@@ -178,7 +181,7 @@ export function assertN54PreviewFixtureDescriptor(descriptor: N54PreviewFixtureD
 
 const fixtureMaterialCache = new Map<string, Promise<FixtureMaterial>>();
 
-async function materializeFixture(descriptor: N54PreviewFixtureDescriptor): Promise<FixtureMaterial> {
+async function materializeFixture(descriptor: N54PreviewFixtureDescriptor, diagnosticTrace: WorkshopDiagnosticTrace): Promise<FixtureMaterial> {
   const profile = process.env.TUNESIGHT_WORKSHOP_PROFILE === "1";
   const timings: Record<string, number> = {};
   let mark = performance.now();
@@ -187,12 +190,12 @@ async function materializeFixture(descriptor: N54PreviewFixtureDescriptor): Prom
     timings[name] = Math.round(now - mark);
     mark = now;
   };
-  assertN54PreviewFixtureDescriptor(descriptor);
-  const cohort = VOCABULARY.map((identity) => constructN54PreviewFixtureDescriptor(identity));
+  diagnosticTrace.run("AUTHORITY_LAYOUT", () => assertN54PreviewFixtureDescriptor(descriptor));
+  const cohort = diagnosticTrace.run("AUTHORITY_LAYOUT", () => VOCABULARY.map((identity) => constructN54PreviewFixtureDescriptorWithTrace(identity, diagnosticTrace)));
   record("authorityLayoutAssemblyMs");
   const { source, referenceBinary, modifiedBinary: currentBinary, layout, relationship, configuration } = descriptor;
   const authority: RomLayoutMembershipAuthority = { layout, relationship, definitionSet: source.set, definitions: source.definitions };
-  const discoveryRegistry = constructWorkshopDiscoveryRegistry(cohort.map((item) => item.layout));
+  const discoveryRegistry = diagnosticTrace.run("AUTHORITY_LAYOUT", () => constructWorkshopDiscoveryRegistry(cohort.map((item) => item.layout)));
   record("discoveryRegistryAssemblyMs");
   const profileDiscovery = (binary: ExactBinary, sourceRole: "stock_candidate" | "mapswitch") => {
     if (!profile) return;
@@ -230,13 +233,13 @@ async function materializeFixture(descriptor: N54PreviewFixtureDescriptor): Prom
   };
   profileDiscovery(referenceBinary, "stock_candidate");
   record("referenceDiscoveryMembershipMs");
-  const reference = materialize(referenceBinary, "stock_candidate");
+  const reference = diagnosticTrace.run("REFERENCE_DATASET", () => materialize(referenceBinary, "stock_candidate"));
   record("referenceDatasetMaterializationMs");
   profileDiscovery(currentBinary, "mapswitch");
   record("currentDiscoveryMembershipMs");
-  const current = materialize(currentBinary, "mapswitch");
+  const current = diagnosticTrace.run("CURRENT_DATASET", () => materialize(currentBinary, "mapswitch"));
   record("currentDatasetMaterializationMs");
-  const comparison = compareQualifiedCalibrationDatasets(constructQualifiedCalibrationDatasetComparisonRequest({ reference, modified: current }));
+  const comparison = diagnosticTrace.run("COMPARISON", () => compareQualifiedCalibrationDatasets(constructQualifiedCalibrationDatasetComparisonRequest({ reference, modified: current })));
   record("datasetComparisonMs");
   if (comparison.status === "rejected") throw new Error(`Workshop fixture comparison failed: ${comparison.finding}`);
   if (profile) console.info("TUNESIGHT_WORKSHOP_PROFILE", JSON.stringify({ previewRom: configuration.identity, cacheKey: descriptor.cacheKey, ...timings, totalMaterializationMs: Object.values(timings).reduce((sum, value) => sum + value, 0) }));
@@ -245,11 +248,11 @@ async function materializeFixture(descriptor: N54PreviewFixtureDescriptor): Prom
 
 function identityFor(layout: RomLayoutIdentity): string { return layout.romSoftwareIdentifiers[0] ?? "unknown"; }
 
-function loadFixtureMaterial(previewRom: N54PreviewRom): Promise<FixtureMaterial> {
-  const descriptor = constructN54PreviewFixtureDescriptor(previewRom);
+function loadFixtureMaterial(previewRom: N54PreviewRom, diagnosticTrace: WorkshopDiagnosticTrace): Promise<FixtureMaterial> {
+  const descriptor = constructN54PreviewFixtureDescriptorWithTrace(previewRom, diagnosticTrace);
   const cached = fixtureMaterialCache.get(descriptor.cacheKey);
   if (cached) return cached;
-  const pending = materializeFixture(descriptor).catch((error) => {
+  const pending = materializeFixture(descriptor, diagnosticTrace).catch((error) => {
     fixtureMaterialCache.delete(descriptor.cacheKey);
     throw error;
   });
@@ -263,19 +266,22 @@ export const developmentCalibrationWorkshopProvider: CalibrationWorkshopProvider
   async loadVehicleWorkshop(vehicleId: string, userId: string, selectedDefinition?: string | null, previewRom: N54PreviewRom = DEFAULT_N54_PREVIEW_ROM) {
     if (!vehicleId.trim() || !userId.trim()) throw new Error("Vehicle and user identity are required.");
     const providerStarted = performance.now();
-    const material = await loadFixtureMaterial(previewRom);
+    const diagnosticTrace = new WorkshopDiagnosticTrace();
+    let material: FixtureMaterial;
+    try { material = await loadFixtureMaterial(previewRom, diagnosticTrace); } catch (error) { throw diagnosticTrace.wrap("UNKNOWN", error); }
     const adaptationStarted = performance.now();
-    if (material.comparison.status === "rejected") throw new Error(material.comparison.finding);
-    const workshop = buildWorkshopViewModel({
+    const comparison = material.comparison;
+    if (comparison.status === "rejected") throw new Error(comparison.finding);
+    const workshop = diagnosticTrace.run("VIEW_MODEL", () => buildWorkshopViewModel({
       reference: material.reference,
       current: material.current,
-      comparison: material.comparison.evidence,
+      comparison: comparison.evidence,
       source: {
         label: `${material.descriptor.configuration.identity} Original → ${material.descriptor.configuration.identity} MapSwitch`,
         fixtureIdentity: material.descriptor.configuration.fixtureIdentity,
       },
       selectedKey: selectedDefinition,
-    });
+    }));
     if (process.env.TUNESIGHT_WORKSHOP_PROFILE === "1") console.info("TUNESIGHT_WORKSHOP_VIEW_MODEL_PROFILE", JSON.stringify({ previewRom, adaptationMs: Math.round(performance.now() - adaptationStarted), totalProviderLoadMs: Math.round(performance.now() - providerStarted), cacheKey: material.descriptor.cacheKey }));
     return workshop;
   },

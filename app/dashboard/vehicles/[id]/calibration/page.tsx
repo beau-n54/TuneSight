@@ -7,6 +7,7 @@ import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNaviga
 import { isSubscriberWorkshopSessionId, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import UploadCalibration from "./upload-calibration";
 import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
+import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -65,7 +66,13 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
 
   const subscriberSuccess = subscriberResult?.status === "workshop_ready" ? subscriberResult : null;
   const previewRom = previewSelection.status === "valid" ? previewSelection.rom : undefined;
-  const workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
+  let workshop;
+  try { workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom); }
+  catch (error) {
+    const diagnostic = publicWorkshopFailureDiagnostic(error);
+    console.error("CALIBRATION_WORKSHOP_FAILURE", diagnostic.errorId, error);
+    return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><section className="rounded-2xl border border-red-400/30 bg-zinc-900 p-6" role="alert"><h1 className="text-xl font-bold">Calibration Evidence unavailable</h1><p className="mt-2 text-sm text-zinc-400">The controlled Workshop Evidence could not be loaded. No calibration values have been substituted.</p><dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">Diagnostic ID</dt><dd className="font-mono">{diagnostic.errorId}</dd><dt className="text-zinc-500">Failure stage</dt><dd>{diagnostic.stage}</dd><dt className="text-zinc-500">Elapsed</dt><dd>{diagnostic.elapsedMs} ms</dd></dl>{Object.entries(diagnostic.completedStageTimings).length > 0 && <p className="mt-4 font-mono text-xs text-zinc-500">Completed: {Object.entries(diagnostic.completedStageTimings).map(([stage, elapsed]) => `${stage} ${elapsed} ms`).join(" · ")}</p>}<p className="mt-4 text-sm text-zinc-400">No file paths, binary data, identities, tokens or resource names are included in this diagnostic.</p></section></div></main>;
+  }
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6">
