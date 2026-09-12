@@ -1,0 +1,10 @@
+import { FOUNDER_00003076501103_APPLICABILITY_CANDIDATE } from "./b58PhysicalApplicabilityCandidate.ts";
+import { FOUNDER_00003076501103_COMPLETE_VALIDATIONS, FOUNDER_00003076501103_INJECTOR_SCALAR_QUARANTINE, FOUNDER_00003076501103_INJECTOR_SCALAR_SAFETY_ASSESSMENT } from "./b58PhysicalTableQuarantine.ts";
+import { assessCurrentOnlyWorkshopAdmission, constructAcceptedQuarantineAwareApplicabilityDecision } from "./quarantineAwareApplicabilityDecision.ts";
+
+export const FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_CANDIDATE_ID = "quarantine-aware-applicability-candidate:e2087ce9aa017d61605c68fa7eefd9da109b2ba8545cd5c09bc9cb13b0bf5be8" as const;
+export const FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_CANDIDATE_REVISION = "quarantine-aware-applicability-candidate-revision:48382f9e6c139a10508f008172198232453dab1446578259c9049d29b7814fac" as const;
+
+export const FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_DECISION = constructAcceptedQuarantineAwareApplicabilityDecision({ candidate: FOUNDER_00003076501103_APPLICABILITY_CANDIDATE, acceptedCandidateId: FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_CANDIDATE_ID, acceptedCandidateRevision: FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_CANDIDATE_REVISION, validations: FOUNDER_00003076501103_COMPLETE_VALIDATIONS, quarantines: [FOUNDER_00003076501103_INJECTOR_SCALAR_QUARANTINE], safetyAssessments: [FOUNDER_00003076501103_INJECTOR_SCALAR_SAFETY_ASSESSMENT], authority: { authorityId: "applicability-decision-authority:tunesight-founder-b58-gen1-00003076501103", authorityRevision: "applicability-decision-authority-revision:2026-09-13-00003076501103", authorityClass: "founder", provenance: ["Founder Beau and Bob explicitly accepted the exact immutable quarantine-aware applicability candidate on 2026-09-13.", "Acceptance preserves the exact Table quarantine and does not establish Stock, Reference, publication or Workshop authority."] }, decidedAt: "2026-09-13T00:00:00.000Z" });
+
+export const FOUNDER_00003076501103_WORKSHOP_ADMISSION_ASSESSMENT = assessCurrentOnlyWorkshopAdmission(FOUNDER_00003076501103_ACCEPTED_APPLICABILITY_DECISION);
