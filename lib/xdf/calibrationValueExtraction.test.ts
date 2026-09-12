@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveBinaryContainer, type EngineeringBinary } from "../tunes/binaryContainer.ts";
 import { defineXdfDefinitionRevision, deriveDefinitionIdentity, type XdfAxisDefinition, type XdfDefinitionRevision } from "./canonicalXdfDefinition.ts";
-import { assessDefinitionExtractionCapability, extractRawCalibrationValues } from "./calibrationValueExtraction.ts";
+import { assessDefinitionExtractionCapability, createCalibrationValueExtractionBatchContext, extractRawCalibrationValues } from "./calibrationValueExtraction.ts";
 
 function binary(values: readonly number[]): EngineeringBinary {
   const result = resolveBinaryContainer({ bytes: Uint8Array.from(values), fileName: "fixture.bin", mimeType: "application/octet-stream" });
@@ -33,6 +33,16 @@ test("binds extraction Evidence to exact binary and exact Definition Revision", 
   assert.equal(first.definitionStructuralDigest, definition.structuralDigest);
   assert.notEqual(first.binaryIdentity.digest, changed.binaryIdentity.digest);
   assert.notDeepEqual(first.shape, changed.shape);
+});
+
+test("a verified batch context preserves exact extraction Evidence across definitions", () => {
+  const source = binary([1, 2, 3, 4]);
+  const context = createCalibrationValueExtractionBatchContext(source);
+  for (const definition of [revision({ address: 0 }), revision({ address: 1, columns: 2 })]) {
+    assert.deepEqual(extractRawCalibrationValues(source, definition, context), extractRawCalibrationValues(source, definition));
+  }
+  const other = binary([9, 8, 7, 6]);
+  assert.equal(extractRawCalibrationValues(other, revision({ address: 0 }), context).binaryIdentity.digest, extractRawCalibrationValues(other, revision({ address: 0 })).binaryIdentity.digest);
 });
 
 test("reads unsigned and signed 8-bit scalar values", () => {

@@ -75,7 +75,7 @@ test("unsupported, conflicting, invalid, and oversized inputs fail closed", asyn
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES + 1), fileName: "large.bin", mimeType: null, observedAt })).status, "invalid_upload");
 });
 
-test("only the exactly published B58 Gen1 relationship enters a Current-only Workshop", async () => {
+test("only the exactly published B58 Gen1 relationship enters a Current-only Workshop", async (context) => {
   const fixtures = [
     ["00003076501D02_original.bin", "00003076501D02"],
     ["000030765A3C06_original.bin", "000030765A3C06"],
@@ -85,7 +85,9 @@ test("only the exactly published B58 Gen1 relationship enters a Current-only Wor
   ] as const;
   const exactBytes = new Uint8Array(7_864_320), exactMarker = Buffer.from("00003076501103", "hex");
   for (const offset of [262469, 6814977, 7863823]) exactBytes.set(exactMarker, offset);
+  const startedAt = performance.now();
   const accepted = await loadSubscriberCalibration({ bytes: exactBytes, fileName: "subscriber.bin", mimeType: null, observedAt });
+  const elapsedMs = performance.now() - startedAt;
   assert.equal(accepted.status, "workshop_ready");
   if (accepted.status === "workshop_ready") {
     assert.equal(accepted.identity, "00003076501103");
@@ -99,6 +101,9 @@ test("only the exactly published B58 Gen1 relationship enters a Current-only Wor
       assert.equal(accepted.workshop.source.comparisonId, null);
       assert.equal(accepted.workshop.capabilities.mutation, false);
     }
+    assert.ok((accepted.timings.currentDatasetMs ?? Number.POSITIVE_INFINITY) < 30_000, `B58 Current Dataset exceeded its 30-second processing budget: ${JSON.stringify(accepted.timings)}`);
+    assert.ok(elapsedMs < 45_000, `B58 subscriber processing exceeded its 45-second route budget: ${Math.round(elapsedMs)}ms`);
+    context.diagnostic(`B58_SUBSCRIBER_PROCESSING_BUDGET ${JSON.stringify({ elapsedMs: Math.round(elapsedMs), timings: accepted.timings })}`);
   }
 
   for (const [fileName, identity] of fixtures) {

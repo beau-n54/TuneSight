@@ -42,6 +42,13 @@ export type CalibrationValueExtractionEvidence = Readonly<{
   findings: readonly string[];
 }>;
 
+export type CalibrationValueExtractionBatchContext = Readonly<{
+  engineeringBinary: EngineeringBinary;
+  binaryIdentity: CalibrationValueExtractionEvidence["binaryIdentity"];
+}>;
+
+const issuedBatchContexts = new WeakSet<object>();
+
 type ResolvedCalibrationAddress = NonNullable<CalibrationValueExtractionEvidence["resolvedAddress"]>;
 
 function binaryIdentity(binary: EngineeringBinary) {
@@ -52,6 +59,12 @@ function binaryIdentity(binary: EngineeringBinary) {
     containerType: binary.source.containerType,
     fileName: binary.source.fileName,
   });
+}
+
+export function createCalibrationValueExtractionBatchContext(binary: EngineeringBinary): CalibrationValueExtractionBatchContext {
+  const context = Object.freeze({ engineeringBinary: binary, binaryIdentity: binaryIdentity(binary) });
+  issuedBatchContexts.add(context);
+  return context;
 }
 
 function checkedProduct(left: number, right: number, label: string): number {
@@ -147,8 +160,11 @@ export function assessDefinitionExtractionCapability(definition: XdfDefinitionRe
   return Object.freeze({ state: reasons.length === 0 ? "extraction_capable" : reasons.some((reason) => reason.includes("unresolved") || reason.includes("no embedded")) ? "unresolved" : "unsupported", reasons: Object.freeze(reasons) });
 }
 
-export function extractRawCalibrationValues(binary: EngineeringBinary, definition: XdfDefinitionRevision): CalibrationValueExtractionEvidence {
-  const identity = binaryIdentity(binary); const capability = assessDefinitionExtractionCapability(definition);
+export function extractRawCalibrationValues(binary: EngineeringBinary, definition: XdfDefinitionRevision, batchContext?: CalibrationValueExtractionBatchContext): CalibrationValueExtractionEvidence {
+  const identity = batchContext && issuedBatchContexts.has(batchContext) && batchContext.engineeringBinary === binary
+    ? batchContext.binaryIdentity
+    : binaryIdentity(binary);
+  const capability = assessDefinitionExtractionCapability(definition);
   const base = { contractVersion: CALIBRATION_VALUE_EXTRACTOR_CONTRACT, binaryIdentity: identity, definitionRevisionId: definition.revisionId, definitionStructuralDigest: definition.structuralDigest, definitionSourceBindingDigest: definition.sourceBindingDigest } as const;
   if (capability.state !== "extraction_capable") return Object.freeze({ ...base, outcome: capability.state, resolvedAddress: null, datatype: null, widthBits: null, signed: null, endianness: null, shape: null, offsets: Object.freeze([]), axes: Object.freeze([]), findings: capability.reasons });
   const valueAxis = definition.axes.find((axis) => axis.axisId.toLowerCase() === "z") ?? definition.axes.at(-1)!;

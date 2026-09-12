@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { EngineeringBinary } from "../tunes/binaryContainer.ts";
-import { assessDefinitionExtractionCapability, extractRawCalibrationValues, type CalibrationValueExtractionEvidence } from "./calibrationValueExtraction.ts";
+import { assessDefinitionExtractionCapability, createCalibrationValueExtractionBatchContext, extractRawCalibrationValues, type CalibrationValueExtractionBatchContext, type CalibrationValueExtractionEvidence } from "./calibrationValueExtraction.ts";
 import { defineXdfDefinitionRevision, type XdfDefinitionRevision } from "./canonicalXdfDefinition.ts";
 import type { DefinitionSetRevision, EngineeringBinaryIdentity } from "./definitionRomApplicability.ts";
 import { verifyQualifiedBinaryLayoutMembership, type QualifiedBinaryToRomLayoutMembership } from "./binaryRomLayoutMembership.ts";
@@ -27,6 +27,7 @@ export type QualifiedCalibrationExtractionBatchContext = Readonly<{
   exactBinaryDigest: string;
   engineeringBinary: EngineeringBinary;
   binaryIdentity: EngineeringBinaryIdentity;
+  rawExtractionContext: CalibrationValueExtractionBatchContext;
 }>;
 
 export type QualifiedApplicabilityAuthorityChain = Readonly<{
@@ -88,9 +89,9 @@ function freeze<T>(value:T):T{if(Array.isArray(value))return Object.freeze(value
 const verifiedBatchContexts = new WeakSet<object>();
 
 export function createQualifiedCalibrationExtractionBatchContext(input:{engineeringBinary:EngineeringBinary;binaryIdentity:EngineeringBinaryIdentity}):QualifiedCalibrationExtractionBatchContext{
-  const exactBinaryDigest=createHash("sha256").update(input.engineeringBinary.bytes).digest("hex");
+  const rawExtractionContext=createCalibrationValueExtractionBatchContext(input.engineeringBinary),exactBinaryDigest=rawExtractionContext.binaryIdentity.digest.slice("sha256:".length);
   if(exactBinaryDigest!==input.binaryIdentity.digest||input.binaryIdentity.byteLength!==input.engineeringBinary.byteLength||input.binaryIdentity.identityId!==`engineering-binary:${exactBinaryDigest}`)throw new Error("Engineering Binary bytes do not match the supplied exact Binary Identity.");
-  const context=Object.freeze({exactBinaryDigest,engineeringBinary:input.engineeringBinary,binaryIdentity:input.binaryIdentity});verifiedBatchContexts.add(context);return context;
+  const context=Object.freeze({exactBinaryDigest,engineeringBinary:input.engineeringBinary,binaryIdentity:input.binaryIdentity,rawExtractionContext});verifiedBatchContexts.add(context);return context;
 }
 function exactDigest(request:Pick<QualifiedCalibrationExtractionRequest,"engineeringBinary"|"binaryIdentity"|"batchContext">):string{
   const context=request.batchContext;
@@ -121,7 +122,7 @@ export function extractQualifiedCalibrationValue(request:QualifiedCalibrationExt
   if(request.definition.identity.status==="conflicting")return rejected(request,lookup,relationship,"definition_conflicting","A representation-conflicted Definition cannot produce qualified raw Calibration Value Evidence.");
   if(request.definition.identity.status!=="derived"||!request.definition.identity.stableId)return rejected(request,lookup,relationship,"definition_invalid","The Definition Revision is not structurally valid for qualified extraction.");
   const capability=assessDefinitionExtractionCapability(request.definition);if(capability.state!=="extraction_capable")return rejected(request,lookup,relationship,"definition_extraction_unsupported",capability.reasons.join(" ")||"Definition is not extraction-capable.");
-  const chain=authorityChain(request.registrySnapshot,relationship);const rawExtraction=extractRawCalibrationValues(request.engineeringBinary,request.definition);
+  const chain=authorityChain(request.registrySnapshot,relationship);const rawExtraction=extractRawCalibrationValues(request.engineeringBinary,request.definition,request.batchContext?.rawExtractionContext);
   if(rawExtraction.outcome!=="extracted"||!rawExtraction.shape||!rawExtraction.resolvedAddress)return freeze({status:"extraction_failed",requestId:request.requestId,lookup,applicabilityRelationship:relationship,authorityChain:chain,rawExtraction,errorCode:"raw_extraction_failed",explanation:rawExtraction.findings.join(" ")||`Raw extraction returned ${rawExtraction.outcome}.`});
   const inertEquationSources=[...new Set(request.definition.axes.map((axis)=>axis.equationSource).filter((value):value is string=>value!==null))].sort();const material={exactBinaryDigest:exactDigestValue,exactBinaryIdentityId:request.binaryIdentity.identityId,romLayoutId:relationship.romLayoutId,authorityChain:chain,definitionSetId:request.definitionSet.definitionSetId,definitionSetRevisionId:request.definitionSet.revisionId,definitionIdentity:request.definition.identity.stableId,definitionRevisionId:request.definition.revisionId,definitionSourceBindingDigest:request.definition.sourceBindingDigest,exactRawOffsets:rawExtraction.offsets,datatype:rawExtraction.datatype,widthBits:rawExtraction.widthBits,signed:rawExtraction.signed,endianness:rawExtraction.endianness,dimensions:{kind:rawExtraction.shape.kind,rows:rawExtraction.shape.rows,columns:rawExtraction.shape.columns},rawValues:rawExtraction.shape.values,rawAxes:rawExtraction.axes,resolvedAddress:rawExtraction.resolvedAddress,inertEquationSources,rawExtractionContractVersion:rawExtraction.contractVersion,provenance:[`Exact bytes: engineering-binary:${exactDigestValue}`,`Definition applicability: ${relationship.definitionSetRevisionId} -> ${relationship.romLayoutId}`,`Founder accepted Decision: ${relationship.decisionId}`,`Active qualified relationship: ${relationship.relationshipRevision}`].sort(),outcome:"qualified_raw_extracted" as const,contractVersion:"tunesight.qualified-raw-calibration-value-evidence.v1" as const};const evidenceId=`qualified-raw-calibration-evidence:${digest("tunesight.qualified-raw-calibration-evidence-identity.v1",{exactBinaryDigest:exactDigestValue,relationshipRevision:relationship.relationshipRevision,definitionRevisionId:request.definition.revisionId,definitionSourceBindingDigest:request.definition.sourceBindingDigest})}`;const evidence=freeze({evidenceId,evidenceRevision:`qualified-raw-calibration-evidence-revision:${digest("tunesight.qualified-raw-calibration-evidence-revision.v1",material)}`,...material});return freeze({status:"qualified_extracted",requestId:request.requestId,lookup,applicabilityRelationship:relationship,rawExtraction,evidence});
 }
