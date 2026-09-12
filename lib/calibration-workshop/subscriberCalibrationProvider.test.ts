@@ -14,6 +14,7 @@ test("an uploaded N54 BIN alone establishes exact coverage and a subscriber Curr
   assert.equal(result.status, "workshop_ready");
   if (result.status !== "workshop_ready") return;
   assert.equal(result.identity, "IJE0S");
+  if ("mode" in result.workshop || result.material.reference === null || result.material.comparison === null) assert.fail("N54 must retain comparison Workshop material.");
   assert.equal(result.coverage.outcome, "EXACT_DEFINITION_COVERAGE");
   assert.equal(result.workshop.source.kind, "subscriber_upload");
   assert.match(result.workshop.source.fixtureIdentity, new RegExp(result.digest));
@@ -28,11 +29,13 @@ test("an uploaded N54 BIN alone establishes exact coverage and a subscriber Curr
 
   const oneD = result.workshop.definitions.find((item) => item.available && item.shape === "1D")!;
   const oneDWorkshop = buildSubscriberWorkshop(result, oneD.key);
+  if ("mode" in oneDWorkshop) assert.fail("N54 selection must retain comparison mode.");
   assert.equal(oneDWorkshop.selectedDefinition.summary.key, oneD.key);
   assert.ok(buildCalibrationSlice(buildCalibrationVisualizationModel(oneDWorkshop.selectedDefinition), "row", 0).length > 0);
 
   const twoD = result.workshop.definitions.find((item) => item.available && item.shape === "2D")!;
   const twoDWorkshop = buildSubscriberWorkshop(result, twoD.key);
+  if ("mode" in twoDWorkshop) assert.fail("N54 selection must retain comparison mode.");
   const visualization = buildCalibrationVisualizationModel(twoDWorkshop.selectedDefinition);
   assert.equal(visualization.capabilities.threeDimensional, true);
   assert.equal(buildCalibrationSurfaceMesh(visualization).available, true);
@@ -46,6 +49,7 @@ test("each governed N54 upload resolves its own ROM without a preview selector",
     const result = await loadSubscriberCalibration({ bytes: load(`${identity}_original.bin`), fileName: `${identity}.bin`, mimeType: null, observedAt });
     assert.equal(result.status, "workshop_ready", identity);
     if (result.status === "workshop_ready") {
+      if ("mode" in result.workshop) assert.fail("N54 must retain comparison mode.");
       assert.equal(result.identity, identity);
       assert.equal(result.material.current.exactBinaryIdentity.digest, result.digest);
       assert.equal(result.workshop.comparison.changed, 0);
@@ -65,21 +69,37 @@ test("unsupported, conflicting, invalid, and oversized inputs fail closed", asyn
   const b58 = await loadSubscriberCalibration({ bytes: new TextEncoder().encode("00003076501103"), fileName: "b58.bin", mimeType: null, observedAt });
   assert.equal(b58.status, "coverage_unavailable");
   assert.equal(b58.identity, "00003076501103");
-  assert.equal(b58.coverage?.outcome, "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
+  assert.equal(b58.coverage?.outcome, "EXACT_DEFINITION_COVERAGE");
 
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(), fileName: "empty.bin", mimeType: null, observedAt })).status, "invalid_upload");
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES + 1), fileName: "large.bin", mimeType: null, observedAt })).status, "invalid_upload");
 });
 
-test("real B58 Gen1 cohort binaries resolve exact identities but remain outside unpublished Workshop coverage", async () => {
+test("only the exactly published B58 Gen1 relationship enters a Current-only Workshop", async () => {
   const fixtures = [
-    ["00003076501103_original.bin", "00003076501103"],
     ["00003076501D02_original.bin", "00003076501D02"],
     ["000030765A3C06_original.bin", "000030765A3C06"],
     ["00003081501102_original.bin", "00003081501102"],
     ["00003081501D04_original.bin", "00003081501D04"],
     ["00007972000705_original.bin", "00007972000705"],
   ] as const;
+  const exactBytes = new Uint8Array(7_864_320), exactMarker = Buffer.from("00003076501103", "hex");
+  for (const offset of [262469, 6814977, 7863823]) exactBytes.set(exactMarker, offset);
+  const accepted = await loadSubscriberCalibration({ bytes: exactBytes, fileName: "subscriber.bin", mimeType: null, observedAt });
+  assert.equal(accepted.status, "workshop_ready");
+  if (accepted.status === "workshop_ready") {
+    assert.equal(accepted.identity, "00003076501103");
+    assert.ok("mode" in accepted.workshop);
+    if ("mode" in accepted.workshop) {
+      assert.equal(accepted.workshop.mode, "current_only");
+      assert.equal(accepted.workshop.summary.totalDefinitions, 1175);
+      assert.equal(accepted.workshop.summary.currentAvailable, 1174);
+      assert.equal(accepted.workshop.summary.unavailable, 1);
+      assert.equal(accepted.workshop.source.referenceDatasetId, null);
+      assert.equal(accepted.workshop.source.comparisonId, null);
+      assert.equal(accepted.workshop.capabilities.mutation, false);
+    }
+  }
 
   for (const [fileName, identity] of fixtures) {
     const bytes = loadB58(fileName);

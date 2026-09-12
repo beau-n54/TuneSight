@@ -3,11 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
+import CurrentOnlyWorkshopClient from "./current-only-workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
 import { isSubscriberWorkshopSessionId, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import UploadCalibration from "./upload-calibration";
 import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
+import type { CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
+import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -17,6 +20,8 @@ type PageProps = {
 // Cold, fail-closed Dataset materialization parses controlled XDF/BIN Evidence.
 // Deployment platforms consume this static route value from the Next build output.
 export const maxDuration = 60;
+
+function isCurrentOnlyWorkshop(workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel): workshop is CurrentOnlyWorkshopViewModel { return "mode" in workshop && workshop.mode === "current_only"; }
 
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
   const { id } = await params;
@@ -73,6 +78,8 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     console.error("CALIBRATION_WORKSHOP_FAILURE", diagnostic.errorId, error);
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><section className="rounded-2xl border border-red-400/30 bg-zinc-900 p-6" role="alert"><h1 className="text-xl font-bold">Calibration Evidence unavailable</h1><p className="mt-2 text-sm text-zinc-400">The controlled Workshop Evidence could not be loaded. No calibration values have been substituted.</p><dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">Diagnostic ID</dt><dd className="font-mono">{diagnostic.errorId}</dd><dt className="text-zinc-500">Failure stage</dt><dd>{diagnostic.stage}</dd><dt className="text-zinc-500">Elapsed</dt><dd>{diagnostic.elapsedMs} ms</dd></dl>{Object.entries(diagnostic.completedStageTimings).length > 0 && <p className="mt-4 font-mono text-xs text-zinc-500">Completed: {Object.entries(diagnostic.completedStageTimings).map(([stage, elapsed]) => `${stage} ${elapsed} ms`).join(" · ")}</p>}<p className="mt-4 text-sm text-zinc-400">No file paths, binary data, identities, tokens or resource names are included in this diagnostic.</p></section></div></main>;
   }
+  const currentOnlyWorkshop = isCurrentOnlyWorkshop(workshop) ? workshop : null;
+  const comparisonWorkshop = isCurrentOnlyWorkshop(workshop) ? null : workshop;
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6">
@@ -101,7 +108,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           <p className="mt-2 text-sm leading-6 text-amber-50">
             This Workshop displays controlled qualified Calibration Evidence for interface development. It is not derived from this vehicle.
           </p>
-          <p className="mt-2 font-mono text-xs text-amber-200/70">{workshop.source.label} · {workshop.source.fixtureIdentity}</p>
+          {comparisonWorkshop && <p className="mt-2 font-mono text-xs text-amber-200/70">{comparisonWorkshop.source.label} · {comparisonWorkshop.source.fixtureIdentity}</p>}
           <div className="mt-4 flex flex-wrap gap-2" aria-label="Select development preview ROM">
             {(["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const).map((rom) => <Link key={rom} href={buildWorkshopDeepLink({vehicleId:vehicle.id,previewRom:rom})} aria-current={rom === previewRom ? "page" : undefined} className={`rounded-lg border px-3 py-2 font-mono text-xs ${rom === previewRom ? "border-amber-200 bg-amber-200/15 text-amber-50" : "border-amber-200/20 text-amber-200/70 hover:bg-amber-200/10"}`}>{rom}</Link>)}
           </div>
@@ -110,31 +117,38 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Calibration states">
           {workshop.states.map((state) => (
             <article key={state.id} className={`rounded-2xl border p-4 ${state.availability === "available" ? "border-blue-400/30 bg-zinc-900" : "border-zinc-800 bg-zinc-950"}`}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">{state.label}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">{"label" in state ? state.label : state.id}</p>
               <p className={`mt-3 text-sm font-semibold ${state.availability === "available" ? "text-blue-200" : "text-zinc-500"}`}>{state.message}</p>
-              {state.sourceRole && <p className="mt-1 text-xs text-zinc-500">Source role: {state.sourceRole}</p>}
+              {"sourceRole" in state && state.sourceRole && <p className="mt-1 text-xs text-zinc-500">Source role: {state.sourceRole}</p>}
             </article>
           ))}
         </section>
 
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7" aria-label="Comparison summary">
-          {[
-            ["Definitions", workshop.comparison.totalDefinitions],
-            ["Changed", workshop.comparison.changed],
-            ["Unchanged", workshop.comparison.unchanged],
-            ["Axis Changed", workshop.comparison.axisChanged],
-            ["Unavailable", workshop.comparison.unavailable],
-            ["Conflicts", workshop.comparison.conflicts],
-            ["Changed Cells", workshop.comparison.changedCells],
-          ].map(([label, value]) => (
+        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7" aria-label={currentOnlyWorkshop ? "Current Dataset summary" : "Comparison summary"}>
+          {(currentOnlyWorkshop ? [
+            ["Definitions", currentOnlyWorkshop.summary.totalDefinitions],
+            ["Current available", currentOnlyWorkshop.summary.currentAvailable],
+            ["Unavailable", currentOnlyWorkshop.summary.unavailable],
+            ["Quarantined", currentOnlyWorkshop.summary.quarantined],
+            ["Reference", "Not established"],
+            ["Comparison", "Unavailable"],
+          ] : [
+            ["Definitions", comparisonWorkshop!.comparison.totalDefinitions],
+            ["Changed", comparisonWorkshop!.comparison.changed],
+            ["Unchanged", comparisonWorkshop!.comparison.unchanged],
+            ["Axis Changed", comparisonWorkshop!.comparison.axisChanged],
+            ["Unavailable", comparisonWorkshop!.comparison.unavailable],
+            ["Conflicts", comparisonWorkshop!.comparison.conflicts],
+            ["Changed Cells", comparisonWorkshop!.comparison.changedCells],
+          ]).map(([label, value]) => (
             <div key={label} className="rounded-xl border border-white/10 bg-zinc-900 p-4">
               <p className="text-xs text-zinc-500">{label}</p>
-              <p className="mt-1 text-xl font-semibold text-white">{Number(value).toLocaleString()}</p>
+              <p className="mt-1 text-xl font-semibold text-white">{typeof value === "number" ? value.toLocaleString() : value}</p>
             </div>
           ))}
         </section>
 
-        <WorkshopClient workshop={workshop} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />
+        {currentOnlyWorkshop ? <CurrentOnlyWorkshopClient workshop={currentOnlyWorkshop} vehicleId={vehicle.id} subscriberSession={subscriberSession}/> : <WorkshopClient workshop={comparisonWorkshop!} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />}
 
         <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
           <summary className="cursor-pointer font-semibold text-zinc-200">Workshop concepts and evidence boundaries</summary>
