@@ -1,0 +1,2829 @@
+{
+  "contractVersion": "tunesight.bmw-master-catalog-census.v1",
+  "rows": [
+    {
+      "relativePath": "B58gen1/00003076501103.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "00003076501103"
+      ],
+      "sourceArtifactId": "xdf-source:5526abdc4738a9b8f3224a3115e528dbcfff815d9659e9b854332e4e0ae970fc",
+      "definitionSetId": "xdf-definition-set:72480f28795dcf71e32aac4f0c027716aae029a408ee138d6f6c8e166ffcf4e7",
+      "definitionSetRevision": "xdf-definition-set-revision:a364e4f988f9f83b000bded0bc1ef8627187127cf009c04561065be17367ca74",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1175,
+      "extractionCapableCount": 1175,
+      "conversionCount": 865,
+      "identityNoOpCount": 310,
+      "quarantineCount": 1,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "VIEW_QUALIFIED_WITH_QUARANTINE",
+      "capabilities": [
+        "CATALOGED",
+        "VIEW_QUALIFIED"
+      ],
+      "viewQualified": true,
+      "blockers": []
+    },
+    {
+      "relativePath": "B58gen1/00003076501D02.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "00003076501D02"
+      ],
+      "sourceArtifactId": "xdf-source:e981fea4ecc4b11a0cea090e0ab770b755cc88ca1aa2ac9035c10932af7920ea",
+      "definitionSetId": "xdf-definition-set:b5e82316fb71feb92004aa514a951a63524f15319ef520453dbf8c79e4177b48",
+      "definitionSetRevision": "xdf-definition-set-revision:812263c212fb3f854fe48eb911e81c7b236c23d3c2ebb692f127337ccc3a6125",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1173,
+      "extractionCapableCount": 1173,
+      "conversionCount": 863,
+      "identityNoOpCount": 310,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen1/000030765A3C06.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "000030765A3C06"
+      ],
+      "sourceArtifactId": "xdf-source:1be662c412b830ababb69f231ac745a0fff109fcaf2861dcbd511db1dd2feb8e",
+      "definitionSetId": "xdf-definition-set:a2fd2b14141b97167ebf560e710dbfc49dcd8b818b38f8001e47b93954d2b5ca",
+      "definitionSetRevision": "xdf-definition-set-revision:3c54c3dff29ea1e192430fa36fce4672d3c33fed3101e18a76e335272f09e062",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1168,
+      "extractionCapableCount": 1166,
+      "conversionCount": 859,
+      "identityNoOpCount": 307,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "B58gen1/000030765A5005.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "000030765A5005"
+      ],
+      "sourceArtifactId": "xdf-source:69593d3694e8e5c20521c16c172d7dd363bd946dbf50b30a7a83ab8ae598f648",
+      "definitionSetId": "xdf-definition-set:0c7410706843ff2bb32f31f27cecad5aed9455a4780b06ac39b9932582541de5",
+      "definitionSetRevision": "xdf-definition-set-revision:2a1ca223484ae87d1b81136f060d5367d63401c7eb1a08ac5fd799d00baa1af9",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 951,
+      "extractionCapableCount": 949,
+      "conversionCount": 731,
+      "identityNoOpCount": 218,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "B58gen1/00003081501102.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "00003081501102"
+      ],
+      "sourceArtifactId": "xdf-source:ec0dc8a3a6a5673bc4c19c896579cb22fa725de663d41e8b3951edc450dcd1ea",
+      "definitionSetId": "xdf-definition-set:fcb895da23c6d1cf5916b5b64936a1bb339ae1f8b29724f2d45b936625a89a63",
+      "definitionSetRevision": "xdf-definition-set-revision:f8529b658a28616b21e18e08028e4929efd56cfbc611b7d0a9962a5f887abcbb",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1154,
+      "extractionCapableCount": 1154,
+      "conversionCount": 851,
+      "identityNoOpCount": 303,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen1/00003081501D04.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "00003081501D04"
+      ],
+      "sourceArtifactId": "xdf-source:7a5354f47b348d370396e321649e0a8ca46585a9c608ce3db2bfd716ac6e972e",
+      "definitionSetId": "xdf-definition-set:778a7542f4b360bb936d17c88816da0fd1167f253a5fb5edc53167930dd80a80",
+      "definitionSetRevision": "xdf-definition-set-revision:fb4d6a1aa843d45181df3998e4082fa4b436be8eaf1e7563daafac929530b3aa",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1155,
+      "extractionCapableCount": 1155,
+      "conversionCount": 851,
+      "identityNoOpCount": 304,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen1/00007972000705.xdf",
+      "family": "B58gen1",
+      "candidateRomIdentities": [
+        "00007972000705"
+      ],
+      "sourceArtifactId": "xdf-source:a2113f0eb25fe42c378eb1b47de7032990e2b8b59eeb58a42ae655eb5c375a60",
+      "definitionSetId": "xdf-definition-set:094b147cb350c17584202cedc8a45d11619ddbedff3151e44422497b28042be9",
+      "definitionSetRevision": "xdf-definition-set-revision:e0481c51a69b45aa9328dba345ab75cd997b459f58ca150a79348e3a36b03105",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1096,
+      "extractionCapableCount": 1096,
+      "conversionCount": 811,
+      "identityNoOpCount": 285,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55289606/00005D55289606.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55289606"
+      ],
+      "sourceArtifactId": "xdf-source:f65398e2578999351dc248506576ef10909a28df87e781a4ace0134e5b0671b9",
+      "definitionSetId": "xdf-definition-set:c2277976d60197ec1cc2b4ecee90b20c9d0cf1a9403d845cd86ff88d94ecb6f2",
+      "definitionSetRevision": "xdf-definition-set-revision:7717f6de56e714aa96f5fb1bb3f1a9963e1f8d1c1b5d65e5b3e6f1bf2b7911c5",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1198,
+      "extractionCapableCount": 1198,
+      "conversionCount": 904,
+      "identityNoOpCount": 294,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528AA06/00005D5528AA06.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5528AA06"
+      ],
+      "sourceArtifactId": "xdf-source:0ab4a6e15b5639a1bdc8b7bfbc43e50bf2475fb9eb5188ba77563a5d8b8406c7",
+      "definitionSetId": "xdf-definition-set:cca6f3a50800f59e9dd2dc04b43d87ade8cc081d3c5639e82c95e601ede9730a",
+      "definitionSetRevision": "xdf-definition-set-revision:b1e392258317795426fbf110b7fe2e51220cd93891ec02cc1bdebd061f5e7166",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1205,
+      "extractionCapableCount": 1205,
+      "conversionCount": 907,
+      "identityNoOpCount": 298,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528B405/00005D5528B405.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5528B405"
+      ],
+      "sourceArtifactId": "xdf-source:d6da02bf24eea31e40d9561f2660d08fa574ab2e383970fad2d5b1059a4f8f49",
+      "definitionSetId": "xdf-definition-set:3d1b4cdaffefbc2e047f660d52216d734d5d94671cf30302a945a4666f4cb339",
+      "definitionSetRevision": "xdf-definition-set-revision:8296061b8413e395844f810c20a36f46713bb2d7a3e405a200a0006e0fb282b4",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1200,
+      "extractionCapableCount": 1200,
+      "conversionCount": 907,
+      "identityNoOpCount": 293,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528BE07/00005D5528BE07.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5528BE07"
+      ],
+      "sourceArtifactId": "xdf-source:d6da02bf24eea31e40d9561f2660d08fa574ab2e383970fad2d5b1059a4f8f49",
+      "definitionSetId": "xdf-definition-set:3d1b4cdaffefbc2e047f660d52216d734d5d94671cf30302a945a4666f4cb339",
+      "definitionSetRevision": "xdf-definition-set-revision:8296061b8413e395844f810c20a36f46713bb2d7a3e405a200a0006e0fb282b4",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1200,
+      "extractionCapableCount": 1200,
+      "conversionCount": 907,
+      "identityNoOpCount": 293,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": "B58gen2/00005D5528B405/00005D5528B405.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases B58gen2/00005D5528B405/00005D5528B405.xdf."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528BE09/00005D5528BE09.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5528BE09"
+      ],
+      "sourceArtifactId": "xdf-source:d6da02bf24eea31e40d9561f2660d08fa574ab2e383970fad2d5b1059a4f8f49",
+      "definitionSetId": "xdf-definition-set:3d1b4cdaffefbc2e047f660d52216d734d5d94671cf30302a945a4666f4cb339",
+      "definitionSetRevision": "xdf-definition-set-revision:8296061b8413e395844f810c20a36f46713bb2d7a3e405a200a0006e0fb282b4",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1200,
+      "extractionCapableCount": 1200,
+      "conversionCount": 907,
+      "identityNoOpCount": 293,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": "B58gen2/00005D5528B405/00005D5528B405.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases B58gen2/00005D5528B405/00005D5528B405.xdf."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55327806/00005D55327806.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55327806"
+      ],
+      "sourceArtifactId": "xdf-source:c24ac2bab59977c5df4fa00e9aa2529f5117042fa7b4d95f7311ef345a38c1f0",
+      "definitionSetId": "xdf-definition-set:6b68ff800bf109b1ca03ab6647d20e3fcb082d5de4bc943f9781733a4dbcb454",
+      "definitionSetRevision": "xdf-definition-set-revision:2f72766e7a7683c381f6de29a5fcd4fd92ee96146a38df380cf1557f248a1384",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1243,
+      "extractionCapableCount": 1243,
+      "conversionCount": 928,
+      "identityNoOpCount": 315,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55328C05/00005D55328C05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55328C05"
+      ],
+      "sourceArtifactId": "xdf-source:dbeb9ed695c31187680c4cdd308e00a362f9eb47468d292e5c75dc3e146b92a4",
+      "definitionSetId": "xdf-definition-set:546224b52081e4ac6744c68faeaf3a3cfd8c7ced312ea3b3b021a6efb5ddcafc",
+      "definitionSetRevision": "xdf-definition-set-revision:d7efff741d6b735f395b3a10cf7484bfd95fd49b3cfb74c5a41c969fc4dda5ed",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1243,
+      "extractionCapableCount": 1243,
+      "conversionCount": 928,
+      "identityNoOpCount": 315,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55329606/00005D55329606.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55329606"
+      ],
+      "sourceArtifactId": "xdf-source:408067e4f578809f89b28fd7d14e2559c8bf508cee7b9465c33065bf7e82e361",
+      "definitionSetId": "xdf-definition-set:eb9e2c18d557cfdce948065690550488a62daac3b6f69bac7131fcb40206d8dd",
+      "definitionSetRevision": "xdf-definition-set-revision:f3c55aaf95bc3d0c8ac618e2cf2be013d2db77fc33064be6fc72e2070582de94",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1243,
+      "extractionCapableCount": 1243,
+      "conversionCount": 928,
+      "identityNoOpCount": 315,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532BE07/00005D5532BE07.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5532BE07"
+      ],
+      "sourceArtifactId": "xdf-source:e30b16c5c3065970c28b8e295ded0c2a6ae1db34260be4dca0d3f2f3fc05da41",
+      "definitionSetId": "xdf-definition-set:bb638fb53f8c7f2d2aaa9f94907adfd9efb36c95da20d05bc40120dd217d80b5",
+      "definitionSetRevision": "xdf-definition-set-revision:6ede70f55744fada336230a6315ddede99f565bfb8a26b63181c512f8826c2c3",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1238,
+      "extractionCapableCount": 1238,
+      "conversionCount": 928,
+      "identityNoOpCount": 310,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532BE09/00005D5532BE09.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5532BE09"
+      ],
+      "sourceArtifactId": "xdf-source:e30b16c5c3065970c28b8e295ded0c2a6ae1db34260be4dca0d3f2f3fc05da41",
+      "definitionSetId": "xdf-definition-set:bb638fb53f8c7f2d2aaa9f94907adfd9efb36c95da20d05bc40120dd217d80b5",
+      "definitionSetRevision": "xdf-definition-set-revision:6ede70f55744fada336230a6315ddede99f565bfb8a26b63181c512f8826c2c3",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1238,
+      "extractionCapableCount": 1238,
+      "conversionCount": 928,
+      "identityNoOpCount": 310,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": "B58gen2/00005D5532BE07/00005D5532BE07.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases B58gen2/00005D5532BE07/00005D5532BE07.xdf."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532C808/00005D5532C808.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5532C808"
+      ],
+      "sourceArtifactId": "xdf-source:ee1c5ad7ac227db2d121e0d12649c32adee2253b296a70e5a94d7991e9d33c73",
+      "definitionSetId": "xdf-definition-set:94b4dd460ce89c66582bf44009d332211972d454afa66e186af6520176766f52",
+      "definitionSetRevision": "xdf-definition-set-revision:db94b5530e49f2101c28a4c28e2c60dff219e9924f946c4e50c9f636b80653b2",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1234,
+      "extractionCapableCount": 1234,
+      "conversionCount": 927,
+      "identityNoOpCount": 307,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532DC05/00005D5532DC05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5532DC05"
+      ],
+      "sourceArtifactId": "xdf-source:414ef138960f2beec5813f835f756752c363ce449a43f5f45320ff6b1b5eb83b",
+      "definitionSetId": "xdf-definition-set:87d54467f84f635c154bf3047b649a02090f15b6237e91af2ed49ad88ae1efa8",
+      "definitionSetRevision": "xdf-definition-set-revision:b2ce0242bde45acd2f16bcc1c15976ba0e1024d5438b0822d7b15339d1ac3c04",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1238,
+      "extractionCapableCount": 1238,
+      "conversionCount": 928,
+      "identityNoOpCount": 310,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532E605/00005D5532E605.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5532E605"
+      ],
+      "sourceArtifactId": "xdf-source:7fbe3771e6da3d7b8998e811f7197ebec290d54152bb72e1cecae0cdb16395a4",
+      "definitionSetId": "xdf-definition-set:debd9db51ac45ea30fecc19787b2456ecfae3a8539c210691677316bbff0673e",
+      "definitionSetRevision": "xdf-definition-set-revision:f33a957fabdae1ab162faa91e9d70abc464642c79a6e6eb1b5434b1bebccf315",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1231,
+      "extractionCapableCount": 1231,
+      "conversionCount": 921,
+      "identityNoOpCount": 310,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "No responsible repository binary is available to prove exact membership."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C6405/00005D553C6405.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C6405"
+      ],
+      "sourceArtifactId": "xdf-source:3ac62b2d630d7c49755cf985168575174a1a1e1a7a0d4f3bee5d89ad508054fb",
+      "definitionSetId": "xdf-definition-set:65c9dc718ec628d190ae5fb94412470776ea0b91758a4e12ee456a1808666c16",
+      "definitionSetRevision": "xdf-definition-set-revision:6ff4f5302cc0e92b74b0f52e406ffc6fd136ddef943dfabcaecc401049bceb8d",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C6E05/00005D553C6E05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C6E05"
+      ],
+      "sourceArtifactId": "xdf-source:75bf85a3012a02811f5f7134bbea8881d7ffea6f36e73d536758de772912e333",
+      "definitionSetId": "xdf-definition-set:c9a4ae713851c913dc8d43f02cb0343b49f6cc67416110357f29ad8af46b2c79",
+      "definitionSetRevision": "xdf-definition-set-revision:9a2236c99cfe695abacde08182135aa4f9dd3348430ecdacef6167ce1420a1f9",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C7805/00005D553C7805.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C7805"
+      ],
+      "sourceArtifactId": "xdf-source:a5d72a77ee7b1fef6ebddac67d5229ccb920a72b6c23d286abaf755480650a6b",
+      "definitionSetId": "xdf-definition-set:7038b76eb271d541e4e8b2bb1af1906581d6a90abc6d2e8dafd0c13ded560b9c",
+      "definitionSetRevision": "xdf-definition-set-revision:1b743c67bae2ef0c22d201f56c7672c76a9ece64088a861be91f5b3f29c1ebdb",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C7807/00005D553C7807.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C7807"
+      ],
+      "sourceArtifactId": "xdf-source:3d1a404a1fc0710a5562b60cb0dbee0ca9cff99c8579652aab38fbb0d85970d2",
+      "definitionSetId": "xdf-definition-set:a0f2d60907c209982503593a64cb2aea57f59eaa89352fc0019ef38cfb08b72d",
+      "definitionSetRevision": "xdf-definition-set-revision:07e2522f0effc8ba4574c84beb524e6f8f714eb2f5f8b9ab57c21a62e3d8d51d",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C8207/00005D553C8207.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C8207"
+      ],
+      "sourceArtifactId": "xdf-source:4e114f259a53a2c15899ba7a5b8878390fc520548b00b265aefd2eb12ca2d0a3",
+      "definitionSetId": "xdf-definition-set:fd85d038a4d4ae1a6e456135f1c7887ef68987e51a52fa0b2c072620e088e36f",
+      "definitionSetRevision": "xdf-definition-set-revision:f5e4245dea89c13f0c291b0fbe9013e8833c6c7fcc3885df259dfea4d000ed91",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C8C05/00005D553C8C05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C8C05"
+      ],
+      "sourceArtifactId": "xdf-source:2a720d36a84761bc9372a38c2ba566d402db96e4927a3cdec2f20aaaad82f11b",
+      "definitionSetId": "xdf-definition-set:d366890c4a60e4c2ba9396c121ba8fcf205e703fca28479bf08895ec7b059a45",
+      "definitionSetRevision": "xdf-definition-set-revision:1a56a6d4ca0e83367b27d8d8c7df62c1be1e7f4ccd04232370d3421cc54fcc55",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C9607/00005D553C9607.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553C9607"
+      ],
+      "sourceArtifactId": "xdf-source:db87d897a579cc9e3be1821687bad5a34f6c69aa5a8cf6e9d1a51c854b0f28a4",
+      "definitionSetId": "xdf-definition-set:a9f6fb049cf1ad15d8585f51f6fea062ea8ff6112a0c0ef615fa7e36f3db21a4",
+      "definitionSetRevision": "xdf-definition-set-revision:11fa0b89aecd8f1f82900c81797e174b5a937776b6af0932c049c246bbd064f0",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CA007/00005D553CA007.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553CA007"
+      ],
+      "sourceArtifactId": "xdf-source:0c3230cd34b945a46e90e3a51109cc6a52a34795372259370e11c91c4615bfec",
+      "definitionSetId": "xdf-definition-set:303302bf43920a0a789f81666629145f9205d002de24485ddd8438e02f500cf4",
+      "definitionSetRevision": "xdf-definition-set-revision:6df45754031391c8f24042069d6b2b92e7a19ede5e746e1f012cda2f74420514",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CA009/00005D553CA009.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553CA009"
+      ],
+      "sourceArtifactId": "xdf-source:32211d13ee400983bfd8a0bbc3c318b917dc9f76ac8e421a4c2b8f48ebe56874",
+      "definitionSetId": "xdf-definition-set:c7df8ab9de757325c54de069f76eefc26c0c92a1e15048b0e25929576c748de2",
+      "definitionSetRevision": "xdf-definition-set-revision:5a22b7a73ba9eb2c2b624f45582916be077c4b327a285e9da6335664e7aa1fe8",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1234,
+      "extractionCapableCount": 1234,
+      "conversionCount": 925,
+      "identityNoOpCount": 309,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CAA08/00005D553CAA08.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553CAA08"
+      ],
+      "sourceArtifactId": "xdf-source:275799d4f4635a58c79e74cdd48cd2cad7fd38011bb168d2e3c1dd09f852f805",
+      "definitionSetId": "xdf-definition-set:e29ac247eb352c7a2f92b20d501f1cf9c94597d1b35cbbebf65877509de13c60",
+      "definitionSetRevision": "xdf-definition-set-revision:a5dca3007703dfb132d26a3e806b96842cdbce2b7ad49fd547b243b0803e8521",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CBE05/00005D553CBE05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553CBE05"
+      ],
+      "sourceArtifactId": "xdf-source:defdbea14baf529b1f011291c386bb276de5e54b68a0deb81d816cf06f9be062",
+      "definitionSetId": "xdf-definition-set:67bc158f4e5b1b6170ff2cd4eff6abcf0b377ba1f07a0ba7a97270a42f3110e9",
+      "definitionSetRevision": "xdf-definition-set-revision:eca256229757e4949d7e47cffaa5eee3e9abd370364e3773121ffa253f1f4c95",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1242,
+      "extractionCapableCount": 1242,
+      "conversionCount": 931,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CC805/00005D553CC805.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D553CC805"
+      ],
+      "sourceArtifactId": "xdf-source:cd5bf5b4a57ddd57933edd1e7ea782f5ca8882bbf44856b225ca129f71ba71e9",
+      "definitionSetId": "xdf-definition-set:76d4a7172ac06aab0bd7aab38435e1065cf37065d20bbf330a9824c9bf907d9e",
+      "definitionSetRevision": "xdf-definition-set-revision:253a73f6dd67f9e46182d610b3c5f3d96baaf0304ff2238da83ec9204e69d703",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1237,
+      "extractionCapableCount": 1237,
+      "conversionCount": 925,
+      "identityNoOpCount": 312,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55461E08/00005D55461E08.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55461E08"
+      ],
+      "sourceArtifactId": "xdf-source:473d8192b647fd133b3ef9a3fb708b111c9b14d65ce583df2784e2d052f2bf28",
+      "definitionSetId": "xdf-definition-set:3dcdec06e7dcc03ca1369e1b3c0b21485877157c8c6503dcff0406da9587064f",
+      "definitionSetRevision": "xdf-definition-set-revision:7e643489cac470db2607aeb9cbd3c1a2fe58ee3aeb8ec9a065e2df9e9e519993",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1240,
+      "extractionCapableCount": 1240,
+      "conversionCount": 929,
+      "identityNoOpCount": 311,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55463208/00005D55463208.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55463208"
+      ],
+      "sourceArtifactId": "xdf-source:96733edc27e656db730ec26faf2368c369179c36efcd8543832bc3dc9ae16bc2",
+      "definitionSetId": "xdf-definition-set:623a635d0f6e0cfaec133ad97f59480b0eb657556f9973d21d79b68bf2bae259",
+      "definitionSetRevision": "xdf-definition-set-revision:e91c0c31e6cf65fbd6f861c4284cf778af5e71794861760b77164478eb877e85",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55463C07/00005D55463C07.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55463C07"
+      ],
+      "sourceArtifactId": "xdf-source:e7929ac0f5490ff1c25764c2da300f1e70148e8511545ac823225baf08b224d9",
+      "definitionSetId": "xdf-definition-set:35ca9b004c869351eebd108d86f0c33b9bc63752b3724fc8fbc8e9b6e7481f45",
+      "definitionSetRevision": "xdf-definition-set-revision:28c2f7644cec897f471b76f5176932e175b8f7e271d530fd303800952f882815",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55464605/00005D55464605.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55464605"
+      ],
+      "sourceArtifactId": "xdf-source:5aa6518a0a062c69674ee944706920503e45ac46103d2d82a2d03bfb4f464ef6",
+      "definitionSetId": "xdf-definition-set:32d9d23ca1d4b541ebc7c5a3158e19f3fbdef4d3963f52a1acc8697ad728631c",
+      "definitionSetRevision": "xdf-definition-set-revision:108ab66b0d1c65d6cc1ea1fae7e9433de295968bc18dd3007246574803e63212",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55465005/00005D55465005.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55465005"
+      ],
+      "sourceArtifactId": "xdf-source:5aa8cc5b5b5f83b1e7a766a7ff889f64e2f1ded88a5719d6ec89b18485599a8e",
+      "definitionSetId": "xdf-definition-set:eb9c832e7b073592f51a17a7be9806a501a56521e7c6072024a1766a415b52a7",
+      "definitionSetRevision": "xdf-definition-set-revision:eb798b5de97841d093ae6d86de4ca9704f48c6786c9d4dc68d80ce0c617f9097",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55465A07/00005D55465A07.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55465A07"
+      ],
+      "sourceArtifactId": "xdf-source:1db8db4de36a9e4edf3e8533706f17def5f40e87023141d08014c65c9145e5d3",
+      "definitionSetId": "xdf-definition-set:7b4b29b288f23147eac4e4a6f5e59ade3d7299153ee78b55ff3bf38d8bf4ef71",
+      "definitionSetRevision": "xdf-definition-set-revision:2891e19b46b1f90ca31c642bdf316807e9ea66ca48adea0a62ba75fa14401f81",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55465A09/00005D55465A09.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55465A09"
+      ],
+      "sourceArtifactId": "xdf-source:1db8db4de36a9e4edf3e8533706f17def5f40e87023141d08014c65c9145e5d3",
+      "definitionSetId": "xdf-definition-set:7b4b29b288f23147eac4e4a6f5e59ade3d7299153ee78b55ff3bf38d8bf4ef71",
+      "definitionSetRevision": "xdf-definition-set-revision:2891e19b46b1f90ca31c642bdf316807e9ea66ca48adea0a62ba75fa14401f81",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": "B58gen2/00005D55465A07/00005D55465A07.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases B58gen2/00005D55465A07/00005D55465A07.xdf."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55466408/00005D55466408.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55466408"
+      ],
+      "sourceArtifactId": "xdf-source:a566068266ab7d31f0152fdcb887e4725071004be7801e77c23eda7d0034b99d",
+      "definitionSetId": "xdf-definition-set:2443185d50fe7cc157f8d116e48a6d84f519bd40b4cf0c22ccce31d60263089d",
+      "definitionSetRevision": "xdf-definition-set-revision:a1a44a81a20b2d761a2d9af5d0e56260998fbfb2d9f903edded58236252c9a63",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55467805/00005D55467805.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55467805"
+      ],
+      "sourceArtifactId": "xdf-source:85edf3adc81ade9252deeed5270b5a0626e997c83b9f87196d3a42ccc180cd25",
+      "definitionSetId": "xdf-definition-set:45478c3962c767140c5fb210964b97ce51415c9641579906b9de3302eb996f34",
+      "definitionSetRevision": "xdf-definition-set-revision:b362030dc669ead49f34c874eacda68ec057ee223c993eae3a611b802f8b25cb",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1235,
+      "extractionCapableCount": 1235,
+      "conversionCount": 929,
+      "identityNoOpCount": 306,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55468205/00005D55468205.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55468205"
+      ],
+      "sourceArtifactId": "xdf-source:7b4a525f386a14ad43f2fc1e5792baff76edc300d0b23606e568cc8e767f4d16",
+      "definitionSetId": "xdf-definition-set:5bdd290b6e8cd89f2e7ea34d6c7093b4dd777ff28002c3bc4e7d97580c7b1e94",
+      "definitionSetRevision": "xdf-definition-set-revision:6b32b5f280749c4fe8e66e4ce57ab2b72095fa5e816570024145eeaa58c21c4e",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1230,
+      "extractionCapableCount": 1230,
+      "conversionCount": 923,
+      "identityNoOpCount": 307,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55502807/00005D55502807.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55502807"
+      ],
+      "sourceArtifactId": "xdf-source:ddcc6429f9a828ab74dfe8dd6bfbfc5d5acc085a1114c19ff87a6873d1076d92",
+      "definitionSetId": "xdf-definition-set:c44f24111224b0d1c822d30e00bb84c616d328ae76c72d1d847b1aafcd50697a",
+      "definitionSetRevision": "xdf-definition-set-revision:7327cdc5345591fc6889dd7359074341c0b949af9da64e8a5912272bebaacd9c",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55503705/00005D55503705.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55503705"
+      ],
+      "sourceArtifactId": "xdf-source:908e038ea9ff640f0ea7ffe0f02f82bda57f8ac8624b5a4f9d85ac136b8379fa",
+      "definitionSetId": "xdf-definition-set:3a2391295c99583cd2b107618ce52d24f451a25fd3657ac671c047adf66280ed",
+      "definitionSetRevision": "xdf-definition-set-revision:b975010dd30a8c0fb7701a1a7eb18c1531e0ef3d23ae48f1e39d5322e882f3cd",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55503C05/00005D55503C05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55503C05"
+      ],
+      "sourceArtifactId": "xdf-source:622c3de99462f9143898546243cb90ce92f963f61b78ad5fbcf0aa4420316ebf",
+      "definitionSetId": "xdf-definition-set:71274fe934ad9ab902751914f5078aee01efacb4398f08fbc1af91d435cc3a64",
+      "definitionSetRevision": "xdf-definition-set-revision:22654864bf75daf8113a7a82e29d507043486940d2ffe4155fcbb1b82d5eceea",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55504807/00005D55504807.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55504807"
+      ],
+      "sourceArtifactId": "xdf-source:3a4f4a54e9a6f8bdc97d51689c5ad9277602c72d7f456b66ee5403bd21f342d1",
+      "definitionSetId": "xdf-definition-set:f3a0a4832f95dc087460f52c2bb58c7aaa33df0d1d658c4053c958bb12709897",
+      "definitionSetRevision": "xdf-definition-set-revision:4e84dda41ba6273c07a4995925fe0839b758a6013143adf3a22b18a90cdf506a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55504809/00005D55504809.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55504809"
+      ],
+      "sourceArtifactId": "xdf-source:3a4f4a54e9a6f8bdc97d51689c5ad9277602c72d7f456b66ee5403bd21f342d1",
+      "definitionSetId": "xdf-definition-set:f3a0a4832f95dc087460f52c2bb58c7aaa33df0d1d658c4053c958bb12709897",
+      "definitionSetRevision": "xdf-definition-set-revision:4e84dda41ba6273c07a4995925fe0839b758a6013143adf3a22b18a90cdf506a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": "B58gen2/00005D55504807/00005D55504807.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases B58gen2/00005D55504807/00005D55504807.xdf."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5550480C/00005D5550480C.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D5550480C"
+      ],
+      "sourceArtifactId": "xdf-source:5a74de25f8c00543df15667351baa8fc5ce81d6334ec1890abfd9a98ed3a6d00",
+      "definitionSetId": "xdf-definition-set:051d7af5a3b5db2146736a66fa365c2704f95a7163e442ce47048b6d39114a67",
+      "definitionSetRevision": "xdf-definition-set-revision:06fe4b43620d9db73eddd4cacffd31cc472b130a09081c105c332b550dff90e6",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55505008/00005D55505008.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55505008"
+      ],
+      "sourceArtifactId": "xdf-source:1c24d9688fbacebe1e549237ce2accbe76bd9e10bead8fc0731450c005943c57",
+      "definitionSetId": "xdf-definition-set:e559e2149dde853e4ce72347e74a576c6fb94feac6ccd1b2cd436366a56cf0e6",
+      "definitionSetRevision": "xdf-definition-set-revision:9cb301b1c3d842aadc7645f4ed0b71236b715443ea3d93b8c262e38a992021c4",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 4,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55506405/00005D55506405.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55506405"
+      ],
+      "sourceArtifactId": "xdf-source:e2a230f52fb530415a0c1e36718b1fe4ea127117fb65a77d78bd08b2a6c63d63",
+      "definitionSetId": "xdf-definition-set:958da5413d42007ca3276c1f6f1362deba65634d009bd5dc770e5c0d42a33af7",
+      "definitionSetRevision": "xdf-definition-set-revision:564a2b8adb928e2bbb3f3f40d45eab8a5d6f45ea8506b04f4231447cd9476318",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "No responsible repository binary is available to prove exact membership."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55506406/00005D55506406.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55506406"
+      ],
+      "sourceArtifactId": "xdf-source:03542cc830d216407500394e207c34fce7266007b46ffcf0bba5962da253f5d8",
+      "definitionSetId": "xdf-definition-set:55cd18a6eef45d8c9a29b33fbee53d7310cdc94b6b2529be0fff693a05b89f3e",
+      "definitionSetRevision": "xdf-definition-set-revision:f5babaf38738b8981c38435202d3db916999b22d8ddab5129b6f113b86a4d896",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1252,
+      "extractionCapableCount": 1252,
+      "conversionCount": 939,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55508C05/00005D55508C05.xdf",
+      "family": "B58gen2",
+      "candidateRomIdentities": [
+        "00005D55508C05"
+      ],
+      "sourceArtifactId": "xdf-source:ff29ab29a31d4839857223e1325db0177408b0f7f62112a0f2cfaa0e965b3079",
+      "definitionSetId": "xdf-definition-set:218bbf5941ad57516b4cc59d61dc345dfc346087abc155e91cdac1d28ce1bf6a",
+      "definitionSetRevision": "xdf-definition-set-revision:d1b63fc51e2e024d3a1bf81b6a720d7876a5c298a7f2c13bc815e87ad8ac7a58",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1247,
+      "extractionCapableCount": 1247,
+      "conversionCount": 933,
+      "identityNoOpCount": 314,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "No responsible repository binary is available to prove exact membership."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00000D07596401.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00000D07596401"
+      ],
+      "sourceArtifactId": "xdf-source:35fecac90001a033d0ec39c07fcff1d1ebc2067f7e441e75c26e8d4a8e0c4521",
+      "definitionSetId": "xdf-definition-set:243a94b72311e4f0939118cc46987a54f8e637d6b63a83f04fd5799a7ce4b169",
+      "definitionSetRevision": "xdf-definition-set-revision:e365c9a053fb99fce6c956e52ca478f46f638328d4a80dbd3976d1c3d9c345cb",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 882,
+      "extractionCapableCount": 874,
+      "conversionCount": 737,
+      "identityNoOpCount": 137,
+      "quarantineCount": 0,
+      "conflictCount": 16,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00000E2B3B0A01.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00000E2B3B0A01"
+      ],
+      "sourceArtifactId": "xdf-source:0f1869d5bc8b3f4c5c230ba227ebd31c7b29cbe9d200efea4cb94ce17343dde7",
+      "definitionSetId": "xdf-definition-set:fdc8063f1f4c7943ac15551fef902e796c271b009ba693065580f919d9573073",
+      "definitionSetRevision": "xdf-definition-set-revision:9350ab2bb52294398376862be80aeb1219abd71b70af59499d54e640cb6ddc1a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 777,
+      "extractionCapableCount": 769,
+      "conversionCount": 636,
+      "identityNoOpCount": 133,
+      "quarantineCount": 0,
+      "conflictCount": 16,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00000FEF81A001.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00000FEF81A001"
+      ],
+      "sourceArtifactId": "xdf-source:0a48391023501005080775c5e6ad9975d5ad42f624e570872edc62ae346171a9",
+      "definitionSetId": "xdf-definition-set:62a2e3550640d32d13d66397f413292fc42a929b4a28ed2c854d3187a21d6afe",
+      "definitionSetRevision": "xdf-definition-set-revision:37f3fe4ff923a73e4ce4041177d472cf4439e2e3e1bf93950bf805442472a49a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 962,
+      "extractionCapableCount": 958,
+      "conversionCount": 794,
+      "identityNoOpCount": 164,
+      "quarantineCount": 0,
+      "conflictCount": 8,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00001A841D1401.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00001A841D1401"
+      ],
+      "sourceArtifactId": "xdf-source:7eaee730bccf725a27473c3bd8cee5518a30068e5b5bb6c3a08a4ee7a8fd388d",
+      "definitionSetId": "xdf-definition-set:71702e3b332bcd67209d4fbc4b66d8cb19e38ba2ae08615abffad79c7171923b",
+      "definitionSetRevision": "xdf-definition-set-revision:d9b91648ac1f91a915f125aef96de82cdb91074ecde8091c18732ca9cba3720c",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1278,
+      "extractionCapableCount": 1276,
+      "conversionCount": 1002,
+      "identityNoOpCount": 274,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00001A841D2801.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00001A841D2801"
+      ],
+      "sourceArtifactId": "xdf-source:78cff1f475adf5b3cafa0c04a1db76644c157fd85cc61b71b181f302bfcf3362",
+      "definitionSetId": "xdf-definition-set:f48c60d8f62efffa9c9af837eca872e3413ef8da1ca0cb6e7bd3eaee04f51ba9",
+      "definitionSetRevision": "xdf-definition-set-revision:8ecaf131173f2a183319ad0212ab9c67c9f16a910c172536921f5733cef73beb",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1273,
+      "extractionCapableCount": 1271,
+      "conversionCount": 996,
+      "identityNoOpCount": 275,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00001C41279601.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00001C41279601"
+      ],
+      "sourceArtifactId": "xdf-source:827b210fc2d8fe6db140e58ebd01c4012a2fdd10048dd06627d8f7bc74a6c544",
+      "definitionSetId": "xdf-definition-set:a94d7e483167b1613c5e9a0ad16661603b31ec7ea5c487a0c77a76ef6218d68e",
+      "definitionSetRevision": "xdf-definition-set-revision:6f004cc42e8ab3fdcf8681fec68bd3c721d80ad1e96452004ad5269d00f4c984",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 965,
+      "extractionCapableCount": 961,
+      "conversionCount": 797,
+      "identityNoOpCount": 164,
+      "quarantineCount": 0,
+      "conflictCount": 8,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/000021571D8202.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "000021571D8202"
+      ],
+      "sourceArtifactId": "xdf-source:4ac1f37d228926def3420fc0fb72bd3ca4c72873427181bd9dcdb55037e8ac34",
+      "definitionSetId": "xdf-definition-set:b96da86f15ccf2903a4e39398e88673be123160daa06eda31946a2595c0c2134",
+      "definitionSetRevision": "xdf-definition-set-revision:168da423cdc9653ab7b976141df863865f970984bc09b7657a712430e9b2fbcf",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1100,
+      "extractionCapableCount": 1094,
+      "conversionCount": 917,
+      "identityNoOpCount": 177,
+      "quarantineCount": 0,
+      "conflictCount": 12,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/000021571DAA01.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "000021571DAA01"
+      ],
+      "sourceArtifactId": "xdf-source:f846df69c5b4bea67e178d8cec6b478b9ce6867b3f15eacaf5f401bbdb5efe85",
+      "definitionSetId": "xdf-definition-set:d22be6348387c3b74b9e684abd189069f8b6605eba23c9f58ae0ac01586ce928",
+      "definitionSetRevision": "xdf-definition-set-revision:ac01d292b21a090dbbdfebd0299227fae10024a34e37c941e33d9743d0e1162c",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1111,
+      "extractionCapableCount": 1109,
+      "conversionCount": 927,
+      "identityNoOpCount": 182,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/000021571DBE01.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "000021571DBE01"
+      ],
+      "sourceArtifactId": "xdf-source:d0d9132315394496c52fdc4c83d3cf8fa0067822e426f24ee4db5ed6172e78b9",
+      "definitionSetId": "xdf-definition-set:7d8a5e454419128b6f09ca053adc2e2f5ab5174b6cda3673cb5711752508116e",
+      "definitionSetRevision": "xdf-definition-set-revision:f3f5d8c9e8b3dd7060560a04c72b6b8dcffb50ee560aedecc087bfc71f5cc501",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1111,
+      "extractionCapableCount": 1109,
+      "conversionCount": 927,
+      "identityNoOpCount": 182,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00002DF2132801.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00002DF2132801"
+      ],
+      "sourceArtifactId": "xdf-source:fa3fc8f6c334aaae60686e6a3d5bb70bfe323c8f8b0bf7643511040234fe34e4",
+      "definitionSetId": "xdf-definition-set:f82239aa49e2274fbd82402a655f3e5ad9d6e50d38dcf861fe553acc2e551b0e",
+      "definitionSetRevision": "xdf-definition-set-revision:2c546d0d0f4a676eea49c764051207df00b4467189f83aa4892228ea36d340f1",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1052,
+      "extractionCapableCount": 1046,
+      "conversionCount": 851,
+      "identityNoOpCount": 195,
+      "quarantineCount": 0,
+      "conflictCount": 12,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00005BA8134601.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00005BA8134601"
+      ],
+      "sourceArtifactId": "xdf-source:0d1bd7932e7d4207cae7e9316f62004f15bb72392c5ebdbd0d1f88afeb21d67a",
+      "definitionSetId": "xdf-definition-set:c025461ce1f212c9517cb234285132c14ff50486824b41add40c21ef718f712e",
+      "definitionSetRevision": "xdf-definition-set-revision:1e029074e526ecc34ecafa491f0d109a0f41a6530ee663369b2ca5d385a70062",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1306,
+      "extractionCapableCount": 1304,
+      "conversionCount": 1010,
+      "identityNoOpCount": 294,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "AMBIGUOUS_PLATFORM_OR_ROM",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Folder and filename identity do not establish an exact platform/ROM relationship.",
+        "Technical failures must also be resolved before qualification."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00005BA8135001.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00005BA8135001"
+      ],
+      "sourceArtifactId": "xdf-source:0d1bd7932e7d4207cae7e9316f62004f15bb72392c5ebdbd0d1f88afeb21d67a",
+      "definitionSetId": "xdf-definition-set:c025461ce1f212c9517cb234285132c14ff50486824b41add40c21ef718f712e",
+      "definitionSetRevision": "xdf-definition-set-revision:1e029074e526ecc34ecafa491f0d109a0f41a6530ee663369b2ca5d385a70062",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1306,
+      "extractionCapableCount": 1304,
+      "conversionCount": 1010,
+      "identityNoOpCount": 294,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": "F series N55 S55 N13/00005BA8134601.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases F series N55 S55 N13/00005BA8134601.xdf."
+      ]
+    },
+    {
+      "relativePath": "F series N55 S55 N13/00005BA8135A01.xdf",
+      "family": "F series N55 S55 N13",
+      "candidateRomIdentities": [
+        "00005BA8135A01"
+      ],
+      "sourceArtifactId": "xdf-source:0d1bd7932e7d4207cae7e9316f62004f15bb72392c5ebdbd0d1f88afeb21d67a",
+      "definitionSetId": "xdf-definition-set:c025461ce1f212c9517cb234285132c14ff50486824b41add40c21ef718f712e",
+      "definitionSetRevision": "xdf-definition-set-revision:1e029074e526ecc34ecafa491f0d109a0f41a6530ee663369b2ca5d385a70062",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1306,
+      "extractionCapableCount": 1304,
+      "conversionCount": 1010,
+      "identityNoOpCount": 294,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 2,
+      "duplicateOf": "F series N55 S55 N13/00005BA8134601.xdf",
+      "lifecycleState": "content_alias",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Content aliases F series N55 S55 N13/00005BA8134601.xdf."
+      ]
+    },
+    {
+      "relativePath": "N54/I8A0S_Legacy.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "I8A0S_LEGACY"
+      ],
+      "sourceArtifactId": "xdf-source:66a16f72cf7003a564d6a354c0db09a3e6e4d552dcd579ac5babfb14e8a30e5c",
+      "definitionSetId": "xdf-definition-set:24f705271bf32281d9e1cc3ffe78897d5554d4050111f37d3da6c01f80e86c70",
+      "definitionSetRevision": "xdf-definition-set-revision:6e8bf181b3100cafc62bd806135c95c7fb22d56f36e79880a75e1fa0d84820d4",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 487,
+      "extractionCapableCount": 487,
+      "conversionCount": 303,
+      "identityNoOpCount": 184,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "legacy",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Legacy source is outside current relationship scope."
+      ]
+    },
+    {
+      "relativePath": "N54/I8A0S.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "I8A0S"
+      ],
+      "sourceArtifactId": "xdf-source:908226f2cb9ad9371543d51c79bcf6624535a5febbbd29e1341e3970db95979a",
+      "definitionSetId": "xdf-definition-set:46ee937952297857fa93f76d3ab1578708fd394b97171b9d47a9b44024c7442f",
+      "definitionSetRevision": "xdf-definition-set-revision:719478c2d8c72f0703e462fb3b7852b71bd9e0f505e18a1476a8ccf4618a7ed5",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 721,
+      "extractionCapableCount": 721,
+      "conversionCount": 481,
+      "identityNoOpCount": 240,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "VIEW_QUALIFIED_EXACT",
+      "capabilities": [
+        "CATALOGED",
+        "VIEW_QUALIFIED"
+      ],
+      "viewQualified": true,
+      "blockers": []
+    },
+    {
+      "relativePath": "N54/IJE0S_Legacy.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "IJE0S_LEGACY"
+      ],
+      "sourceArtifactId": "xdf-source:3280fb490fe557dc13375c7819d05c5254db0451483480552dcd3825016e6538",
+      "definitionSetId": "xdf-definition-set:719c58b851915abd88f750e92f022734fe1fe5dcf08856f6bdebdbc1d6e1ead1",
+      "definitionSetRevision": "xdf-definition-set-revision:4288705ac67cc01c8d2f83b1a1f540da1bf5e6529f60675e346a82da0bd86976",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 562,
+      "extractionCapableCount": 541,
+      "conversionCount": 329,
+      "identityNoOpCount": 212,
+      "quarantineCount": 0,
+      "conflictCount": 42,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "legacy",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Legacy source is outside current relationship scope."
+      ]
+    },
+    {
+      "relativePath": "N54/IJE0S.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "IJE0S"
+      ],
+      "sourceArtifactId": "xdf-source:b6e77d9b5d25a7ea108c0e5ffbc43fe91de89d96912b10e8e6be871a28c3065c",
+      "definitionSetId": "xdf-definition-set:8c2a83f7c3b73a1d9fbeb7589432b6de977c04a87e7e34b1315aaed048a00cdb",
+      "definitionSetRevision": "xdf-definition-set-revision:1a932b41ee2d9ea234971fce9d6188dfbe23c33d625bd32bcf1a2e3f2d048c91",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 739,
+      "extractionCapableCount": 739,
+      "conversionCount": 491,
+      "identityNoOpCount": 248,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "VIEW_QUALIFIED_EXACT",
+      "capabilities": [
+        "CATALOGED",
+        "VIEW_QUALIFIED"
+      ],
+      "viewQualified": true,
+      "blockers": []
+    },
+    {
+      "relativePath": "N54/IKM0S_Legacy.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "IKM0S_LEGACY"
+      ],
+      "sourceArtifactId": "xdf-source:8f1a3a16d717fd871304843da6d4765708a80c7eca16a0ad8e79c16feeaf05fa",
+      "definitionSetId": "xdf-definition-set:19bf54a2d44a702a391b585f4d8dcf8ccb179749c23e311a5143b840afe0e7c8",
+      "definitionSetRevision": "xdf-definition-set-revision:c34cff181c8ae47f28bc7e6619566a907035ce4b191a7a821c2aa795b55ff007",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 525,
+      "extractionCapableCount": 504,
+      "conversionCount": 323,
+      "identityNoOpCount": 181,
+      "quarantineCount": 0,
+      "conflictCount": 42,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "legacy",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Legacy source is outside current relationship scope."
+      ]
+    },
+    {
+      "relativePath": "N54/IKM0S.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "IKM0S"
+      ],
+      "sourceArtifactId": "xdf-source:744e21f9403bf41b5a64f56a52148ce1d580c2810811952ec411268eadd5ef3a",
+      "definitionSetId": "xdf-definition-set:c69ffb69850c60645bfc1464a0e0ea566f3ce589cc2430ae4c48de9622ba28b7",
+      "definitionSetRevision": "xdf-definition-set-revision:977d3012490714662ac4ab552087b2c84fb96eeae5505fa74df0ca93d8829126",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 707,
+      "extractionCapableCount": 707,
+      "conversionCount": 491,
+      "identityNoOpCount": 216,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "VIEW_QUALIFIED_EXACT",
+      "capabilities": [
+        "CATALOGED",
+        "VIEW_QUALIFIED"
+      ],
+      "viewQualified": true,
+      "blockers": []
+    },
+    {
+      "relativePath": "N54/INA0S_Legacy.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "INA0S_LEGACY"
+      ],
+      "sourceArtifactId": "xdf-source:2e96e0167bac4e40179db5a0d695298b2bebd076e7e5e76918da0db1b4195886",
+      "definitionSetId": "xdf-definition-set:eb192cc1af801aa3cbc9af41837b5d4999e66696fa5ec1175d2ef85709383ec0",
+      "definitionSetRevision": "xdf-definition-set-revision:5a53fe0f3e2ab7da6abd515d05ba91af7cc07608e8771e1e30fb4b932c79dfb0",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 539,
+      "extractionCapableCount": 518,
+      "conversionCount": 327,
+      "identityNoOpCount": 191,
+      "quarantineCount": 0,
+      "conflictCount": 42,
+      "binaryCount": 0,
+      "duplicateOf": null,
+      "lifecycleState": "legacy",
+      "cohort": "LEGACY_SUPERSEDED_OR_DUPLICATE",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Legacy source is outside current relationship scope."
+      ]
+    },
+    {
+      "relativePath": "N54/INA0S.xdf",
+      "family": "N54",
+      "candidateRomIdentities": [
+        "INA0S"
+      ],
+      "sourceArtifactId": "xdf-source:b7a8917b9608e19fc733abf1220c9cf0eb44c962e36a9674f3dadcfdb77c4c02",
+      "definitionSetId": "xdf-definition-set:1418e549f2cf76c8570d070689baecdbe666335d16061ab229fcda30167db8ee",
+      "definitionSetRevision": "xdf-definition-set-revision:53b2a79d395e955e4d9dc20337b6b5210dede084f67f6ba6e01d35972ca906d1",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 717,
+      "extractionCapableCount": 717,
+      "conversionCount": 489,
+      "identityNoOpCount": 228,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "VIEW_QUALIFIED_EXACT",
+      "capabilities": [
+        "CATALOGED",
+        "VIEW_QUALIFIED"
+      ],
+      "viewQualified": true,
+      "blockers": []
+    },
+    {
+      "relativePath": "N55E/98G0B.xdf",
+      "family": "N55E",
+      "candidateRomIdentities": [
+        "98G0B"
+      ],
+      "sourceArtifactId": "xdf-source:bcc060c8532719e211f7604fbc9b81fdb4be41dabd1388ea85a6e9a83792e985",
+      "definitionSetId": "xdf-definition-set:200e2e21620b0bd1786f29d392d62fb2f3b2be6efb06db86d7ed8db1174cc034",
+      "definitionSetRevision": "xdf-definition-set-revision:b4aea998f175220eb9c97fd784774b13b84e7a3060f8ca35435a53767e9f49b6",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1012,
+      "extractionCapableCount": 1008,
+      "conversionCount": 850,
+      "identityNoOpCount": 158,
+      "quarantineCount": 0,
+      "conflictCount": 8,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "N55E/9E60B.xdf",
+      "family": "N55E",
+      "candidateRomIdentities": [
+        "9E60B"
+      ],
+      "sourceArtifactId": "xdf-source:faa7230d05ab6954eb7d11c21627717cea41ddf19806fbf28e8e818fb417ea1a",
+      "definitionSetId": "xdf-definition-set:e62f3927935ae1d2d425e299859a7fa22bb44ef8e5cb09a37db94ebda7fe5f8d",
+      "definitionSetRevision": "xdf-definition-set-revision:2b95f0e07c3fecbd0d7eab0eb482a26a059986f08556a48989d5a746fce6ee19",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1018,
+      "extractionCapableCount": 1018,
+      "conversionCount": 864,
+      "identityNoOpCount": 154,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A6405/00005C640A6405.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C640A6405"
+      ],
+      "sourceArtifactId": "xdf-source:e5e0add9ecb8876a16fe5c4b93bc3714fc4b2d415565dc18d663f1ac4a70e46e",
+      "definitionSetId": "xdf-definition-set:28148933e7edc57b7a7391d0a4c4ddc423b38db5b092de9b87a6a203a8228dc3",
+      "definitionSetRevision": "xdf-definition-set-revision:8043aef7d3b29acbdaca72744ae716aa22742d5cc9e1841588eb05d90cbf54df",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1206,
+      "extractionCapableCount": 1206,
+      "conversionCount": 893,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A8205/00005C640A8205.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C640A8205"
+      ],
+      "sourceArtifactId": "xdf-source:d3d8abbb9d4827d91abb8b53cbdf988870027e90b1243d9be0daf731bc04751c",
+      "definitionSetId": "xdf-definition-set:2d41dc99cf0f3e3d62e529a885572008497472db748626252d15ae6f9f9e700d",
+      "definitionSetRevision": "xdf-definition-set-revision:beadab977ba5e6e3698bc93b4efb1620e7c2bfed15907eafd55cbc935208674a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1206,
+      "extractionCapableCount": 1206,
+      "conversionCount": 893,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A8C05/00005C640A8C05.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C640A8C05"
+      ],
+      "sourceArtifactId": "xdf-source:5ffb4f98f61b238e6906ef7b163f247e75c4ba40c99a55b5ea36253152ac3b00",
+      "definitionSetId": "xdf-definition-set:4748e565cb6d7ac5cdc4c7629696a173b0473306a826f66c3b0381f3cada9e4f",
+      "definitionSetRevision": "xdf-definition-set-revision:fef182a4425f73beed8e8948c1dfc5e199a0eec17c29c037dbdfa1aa253ee309",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1206,
+      "extractionCapableCount": 1206,
+      "conversionCount": 893,
+      "identityNoOpCount": 313,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64143206/00005C64143206.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64143206"
+      ],
+      "sourceArtifactId": "xdf-source:8fff783f953aac628a7bb8927364f064d86debc53ee2704cc751f063035f45b9",
+      "definitionSetId": "xdf-definition-set:11a1ff48b60557a5080fdf1f0a9caad72a9ef31749e23a2a6ff54f2d5486c313",
+      "definitionSetRevision": "xdf-definition-set-revision:3e7701f9fc24a2283ad10a26ff6b8b9d5cff4320e8fd5cdbf085b8fba9c45aa9",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 939,
+      "identityNoOpCount": 338,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64143C05/00005C64143C05.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64143C05"
+      ],
+      "sourceArtifactId": "xdf-source:92d1689434c93caa3c9fae4c453c14a73ab2ad454b095301a2fff98904b8ac51",
+      "definitionSetId": "xdf-definition-set:5050da92e2b4489f6ee9cfa0304b2af23bd51bf83f7b044865b54a5cbb1c1a4e",
+      "definitionSetRevision": "xdf-definition-set-revision:4001fc0f05e9d62a32a43d1019d2005ebbeea39062c6d29c57d69391127fbc03",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 941,
+      "identityNoOpCount": 336,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64144606/00005C64144606.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64144606"
+      ],
+      "sourceArtifactId": "xdf-source:f69645eecb454625e3ba8f94703b007c12526bd166c063b758a7c808803871ac",
+      "definitionSetId": "xdf-definition-set:d70899931eee98a738fe19b8bb4bd8a8c7ca828df548a963d95bea326f169173",
+      "definitionSetRevision": "xdf-definition-set-revision:27fe6b6ecde13b2af1658ba4246909d89ddf227d9e381330cc5b3a6722b9e418",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 939,
+      "identityNoOpCount": 338,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64145007/00005C64145007.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64145007"
+      ],
+      "sourceArtifactId": "xdf-source:1cbf5cd986a1b2992d72242c9eb00f82dea7737de593f7ac07652f8b1085c448",
+      "definitionSetId": "xdf-definition-set:dc301326cf9787103f0ba63b3723c6eea8db5263dab652f49589d8c15b763c03",
+      "definitionSetRevision": "xdf-definition-set-revision:e3f4fec2dbccb1074b43ed49e87d79efef9f82f94f50e6f12dbc0ba36a8e7f7e",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1276,
+      "extractionCapableCount": 1276,
+      "conversionCount": 940,
+      "identityNoOpCount": 336,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64145A05/00005C64145A05.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64145A05"
+      ],
+      "sourceArtifactId": "xdf-source:686ce3a4bd27c88bd9d69db2e21e0fb5cb8a74d637de64d2637441f94d3a9b89",
+      "definitionSetId": "xdf-definition-set:d5a25a67976a341397a9f2b7422a939189125d1de65fb8c3a41aca45ee39ab66",
+      "definitionSetRevision": "xdf-definition-set-revision:d0001207065f7266d9eb7dd69b84dde60b49ae22066aacef65f46644c78dc5b0",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 942,
+      "identityNoOpCount": 335,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64146E06/00005C64146E06.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64146E06"
+      ],
+      "sourceArtifactId": "xdf-source:72ecf244b61ee31eab54d0bce3361f0d0a940bef088d46306b9fc4a86e5cb793",
+      "definitionSetId": "xdf-definition-set:6d7ab2629f882cd2fd095aa007ebbb5d8346418505ff0c035eac97e84f0bd64b",
+      "definitionSetRevision": "xdf-definition-set-revision:522bf4cdc5e5d0f03f6ab9aec01ef938d4e9c6c9ed95658fe030eaa1341e00ef",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 942,
+      "identityNoOpCount": 335,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64148205/00005C64148205.xdf",
+      "family": "s58",
+      "candidateRomIdentities": [
+        "00005C64148205"
+      ],
+      "sourceArtifactId": "xdf-source:e509afcee348a35137862b18ad6c36fb866e70ee79f632abceb09781257ebe6c",
+      "definitionSetId": "xdf-definition-set:a9b30eb28f103fc489ef18ae3ebc5b264687b2cc8e60e259c7874ac77a12cedd",
+      "definitionSetRevision": "xdf-definition-set-revision:225927e0c8313e4bbb936237e8df0f1efa60837d4e8ee52bbf83babc763a3ebf",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 1277,
+      "extractionCapableCount": 1277,
+      "conversionCount": 942,
+      "identityNoOpCount": 335,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 2,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/000010CA3B8C01.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "000010CA3B8C01"
+      ],
+      "sourceArtifactId": "xdf-source:8334aed33c418662d38f2905ba34a6cd09b8174dadf2c7de6ad860fc388a7999",
+      "definitionSetId": "xdf-definition-set:9673c736060fe4e17d61cd400806690fc8d1c539fa53a6b8889b617aa510151a",
+      "definitionSetRevision": "xdf-definition-set-revision:22d5784d8e3597ddcfc890b7dd84aa74fe34b1a53e48e2bdd5d9a0265f78a05e",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 515,
+      "extractionCapableCount": 511,
+      "conversionCount": 452,
+      "identityNoOpCount": 59,
+      "quarantineCount": 0,
+      "conflictCount": 8,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "S63/000010CA598C01.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "000010CA598C01"
+      ],
+      "sourceArtifactId": "xdf-source:abd02ad5493c096f3abeaf465cf83b72669f4db6d09879c57c8841c98cbd413e",
+      "definitionSetId": "xdf-definition-set:f8d7f377c0bd5fa34168c50bdef91fb84b5e0b01ffda473e658eebeba9b36cba",
+      "definitionSetRevision": "xdf-definition-set-revision:9f45b54b709dedfd93eb93b9ebe1c4868ef112a6b1c9c8cafaaa516972ac4455",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 508,
+      "extractionCapableCount": 502,
+      "conversionCount": 438,
+      "identityNoOpCount": 64,
+      "quarantineCount": 0,
+      "conflictCount": 12,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF0A3204/00004ACF0A3204.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF0A3204"
+      ],
+      "sourceArtifactId": "xdf-source:c11647a5a88d0f7a594e0506f46768ef8db66441527e4a33d1d78411a27a0b25",
+      "definitionSetId": "xdf-definition-set:2000eac1763a6adc9fa8ee587f2da594b68d5495cc9f1eca1dd7d2f2570e8b7d",
+      "definitionSetRevision": "xdf-definition-set-revision:80171f4c35909c883eb99aff92166dace26eec7bc68cf883db7a15a654af753d",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 564,
+      "extractionCapableCount": 562,
+      "conversionCount": 388,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 4,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "UNRESOLVED_CONFLICT",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF147803/00004ACF147803.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF147803"
+      ],
+      "sourceArtifactId": "xdf-source:8ae65e1ddc8edc453fa71b7dc9f3c103a66c0700e11d23e20c0bf855eabb9a62",
+      "definitionSetId": "xdf-definition-set:513d6cfc73b4ea2012bed6688592e08e6fc9668d7e69b6460fb0a6d90de3294a",
+      "definitionSetRevision": "xdf-definition-set-revision:4dd31872a399b98e16b2677ffbc3c2bb3fe37fd4273eb8a0348b4a98509460da",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 569,
+      "extractionCapableCount": 569,
+      "conversionCount": 390,
+      "identityNoOpCount": 179,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E6E05/00004ACF1E6E05.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1E6E05"
+      ],
+      "sourceArtifactId": "xdf-source:2f49f094eacdb8e50dbc12c97fb1aa6bcb52179f779ae3ba3d90541d01cce699",
+      "definitionSetId": "xdf-definition-set:897d762a41a14624764d2222aff1c5ebddd778c1daa10c1c0acfc351ae592ba3",
+      "definitionSetRevision": "xdf-definition-set-revision:bd6adf741b07914b38f71648407b216b565d5de5b0294db17d6a728f4550ba4a",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E7805/00004ACF1E7805.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1E7805"
+      ],
+      "sourceArtifactId": "xdf-source:11a32ce3f2827bb3555660e59f84984d8a434dd4cb81cff8f3c651c3c2f9c066",
+      "definitionSetId": "xdf-definition-set:6a526739382dad34887be667ddc0caad10137ec28851b005e9341228b14c0cc4",
+      "definitionSetRevision": "xdf-definition-set-revision:7742b365fd6b2ef97b6381d616aeabafefd39103816c155d8a84d76af0847891",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E9605/00004ACF1E9605.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1E9605"
+      ],
+      "sourceArtifactId": "xdf-source:87d980ab2a2367d9b3e5a631c6784da3bbce20161e484225220e8c2312d5bc23",
+      "definitionSetId": "xdf-definition-set:efe47c3e33c3e6a30003d0902bd8bf5c4ffece875588e9b514015a7184d284f4",
+      "definitionSetRevision": "xdf-definition-set-revision:69845360a5f466a5b7b864197fe3df336bdab4f2e029e4252040306264ff2ad2",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EA006/00004ACF1EA006.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1EA006"
+      ],
+      "sourceArtifactId": "xdf-source:359622db26a85b2ad93f7c7d727a188bd7439eac04801f51491ba7dbcabb8a3a",
+      "definitionSetId": "xdf-definition-set:4375f2bd734c9a8728ca9829fb8b9cca9c78f77ba0ba5d9bc70bf5ba3f638a1a",
+      "definitionSetRevision": "xdf-definition-set-revision:a5403359b301e7539a6a90f0707e3adf4fd14ad67922a1f80699c8f05cf86493",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EAA05/00004ACF1EAA05.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1EAA05"
+      ],
+      "sourceArtifactId": "xdf-source:a81671c509be027842bbbecccd03e4b622a3d5a5c4833495e15c839a79d3a148",
+      "definitionSetId": "xdf-definition-set:bb1c4d3eb6a34524a668a816967fd70f60d2f890393be067a242af0c51eac2cf",
+      "definitionSetRevision": "xdf-definition-set-revision:f3485486e30ce06d709080bb0b2d244ffbc2c6c52efca6e82d239f76bc620f53",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EB405/00004ACF1EB405.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF1EB405"
+      ],
+      "sourceArtifactId": "xdf-source:a0dd0d4b8244fe019d90947916fb9cdb088002ec02b5feb654e8746b0561c8b6",
+      "definitionSetId": "xdf-definition-set:2aecdc5f4cbdde946fc6cb98202911b5a2f41e72f108a020af5c2ce5bbb58537",
+      "definitionSetRevision": "xdf-definition-set-revision:b6dd1b7398f4c5320849847d75b139954b75406da043fd0aa90df96c9b5a716c",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 560,
+      "extractionCapableCount": 560,
+      "conversionCount": 386,
+      "identityNoOpCount": 174,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF286E05/00004ACF286E05.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF286E05"
+      ],
+      "sourceArtifactId": "xdf-source:7bf67fc5797c7c68db2401fbd65165e3e6c97b92c13b49d97d5e3c902cd39be9",
+      "definitionSetId": "xdf-definition-set:6054348e18731701fdfb3084df3aededd5c82707ffffe9e039fd93bf0d108d23",
+      "definitionSetRevision": "xdf-definition-set-revision:bb02366c45671802e4e5a90c9264c8136cbd29614430a0e943ece74455a4f37e",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 567,
+      "extractionCapableCount": 567,
+      "conversionCount": 391,
+      "identityNoOpCount": 176,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF287806/00004ACF287806.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF287806"
+      ],
+      "sourceArtifactId": "xdf-source:075a731fd96db143c0e8f3510ff5528c920cc098200d8e71cc5a0ba5c429d358",
+      "definitionSetId": "xdf-definition-set:ede9fe8ec26564709558b68ee39858ce5aa71132075124ca25cde5a98e167ae9",
+      "definitionSetRevision": "xdf-definition-set-revision:a0b1498b12754bc974a85ba2760f923dc345e7516ba4a64411a869040941d7c5",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 567,
+      "extractionCapableCount": 567,
+      "conversionCount": 391,
+      "identityNoOpCount": 176,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF288205/00004ACF288205.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF288205"
+      ],
+      "sourceArtifactId": "xdf-source:30a75458f4c3c98d8fac3d84cd1d8ea3541db13c13afa0b98ae76d7a38b71546",
+      "definitionSetId": "xdf-definition-set:dc474042237b19805c1121d07c3e13a56412144ae73678f6030114ef709d58c7",
+      "definitionSetRevision": "xdf-definition-set-revision:058badb396ca60f9a21b3b7c68bae9a9d1af38d6fc08d6892988aabf30adcecd",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 567,
+      "extractionCapableCount": 567,
+      "conversionCount": 391,
+      "identityNoOpCount": 176,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF289605/00004ACF289605.xdf",
+      "family": "S63",
+      "candidateRomIdentities": [
+        "00004ACF289605"
+      ],
+      "sourceArtifactId": "xdf-source:86f5e5464f911c6d13c11f04b0da1d79b49835a98323ae8c2bb51a68b2675f67",
+      "definitionSetId": "xdf-definition-set:35b17bb38483940a18000831459bf5aad37b40fc57b4919486699b5edd1bc1fe",
+      "definitionSetRevision": "xdf-definition-set-revision:63a5b401598b5a9fbeed027d2bee4dd9b398f5f653bdb2854b0a40fa01684bb0",
+      "structuralOutcome": "structurally_interpreted",
+      "definitionCount": 567,
+      "extractionCapableCount": 567,
+      "conversionCount": 391,
+      "identityNoOpCount": 176,
+      "quarantineCount": 0,
+      "conflictCount": 0,
+      "binaryCount": 1,
+      "duplicateOf": null,
+      "lifecycleState": "current",
+      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "capabilities": [
+        "CATALOGED"
+      ],
+      "viewQualified": false,
+      "blockers": [
+        "Exact Current VIEW publication/relationship authority is not established."
+      ]
+    }
+  ],
+  "totals": {
+    "cataloged": 99,
+    "viewQualified": 5,
+    "viewWithQuarantine": 1,
+    "mappingRequired": 66,
+    "ambiguous": 11,
+    "conflicted": 6,
+    "duplicateLegacySuperseded": 11
+  },
+  "familyBreakdown": {
+    "B58gen1": {
+      "cataloged": 7,
+      "viewQualified": 1,
+      "definitions": 7872
+    },
+    "B58gen2": {
+      "cataloged": 45,
+      "viewQualified": 0,
+      "definitions": 55667
+    },
+    "F series N55 S55 N13": {
+      "cataloged": 13,
+      "viewQualified": 0,
+      "definitions": 14429
+    },
+    "N54": {
+      "cataloged": 8,
+      "viewQualified": 4,
+      "definitions": 4997
+    },
+    "N55E": {
+      "cataloged": 2,
+      "viewQualified": 0,
+      "definitions": 2030
+    },
+    "S63": {
+      "cataloged": 14,
+      "viewQualified": 0,
+      "definitions": 7784
+    },
+    "s58": {
+      "cataloged": 10,
+      "viewQualified": 0,
+      "definitions": 12556
+    }
+  }
+}
