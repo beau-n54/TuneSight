@@ -105,14 +105,15 @@ export function resolveMasterCalibration(input: Readonly<{
   const identities = input.catalog.listIdentities();
   const catalogEntries = input.catalog.listEntries();
   const entries = catalogEntries.filter((entry) => entry.lifecycleState === "active" && entry.sourceAuthorityState === "qualified" && entry.applicabilityState === "published" && entry.coverageCandidate.coverageState === "exact_qualified");
-  const qualificationCandidates = catalogEntries.filter((entry) => entry.lifecycleState !== "superseded" && entry.coverageCandidate.coverageState === "candidate_only");
+  const connectedIdentity = input.connectedRom.observation.softwareIdentity?.toUpperCase() ?? null;
+  const hasActiveExactIdentity = entries.some((entry) => entry.identity.romSoftwareIdentity.toUpperCase() === connectedIdentity);
+  const qualificationCandidates = hasActiveExactIdentity ? [] : catalogEntries.filter((entry) => entry.lifecycleState !== "superseded" && entry.coverageCandidate.coverageState === "candidate_only");
   const coverage = resolveDefinitionCoverage({
     connectedRom: input.connectedRom,
     recognizedRomIdentities: identities.map((item) => item.romSoftwareIdentity),
     candidates: [...entries, ...qualificationCandidates].map((item) => item.coverageCandidate),
     conflicts: input.conflicts,
   });
-  const connectedIdentity = input.connectedRom.observation.softwareIdentity?.toUpperCase() ?? null;
   const matches = coverage.outcome === "EXACT_DEFINITION_COVERAGE"
     ? entries.filter((entry) => entry.coverageCandidate.definitionSetRevision === coverage.exactDefinitionSetRevision && entry.identity.romSoftwareIdentity.toUpperCase() === connectedIdentity)
     : [];
