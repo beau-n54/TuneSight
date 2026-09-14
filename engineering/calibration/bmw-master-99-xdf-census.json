@@ -47,13 +47,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "UNRESOLVED_CONFLICT",
       "capabilities": [
         "CATALOGED"
       ],
       "viewQualified": false,
       "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
+        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
       ]
     },
     {
@@ -131,13 +131,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "UNRESOLVED_CONFLICT",
       "capabilities": [
         "CATALOGED"
       ],
       "viewQualified": false,
       "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
+        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
       ]
     },
     {
@@ -159,13 +159,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "UNRESOLVED_CONFLICT",
       "capabilities": [
         "CATALOGED"
       ],
       "viewQualified": false,
       "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
+        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
       ]
     },
     {
@@ -187,14 +187,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55289606/00005D55289606.xdf",
@@ -215,14 +214,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5528AA06/00005D5528AA06.xdf",
@@ -243,14 +241,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5528B405/00005D5528B405.xdf",
@@ -271,14 +268,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5528BE07/00005D5528BE07.xdf",
@@ -355,14 +351,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55328C05/00005D55328C05.xdf",
@@ -383,14 +378,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55329606/00005D55329606.xdf",
@@ -411,14 +405,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5532BE07/00005D5532BE07.xdf",
@@ -439,14 +432,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5532BE09/00005D5532BE09.xdf",
@@ -495,14 +487,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5532DC05/00005D5532DC05.xdf",
@@ -523,14 +514,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D5532E605/00005D5532E605.xdf",
@@ -551,7 +541,7 @@
       "binaryCount": 0,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "MISSING_BINARY_MEMBERSHIP_EVIDENCE",
       "capabilities": [
         "CATALOGED"
       ],
@@ -579,14 +569,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C6E05/00005D553C6E05.xdf",
@@ -607,14 +596,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C7805/00005D553C7805.xdf",
@@ -635,14 +623,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C7807/00005D553C7807.xdf",
@@ -663,14 +650,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C8207/00005D553C8207.xdf",
@@ -691,14 +677,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C8C05/00005D553C8C05.xdf",
@@ -719,14 +704,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553C9607/00005D553C9607.xdf",
@@ -747,14 +731,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553CA007/00005D553CA007.xdf",
@@ -775,14 +758,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553CA009/00005D553CA009.xdf",
@@ -803,14 +785,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553CAA08/00005D553CAA08.xdf",
@@ -831,14 +812,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553CBE05/00005D553CBE05.xdf",
@@ -859,14 +839,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D553CC805/00005D553CC805.xdf",
@@ -887,14 +866,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55461E08/00005D55461E08.xdf",
@@ -915,14 +893,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55463208/00005D55463208.xdf",
@@ -943,14 +920,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55463C07/00005D55463C07.xdf",
@@ -971,14 +947,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55464605/00005D55464605.xdf",
@@ -999,14 +974,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55465005/00005D55465005.xdf",
@@ -1027,14 +1001,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55465A07/00005D55465A07.xdf",
@@ -1055,14 +1028,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55465A09/00005D55465A09.xdf",
@@ -1111,14 +1083,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55467805/00005D55467805.xdf",
@@ -1139,14 +1110,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55468205/00005D55468205.xdf",
@@ -1167,14 +1137,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55502807/00005D55502807.xdf",
@@ -1195,14 +1164,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55503705/00005D55503705.xdf",
@@ -1223,14 +1191,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55503C05/00005D55503C05.xdf",
@@ -1251,14 +1218,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55504807/00005D55504807.xdf",
@@ -1279,14 +1245,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55504809/00005D55504809.xdf",
@@ -1335,14 +1300,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55505008/00005D55505008.xdf",
@@ -1363,14 +1327,13 @@
       "binaryCount": 4,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55506405/00005D55506405.xdf",
@@ -1391,7 +1354,7 @@
       "binaryCount": 0,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "MISSING_BINARY_MEMBERSHIP_EVIDENCE",
       "capabilities": [
         "CATALOGED"
       ],
@@ -1419,14 +1382,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen2/00005D55508C05/00005D55508C05.xdf",
@@ -1447,7 +1409,7 @@
       "binaryCount": 0,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "MISSING_BINARY_MEMBERSHIP_EVIDENCE",
       "capabilities": [
         "CATALOGED"
       ],
@@ -2098,14 +2060,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C640A6405/00005C640A6405.xdf",
@@ -2126,14 +2087,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C640A8205/00005C640A8205.xdf",
@@ -2154,14 +2114,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C640A8C05/00005C640A8C05.xdf",
@@ -2182,14 +2141,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64143206/00005C64143206.xdf",
@@ -2210,14 +2168,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64143C05/00005C64143C05.xdf",
@@ -2238,14 +2195,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64144606/00005C64144606.xdf",
@@ -2266,14 +2222,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64145007/00005C64145007.xdf",
@@ -2294,14 +2249,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64145A05/00005C64145A05.xdf",
@@ -2322,14 +2276,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64146E06/00005C64146E06.xdf",
@@ -2350,14 +2303,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "s58/00005C64148205/00005C64148205.xdf",
@@ -2378,14 +2330,13 @@
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/000010CA3B8C01.xdf",
@@ -2490,14 +2441,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1E6E05/00004ACF1E6E05.xdf",
@@ -2518,14 +2468,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1E7805/00004ACF1E7805.xdf",
@@ -2546,14 +2495,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1E9605/00004ACF1E9605.xdf",
@@ -2574,14 +2522,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1EA006/00004ACF1EA006.xdf",
@@ -2602,14 +2549,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1EAA05/00004ACF1EAA05.xdf",
@@ -2630,14 +2576,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF1EB405/00004ACF1EB405.xdf",
@@ -2658,14 +2603,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF286E05/00004ACF286E05.xdf",
@@ -2686,14 +2630,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF287806/00004ACF287806.xdf",
@@ -2714,14 +2657,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF288205/00004ACF288205.xdf",
@@ -2742,14 +2684,13 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "S63/00004ACF289605/00004ACF289605.xdf",
@@ -2770,34 +2711,34 @@
       "binaryCount": 1,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "EXACT_OR_CANDIDATE_ROM_MAPPING_REQUIRED",
+      "cohort": "VIEW_QUALIFIED_EXACT",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exact Current VIEW publication/relationship authority is not established."
-      ]
+      "viewQualified": true,
+      "blockers": []
     }
   ],
   "totals": {
     "cataloged": 99,
-    "viewQualified": 5,
+    "viewQualified": 65,
     "viewWithQuarantine": 1,
-    "mappingRequired": 66,
+    "exactRomBindingMissing": 0,
+    "binaryMembershipEvidenceMissing": 3,
     "ambiguous": 11,
-    "conflicted": 6,
+    "conflicted": 9,
     "duplicateLegacySuperseded": 11
   },
   "familyBreakdown": {
     "B58gen1": {
       "cataloged": 7,
-      "viewQualified": 1,
+      "viewQualified": 2,
       "definitions": 7872
     },
     "B58gen2": {
       "cataloged": 45,
-      "viewQualified": 0,
+      "viewQualified": 37,
       "definitions": 55667
     },
     "F series N55 S55 N13": {
@@ -2812,17 +2753,17 @@
     },
     "N55E": {
       "cataloged": 2,
-      "viewQualified": 0,
+      "viewQualified": 1,
       "definitions": 2030
     },
     "S63": {
       "cataloged": 14,
-      "viewQualified": 0,
+      "viewQualified": 11,
       "definitions": 7784
     },
     "s58": {
       "cataloged": 10,
-      "viewQualified": 0,
+      "viewQualified": 10,
       "definitions": 12556
     }
   }

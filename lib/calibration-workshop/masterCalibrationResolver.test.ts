@@ -25,9 +25,10 @@ function resolve(identity: string, engineeringBinary: EngineeringBinary, catalog
   return resolveMasterCalibration({ current: Object.freeze({ engineeringBinary, sourceKind, ownerScope: "owner", vehicleScope: "vehicle", provenance: Object.freeze(["Controlled resolver input"]) }), connectedRom: connected(identity, engineeringBinary), catalog });
 }
 
-test("repository catalog exposes only the five active admitted Definition relationships", () => {
+test("repository catalog preserves five prior relationships and exposes 60 bulk Current VIEW admissions", () => {
   const entries = RepositoryDefinitionCatalog.listEntries();
-  assert.deepEqual(entries.map((entry) => entry.identity.romSoftwareIdentity).sort(), ["00003076501103", "I8A0S", "IJE0S", "IKM0S", "INA0S"]);
+  assert.equal(entries.length, 65);
+  for (const identity of ["00003076501103", "I8A0S", "IJE0S", "IKM0S", "INA0S"]) assert.ok(entries.some((entry) => entry.identity.romSoftwareIdentity === identity));
   assert.ok(entries.every((entry) => entry.lifecycleState === "active" && entry.sourceAuthorityState === "qualified" && entry.applicabilityState === "published"));
   assert.doesNotMatch(JSON.stringify(entries), /Development Evidence Preview|development_fixture|MapSwitch Dataset/);
 });
@@ -51,8 +52,8 @@ test("exact B58 publication resolves and capability derivation selects Current-o
 
 test("recognized but unpublished and unknown ROMs fail closed", () => {
   const current = binary("IJE0S_original.bin");
-  assert.equal(resolve("00005D553C8C05", current).outcome, "ROM_RECOGNIZED_DEFINITION_MISSING");
-  assert.equal(resolve("00007972000705", current).outcome, "ROM_RECOGNIZED_DEFINITION_MISSING");
+  assert.equal(resolve("00005D5532E605", current).outcome, "ROM_RECOGNIZED_DEFINITION_MISSING");
+  assert.equal(resolve("00003076501D02", current).outcome, "ROM_RECOGNIZED_DEFINITION_MISSING");
   assert.equal(resolve("FUTURE-ROM", current).outcome, "ROM_UNKNOWN");
 });
 

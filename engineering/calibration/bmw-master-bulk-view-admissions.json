@@ -1,0 +1,3024 @@
+{
+  "contractVersion": "tunesight.bmw-bulk-current-view-admission.v1",
+  "authorizedAt": "2026-09-14T00:00:00.000Z",
+  "authority": "Founder Beau and Bob bulk Current VIEW admission; no EDIT, EXPORT, FLASH, Stock, or Reference authority.",
+  "admitted": [
+    {
+      "relativePath": "B58gen1/00007972000705.xdf",
+      "family": "B58gen1",
+      "romSoftwareIdentity": "00007972000705",
+      "sourceArtifactId": "xdf-source:a2113f0eb25fe42c378eb1b47de7032990e2b8b59eeb58a42ae655eb5c375a60",
+      "sourceArtifactDigest": "sha256:a2113f0eb25fe42c378eb1b47de7032990e2b8b59eeb58a42ae655eb5c375a60",
+      "definitionSetId": "xdf-definition-set:094b147cb350c17584202cedc8a45d11619ddbedff3151e44422497b28042be9",
+      "definitionSetRevision": "xdf-definition-set-revision:e0481c51a69b45aa9328dba345ab75cd997b459f58ca150a79348e3a36b03105",
+      "definitionCount": 1096,
+      "binaryByteLength": 7864320,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00007972000705",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          262469,
+          6814977,
+          7863823
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 6837212,
+        "maximum": 7862112
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "fb3402eeac93ea1ae08cffecb31960923019444ecb22b057fd60b352dc51dd40",
+          "byteLength": 7864320,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:b960332ee5ae6d9ab39837b037bf1abe82221c4f1b998a628eee6341b44fb0f3"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55289606/00005D55289606.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55289606",
+      "sourceArtifactId": "xdf-source:f65398e2578999351dc248506576ef10909a28df87e781a4ace0134e5b0671b9",
+      "sourceArtifactDigest": "sha256:f65398e2578999351dc248506576ef10909a28df87e781a4ace0134e5b0671b9",
+      "definitionSetId": "xdf-definition-set:c2277976d60197ec1cc2b4ecee90b20c9d0cf1a9403d845cd86ff88d94ecb6f2",
+      "definitionSetRevision": "xdf-definition-set-revision:7717f6de56e714aa96f5fb1bb3f1a9963e1f8d1c1b5d65e5b3e6f1bf2b7911c5",
+      "definitionCount": 1198,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55289606",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7382764,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "82b4f6e3c2cb82d8481f7d19aa216a89087120118651a0b935430fd373f8d1ba",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:1ac38cf4324defbcf1d38a3e4ab5bcd756837881549cda7001e047f4a7a141b9"
+        },
+        {
+          "digest": "c0fe40240abc3086b6421e74167729f83340580691f6a391d2c4dbb5cd4bfdf3",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:ce51c2f2875178422a2ffc6a873d570689401a5e12d393267ed48a65c0d6b4fa"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528AA06/00005D5528AA06.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5528AA06",
+      "sourceArtifactId": "xdf-source:0ab4a6e15b5639a1bdc8b7bfbc43e50bf2475fb9eb5188ba77563a5d8b8406c7",
+      "sourceArtifactDigest": "sha256:0ab4a6e15b5639a1bdc8b7bfbc43e50bf2475fb9eb5188ba77563a5d8b8406c7",
+      "definitionSetId": "xdf-definition-set:cca6f3a50800f59e9dd2dc04b43d87ade8cc081d3c5639e82c95e601ede9730a",
+      "definitionSetRevision": "xdf-definition-set-revision:b1e392258317795426fbf110b7fe2e51220cd93891ec02cc1bdebd061f5e7166",
+      "definitionCount": 1205,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5528AA06",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7382764,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "aae586b33ee2e94c50d1bd1222730b55f3698206046834dcdceb81c9c3fff4c1",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:fdfd8c4394caa4224158447a0bff56761440ed578c36e7932e44b0761ee5e2b1"
+        },
+        {
+          "digest": "895986a36ac7e2ed2f47546016f8a81db726ec51ce30c9bd7c7e5500416f6078",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:8c4e605b337f852d0868957e7302ac042d459ba892169d93cd50c49e20d18821"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5528B405/00005D5528B405.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5528B405",
+      "sourceArtifactId": "xdf-source:d6da02bf24eea31e40d9561f2660d08fa574ab2e383970fad2d5b1059a4f8f49",
+      "sourceArtifactDigest": "sha256:d6da02bf24eea31e40d9561f2660d08fa574ab2e383970fad2d5b1059a4f8f49",
+      "definitionSetId": "xdf-definition-set:3d1b4cdaffefbc2e047f660d52216d734d5d94671cf30302a945a4666f4cb339",
+      "definitionSetRevision": "xdf-definition-set-revision:8296061b8413e395844f810c20a36f46713bb2d7a3e405a200a0006e0fb282b4",
+      "definitionCount": 1200,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5528B405",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7383062,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "2e63dc5abe1660b30ae78c138887face5687c1d5ce814fd3640af43f01ec0487",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:dcab5ac89c0c2937e6f8128c4df97cc735b98c637d0911d49a7ee16db5d3ec4f"
+        },
+        {
+          "digest": "b0981700b1997d12cce5da4772cc00ee708db617cef1f97e5cd2dc309148eda7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:87810fa77a51629f9a0d2f606036795befeec725cf3383c9cd365334db9804e2"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55327806/00005D55327806.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55327806",
+      "sourceArtifactId": "xdf-source:c24ac2bab59977c5df4fa00e9aa2529f5117042fa7b4d95f7311ef345a38c1f0",
+      "sourceArtifactDigest": "sha256:c24ac2bab59977c5df4fa00e9aa2529f5117042fa7b4d95f7311ef345a38c1f0",
+      "definitionSetId": "xdf-definition-set:6b68ff800bf109b1ca03ab6647d20e3fcb082d5de4bc943f9781733a4dbcb454",
+      "definitionSetRevision": "xdf-definition-set-revision:2f72766e7a7683c381f6de29a5fcd4fd92ee96146a38df380cf1557f248a1384",
+      "definitionCount": 1243,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55327806",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387122,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "2b41365b319ad809d20b6e77cffbb81358ebf5b5112eace9c4c8f0bf3ef573fb",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:3903583ae24f4cf65e5c5d8615936c74207ffe75842342ad5c6ee5c0a51f7898"
+        },
+        {
+          "digest": "53eef4f8e3471f0a0072303c60a930ccee04e7779743e093e8e8c7a93cf00a91",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a444d1d31ab177f6551f2b1b97f4d675716306771260d592fcf71df7da56b483"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55328C05/00005D55328C05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55328C05",
+      "sourceArtifactId": "xdf-source:dbeb9ed695c31187680c4cdd308e00a362f9eb47468d292e5c75dc3e146b92a4",
+      "sourceArtifactDigest": "sha256:dbeb9ed695c31187680c4cdd308e00a362f9eb47468d292e5c75dc3e146b92a4",
+      "definitionSetId": "xdf-definition-set:546224b52081e4ac6744c68faeaf3a3cfd8c7ced312ea3b3b021a6efb5ddcafc",
+      "definitionSetRevision": "xdf-definition-set-revision:d7efff741d6b735f395b3a10cf7484bfd95fd49b3cfb74c5a41c969fc4dda5ed",
+      "definitionCount": 1243,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55328C05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387122,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "8a393ecf2d0dc4b3ed18733169288ee35f05db43f7f5b35f9fe325c4a40dd121",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:045161c260aa4a2a9cae961fe98f1925ec778419fac56624c275b5ed937db40d"
+        },
+        {
+          "digest": "75ffb2d6dea6b8a2a9c2b6ab1d4fa8d7b6e66df3d85944ab899c598da9805421",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:4c8be372f14559b3d5c6268d907cfed71a9ad608260fcc88756e4148ed83a949"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55329606/00005D55329606.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55329606",
+      "sourceArtifactId": "xdf-source:408067e4f578809f89b28fd7d14e2559c8bf508cee7b9465c33065bf7e82e361",
+      "sourceArtifactDigest": "sha256:408067e4f578809f89b28fd7d14e2559c8bf508cee7b9465c33065bf7e82e361",
+      "definitionSetId": "xdf-definition-set:eb9e2c18d557cfdce948065690550488a62daac3b6f69bac7131fcb40206d8dd",
+      "definitionSetRevision": "xdf-definition-set-revision:f3c55aaf95bc3d0c8ac618e2cf2be013d2db77fc33064be6fc72e2070582de94",
+      "definitionCount": 1243,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55329606",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387122,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "ef9a298f2ec0f7ce051dc1f30326b2e92453a4e8954e0ebfc60df620bac56983",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:a1a810956f70544a8f61a13e2cea12f98fe19f3c6bf04129f704eaef7e7d1729"
+        },
+        {
+          "digest": "1dd53ce63b66807cb77a271cfd49d31b9b864dcc4a3a82a195419ed91e829898",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:49076e3204e636f5e5061014688ad5e5c57d9ab78b0d1c9169547499e4b501ef"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532BE07/00005D5532BE07.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5532BE07",
+      "sourceArtifactId": "xdf-source:e30b16c5c3065970c28b8e295ded0c2a6ae1db34260be4dca0d3f2f3fc05da41",
+      "sourceArtifactDigest": "sha256:e30b16c5c3065970c28b8e295ded0c2a6ae1db34260be4dca0d3f2f3fc05da41",
+      "definitionSetId": "xdf-definition-set:bb638fb53f8c7f2d2aaa9f94907adfd9efb36c95da20d05bc40120dd217d80b5",
+      "definitionSetRevision": "xdf-definition-set-revision:6ede70f55744fada336230a6315ddede99f565bfb8a26b63181c512f8826c2c3",
+      "definitionCount": 1238,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5532BE07",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387420,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "bbff27359d88feb5a0fcf2008b4b3ffe27b6f8ee97200c34f8db443478de6147",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5cf1ba255250674fa9e945796aa9f22c3f6c1a5d15eaf96a92e327f7c3a3ff81"
+        },
+        {
+          "digest": "3d1cca483edc39d9262c3820228cc5d0c904a25ec744237051ce33a96c5876d0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a91d19cc2e969a7a943af5acb69d1cecc3d4b475d2ba640f6f7d24826a5a27e7"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532C808/00005D5532C808.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5532C808",
+      "sourceArtifactId": "xdf-source:ee1c5ad7ac227db2d121e0d12649c32adee2253b296a70e5a94d7991e9d33c73",
+      "sourceArtifactDigest": "sha256:ee1c5ad7ac227db2d121e0d12649c32adee2253b296a70e5a94d7991e9d33c73",
+      "definitionSetId": "xdf-definition-set:94b4dd460ce89c66582bf44009d332211972d454afa66e186af6520176766f52",
+      "definitionSetRevision": "xdf-definition-set-revision:db94b5530e49f2101c28a4c28e2c60dff219e9924f946c4e50c9f636b80653b2",
+      "definitionCount": 1234,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5532C808",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387420,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "270cd67f4291c0ee1fe023e78f3637f120a74e8fb8b5287f1572e40668cdf774",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:d48c953b058ed2aad735e8bd18afe419db62f115be21694f25d394adb5fe4768"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5532DC05/00005D5532DC05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5532DC05",
+      "sourceArtifactId": "xdf-source:414ef138960f2beec5813f835f756752c363ce449a43f5f45320ff6b1b5eb83b",
+      "sourceArtifactDigest": "sha256:414ef138960f2beec5813f835f756752c363ce449a43f5f45320ff6b1b5eb83b",
+      "definitionSetId": "xdf-definition-set:87d54467f84f635c154bf3047b649a02090f15b6237e91af2ed49ad88ae1efa8",
+      "definitionSetRevision": "xdf-definition-set-revision:b2ce0242bde45acd2f16bcc1c15976ba0e1024d5438b0822d7b15339d1ac3c04",
+      "definitionCount": 1238,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5532DC05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387420,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "02d626aa3fbd5f2d97707be4a98f5240c0f649204284509797a8bfe3db7e3e47",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:d3fec60a32117a87bb68c45db5826ba321e9378df8c6ab1007bcd6e9b200179e"
+        },
+        {
+          "digest": "9478d6fad3665e973f847f574d7d476aa4fff0b12c2b4f6055ebf88ebe35547f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:e803179afabbf29ff0d17a2f4c6d567640c029db9273a65f458edab1947bfc64"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C6405/00005D553C6405.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C6405",
+      "sourceArtifactId": "xdf-source:3ac62b2d630d7c49755cf985168575174a1a1e1a7a0d4f3bee5d89ad508054fb",
+      "sourceArtifactDigest": "sha256:3ac62b2d630d7c49755cf985168575174a1a1e1a7a0d4f3bee5d89ad508054fb",
+      "definitionSetId": "xdf-definition-set:65c9dc718ec628d190ae5fb94412470776ea0b91758a4e12ee456a1808666c16",
+      "definitionSetRevision": "xdf-definition-set-revision:6ff4f5302cc0e92b74b0f52e406ffc6fd136ddef943dfabcaecc401049bceb8d",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C6405",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387090,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "7b5bd515fc7cb2f78200ef8ffbc5a5cc2f4dc95ed020cee27bca76046b1ed8c0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:d53dd621db2845521c1ed8e245da4e184674730e632e1631affea43fa8abe926"
+        },
+        {
+          "digest": "e6bb2cd8494cfcb270ad35dd3cf1763549b8603d82d27b07d866bb0a68e05ce3",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:f07650769d5fc11471293a6e6c03686c44bac11a3085b8ad3f29c0f071f0809a"
+        },
+        {
+          "digest": "e4bbdf82f0d7afe8e98fdf95911a17cf5441f68bbc4e05558b086ac34e83451c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:e71121f69e770372a9124f4b81cc2f225af986da5122b47d09af3a212a4bf197"
+        },
+        {
+          "digest": "da5e2a961dfd93b72c1626bf59bfefd6a0e72ff83be188b0b99e35a9d9380ffd",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:5b59840c0f5fa0cad4c7f5559056c7bd187e990ba36bb0d2ae886ad2f340e4c4"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C6E05/00005D553C6E05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C6E05",
+      "sourceArtifactId": "xdf-source:75bf85a3012a02811f5f7134bbea8881d7ffea6f36e73d536758de772912e333",
+      "sourceArtifactDigest": "sha256:75bf85a3012a02811f5f7134bbea8881d7ffea6f36e73d536758de772912e333",
+      "definitionSetId": "xdf-definition-set:c9a4ae713851c913dc8d43f02cb0343b49f6cc67416110357f29ad8af46b2c79",
+      "definitionSetRevision": "xdf-definition-set-revision:9a2236c99cfe695abacde08182135aa4f9dd3348430ecdacef6167ce1420a1f9",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C6E05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387090,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "4a7e2f3f3bf069adaec8b385df0eaf879e4720702ec8d8b759aa76606dc5d9b4",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:cec94b602f3393b6b90499a6d772a7e6243c4c6b478cdb3c49500c70d1946241"
+        },
+        {
+          "digest": "fa4dddb2ffde896ab080e69fc900c302f9f03e94b8a29949a8335fd58b55c0c7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5c4363f1c374b793f5c5e450b7670ae0f2521cba27a137f80b574d21b4f139b8"
+        },
+        {
+          "digest": "bfc29c9d664a1f984915a1bb5bf1d784c2e0ec6945f19c01de84a33b0b1fac77",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:52e8734e2cf376e183f18bb1c6a432a6d17f3b4405c98b80e66fdc7624c32a56"
+        },
+        {
+          "digest": "4d64a0ce52a8c8ef9e7edd3575631fce7275e84f75000075ebcd774668858e59",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:0df05ce73333832763af0e6db01793fba872d609e9618dc09034355d2c822ad3"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C7805/00005D553C7805.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C7805",
+      "sourceArtifactId": "xdf-source:a5d72a77ee7b1fef6ebddac67d5229ccb920a72b6c23d286abaf755480650a6b",
+      "sourceArtifactDigest": "sha256:a5d72a77ee7b1fef6ebddac67d5229ccb920a72b6c23d286abaf755480650a6b",
+      "definitionSetId": "xdf-definition-set:7038b76eb271d541e4e8b2bb1af1906581d6a90abc6d2e8dafd0c13ded560b9c",
+      "definitionSetRevision": "xdf-definition-set-revision:1b743c67bae2ef0c22d201f56c7672c76a9ece64088a861be91f5b3f29c1ebdb",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C7805",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          49451,
+          131371,
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387090,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "f9577e84652a08298f423925fa5956cd1e678aff44627a3f2f920a65a0b11639",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:1bb8fb9145573bc503e996d64edda0590c8cb6405ea01ac7d803bb2c59996858"
+        },
+        {
+          "digest": "df303e6f0777f955590d16692f8dfe95e3016f1dc9587319d22192864020d316",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:73bf1cd4ecddc0a7c22fb5353d0925e42c86afeea79baa9d85d20497d4ffacc6"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C7807/00005D553C7807.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C7807",
+      "sourceArtifactId": "xdf-source:3d1a404a1fc0710a5562b60cb0dbee0ca9cff99c8579652aab38fbb0d85970d2",
+      "sourceArtifactDigest": "sha256:3d1a404a1fc0710a5562b60cb0dbee0ca9cff99c8579652aab38fbb0d85970d2",
+      "definitionSetId": "xdf-definition-set:a0f2d60907c209982503593a64cb2aea57f59eaa89352fc0019ef38cfb08b72d",
+      "definitionSetRevision": "xdf-definition-set-revision:07e2522f0effc8ba4574c84beb524e6f8f714eb2f5f8b9ab57c21a62e3d8d51d",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C7807",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387090,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "0985a4cdc5019e9efaa2356a2e54b9ddf4286ce38ccf95483cb2f02579c7da8f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:940bf3c34a06558e46ec59422024d1f531afb1e67cb2b5b873e1218f5f7e1396"
+        },
+        {
+          "digest": "2d9e4ff00fdd891d57e3a10707c45c9c9d8cc5b50509f22b8beaf0b1b223ca20",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:7d3782817a10b05fbf152f0138493a4454e53e13fe575776a8167444f4ec8e24"
+        },
+        {
+          "digest": "e28abd3a9c6e8c7af1396c92062997f8c1eb67f96efdf7ac1c001f5c2f960367",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:c44685cd6c28c85da986d31b51687c014bfcab0d3b251a37c2181223e8f005b7"
+        },
+        {
+          "digest": "40646ee98f8fe659bc5d1004351ed363e0f1c470e1b8c99e1900c6787df5aba2",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:9a1df379dc6e12228f0abeec206e15149903264ce0d504c93ca5d02d6770f7ef"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C8207/00005D553C8207.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C8207",
+      "sourceArtifactId": "xdf-source:4e114f259a53a2c15899ba7a5b8878390fc520548b00b265aefd2eb12ca2d0a3",
+      "sourceArtifactDigest": "sha256:4e114f259a53a2c15899ba7a5b8878390fc520548b00b265aefd2eb12ca2d0a3",
+      "definitionSetId": "xdf-definition-set:fd85d038a4d4ae1a6e456135f1c7887ef68987e51a52fa0b2c072620e088e36f",
+      "definitionSetRevision": "xdf-definition-set-revision:f5e4245dea89c13f0c291b0fbe9013e8833c6c7fcc3885df259dfea4d000ed91",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C8207",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387102,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "1f92e771436f8623eb2597f819a970ffdfde2e5fff69efaaf05f275a27a952c3",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:bf39a3edcb07c295996b6ea5d509b412b49fff7189dc4bcca1f7920836efefa2"
+        },
+        {
+          "digest": "a2b5ae7607f75dfefedc826a9ef3666df0b76833a8429b1c0126d1fab03f442d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:976a0571d16e503e58a4c9d3d53d19cf60c08bb4a93f0ee77785fb1bdf0cc177"
+        },
+        {
+          "digest": "e4867da42ddbf42626844ea38b4349893485ff425ca80ddccd8e71e2fd96d95c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:34534c121b9049dbbcb1b58a2ac684542ffaddadcff58a33124ac3e2d7513e1c"
+        },
+        {
+          "digest": "17e6f048ec5a821bd17d4caaf81b6f579f797b0ca5237f4d309a97799f41dd4c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:75e1812fe283bf6564dce73d9ceff4e02b25309948a4ccc0cd146a1f558bfae1"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C8C05/00005D553C8C05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C8C05",
+      "sourceArtifactId": "xdf-source:2a720d36a84761bc9372a38c2ba566d402db96e4927a3cdec2f20aaaad82f11b",
+      "sourceArtifactDigest": "sha256:2a720d36a84761bc9372a38c2ba566d402db96e4927a3cdec2f20aaaad82f11b",
+      "definitionSetId": "xdf-definition-set:d366890c4a60e4c2ba9396c121ba8fcf205e703fca28479bf08895ec7b059a45",
+      "definitionSetRevision": "xdf-definition-set-revision:1a56a6d4ca0e83367b27d8d8c7df62c1be1e7f4ccd04232370d3421cc54fcc55",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C8C05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387098,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "c8e42c228614a91ed6ee52315900e5683c80e93640cdabc3ce4c778d49c385e2",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:2509b0cc5eac82d068c4729eb3076551e5ae7c1954240cf2328a21fa6c810445"
+        },
+        {
+          "digest": "addb850bdee02a66632c2ec6f4012b3fe2ccefe0e827e3e46950fac582a13d72",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:936920881988383b7b30faf5980b04cfe2fac6cd8e53391666cb55e33de04fd6"
+        },
+        {
+          "digest": "e8918a6771461aa74e771370ce947a7a2249b648d7939da2f9df16125ecff44c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:46a7df43f06dd71612e4a6730941dd9b65d954e77532e3f652185c2f3ffed4eb"
+        },
+        {
+          "digest": "9d4a9b127888197a87428b694ca88307df4b9b17e33932e40c2fb68fae82d3ec",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:ec6ad31bbc7d9b6f58b2e2753cc4fbdda8fc47b56d23bb5aff91f1d3e8adb154"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553C9607/00005D553C9607.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553C9607",
+      "sourceArtifactId": "xdf-source:db87d897a579cc9e3be1821687bad5a34f6c69aa5a8cf6e9d1a51c854b0f28a4",
+      "sourceArtifactDigest": "sha256:db87d897a579cc9e3be1821687bad5a34f6c69aa5a8cf6e9d1a51c854b0f28a4",
+      "definitionSetId": "xdf-definition-set:a9f6fb049cf1ad15d8585f51f6fea062ea8ff6112a0c0ef615fa7e36f3db21a4",
+      "definitionSetRevision": "xdf-definition-set-revision:11fa0b89aecd8f1f82900c81797e174b5a937776b6af0932c049c246bbd064f0",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553C9607",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "3bc343733d9f51a250e18b658907cd4db41787ff90335d313cdc312423dfce4a",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:f8a9fa4abba5e92412df3abb7cefe5a656082f93872e8c117eb1a42915cdb9a0"
+        },
+        {
+          "digest": "9435ccb85a0681e3131f2e8261e3322e58cb9bac95498ba917bc39dd432c693d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:582ce856af0390bad21b10b6111723fe4b07e43e10e837b9cc6439264aa4c75e"
+        },
+        {
+          "digest": "f454c72e6e34355bad183d57cc5904fec4317bdfb1221418ba5d98b14fe2940b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:d2165a6abe879ca4ebab2596064066aa371b46bbae1d2d5f25af2c83a719a2f2"
+        },
+        {
+          "digest": "0fb9f70541884e7319e80d85d1046c39ff8dffa7e8b54569bc99ce9385f9d526",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:009a72b11d2417ef8e5cc94e60803e3cf30683e4e5bb849eac1498e2fc775628"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CA007/00005D553CA007.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553CA007",
+      "sourceArtifactId": "xdf-source:0c3230cd34b945a46e90e3a51109cc6a52a34795372259370e11c91c4615bfec",
+      "sourceArtifactDigest": "sha256:0c3230cd34b945a46e90e3a51109cc6a52a34795372259370e11c91c4615bfec",
+      "definitionSetId": "xdf-definition-set:303302bf43920a0a789f81666629145f9205d002de24485ddd8438e02f500cf4",
+      "definitionSetRevision": "xdf-definition-set-revision:6df45754031391c8f24042069d6b2b92e7a19ede5e746e1f012cda2f74420514",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553CA007",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "915559d1954180aebdc7ba7a14fd66b56b4aeadc3cf5d1603a6a7fa6e049975a",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:308f635e3cc8f598bd52309dddcfc1e4061f0d4f4f666938a4735ac1a4670c70"
+        },
+        {
+          "digest": "386e9ad5454e0046c60e0bfe4a5794841c56c1aa9f881e6ce4c042e17bbb992c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:dea2cace3829ca0f2556f997e318898c3334c86fcab1361bff0a8c912691d777"
+        },
+        {
+          "digest": "c267cbc4aa2e903b86b187678d9e1c4c722e29a2b40c6c63ea1e63f29f2013ca",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:b10f5ee9d53b3c55567c5a87d3fcc16afcfb2e69c53916e179efcd8cc4a8e028"
+        },
+        {
+          "digest": "259a5c80abcfec66e8e8dcd636fd4cf62e6b28e1f32dd5cad03784636997251f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:5eb793e347b1aa365789f8824a3f472396950844dbc22231df5c9ac4fdad6a7f"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CA009/00005D553CA009.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553CA009",
+      "sourceArtifactId": "xdf-source:32211d13ee400983bfd8a0bbc3c318b917dc9f76ac8e421a4c2b8f48ebe56874",
+      "sourceArtifactDigest": "sha256:32211d13ee400983bfd8a0bbc3c318b917dc9f76ac8e421a4c2b8f48ebe56874",
+      "definitionSetId": "xdf-definition-set:c7df8ab9de757325c54de069f76eefc26c0c92a1e15048b0e25929576c748de2",
+      "definitionSetRevision": "xdf-definition-set-revision:5a22b7a73ba9eb2c2b624f45582916be077c4b327a285e9da6335664e7aa1fe8",
+      "definitionCount": 1234,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553CA009",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "eec59dff7d3254814c0db6ce7a7dffe4788bc110055bbd8155496f2c0e3c4cc7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:2e95d1f1a07e96c7b469673cefd9c0bb4e030f39f350b3a08900908f546cf5f2"
+        },
+        {
+          "digest": "8ddfff71aea642cfad1740d739e4845e10436aaf0ba84201e07795c181a9ffe1",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5cdd94da7f3d013519d909601a4d3440f947a76dce0f282ed15046e40c7df1ba"
+        },
+        {
+          "digest": "10ebf839152674fe5f964816ef785f2287f39257cbbf85650ea57e9876378a12",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:2c1c530b51bd4fe9cfc5db87fde80591f5ee06221077e0c99e129bf85eeab970"
+        },
+        {
+          "digest": "6f9504a6a73146c1b8b23f0c356d81a899f29bfe0fa31f3f0f0676c2a09f6081",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:27d3cd36e051e857308331b6a6090a6cb0ddd4c6fa19208ae26afa0d537d709f"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CAA08/00005D553CAA08.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553CAA08",
+      "sourceArtifactId": "xdf-source:275799d4f4635a58c79e74cdd48cd2cad7fd38011bb168d2e3c1dd09f852f805",
+      "sourceArtifactDigest": "sha256:275799d4f4635a58c79e74cdd48cd2cad7fd38011bb168d2e3c1dd09f852f805",
+      "definitionSetId": "xdf-definition-set:e29ac247eb352c7a2f92b20d501f1cf9c94597d1b35cbbebf65877509de13c60",
+      "definitionSetRevision": "xdf-definition-set-revision:a5dca3007703dfb132d26a3e806b96842cdbce2b7ad49fd547b243b0803e8521",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553CAA08",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "d3ebe3b12fcf7fdea4cafaed544037193d6a471c29dcb6673f30422d30a4c708",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:007a27cf520f4bd2abd0249a1cdeea2c203b06e10de3314311cd1e87b3760745"
+        },
+        {
+          "digest": "c71a53a219be6fa1f68d8850a40530a3c2eb797a75486b44dbd9feba1994ae41",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:4b364e22a374bcd39e6aec2e9b1afedf52266663dbd90453f4ac56189da01662"
+        },
+        {
+          "digest": "a2377fa060b07fe87ca6328605764d3eb59bf2028b6427453b94cd95291fb0d0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:74e61e9caee1b75c2cf02136c85288f22ab74546f5ee0cbf9aca4ee8a77ec6b7"
+        },
+        {
+          "digest": "e650b068dd8ca5a58fe74d54153b63ccc2b7d621e31bee0769cf7dff1c113013",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:4e7d6ae4607e3ebe0fd4b00a2f100e3196d522edc66d04bdc330bc32d62d7822"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CBE05/00005D553CBE05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553CBE05",
+      "sourceArtifactId": "xdf-source:defdbea14baf529b1f011291c386bb276de5e54b68a0deb81d816cf06f9be062",
+      "sourceArtifactDigest": "sha256:defdbea14baf529b1f011291c386bb276de5e54b68a0deb81d816cf06f9be062",
+      "definitionSetId": "xdf-definition-set:67bc158f4e5b1b6170ff2cd4eff6abcf0b377ba1f07a0ba7a97270a42f3110e9",
+      "definitionSetRevision": "xdf-definition-set-revision:eca256229757e4949d7e47cffaa5eee3e9abd370364e3773121ffa253f1f4c95",
+      "definitionCount": 1242,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553CBE05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "c0c533d314a34d22388a23364d2977ea8b88607ff9031a5ad75159ea919e04ed",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:7d5a78abf7803675001fc4ea2c1cc2f8ac71373d65257d57b3233588380fe634"
+        },
+        {
+          "digest": "763b6a881b58cd3e718116d701e50406293b469eaab2e374122f866920f71877",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a3e0891cc99bd8ddb2759c8e939f2067c623586ac38840ca5c7e3375e245bd79"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D553CC805/00005D553CC805.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D553CC805",
+      "sourceArtifactId": "xdf-source:cd5bf5b4a57ddd57933edd1e7ea782f5ca8882bbf44856b225ca129f71ba71e9",
+      "sourceArtifactDigest": "sha256:cd5bf5b4a57ddd57933edd1e7ea782f5ca8882bbf44856b225ca129f71ba71e9",
+      "definitionSetId": "xdf-definition-set:76d4a7172ac06aab0bd7aab38435e1065cf37065d20bbf330a9824c9bf907d9e",
+      "definitionSetRevision": "xdf-definition-set-revision:253a73f6dd67f9e46182d610b3c5f3d96baaf0304ff2238da83ec9204e69d703",
+      "definitionCount": 1237,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D553CC805",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387448,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "70f03f08ca2ecf8b146c097ec6bbf7ca6b7887dd331c1fbadd6ea0d2f81f5e0d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:6c8a5c203de9e6a7711b45fb7b8610f76d0a86817b11ff3cb42f9582adc42fb2"
+        },
+        {
+          "digest": "a6099c35ed5a9430d351e24a6621dfd5fef91eeba5fa97946b8f61c4d5a5ff8e",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:64f205ab4a21a282d1b21000dc087936f71f531ef9556ce6cb4cccb677c27762"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55461E08/00005D55461E08.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55461E08",
+      "sourceArtifactId": "xdf-source:473d8192b647fd133b3ef9a3fb708b111c9b14d65ce583df2784e2d052f2bf28",
+      "sourceArtifactDigest": "sha256:473d8192b647fd133b3ef9a3fb708b111c9b14d65ce583df2784e2d052f2bf28",
+      "definitionSetId": "xdf-definition-set:3dcdec06e7dcc03ca1369e1b3c0b21485877157c8c6503dcff0406da9587064f",
+      "definitionSetRevision": "xdf-definition-set-revision:7e643489cac470db2607aeb9cbd3c1a2fe58ee3aeb8ec9a065e2df9e9e519993",
+      "definitionCount": 1240,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55461E08",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387628,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "d8ffcc4e5346d54fe24ff44527b0b244cc81663e253e3a3d70d30dd4ddb25ff7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:c0d719262f0266eecc12693e20497d90321ebc03fba62b656b2369e0a779d7eb"
+        },
+        {
+          "digest": "7bcc971fcdd2bfd2970e6d83a86ec503527d6903250ca69dfd1d6dd9f920ccc9",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:a270f4abf68fb993e1246c2c1fbeff86cec8a8e2acfede32a98141c0320539d2"
+        },
+        {
+          "digest": "fe5c745840eb57e94ef675d55d18ca25f692dd2a17e4809407f2705c307329b0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:cb3987e0131c8ba30ffb3d3a3a5225deb9796788a65dab4c0ec6dbdc02f3dccc"
+        },
+        {
+          "digest": "56f35db8d3629b202ce8c1cba91745ac3935f01d109af66993b9738f95fda1a6",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:50cf7a79b32048e48d54dc1343eeceb042936624fac7f3112ca1beef6397fda8"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55463208/00005D55463208.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55463208",
+      "sourceArtifactId": "xdf-source:96733edc27e656db730ec26faf2368c369179c36efcd8543832bc3dc9ae16bc2",
+      "sourceArtifactDigest": "sha256:96733edc27e656db730ec26faf2368c369179c36efcd8543832bc3dc9ae16bc2",
+      "definitionSetId": "xdf-definition-set:623a635d0f6e0cfaec133ad97f59480b0eb657556f9973d21d79b68bf2bae259",
+      "definitionSetRevision": "xdf-definition-set-revision:e91c0c31e6cf65fbd6f861c4284cf778af5e71794861760b77164478eb877e85",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55463208",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387628,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "30e1c531bc51a37b9bad910b2599c945a12684d460a198ddbe335db09e0e27fb",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:10bd00fc01843c3fccc2a9cca3ae798103d880a484542da65bba4d2b8ef33d7c"
+        },
+        {
+          "digest": "540291cd657ea2c94a3b7a403b61a6c7431c37b3269e98632ffb8ed2886afe50",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:74dcbdfe7530e71b017782dddff6b60e540026a55d3b905623bb42e704cffff1"
+        },
+        {
+          "digest": "4e0a8cbbd050a363717a9cac270a7280aca087047af9a22a2a303b66940b611b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:8a8f615d8c6fcc33f2ae2837ffd8dd0e26622701977171efb97c0fa00e00498b"
+        },
+        {
+          "digest": "6837be9a14ee63326c586757339b06def18ca772e7fdc727009be428feb56a8d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:1529ce76b31635b1ada5960da4dd3e8f23c29a2ee4abbe2fafe43c37b67601d0"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55463C07/00005D55463C07.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55463C07",
+      "sourceArtifactId": "xdf-source:e7929ac0f5490ff1c25764c2da300f1e70148e8511545ac823225baf08b224d9",
+      "sourceArtifactDigest": "sha256:e7929ac0f5490ff1c25764c2da300f1e70148e8511545ac823225baf08b224d9",
+      "definitionSetId": "xdf-definition-set:35ca9b004c869351eebd108d86f0c33b9bc63752b3724fc8fbc8e9b6e7481f45",
+      "definitionSetRevision": "xdf-definition-set-revision:28c2f7644cec897f471b76f5176932e175b8f7e271d530fd303800952f882815",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55463C07",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387644,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "1b6b2ac4f650f0e51003105ab3aea85c756e17066c9afa090aee7eeea986749a",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:810f0e2eeeae90f8120b258a92f985131d76a24e461e2f7dd18e10c1629a8651"
+        },
+        {
+          "digest": "71fcddf2e3059c945cab679fc0b88d17ddb018c004099074f6c3d51d60dcffd1",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:352b47ef3a13ff33a3cff059b89ab5d4cb059cb426dc620ca6bf76eb4c5cad4c"
+        },
+        {
+          "digest": "e417d7abd88b755c56cfc109084e48c9d691c4e6dc3b014ec603bd60118c3271",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:02dc0c24dd47e5b109a0098fc806f624aef38ac54385f6db5920b35e15ae4b2a"
+        },
+        {
+          "digest": "630307598b4e0c16d50fc3468e8a44e89b1881a60cfaf1d24176d939d5ba2bf7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:45a221c08c970b0fa4baf5bf47a1becd5970932e1164ca25fef35eaac6ba02d3"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55464605/00005D55464605.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55464605",
+      "sourceArtifactId": "xdf-source:5aa6518a0a062c69674ee944706920503e45ac46103d2d82a2d03bfb4f464ef6",
+      "sourceArtifactDigest": "sha256:5aa6518a0a062c69674ee944706920503e45ac46103d2d82a2d03bfb4f464ef6",
+      "definitionSetId": "xdf-definition-set:32d9d23ca1d4b541ebc7c5a3158e19f3fbdef4d3963f52a1acc8697ad728631c",
+      "definitionSetRevision": "xdf-definition-set-revision:108ab66b0d1c65d6cc1ea1fae7e9433de295968bc18dd3007246574803e63212",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55464605",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387644,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "d76a8aff50c8dd32871e785db03844302608e8e0d9ee23e1b1b626132b1f45da",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:771ea658e2b4cc40209184777b49acfba5a47032a7a3bda1736408074ac0f20c"
+        },
+        {
+          "digest": "e89f2b53d073fee016addb460be2913902c426cdfbfc53e89a3cc89ec070c231",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:b1b153a645d624f48dcf509c58695740f64be161516caec048b35a0800c62301"
+        },
+        {
+          "digest": "280bf89a939bcfc5f488d40ac1755977554476e12f8fd454f06d0bf40d20d09e",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:2b96615787c4aa0269ba104d1a047edaa73942f223b48164e1d2f3cf00b744d1"
+        },
+        {
+          "digest": "100d047d3e4c90f58ff813bf7005c7d6df8960a1865c472bd0745d039c43f125",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:87b6c3b953dbfe86d3370391b12e6554dfa99e25ccef478ca4b490eaa2b25da0"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55465005/00005D55465005.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55465005",
+      "sourceArtifactId": "xdf-source:5aa8cc5b5b5f83b1e7a766a7ff889f64e2f1ded88a5719d6ec89b18485599a8e",
+      "sourceArtifactDigest": "sha256:5aa8cc5b5b5f83b1e7a766a7ff889f64e2f1ded88a5719d6ec89b18485599a8e",
+      "definitionSetId": "xdf-definition-set:eb9c832e7b073592f51a17a7be9806a501a56521e7c6072024a1766a415b52a7",
+      "definitionSetRevision": "xdf-definition-set-revision:eb798b5de97841d093ae6d86de4ca9704f48c6786c9d4dc68d80ce0c617f9097",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55465005",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387938,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "5b2887153567cd218676006efceffa10be91ceb021f3cd7a5b36868303eb6ec0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:81842bcb8e7ae92e2b75522d0f1ab23863ac424304afd3545c4fed09128b750b"
+        },
+        {
+          "digest": "677cc0889bea21ec096035144b541e9f2c7a2d767bdd3ffd1ac4ad40ce37e6c0",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:7aad3921e1a3ca1ee5ec91bc07cc6ccfd66428112dbd9f4159438c1d104e17f6"
+        },
+        {
+          "digest": "f09ca3cf7fdd18e2038d5e8e10e1c4c552af2aa8c92a0bf9244be4e015fbe165",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:912bb6de3a0eb4bbad45520843162a431ded803dc230957b2f01cc2a877ff6bd"
+        },
+        {
+          "digest": "cfa15607e529ce4ab799c18781af259d29d880766b191bc44d342cd22af76eb7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a95ed67ba51596c42aa49e9f862416b36f8a3e04c38350045833a2b49ff0984d"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55465A07/00005D55465A07.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55465A07",
+      "sourceArtifactId": "xdf-source:1db8db4de36a9e4edf3e8533706f17def5f40e87023141d08014c65c9145e5d3",
+      "sourceArtifactDigest": "sha256:1db8db4de36a9e4edf3e8533706f17def5f40e87023141d08014c65c9145e5d3",
+      "definitionSetId": "xdf-definition-set:7b4b29b288f23147eac4e4a6f5e59ade3d7299153ee78b55ff3bf38d8bf4ef71",
+      "definitionSetRevision": "xdf-definition-set-revision:2891e19b46b1f90ca31c642bdf316807e9ea66ca48adea0a62ba75fa14401f81",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55465A07",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387938,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "a51d4945085c328ae86c054b7cd5b939ae12bee70a885c5c625c4b2247e1e9b5",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:9f1fff5ae2dbc15433dfd1d86e86c10cfe05262cd877a1d0f6b4053a12f289d8"
+        },
+        {
+          "digest": "3ec0263772bfa21112125fbd28a0d2464eda5b979351b82efaaf16e26f44a77b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:6726a924326f5a59e123d8f581b7a89dcad7b600e964862d2288258c87771811"
+        },
+        {
+          "digest": "6ff8224f9803d5fa94c7813f131fcfbf88bad5ffce29f9c96cd714d36e9ec7e6",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:955f812f63e859f5ebb168649d167b01e1ae6bc0e005ef3b496988d5d57e905a"
+        },
+        {
+          "digest": "f4b5148ffe16ccd11a5502ff1dff88c891bc9b0823d439740ffc96a95688bf63",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:85a0bfd6bf619a168fb1b94a77a553b79ab3e4eb5b0df52eb39b89fd3b28b6ad"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55466408/00005D55466408.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55466408",
+      "sourceArtifactId": "xdf-source:a566068266ab7d31f0152fdcb887e4725071004be7801e77c23eda7d0034b99d",
+      "sourceArtifactDigest": "sha256:a566068266ab7d31f0152fdcb887e4725071004be7801e77c23eda7d0034b99d",
+      "definitionSetId": "xdf-definition-set:2443185d50fe7cc157f8d116e48a6d84f519bd40b4cf0c22ccce31d60263089d",
+      "definitionSetRevision": "xdf-definition-set-revision:a1a44a81a20b2d761a2d9af5d0e56260998fbfb2d9f903edded58236252c9a63",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55466408",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387950,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "75ae38e5a4418a3b8e5b6af33b8613d2c01513a41510f64fdca212967503804f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:6579d4526ae69ee2b3ec472eb6a32ead9829a6f739fbcc03510fd112c738b03a"
+        },
+        {
+          "digest": "9b7330a3eae982ab09ced65d76e704cf998a0c6b66f259bb6806c6a475a29f10",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:607b978ccfa8938a53f6fc67358c96ab0269930714c16d285077d148925637b6"
+        },
+        {
+          "digest": "2696e2cd9a12140027809427c2eb14a1ee97d80d14ba430d8b3c446ee87f6282",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a6370e651beb2cd9447eb09b99fe283f0471255c2b0dcf46e7a7f91808013f41"
+        },
+        {
+          "digest": "0662207fd34beab0a96896bb13754627141b81a76ccae57675064d5c68963c80",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:ee566806ec72fe680324f3db4f99825bc65da3eeab8a2805933e71283a04125f"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55467805/00005D55467805.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55467805",
+      "sourceArtifactId": "xdf-source:85edf3adc81ade9252deeed5270b5a0626e997c83b9f87196d3a42ccc180cd25",
+      "sourceArtifactDigest": "sha256:85edf3adc81ade9252deeed5270b5a0626e997c83b9f87196d3a42ccc180cd25",
+      "definitionSetId": "xdf-definition-set:45478c3962c767140c5fb210964b97ce51415c9641579906b9de3302eb996f34",
+      "definitionSetRevision": "xdf-definition-set-revision:b362030dc669ead49f34c874eacda68ec057ee223c993eae3a611b802f8b25cb",
+      "definitionCount": 1235,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55467805",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387950,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "e88822bf688403abc4efe856f5b44688de43e4f16fbae58dea21db6be3b1028a",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:d73eaa65dcfa66d00ad89a34405ea38739ec6168d5c1b7056f802d7d9909e5f6"
+        },
+        {
+          "digest": "07e432ace253de5f48651dd6ba0c893ef48f568db17921a05961f070cda44cf5",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:0ecf7eba8da5365bc0a7b69f13530fde0d0e1be2191a01fa8817c280b39c2f86"
+        },
+        {
+          "digest": "7fd0b73a14f935345dbd0949139e7d333362f9b6e9a53d82fdf5d05593bc8fee",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:eeb2ba920600bcc37e3a66f9c43fc4f189a03cf132775a8369ced9b401eec9ce"
+        },
+        {
+          "digest": "64e5f3afde6d1af2f4c73069e32e3c9417442b76e6120149b5dd4b9ae7e54654",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:65223577e2fb3b7fd704fe2dfa02bffae8808d4c0f5dc190d5d350418f82714d"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55468205/00005D55468205.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55468205",
+      "sourceArtifactId": "xdf-source:7b4a525f386a14ad43f2fc1e5792baff76edc300d0b23606e568cc8e767f4d16",
+      "sourceArtifactDigest": "sha256:7b4a525f386a14ad43f2fc1e5792baff76edc300d0b23606e568cc8e767f4d16",
+      "definitionSetId": "xdf-definition-set:5bdd290b6e8cd89f2e7ea34d6c7093b4dd777ff28002c3bc4e7d97580c7b1e94",
+      "definitionSetRevision": "xdf-definition-set-revision:6b32b5f280749c4fe8e66e4ce57ab2b72095fa5e816570024145eeaa58c21c4e",
+      "definitionCount": 1230,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55468205",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7387950,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "38daae802313cd40b8268b2404422091a05d8185178c24d66f80553064cf1184",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:cea53d170da4b0e157f8fe7f4874e1857b667eeaae9624ff5d38908b52617d93"
+        },
+        {
+          "digest": "2816809661d604a257319c11e71119f05a9987213625a81f6016fcc26ff6657a",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:7fba22bd87c2a805ab69ac65a76639623db96f21be2a20d023ee3bd927ce6ad6"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55502807/00005D55502807.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55502807",
+      "sourceArtifactId": "xdf-source:ddcc6429f9a828ab74dfe8dd6bfbfc5d5acc085a1114c19ff87a6873d1076d92",
+      "sourceArtifactDigest": "sha256:ddcc6429f9a828ab74dfe8dd6bfbfc5d5acc085a1114c19ff87a6873d1076d92",
+      "definitionSetId": "xdf-definition-set:c44f24111224b0d1c822d30e00bb84c616d328ae76c72d1d847b1aafcd50697a",
+      "definitionSetRevision": "xdf-definition-set-revision:7327cdc5345591fc6889dd7359074341c0b949af9da64e8a5912272bebaacd9c",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55502807",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391246,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "756b84d8d4706028a7925daa41ed7a1cd66dd3a9a1cc9ff5af2655aac767b8e5",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:2065a689149e95a1300d23478276b40450371ba39419fe568605ae99ae377253"
+        },
+        {
+          "digest": "197292a520e93bd9d44a1c7c9d9fc06db409399409a8545c4f9e4f83b04a3068",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:20f25504d1d6ac016c94be6471e070b631dd7abad75a7f797281f6c845fd7b56"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55503705/00005D55503705.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55503705",
+      "sourceArtifactId": "xdf-source:908e038ea9ff640f0ea7ffe0f02f82bda57f8ac8624b5a4f9d85ac136b8379fa",
+      "sourceArtifactDigest": "sha256:908e038ea9ff640f0ea7ffe0f02f82bda57f8ac8624b5a4f9d85ac136b8379fa",
+      "definitionSetId": "xdf-definition-set:3a2391295c99583cd2b107618ce52d24f451a25fd3657ac671c047adf66280ed",
+      "definitionSetRevision": "xdf-definition-set-revision:b975010dd30a8c0fb7701a1a7eb18c1531e0ef3d23ae48f1e39d5322e882f3cd",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55503705",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391246,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "514e70bf9e58aaf793d14eac0c7b4fab3645f08500db6844947dd98ddde1c82d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:83dcfee2cb9ee35d8c3cef7993cdd112abd8055817827344db2bcaca330161ff"
+        },
+        {
+          "digest": "8231647df415a5f1baef01e8499709fa2b1228ef9188b0f24492648b19c56f8f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:266f97c88d660cb6dba778542801c378750220ecf71705583568572c18555d47"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55503C05/00005D55503C05.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55503C05",
+      "sourceArtifactId": "xdf-source:622c3de99462f9143898546243cb90ce92f963f61b78ad5fbcf0aa4420316ebf",
+      "sourceArtifactDigest": "sha256:622c3de99462f9143898546243cb90ce92f963f61b78ad5fbcf0aa4420316ebf",
+      "definitionSetId": "xdf-definition-set:71274fe934ad9ab902751914f5078aee01efacb4398f08fbc1af91d435cc3a64",
+      "definitionSetRevision": "xdf-definition-set-revision:22654864bf75daf8113a7a82e29d507043486940d2ffe4155fcbb1b82d5eceea",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55503C05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391568,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "a2b186e136c7bea4409e067bbfae98deb6534d9a01e962bfd02c6728c28ccf30",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:b391ee04495b6bd1bcc6d55b5fed974ab77b8787253c4c22e66e2ce84d21ce34"
+        },
+        {
+          "digest": "b4ca9da22a01e2b637bbaba67229657ed2cee1e5a30ff4777594373f1f6f7979",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:675af1a1ed4ca0d6d68eb8d456ce3c095a6daf5fc87f8eb3b01566d755d493b6"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55504807/00005D55504807.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55504807",
+      "sourceArtifactId": "xdf-source:3a4f4a54e9a6f8bdc97d51689c5ad9277602c72d7f456b66ee5403bd21f342d1",
+      "sourceArtifactDigest": "sha256:3a4f4a54e9a6f8bdc97d51689c5ad9277602c72d7f456b66ee5403bd21f342d1",
+      "definitionSetId": "xdf-definition-set:f3a0a4832f95dc087460f52c2bb58c7aaa33df0d1d658c4053c958bb12709897",
+      "definitionSetRevision": "xdf-definition-set-revision:4e84dda41ba6273c07a4995925fe0839b758a6013143adf3a22b18a90cdf506a",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55504807",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391568,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "7436b82fd2ac8e07908a3021ae0fdf7bf41a9894f3b0d4d8a7c84e647457d5db",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:a109fa456dfdc6c985154d449353a2cbd7192c3764e0e266928b7ddcea3eb321"
+        },
+        {
+          "digest": "77d3e68a5c631282ff8c40a2911045849657de3a579caeb19af3ce071bd32e34",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:4c6e450f190a11a2cb66a8342b2650fdd3a33aa08e953514fa208fd8b01f6578"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D5550480C/00005D5550480C.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D5550480C",
+      "sourceArtifactId": "xdf-source:5a74de25f8c00543df15667351baa8fc5ce81d6334ec1890abfd9a98ed3a6d00",
+      "sourceArtifactDigest": "sha256:5a74de25f8c00543df15667351baa8fc5ce81d6334ec1890abfd9a98ed3a6d00",
+      "definitionSetId": "xdf-definition-set:051d7af5a3b5db2146736a66fa365c2704f95a7163e442ce47048b6d39114a67",
+      "definitionSetRevision": "xdf-definition-set-revision:06fe4b43620d9db73eddd4cacffd31cc472b130a09081c105c332b550dff90e6",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D5550480C",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391568,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "525fa8d9825ff7a3c428cfd135bceb17822d2a49b5c6dd29bd326c5de35ecb01",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:1b6e946ff8511d310cff4b392d13eeaddd53299e9e3b5286102eff38f8c41c3c"
+        },
+        {
+          "digest": "dac73a471842e4b01f49640e171e20d3827a11b9bbe5fde853b913e671ecd414",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:c8b96a69743047fd63f7c1eb22f2203b807e10199523bf4cc0e2dd13079754e5"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55505008/00005D55505008.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55505008",
+      "sourceArtifactId": "xdf-source:1c24d9688fbacebe1e549237ce2accbe76bd9e10bead8fc0731450c005943c57",
+      "sourceArtifactDigest": "sha256:1c24d9688fbacebe1e549237ce2accbe76bd9e10bead8fc0731450c005943c57",
+      "definitionSetId": "xdf-definition-set:e559e2149dde853e4ce72347e74a576c6fb94feac6ccd1b2cd436366a56cf0e6",
+      "definitionSetRevision": "xdf-definition-set-revision:9cb301b1c3d842aadc7645f4ed0b71236b715443ea3d93b8c262e38a992021c4",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55505008",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391568,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "092647c9638a90f2ec43d90787ec882147f0e2a08ece5481135e8162763c9703",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:78690e14cc9fe0a0fcd6952d246b226858ea030be54017dfb6d5fe6b56ec5879"
+        },
+        {
+          "digest": "3eefdc36e230f557f8e5fbf218931cd3052bf7a4e63ef3c723cbb8a874ae9ca7",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:7f56ddba1f3769c818e02f2a83f32fc8287c36ad6a495e64207eb845337fb9fd"
+        },
+        {
+          "digest": "f3e4dee19bd08285827972cf07bbf4d726e143fb654319cc44c811c25b0b3497",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:07f9fee2bde3d308ec0bc23018f76b8d6fd3be00c473b214d660c3dfeeb454c8"
+        },
+        {
+          "digest": "a52981ed89119d675f185606681132664a79abe4f1e6b8a3cd6680fc2caa184e",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:682b2b13bffe7fedb6baaff72682f3d6a8979ccd847f24261c0c23df1db28130"
+        }
+      ]
+    },
+    {
+      "relativePath": "B58gen2/00005D55506406/00005D55506406.xdf",
+      "family": "B58gen2",
+      "romSoftwareIdentity": "00005D55506406",
+      "sourceArtifactId": "xdf-source:03542cc830d216407500394e207c34fce7266007b46ffcf0bba5962da253f5d8",
+      "sourceArtifactDigest": "sha256:03542cc830d216407500394e207c34fce7266007b46ffcf0bba5962da253f5d8",
+      "definitionSetId": "xdf-definition-set:55cd18a6eef45d8c9a29b33fbee53d7310cdc94b6b2529be0fff693a05b89f3e",
+      "definitionSetRevision": "xdf-definition-set-revision:f5babaf38738b8981c38435202d3db916999b22d8ddab5129b6f113b86a4d896",
+      "definitionCount": 1252,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005D55506406",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391568,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "185c440493dfc8e594a9d63d885f1fa1d94f39f0a9c18d051f30e5d8a74940b4",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:6cbe676e544e2168621f7840b25a3b572da7b6136c10b5bb79d4251c67d1e3a7"
+        },
+        {
+          "digest": "704199890f8f8a07c7d8f895b491de8688b0c25b779db9a14d7c861f2d89b26d",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:ba8e5aca76884d85ae0eaf763803ebe2dd40e9adc02a610144fbd7144f4d3c56"
+        }
+      ]
+    },
+    {
+      "relativePath": "N55E/9E60B.xdf",
+      "family": "N55E",
+      "romSoftwareIdentity": "9E60B",
+      "sourceArtifactId": "xdf-source:faa7230d05ab6954eb7d11c21627717cea41ddf19806fbf28e8e818fb417ea1a",
+      "sourceArtifactDigest": "sha256:faa7230d05ab6954eb7d11c21627717cea41ddf19806fbf28e8e818fb417ea1a",
+      "definitionSetId": "xdf-definition-set:e62f3927935ae1d2d425e299859a7fa22bb44ef8e5cb09a37db94ebda7fe5f8d",
+      "definitionSetRevision": "xdf-definition-set-revision:2b95f0e07c3fecbd0d7eab0eb482a26a059986f08556a48989d5a746fce6ee19",
+      "definitionCount": 1018,
+      "binaryByteLength": 4194304,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "9E60B",
+        "detector": "bounded_ascii_exact",
+        "offsets": [
+          55435,
+          55447,
+          55459,
+          1571621,
+          1571631,
+          1572992,
+          1573009,
+          1573026,
+          2095909,
+          2095919
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 4194304
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 1579842,
+        "maximum": 2095696
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "4091384679312dec109fa206234f2fba7f866028e95ec28c1a7cc6aebaa3d4ff",
+          "byteLength": 4194304,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:cfe314280e26086d85e0bf4aea08a2b2488d73665f19d73e366cdcc51c7468bb"
+        },
+        {
+          "digest": "ee28b5eda527574a3e99b85c3685f6605f242682c3e7c1950aeffd96e9973c67",
+          "byteLength": 4194304,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:c0ed74b1247673fa4fceaada313a6418f5d98d7c147f591f4b752acb3eb9d2aa"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A6405/00005C640A6405.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C640A6405",
+      "sourceArtifactId": "xdf-source:e5e0add9ecb8876a16fe5c4b93bc3714fc4b2d415565dc18d663f1ac4a70e46e",
+      "sourceArtifactDigest": "sha256:e5e0add9ecb8876a16fe5c4b93bc3714fc4b2d415565dc18d663f1ac4a70e46e",
+      "definitionSetId": "xdf-definition-set:28148933e7edc57b7a7391d0a4c4ddc423b38db5b092de9b87a6a203a8228dc3",
+      "definitionSetRevision": "xdf-definition-set-revision:8043aef7d3b29acbdaca72744ae716aa22742d5cc9e1841588eb05d90cbf54df",
+      "definitionCount": 1206,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C640A6405",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7389126,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "89cb32ff5619a98e0b721bae9faf2b27db55d5fe40684bdeca0004fc411e65fb",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:2606774192cda3f2739f2c0021d368b643fa65c0cdf9890e8b294db845734743"
+        },
+        {
+          "digest": "5b05e21f9c8c6485969b1c42e8ac16abc3d037f6010aeced5262cfe1f27dfe41",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:135504d4e7bb35eb03ac17e82f11e1a0aa354ab23c2a13e73d28ba23d0898b36"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A8205/00005C640A8205.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C640A8205",
+      "sourceArtifactId": "xdf-source:d3d8abbb9d4827d91abb8b53cbdf988870027e90b1243d9be0daf731bc04751c",
+      "sourceArtifactDigest": "sha256:d3d8abbb9d4827d91abb8b53cbdf988870027e90b1243d9be0daf731bc04751c",
+      "definitionSetId": "xdf-definition-set:2d41dc99cf0f3e3d62e529a885572008497472db748626252d15ae6f9f9e700d",
+      "definitionSetRevision": "xdf-definition-set-revision:beadab977ba5e6e3698bc93b4efb1620e7c2bfed15907eafd55cbc935208674a",
+      "definitionCount": 1206,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C640A8205",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7389126,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "812ff0425c8575767114904e4eb002837bbfa3f202aba5d6cd701636ddcbc34b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:1530b8787daa49d5e9ca2ec70ad16451c66e58874f093268713069586fdf1e5b"
+        },
+        {
+          "digest": "2b3d42dcec556e857b462837b1ad34b09eb78b51b4c590e667bcddcc25c0c257",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:44f2602a5c7c06d94499117c770c5bcc4d248e229df0e4c1f51b240f3dd349a1"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C640A8C05/00005C640A8C05.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C640A8C05",
+      "sourceArtifactId": "xdf-source:5ffb4f98f61b238e6906ef7b163f247e75c4ba40c99a55b5ea36253152ac3b00",
+      "sourceArtifactDigest": "sha256:5ffb4f98f61b238e6906ef7b163f247e75c4ba40c99a55b5ea36253152ac3b00",
+      "definitionSetId": "xdf-definition-set:4748e565cb6d7ac5cdc4c7629696a173b0473306a826f66c3b0381f3cada9e4f",
+      "definitionSetRevision": "xdf-definition-set-revision:fef182a4425f73beed8e8948c1dfc5e199a0eec17c29c037dbdfa1aa253ee309",
+      "definitionCount": 1206,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C640A8C05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7389126,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "94816ee9bf5bcdef43a2da1fab0ba2d47e9bc557457eca0e840b0f28313c5862",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:25c0df35760fdca8be49277f91ef1ea7b22b61b59aa6c86e96b3e2097f62ba99"
+        },
+        {
+          "digest": "f8f3f728441ec40b8b428e8816b4e9122e98c934ce5547ee7fe9a493ce0a08a4",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:1e326ab0582000b09bbbcbd597e566c1de587d8c6dfb33d63e6ad8230054d12b"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64143206/00005C64143206.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64143206",
+      "sourceArtifactId": "xdf-source:8fff783f953aac628a7bb8927364f064d86debc53ee2704cc751f063035f45b9",
+      "sourceArtifactDigest": "sha256:8fff783f953aac628a7bb8927364f064d86debc53ee2704cc751f063035f45b9",
+      "definitionSetId": "xdf-definition-set:11a1ff48b60557a5080fdf1f0a9caad72a9ef31749e23a2a6ff54f2d5486c313",
+      "definitionSetRevision": "xdf-definition-set-revision:3e7701f9fc24a2283ad10a26ff6b8b9d5cff4320e8fd5cdbf085b8fba9c45aa9",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64143206",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391192,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "1dfd7e3ff33f3c0f0c27801a73fa68820ef49a04d3d22281774cf1a055dc3af8",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5d340089d349eb8c194854b3f06709298819828c31f9538a8a4e56adb0eda409"
+        },
+        {
+          "digest": "8db96ef9431481d5e5fd4d2a79241f2844201fae3788ba6c642ac24d990b5249",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:cec10e09894286c5b30144c1a095a68c8a141c8cf8bac5428e628503122fd6f7"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64143C05/00005C64143C05.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64143C05",
+      "sourceArtifactId": "xdf-source:92d1689434c93caa3c9fae4c453c14a73ab2ad454b095301a2fff98904b8ac51",
+      "sourceArtifactDigest": "sha256:92d1689434c93caa3c9fae4c453c14a73ab2ad454b095301a2fff98904b8ac51",
+      "definitionSetId": "xdf-definition-set:5050da92e2b4489f6ee9cfa0304b2af23bd51bf83f7b044865b54a5cbb1c1a4e",
+      "definitionSetRevision": "xdf-definition-set-revision:4001fc0f05e9d62a32a43d1019d2005ebbeea39062c6d29c57d69391127fbc03",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64143C05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391192,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "3a15f356833d2093e32105a3ec5f3d93378daead63bc29809316888338ee0ac6",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:91a4f786fe40a5649c571aceabbfca70a84bff36a379751c0fa966b00362442f"
+        },
+        {
+          "digest": "f1581095f3a4d42e5635de37d6b8a259b5a44cf5304d16a8a748759a9af26ab8",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:b4ecbf0e7896e2e82bdc346645757622cdf248a615602859f48086c54a50d36f"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64144606/00005C64144606.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64144606",
+      "sourceArtifactId": "xdf-source:f69645eecb454625e3ba8f94703b007c12526bd166c063b758a7c808803871ac",
+      "sourceArtifactDigest": "sha256:f69645eecb454625e3ba8f94703b007c12526bd166c063b758a7c808803871ac",
+      "definitionSetId": "xdf-definition-set:d70899931eee98a738fe19b8bb4bd8a8c7ca828df548a963d95bea326f169173",
+      "definitionSetRevision": "xdf-definition-set-revision:27fe6b6ecde13b2af1658ba4246909d89ddf227d9e381330cc5b3a6722b9e418",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64144606",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391510,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "138b555d467b2bedea8dd29c383bcd4aa35f149b9547ca5bca3c90d73c4f536c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5e7621bb298a3e807f0611cd8dce55ef046806759d0ae55685b4ed44e70c0275"
+        },
+        {
+          "digest": "06ac9514bb0a908f79888b382a9ec29f88dde6f0fed09f6471e9e27599c3ff6b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:5ecc45f414d8dbff90bfd9e36e88a65efaeda7d5e32a0c0aeaf752872c57d54c"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64145007/00005C64145007.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64145007",
+      "sourceArtifactId": "xdf-source:1cbf5cd986a1b2992d72242c9eb00f82dea7737de593f7ac07652f8b1085c448",
+      "sourceArtifactDigest": "sha256:1cbf5cd986a1b2992d72242c9eb00f82dea7737de593f7ac07652f8b1085c448",
+      "definitionSetId": "xdf-definition-set:dc301326cf9787103f0ba63b3723c6eea8db5263dab652f49589d8c15b763c03",
+      "definitionSetRevision": "xdf-definition-set-revision:e3f4fec2dbccb1074b43ed49e87d79efef9f82f94f50e6f12dbc0ba36a8e7f7e",
+      "definitionCount": 1276,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64145007",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391526,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "ca6b18a35e1de13776c8642a537dd363bad40cb8a6fca836ceb450b4ee3abd80",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:7d55ac10bb696a20bac0db0b0d9becbaca9dc6daa14b1c4e39fa907b2cec2f47"
+        },
+        {
+          "digest": "ecea91422656de2279afb9d119e43bba42f912ea0ac90a786648fd0afdf6e5ab",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:ec7cb6b5d78ad6b3855076474d2345a68be55152e44d1ae1d2f0c2bad3a7f386"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64145A05/00005C64145A05.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64145A05",
+      "sourceArtifactId": "xdf-source:686ce3a4bd27c88bd9d69db2e21e0fb5cb8a74d637de64d2637441f94d3a9b89",
+      "sourceArtifactDigest": "sha256:686ce3a4bd27c88bd9d69db2e21e0fb5cb8a74d637de64d2637441f94d3a9b89",
+      "definitionSetId": "xdf-definition-set:d5a25a67976a341397a9f2b7422a939189125d1de65fb8c3a41aca45ee39ab66",
+      "definitionSetRevision": "xdf-definition-set-revision:d0001207065f7266d9eb7dd69b84dde60b49ae22066aacef65f46644c78dc5b0",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64145A05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391526,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "8c1333f0222fd2aef0b65c1b03f2dedb2eb489e77729456935b97ad728d36f30",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:4857ea54486fc1a3e279f94fd94d0e636d72f7bc12a33f2e284fde7b16db2644"
+        },
+        {
+          "digest": "27a4af7ae283def62040cc66e551521648abf3ca4701222335f959ae252f5393",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:454e7337cf8047da6af0095b310e8d4606ebf80e08c586c86c217615d26f8a71"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64146E06/00005C64146E06.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64146E06",
+      "sourceArtifactId": "xdf-source:72ecf244b61ee31eab54d0bce3361f0d0a940bef088d46306b9fc4a86e5cb793",
+      "sourceArtifactDigest": "sha256:72ecf244b61ee31eab54d0bce3361f0d0a940bef088d46306b9fc4a86e5cb793",
+      "definitionSetId": "xdf-definition-set:6d7ab2629f882cd2fd095aa007ebbb5d8346418505ff0c035eac97e84f0bd64b",
+      "definitionSetRevision": "xdf-definition-set-revision:522bf4cdc5e5d0f03f6ab9aec01ef938d4e9c6c9ed95658fe030eaa1341e00ef",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64146E06",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391530,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "4f9db448bb8938d6bab0f40d4a78a7b25ed992860ddf599d591e855985ce8d99",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:6314bf6b8c517ff85f44e6714bb616f300858ff4062a8e1baa7fed3b433df16b"
+        },
+        {
+          "digest": "a3092d9144281ae8b59dbb12b65b784ba87143da40bb7b5c8d0bd6e150595996",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:88a49d113c9edfca27841cad39115523f5b63d6985458e6cfba6c28bd007fdf6"
+        }
+      ]
+    },
+    {
+      "relativePath": "s58/00005C64148205/00005C64148205.xdf",
+      "family": "s58",
+      "romSoftwareIdentity": "00005C64148205",
+      "sourceArtifactId": "xdf-source:e509afcee348a35137862b18ad6c36fb866e70ee79f632abceb09781257ebe6c",
+      "sourceArtifactDigest": "sha256:e509afcee348a35137862b18ad6c36fb866e70ee79f632abceb09781257ebe6c",
+      "definitionSetId": "xdf-definition-set:a9b30eb28f103fc489ef18ae3ebc5b264687b2cc8e60e259c7874ac77a12cedd",
+      "definitionSetRevision": "xdf-definition-set-revision:225927e0c8313e4bbb936237e8df0f1efa60837d4e8ee52bbf83babc763a3ebf",
+      "definitionCount": 1277,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00005C64148205",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7391530,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "6fcf358ea8847fe3c40bb925f905e3d991ee97f0f8502206dc6bb06761199849",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:c8526da249d8cd35f004413496bc52dccc21c1ab9fd38f5b7e2bc13616a4e1fa"
+        },
+        {
+          "digest": "e6aba9fa438886ca09222f3e3e5a332e7cff83545887b328a4f3909b102abd7b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:9ca6bfc92575dde58e0d57bae20b4de6487366c4bdb772bab09223ebbfabc551"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF147803/00004ACF147803.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF147803",
+      "sourceArtifactId": "xdf-source:8ae65e1ddc8edc453fa71b7dc9f3c103a66c0700e11d23e20c0bf855eabb9a62",
+      "sourceArtifactDigest": "sha256:8ae65e1ddc8edc453fa71b7dc9f3c103a66c0700e11d23e20c0bf855eabb9a62",
+      "definitionSetId": "xdf-definition-set:513d6cfc73b4ea2012bed6688592e08e6fc9668d7e69b6460fb0a6d90de3294a",
+      "definitionSetRevision": "xdf-definition-set-revision:4dd31872a399b98e16b2677ffbc3c2bb3fe37fd4273eb8a0348b4a98509460da",
+      "definitionCount": 569,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF147803",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "bc8cd718ec58af73087b70e7045408fca794315016213452664a6fee590129db",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:fa1835adffe34054cfa83821001c59781e7e5894f7c22adc6239cde06248d32c"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E6E05/00004ACF1E6E05.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1E6E05",
+      "sourceArtifactId": "xdf-source:2f49f094eacdb8e50dbc12c97fb1aa6bcb52179f779ae3ba3d90541d01cce699",
+      "sourceArtifactDigest": "sha256:2f49f094eacdb8e50dbc12c97fb1aa6bcb52179f779ae3ba3d90541d01cce699",
+      "definitionSetId": "xdf-definition-set:897d762a41a14624764d2222aff1c5ebddd778c1daa10c1c0acfc351ae592ba3",
+      "definitionSetRevision": "xdf-definition-set-revision:bd6adf741b07914b38f71648407b216b565d5de5b0294db17d6a728f4550ba4a",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1E6E05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "24351a04cc7748dd53a53f6a126226de0997a9f5e318599f569f228d99eafc6c",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:89b26f8cd814e509cad93118c725c160d4c409d16c71c6f832fb9cdd76eff227"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E7805/00004ACF1E7805.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1E7805",
+      "sourceArtifactId": "xdf-source:11a32ce3f2827bb3555660e59f84984d8a434dd4cb81cff8f3c651c3c2f9c066",
+      "sourceArtifactDigest": "sha256:11a32ce3f2827bb3555660e59f84984d8a434dd4cb81cff8f3c651c3c2f9c066",
+      "definitionSetId": "xdf-definition-set:6a526739382dad34887be667ddc0caad10137ec28851b005e9341228b14c0cc4",
+      "definitionSetRevision": "xdf-definition-set-revision:7742b365fd6b2ef97b6381d616aeabafefd39103816c155d8a84d76af0847891",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1E7805",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "2250da5f9868597a274d9fc5af48a53e7286eb849ae1c0af491f71639c20ee54",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:671d242fd8c8dfbdb8853ad59709af47fdcd7bd2a00a0e60ac895ada655a8ace"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1E9605/00004ACF1E9605.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1E9605",
+      "sourceArtifactId": "xdf-source:87d980ab2a2367d9b3e5a631c6784da3bbce20161e484225220e8c2312d5bc23",
+      "sourceArtifactDigest": "sha256:87d980ab2a2367d9b3e5a631c6784da3bbce20161e484225220e8c2312d5bc23",
+      "definitionSetId": "xdf-definition-set:efe47c3e33c3e6a30003d0902bd8bf5c4ffece875588e9b514015a7184d284f4",
+      "definitionSetRevision": "xdf-definition-set-revision:69845360a5f466a5b7b864197fe3df336bdab4f2e029e4252040306264ff2ad2",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1E9605",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "988525d7edc8d66ccc6eeb8b9c9b5c36d1f198b159760967dedd24c7ecec2afb",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:a25547af561f1caf443983427e0d53545d51289fe652bf32f87a36607440378f"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EA006/00004ACF1EA006.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1EA006",
+      "sourceArtifactId": "xdf-source:359622db26a85b2ad93f7c7d727a188bd7439eac04801f51491ba7dbcabb8a3a",
+      "sourceArtifactDigest": "sha256:359622db26a85b2ad93f7c7d727a188bd7439eac04801f51491ba7dbcabb8a3a",
+      "definitionSetId": "xdf-definition-set:4375f2bd734c9a8728ca9829fb8b9cca9c78f77ba0ba5d9bc70bf5ba3f638a1a",
+      "definitionSetRevision": "xdf-definition-set-revision:a5403359b301e7539a6a90f0707e3adf4fd14ad67922a1f80699c8f05cf86493",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1EA006",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "89e540c99bcc44b383ab176059a9f8ce8b4d31389e877c199eb68ebcbee1903f",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:1890ab41dc5687f46de18e35e9ee394ddb9e03791237df4250d245bae41e3ada"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EAA05/00004ACF1EAA05.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1EAA05",
+      "sourceArtifactId": "xdf-source:a81671c509be027842bbbecccd03e4b622a3d5a5c4833495e15c839a79d3a148",
+      "sourceArtifactDigest": "sha256:a81671c509be027842bbbecccd03e4b622a3d5a5c4833495e15c839a79d3a148",
+      "definitionSetId": "xdf-definition-set:bb1c4d3eb6a34524a668a816967fd70f60d2f890393be067a242af0c51eac2cf",
+      "definitionSetRevision": "xdf-definition-set-revision:f3485486e30ce06d709080bb0b2d244ffbc2c6c52efca6e82d239f76bc620f53",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1EAA05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "c4801849b2221cdc4bac91f402c4190a74bcb4fa43a1252504d28ed573e2127e",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:51ff96b1b96aee1721e991213225bd7cd534fd14071031be53dc09a9e95910c5"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF1EB405/00004ACF1EB405.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF1EB405",
+      "sourceArtifactId": "xdf-source:a0dd0d4b8244fe019d90947916fb9cdb088002ec02b5feb654e8746b0561c8b6",
+      "sourceArtifactDigest": "sha256:a0dd0d4b8244fe019d90947916fb9cdb088002ec02b5feb654e8746b0561c8b6",
+      "definitionSetId": "xdf-definition-set:2aecdc5f4cbdde946fc6cb98202911b5a2f41e72f108a020af5c2ce5bbb58537",
+      "definitionSetRevision": "xdf-definition-set-revision:b6dd1b7398f4c5320849847d75b139954b75406da043fd0aa90df96c9b5a716c",
+      "definitionCount": 560,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF1EB405",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "cd02fe2fdc23c18208a4674c9d0a011d56dee7a25b594ec647e3f9bcae3d4cb8",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:5cf58424e6cbfbd07cafb7e5fe675ef8c2d56b9d0938cfa5c9576e6b26242bbe"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF286E05/00004ACF286E05.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF286E05",
+      "sourceArtifactId": "xdf-source:7bf67fc5797c7c68db2401fbd65165e3e6c97b92c13b49d97d5e3c902cd39be9",
+      "sourceArtifactDigest": "sha256:7bf67fc5797c7c68db2401fbd65165e3e6c97b92c13b49d97d5e3c902cd39be9",
+      "definitionSetId": "xdf-definition-set:6054348e18731701fdfb3084df3aededd5c82707ffffe9e039fd93bf0d108d23",
+      "definitionSetRevision": "xdf-definition-set-revision:bb02366c45671802e4e5a90c9264c8136cbd29614430a0e943ece74455a4f37e",
+      "definitionCount": 567,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF286E05",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "d9c1bfb8a9e92b895ec3783aebe43b7cc947f917326ba1ca9c5241cc33290f82",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:fe3206a1a94966539cf252ab9c2721aa6734573fb9d1122e62231e99087351ac"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF287806/00004ACF287806.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF287806",
+      "sourceArtifactId": "xdf-source:075a731fd96db143c0e8f3510ff5528c920cc098200d8e71cc5a0ba5c429d358",
+      "sourceArtifactDigest": "sha256:075a731fd96db143c0e8f3510ff5528c920cc098200d8e71cc5a0ba5c429d358",
+      "definitionSetId": "xdf-definition-set:ede9fe8ec26564709558b68ee39858ce5aa71132075124ca25cde5a98e167ae9",
+      "definitionSetRevision": "xdf-definition-set-revision:a0b1498b12754bc974a85ba2760f923dc345e7516ba4a64411a869040941d7c5",
+      "definitionCount": 567,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF287806",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "cbf94c5dcba17af3e37a078f39ed803c754a01bd949c01fda55b7f050f5227e8",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:f3645c70e550cfd024a062c091485d760f4408cbb48b73a72ef7a02b982922be"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF288205/00004ACF288205.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF288205",
+      "sourceArtifactId": "xdf-source:30a75458f4c3c98d8fac3d84cd1d8ea3541db13c13afa0b98ae76d7a38b71546",
+      "sourceArtifactDigest": "sha256:30a75458f4c3c98d8fac3d84cd1d8ea3541db13c13afa0b98ae76d7a38b71546",
+      "definitionSetId": "xdf-definition-set:dc474042237b19805c1121d07c3e13a56412144ae73678f6030114ef709d58c7",
+      "definitionSetRevision": "xdf-definition-set-revision:058badb396ca60f9a21b3b7c68bae9a9d1af38d6fc08d6892988aabf30adcecd",
+      "definitionCount": 567,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF288205",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "040bffb2e8b9e4b0db67627d0768905f53d2426c20b42070b8a32020eb408c2b",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:9fe5b211f9a7884c7d706e43a3bab86bde0fb5df5e4d4c92649537d29bd25059"
+        }
+      ]
+    },
+    {
+      "relativePath": "S63/00004ACF289605/00004ACF289605.xdf",
+      "family": "S63",
+      "romSoftwareIdentity": "00004ACF289605",
+      "sourceArtifactId": "xdf-source:86f5e5464f911c6d13c11f04b0da1d79b49835a98323ae8c2bb51a68b2675f67",
+      "sourceArtifactDigest": "sha256:86f5e5464f911c6d13c11f04b0da1d79b49835a98323ae8c2bb51a68b2675f67",
+      "definitionSetId": "xdf-definition-set:35b17bb38483940a18000831459bf5aad37b40fc57b4919486699b5edd1bc1fe",
+      "definitionSetRevision": "xdf-definition-set-revision:63a5b401598b5a9fbeed027d2bee4dd9b398f5f653bdb2854b0a40fa01684bb0",
+      "definitionCount": 567,
+      "binaryByteLength": 8388608,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00004ACF289605",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          524613,
+          7339265,
+          8388111
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 7340978,
+        "maximum": 8386400
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "22678d1784bd51a694786a862b148ac2c5399ed3f7265321adc5313881119c59",
+          "byteLength": 8388608,
+          "containerType": "bin",
+          "sourceRole": "stock_original",
+          "validationRevision": "bmw-full-validation-revision:e3ffcb5282939b1fd98b4d8add33c63e5de4ca97f9719fddbac470db9e8f3bea"
+        }
+      ]
+    }
+  ],
+  "rejected": [
+    {
+      "relativePath": "B58gen1/00003076501D02.xdf",
+      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
+    },
+    {
+      "relativePath": "B58gen1/00003081501102.xdf",
+      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
+    },
+    {
+      "relativePath": "B58gen1/00003081501D04.xdf",
+      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
+    },
+    {
+      "relativePath": "B58gen2/00005D5532E605/00005D5532E605.xdf",
+      "reason": "MISSING_BINARY_MEMBERSHIP_EVIDENCE"
+    },
+    {
+      "relativePath": "B58gen2/00005D55506405/00005D55506405.xdf",
+      "reason": "MISSING_BINARY_MEMBERSHIP_EVIDENCE"
+    },
+    {
+      "relativePath": "B58gen2/00005D55508C05/00005D55508C05.xdf",
+      "reason": "MISSING_BINARY_MEMBERSHIP_EVIDENCE"
+    }
+  ],
+  "revision": "bmw-bulk-current-view-admission-revision:a6917653043482497f59d1655ed1529d3f2a3ea97d3225d8b28e0f50cc6883ee"
+}
