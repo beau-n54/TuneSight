@@ -41,6 +41,18 @@ test("B58 Gen1 invalid numeric and representation blockers are definition-exact"
   assert.deepEqual([...new Set(conflictFindings.map((item) => item.rom))].sort(), ["000030765A3C06", "000030765A5005"]);
   assert.deepEqual([...new Set(conflictFindings.map((item) => item.revision))].sort(), ["xdf-definition-revision:cdb3a13ebbc80129453d0899731c77a72efcf33580e2ae1c8abb520e05440938", "xdf-definition-revision:f470b44e75278b2d7d7e22850fe53746cf09b7f67c289c359c69d80b420c11bb"]);
   assert.ok(conflictFindings.every((item) => item.address === 7_340_032));
+  for (const rom of ["000030765A3C06", "000030765A5005"]) {
+    const parsed = interpretXdfStructure({ xml: fs.readFileSync(path.join(root, `${rom}.xdf`), "utf8"), filename: `${rom}.xdf`, provenance: `B58 Gen1 overlap forensic ${rom}` });
+    const overlapping = parsed.definitions.filter((item) => item.primaryAddress === 7_340_032);
+    assert.deepEqual(overlapping.map((item) => item.title).sort(), ["GPF - Rail Pressure Setpoint Reconditioning", "GPF - Rail pressure setpoint for multiple injection, 1/1", "GPF - Rail pressure setpoint for single injection, 1/1"].sort());
+    const maps = overlapping.filter((item) => item.title !== "GPF - Rail Pressure Setpoint Reconditioning");
+    assert.ok(maps.every((item) => item.identity.status === "conflicting" && item.defaultDataLayout.elementSizeBits === 16 && item.defaultDataLayout.signed === false));
+    assert.ok(maps.every((item) => item.axes.map((axis) => axis.embeddedData.address).every((address) => address === 7_340_032)));
+    assert.ok(maps.every((item) => item.axes[0]?.indexCount === 6 && item.axes[1]?.indexCount === 6 && item.axes[2]?.equationSource === "X*0.000610351563"));
+    assert.notEqual(maps[0]?.description, maps[1]?.description, "Different calibration-function labels cannot be collapsed as harmless aliases.");
+    const scalar = overlapping.find((item) => item.title === "GPF - Rail Pressure Setpoint Reconditioning")!;
+    assert.equal(scalar.identity.status, "derived"); assert.equal(scalar.defaultDataLayout.elementSizeBits, 16);
+  }
   context.diagnostic(`B58_GEN1_INVALID_NUMERIC ${JSON.stringify(invalid)}`);
   context.diagnostic(`B58_GEN1_REPRESENTATION_CONFLICTS ${JSON.stringify(conflicts)}`);
 });
