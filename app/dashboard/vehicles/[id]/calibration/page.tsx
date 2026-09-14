@@ -149,7 +149,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           ))}
         </section>
 
-        {currentOnlyWorkshop ? <CurrentOnlyWorkshopClient workshop={currentOnlyWorkshop} vehicleId={vehicle.id} ownerScope={createHash("sha256").update(user.id).digest("hex").slice(0, 24)} subscriberSession={subscriberSession}/> : <WorkshopClient workshop={comparisonWorkshop!} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />}
+        {currentOnlyWorkshop ? <CurrentOnlyWorkshopClient workshop={currentOnlyWorkshop} vehicleId={vehicle.id} ownerScope={createHash("sha256").update(user.id).digest("hex").slice(0, 24)} subscriberSession={subscriberSession}/> : <WorkshopClient workshop={comparisonWorkshop!} vehicleId={vehicle.id} ownerScope={createHash("sha256").update(user.id).digest("hex").slice(0, 24)} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />}
 
         <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
           <summary className="cursor-pointer font-semibold text-zinc-200">Workshop concepts and evidence boundaries</summary>

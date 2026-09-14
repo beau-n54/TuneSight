@@ -12,12 +12,13 @@ import { buildCurrentOnlyWorkshopViewModel, type CurrentOnlyWorkshopViewModel } 
 import { deriveWorkshopCapabilities, resolveMasterCalibration } from "./masterCalibrationResolver.ts";
 import { findRepositoryIdentity, RepositoryDefinitionCatalog } from "./repositoryDefinitionCatalog.ts";
 import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
+import { classifyEntryEditCapabilities, type CalibrationEditCapability } from "./editAuthority.ts";
 
 export const SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
 export type SubscriberCalibrationFailure = Readonly<{ status: "coverage_unavailable" | "invalid_upload"; title: string; message: string; identity: string | null; digest: string | null; container: string | null; byteLength: number | null; coverage: DefinitionCoverageResolution | null; timings: Readonly<Record<string, number>> }>;
 type SubscriberWorkshopMaterial = Readonly<{ reference: QualifiedCalibrationDataset; current: QualifiedCalibrationDataset; comparison: QualifiedCalibrationComparisonEvidence }>;
 type SubscriberCurrentOnlyMaterial = Readonly<{ reference: null; current: QualifiedCalibrationDataset; comparison: null }>;
-export type SubscriberCalibrationSuccess = Readonly<{ status: "workshop_ready"; workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel; material: SubscriberWorkshopMaterial | SubscriberCurrentOnlyMaterial; identity: string; digest: string; container: string; byteLength: number; coverage: DefinitionCoverageResolution; quarantines: readonly TableQuarantineRecord[]; timings: Readonly<Record<string, number>> }>;
+export type SubscriberCalibrationSuccess = Readonly<{ status: "workshop_ready"; workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel; material: SubscriberWorkshopMaterial | SubscriberCurrentOnlyMaterial; identity: string; digest: string; container: string; byteLength: number; coverage: DefinitionCoverageResolution; quarantines: readonly TableQuarantineRecord[]; editCapabilities: readonly CalibrationEditCapability[]; timings: Readonly<Record<string, number>> }>;
 export type SubscriberCalibrationResult = SubscriberCalibrationFailure | SubscriberCalibrationSuccess;
 
 const sha = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
@@ -41,10 +42,11 @@ export async function loadSubscriberCalibration(input: Readonly<{ bytes: Uint8Ar
   const currentResult = materializeQualifiedCalibrationDataset(constructQualifiedCalibrationDatasetRequest({ engineeringBinary: binary, binaryIdentity, observations, discoveryRegistry: entry.discoveryRegistry, applicabilityRegistry: entry.applicabilityRegistry, membershipAuthorities: [entry.authority], sourceRole: "other_observed", sourceProvenance: ["Subscriber-supplied Current Calibration", observation.observationId, coverage.resolutionRevision], independentlyQualifiedEcuFamily: null })); record("currentDatasetMs");
   if (!currentResult.dataset) return Object.freeze({ status: "coverage_unavailable", title: "Calibration coverage unavailable", message: currentResult.finding, identity, digest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, timings: Object.freeze(timings) });
   const quarantines = entry.quarantines.filter((item) => item.affectedBinary.digest === digest);
+  const editCapabilities = classifyEntryEditCapabilities(entry);
   const capabilities = deriveWorkshopCapabilities(entry);
   if (capabilities.mode === "current_only" || entry.referenceCapability.state === "reference_unavailable") {
     const material: SubscriberCurrentOnlyMaterial = Object.freeze({ reference: null, current: currentResult.dataset, comparison: null });
-    const successBase = { status: "workshop_ready" as const, material, identity, digest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, quarantines };
+    const successBase = { status: "workshop_ready" as const, material, identity, digest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, quarantines, editCapabilities };
     const workshop = buildSubscriberWorkshop(successBase, input.selectedDefinition); record("viewModelMs");
     return Object.freeze({ ...successBase, workshop, timings: Object.freeze(timings) });
   }
@@ -53,12 +55,12 @@ export async function loadSubscriberCalibration(input: Readonly<{ bytes: Uint8Ar
   if (!referenceResult.dataset) throw new Error("Governed Reference Dataset could not be materialized.");
   const compared = compareQualifiedCalibrationDatasets(constructQualifiedCalibrationDatasetComparisonRequest({ reference: referenceResult.dataset, modified: currentResult.dataset })); record("comparisonMs"); if (compared.status === "rejected") throw new Error(compared.finding);
   const material = Object.freeze({ reference: referenceResult.dataset, current: currentResult.dataset, comparison: compared.evidence });
-  const successBase = { status: "workshop_ready" as const, material, identity, digest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, quarantines };
+  const successBase = { status: "workshop_ready" as const, material, identity, digest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, quarantines, editCapabilities };
   const workshop = buildSubscriberWorkshop(successBase, input.selectedDefinition); record("viewModelMs");
   return Object.freeze({ ...successBase, workshop, timings: Object.freeze(timings) });
 }
 
-export function buildSubscriberWorkshop(result: Pick<SubscriberCalibrationSuccess, "material" | "identity" | "digest" | "quarantines">, selectedDefinition?: string | null): WorkshopViewModel | CurrentOnlyWorkshopViewModel {
-  if (result.material.reference === null || result.material.comparison === null) return buildCurrentOnlyWorkshopViewModel({ current: result.material.current, quarantines: result.quarantines, selectedKey: selectedDefinition });
-  return buildWorkshopViewModel({ reference: result.material.reference, current: result.material.current, comparison: result.material.comparison, source: { kind: "subscriber_upload", label: `${result.identity} governed Reference → subscriber Current`, fixtureIdentity: `subscriber-upload:${result.digest}` }, selectedKey: selectedDefinition });
+export function buildSubscriberWorkshop(result: Pick<SubscriberCalibrationSuccess, "material" | "identity" | "digest" | "quarantines" | "editCapabilities">, selectedDefinition?: string | null): WorkshopViewModel | CurrentOnlyWorkshopViewModel {
+  if (result.material.reference === null || result.material.comparison === null) return buildCurrentOnlyWorkshopViewModel({ current: result.material.current, quarantines: result.quarantines, editCapabilities: result.editCapabilities, selectedKey: selectedDefinition });
+  return buildWorkshopViewModel({ reference: result.material.reference, current: result.material.current, comparison: result.material.comparison, editCapabilities: result.editCapabilities, source: { kind: "subscriber_upload", label: `${result.identity} governed Reference → subscriber Current`, fixtureIdentity: `subscriber-upload:${result.digest}` }, selectedKey: selectedDefinition });
 }

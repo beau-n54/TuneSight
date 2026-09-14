@@ -21,7 +21,8 @@ test("an uploaded N54 BIN alone establishes exact coverage and a subscriber Curr
   assert.equal(result.material.current.exactBinaryIdentity.digest, result.digest);
   assert.notEqual(result.material.reference.exactBinaryIdentity.digest, result.digest);
   assert.equal(result.workshop.states[1]?.label, "Current Calibration");
-  assert.equal(result.workshop.capabilities.mutation, false);
+  assert.equal(result.workshop.capabilities.mutation, true);
+  assert.equal(result.workshop.capabilities.editAuthority, true);
   assert.equal(result.workshop.capabilities.suggestedCalibration, false);
   assert.ok(result.workshop.comparison.changed > 0);
   assert.ok(result.workshop.comparison.unchanged > 0);
@@ -99,7 +100,8 @@ test("prior B58 publication and bulk-admitted 000079 enter Current-only while re
       assert.equal(accepted.workshop.summary.unavailable, 1);
       assert.equal(accepted.workshop.source.referenceDatasetId, null);
       assert.equal(accepted.workshop.source.comparisonId, null);
-      assert.equal(accepted.workshop.capabilities.mutation, false);
+      assert.equal(accepted.workshop.capabilities.mutation, true);
+      assert.equal(accepted.workshop.capabilities.editAuthority, true);
     }
     assert.ok((accepted.timings.currentDatasetMs ?? Number.POSITIVE_INFINITY) < 30_000, `B58 Current Dataset exceeded its 30-second processing budget: ${JSON.stringify(accepted.timings)}`);
     assert.ok(elapsedMs < 45_000, `B58 subscriber processing exceeded its 45-second route budget: ${Math.round(elapsedMs)}ms`);

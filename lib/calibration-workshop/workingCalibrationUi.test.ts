@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const source = fs.readFileSync(path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration", "current-only-workshop-client.tsx"), "utf8");
+const comparisonSource = fs.readFileSync(path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration", "workshop-client.tsx"), "utf8");
 
 test("Current-only Workshop exposes generic Working controls and Working-aware Grid/2D/3D values", () => {
   for (const label of ["Create Working Calibration", "Set value", "Add delta", "Change %", "Undo", "Redo", "Shift-click selects a rectangular region"]) assert.match(source, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -14,6 +15,17 @@ test("Current-only Workshop exposes generic Working controls and Working-aware G
   assert.match(source, /workingCellDelta/);
   assert.match(source, /detail\.editCapability\.state !== "EDIT_QUALIFIED"/);
   assert.doesNotMatch(source, /if\s*\([^)]*(?:N54|B58|S58|I8A0S|00003076501103)/);
+});
+
+test("comparison Workshop exposes the same governed Working mutation path only for subscriber sessions", () => {
+  for (const label of ["Create Working Calibration", "Set value", "Add delta", "Change %", "Undo", "Redo", "Apply"]) {
+    assert.match(comparisonSource, new RegExp(label));
+  }
+  assert.match(comparisonSource, /subscriberSession&&/);
+  assert.match(comparisonSource, /detail\.summary\.editCapability\?\.state!=="EDIT_QUALIFIED"/);
+  assert.match(comparisonSource, /workingCellValue/);
+  assert.match(comparisonSource, /workingCellDelta/);
+  assert.doesNotMatch(comparisonSource, /if\s*\([^)]*(?:N54|B58|S58|I8A0S|00003076501103)/);
 });
 
 test("browser persistence stores derived mutation evidence rather than Current Dataset values", () => {

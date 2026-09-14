@@ -1,0 +1,8 @@
+import { createHash } from "node:crypto";
+import { classifyEntryEditCapabilities, type EditCapabilityState } from "./editAuthority.ts";
+import { RepositoryDefinitionCatalog } from "./repositoryDefinitionCatalog.ts";
+
+export function buildCalibrationEditCensus() {
+  const entries = RepositoryDefinitionCatalog.listEntries().filter((entry) => entry.lifecycleState === "active" && entry.applicabilityState === "published"), rows = entries.map((entry) => { const capabilities = classifyEntryEditCapabilities(entry), states = Object.fromEntries([...new Set(capabilities.map((item) => item.state))].sort().map((state) => [state, capabilities.filter((item) => item.state === state).length])); return Object.freeze({ family: entry.identity.family, romSoftwareIdentity: entry.identity.romSoftwareIdentity, relationshipRevision: entry.authority.relationship.relationshipRevision, definitionSetRevision: entry.authority.definitionSet.revisionId, tables: capabilities.length, states: Object.freeze(states) }); }), totals = Object.fromEntries((["EDIT_QUALIFIED", "EDIT_BLOCKED_NON_INVERTIBLE", "EDIT_BLOCKED_REPRESENTATION", "EDIT_BLOCKED_QUARANTINE", "EDIT_BLOCKED_DEPENDENCY", "EDIT_BLOCKED_CONSTRAINT", "EDIT_REVIEW_REQUIRED"] satisfies EditCapabilityState[]).map((state) => [state, rows.reduce((sum, row) => sum + (row.states[state] ?? 0), 0)])), material = JSON.stringify(rows);
+  return Object.freeze({ contractVersion: "tunesight.calibration-edit-census.v1", revision: `calibration-edit-census-revision:${createHash("sha256").update(material).digest("hex")}`, relationships: rows.length, tables: rows.reduce((sum, row) => sum + row.tables, 0), totals: Object.freeze(totals), rows: Object.freeze(rows) });
+}

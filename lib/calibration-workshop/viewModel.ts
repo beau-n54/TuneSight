@@ -4,6 +4,9 @@ import type {
   QualifiedCalibrationComparisonEvidence,
 } from "../xdf/qualifiedCalibrationComparison.ts";
 import { bindDefinitionKnowledge, type WorkshopKnowledgeRecord, type WorkshopSemanticBinding } from "./definitionKnowledgeBinding.ts";
+import type { CalibrationEditCapability } from "./editAuthority.ts";
+import type { WorkingEditCapability } from "./workingCalibration.ts";
+import type { WorkingDefinitionSeed } from "./workingCalibration.ts";
 
 export type WorkshopFilter =
   | "all"
@@ -36,6 +39,7 @@ export type WorkshopDefinitionSummary = Readonly<{
   changedCellCount: number;
   available: boolean;
   semantic: WorkshopSemanticBinding;
+  editCapability?: WorkingEditCapability;
 }>;
 
 export type WorkshopAxis = Readonly<{
@@ -107,6 +111,9 @@ export type WorkshopViewModel = Readonly<{
     romLayoutId: string;
     referenceDatasetId: string;
     currentDatasetId: string;
+    currentDatasetRevision: string;
+    relationshipRevision: string;
+    definitionSetRevision: string;
     comparisonId: string;
   }>;
   states: readonly WorkshopStateSlot[];
@@ -122,16 +129,17 @@ export type WorkshopViewModel = Readonly<{
   }>;
   definitions: readonly WorkshopDefinitionSummary[];
   selectedDefinition: WorkshopDefinitionDetail;
+  workingDefinitions: readonly WorkingDefinitionSeed[];
   provenance: readonly string[];
   limitations: readonly string[];
   capabilities: Readonly<{
-    readOnly: true;
-    mutation: false;
+    readOnly: boolean;
+    mutation: boolean;
     semanticKnowledge: boolean;
     suggestedCalibration: false;
-    workingCalibration: false;
+    workingCalibration: boolean;
     workingCalibrationFoundation: true;
-    editAuthority: false;
+    editAuthority: boolean;
   }>;
 }>;
 
@@ -166,13 +174,14 @@ export function buildWorkshopDefinitionSummaries(
     definitionSetRevision: string;
   }>,
   knowledgeRecords: readonly WorkshopKnowledgeRecord[] = [],
+  editCapabilities: readonly CalibrationEditCapability[] = [],
 ): readonly WorkshopDefinitionSummary[] {
   const occurrences = new Map<string, number>();
   return deepFreeze(
     comparison.definitions.map((definition) => {
       const occurrence = occurrences.get(definition.definitionRevisionId) ?? 0;
       occurrences.set(definition.definitionRevisionId, occurrence + 1);
-      return summarizeDefinition(definition, identityContext, occurrence, knowledgeRecords);
+      return summarizeDefinition(definition, identityContext, occurrence, knowledgeRecords, editCapabilities);
     }),
   );
 }
@@ -185,6 +194,7 @@ function summarizeDefinition(
   }>,
   occurrence: number,
   knowledgeRecords: readonly WorkshopKnowledgeRecord[] = [],
+  editCapabilities: readonly CalibrationEditCapability[] = [],
 ): WorkshopDefinitionSummary {
   const identity = {
     key: [
@@ -207,7 +217,8 @@ function summarizeDefinition(
       definition.referenceEngineeringEvidence !== null &&
       definition.modifiedEngineeringEvidence !== null,
   };
-  return { ...identity, semantic: bindDefinitionKnowledge(identity, knowledgeRecords) };
+  const authority = editCapabilities.find((item) => item.definitionRevision === definition.definitionRevisionId && item.occurrence === occurrence), editCapability: WorkingEditCapability = authority ? { state: authority.state === "EDIT_QUALIFIED" ? "EDIT_QUALIFIED" : "VIEW_ONLY", revision: authority.state === "EDIT_QUALIFIED" ? authority.capabilityRevision : null, inverse: authority.inverse, engineeringMinimum: authority.engineeringMinimum, engineeringMaximum: authority.engineeringMaximum, warnings: authority.validation === "WARNING" ? authority.findings : [], blockers: authority.validation === "BLOCKED" ? authority.findings : [] } : { state: "VIEW_ONLY", revision: null, inverse: null, engineeringMinimum: null, engineeringMaximum: null, warnings: [], blockers: ["EDIT authority is unavailable."] };
+  return { ...identity, semantic: bindDefinitionKnowledge(identity, knowledgeRecords), editCapability };
 }
 
 export function filterWorkshopDefinitions(
@@ -362,18 +373,21 @@ export function buildWorkshopViewModel(input: {
   }>;
   selectedKey?: string | null;
   knowledgeRecords?: readonly WorkshopKnowledgeRecord[];
+  editCapabilities?: readonly CalibrationEditCapability[];
 }): WorkshopViewModel {
   const { reference, current, comparison } = input;
   const identityContext = {
     datasetRevision: reference.datasetRevision,
     definitionSetRevision: reference.definitionSetRevisionId,
   };
-  const definitions = buildWorkshopDefinitionSummaries(comparison, identityContext, input.knowledgeRecords ?? []);
+  const definitions = buildWorkshopDefinitionSummaries(comparison, identityContext, input.knowledgeRecords ?? [], input.editCapabilities ?? []);
+  const editAuthority = definitions.some((item) => item.editCapability?.state === "EDIT_QUALIFIED");
   const selectedKey = selectWorkshopDefinitionKey(definitions, input.selectedKey);
   const selectedIndex = definitions.findIndex((definition) => definition.key === selectedKey);
   const selected = comparison.definitions[selectedIndex];
   const selectedSummary = definitions[selectedIndex];
   if (!selected || !selectedSummary) throw new Error("Qualified comparison contains no selectable Definition.");
+  const occurrences = new Map<string, number>(), workingDefinitions = current.definitions.map((definition): WorkingDefinitionSeed => { const occurrence = occurrences.get(definition.definitionRevisionId) ?? 0; occurrences.set(definition.definitionRevisionId, occurrence + 1); const editCapability = definitions.find((item) => item.definitionRevision === definition.definitionRevisionId && item.occurrence === occurrence)?.editCapability ?? { state: "VIEW_ONLY" as const, revision: null, inverse: null, engineeringMinimum: null, engineeringMaximum: null, warnings: [], blockers: ["EDIT authority is unavailable."] }; return deepFreeze({ definitionRevision: definition.definitionRevisionId, occurrence, rows: definition.dimensions?.rows ?? 0, columns: definition.dimensions?.columns ?? 0, availability: definition.engineeringEvidence ? "available" as const : "unavailable" as const, capability: editCapability, cells: definition.engineeringEvidence ? definition.engineeringEvidence.engineeringValues.map((currentValue, index) => { const trace = definition.engineeringEvidence!.cellTrace[index]!; return { definitionRevision: definition.definitionRevisionId, occurrence, index, row: trace.row, column: trace.column, currentValue, units: definition.units }; }) : [] }); });
 
   return deepFreeze({
     source: {
@@ -383,13 +397,16 @@ export function buildWorkshopViewModel(input: {
       romLayoutId: reference.romLayoutId,
       referenceDatasetId: reference.datasetId,
       currentDatasetId: current.datasetId,
+      currentDatasetRevision: current.datasetRevision,
+      relationshipRevision: current.relationshipRevision,
+      definitionSetRevision: current.definitionSetRevisionId,
       comparisonId: comparison.comparisonId,
     },
     states: [
       { id: "reference", label: "Reference", availability: "available", sourceRole: sourceRoleLabel(reference.sourceRole), datasetId: reference.datasetId, message: "Qualified reference Dataset" },
       { id: "current", label: "Current Calibration", availability: "available", sourceRole: sourceRoleLabel(current.sourceRole), datasetId: current.datasetId, message: input.source.kind === "subscriber_upload" ? "Qualified subscriber-supplied Current Dataset" : "Qualified current Dataset" },
       { id: "suggested", label: "TuneSight Suggested", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
-      { id: "working", label: "Working Calibration", availability: "unavailable", sourceRole: null, datasetId: null, message: "Foundation available; exact EDIT authority is not yet published" },
+      { id: "working", label: "Working Calibration", availability: editAuthority ? "available" : "unavailable", sourceRole: null, datasetId: null, message: editAuthority ? "Governed Working Calibration is available for EDIT-qualified Tables" : "Exact EDIT authority is unavailable" },
     ],
     comparison: {
       totalDefinitions: comparison.totalDefinitionsConsidered,
@@ -412,16 +429,17 @@ export function buildWorkshopViewModel(input: {
       datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])],
       limitations: [...new Set([...reference.limitations, ...current.limitations])],
     }),
+    workingDefinitions,
     provenance: [...new Set([...reference.provenance, ...current.provenance])],
     limitations: [...new Set([...reference.limitations, ...current.limitations, ...(input.source.kind === "subscriber_upload" ? ["Uploaded bytes are session-scoped and were not persisted."] : ["This controlled fixture is not derived from the selected vehicle."]), "Engineering semantic interpretation is not yet bound."])],
     capabilities: {
-      readOnly: true,
-      mutation: false,
+      readOnly: !editAuthority,
+      mutation: editAuthority,
       semanticKnowledge: definitions.some((definition) => definition.semantic.outcome === "exact" || definition.semantic.outcome === "partial"),
       suggestedCalibration: false,
-      workingCalibration: false,
+      workingCalibration: editAuthority,
       workingCalibrationFoundation: true,
-      editAuthority: false,
+      editAuthority,
     },
   });
 }
