@@ -15,9 +15,10 @@ test("all 99 repository XDFs enter one deterministic governed capability census"
 
 test("VIEW remains exact, quarantine-aware, and fail-closed for ambiguity or conflict", { timeout: 3_600_000 }, () => {
   const census = buildBmwMasterCatalogCensus(root), viewed = census.rows.filter((row) => row.viewQualified);
-  assert.equal(viewed.length, 65);
+  assert.equal(viewed.length, 68);
   for (const existing of ["B58gen1/00003076501103.xdf", "N54/I8A0S.xdf", "N54/IJE0S.xdf", "N54/IKM0S.xdf", "N54/INA0S.xdf"]) assert.ok(viewed.some((row) => row.relativePath === existing));
   assert.equal(census.rows.find((row) => row.relativePath === "B58gen1/00003076501103.xdf")?.cohort, "VIEW_QUALIFIED_WITH_QUARANTINE");
+  for (const identity of ["00003076501D02", "00003081501102", "00003081501D04"]) assert.equal(census.rows.find((row) => row.relativePath === `B58gen1/${identity}.xdf`)?.cohort, "VIEW_QUALIFIED_WITH_QUARANTINE");
   assert.ok(census.rows.filter((row) => row.cohort === "AMBIGUOUS_PLATFORM_OR_ROM" || row.cohort === "UNRESOLVED_CONFLICT").every((row) => !row.viewQualified));
 });
 

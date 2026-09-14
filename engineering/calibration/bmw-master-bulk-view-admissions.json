@@ -1,7 +1,7 @@
 {
   "contractVersion": "tunesight.bmw-bulk-current-view-admission.v1",
-  "authorizedAt": "2026-09-14T00:00:00.000Z",
-  "authority": "Founder Beau and Bob bulk Current VIEW admission; no EDIT, EXPORT, FLASH, Stock, or Reference authority.",
+  "authorizedAt": "2026-09-15T00:00:00.000Z",
+  "authority": "Founder Beau and Bob bulk Current VIEW admission and quarantine-aware B58 Gen1 expansion; no direct EDIT, EXPORT, FLASH, Stock, or Reference authority.",
   "admitted": [
     {
       "relativePath": "B58gen1/00007972000705.xdf",
@@ -2992,21 +2992,306 @@
           "validationRevision": "bmw-full-validation-revision:e3ffcb5282939b1fd98b4d8add33c63e5de4ca97f9719fddbac470db9e8f3bea"
         }
       ]
-    }
-  ],
-  "rejected": [
+    },
     {
       "relativePath": "B58gen1/00003076501D02.xdf",
-      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
+      "family": "B58gen1",
+      "romSoftwareIdentity": "00003076501D02",
+      "sourceArtifactId": "xdf-source:e981fea4ecc4b11a0cea090e0ab770b755cc88ca1aa2ac9035c10932af7920ea",
+      "sourceArtifactDigest": "sha256:e981fea4ecc4b11a0cea090e0ab770b755cc88ca1aa2ac9035c10932af7920ea",
+      "definitionSetId": "xdf-definition-set:b5e82316fb71feb92004aa514a951a63524f15319ef520453dbf8c79e4177b48",
+      "definitionSetRevision": "xdf-definition-set-revision:812263c212fb3f854fe48eb911e81c7b236c23d3c2ebb692f127337ccc3a6125",
+      "definitionCount": 1173,
+      "binaryByteLength": 7864320,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00003076501D02",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          262469,
+          6814977,
+          7863823
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 6836670,
+        "maximum": 7862112
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "33f6e7c489cb12665623cde18424aa00bfd4dd2179d368fd5c2e1357a1de300e",
+          "byteLength": 7864320,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:5ba92169b0b85ba8e0360db2ce97f0475a13d6d98ad9379ea0ea62520875d00a"
+        }
+      ],
+      "quarantines": [
+        {
+          "quarantineId": "table-quarantine:b9adad38364f27117c42205b5bdf2ecb47fb7a2289e65e9d4dbf6b2e5750f955",
+          "quarantineRevision": "table-quarantine-revision:8d0ab99e701b07d32687e3af7831dfe9f470d3c8d4853b9df5995c19d3bed7e0",
+          "relationship": {
+            "romSoftwareIdentity": "00003076501D02",
+            "sourceArtifactId": "xdf-source:e981fea4ecc4b11a0cea090e0ab770b755cc88ca1aa2ac9035c10932af7920ea",
+            "definitionSetRevision": "xdf-definition-set-revision:812263c212fb3f854fe48eb911e81c7b236c23d3c2ebb692f127337ccc3a6125"
+          },
+          "occurrence": {
+            "definitionIdentity": "xdf-definition:7e68ce712d0c2bdaf540e1d125b757cb9b616eb92e056be6cb6b90ce05588c1a",
+            "definitionRevisionId": "xdf-definition-revision:42026e596f3a1b7220bf5c609596e38b5cdb0e8138fd21ac9576e3023cb8ad35",
+            "sourceBindingDigest": "sha256:6c0247bd08aeec89367a6b5f29d83e605fb934419279f00ff45838b744649815",
+            "occurrence": 0
+          },
+          "affectedBinary": {
+            "digest": "33f6e7c489cb12665623cde18424aa00bfd4dd2179d368fd5c2e1357a1de300e",
+            "role": "mapswitch",
+            "validationRevision": "bmw-full-validation-revision:5ba92169b0b85ba8e0360db2ce97f0475a13d6d98ad9379ea0ea62520875d00a"
+          },
+          "failureClass": "invalid_engineering_conversion",
+          "failureEvidence": {
+            "rawOffsets": [
+              7445148
+            ],
+            "rawBytes": [
+              0,
+              0
+            ],
+            "rawValues": [
+              0
+            ],
+            "equation": "1/(X*0.000011518903) * 80.11750567498999",
+            "outcome": "invalid_numeric_result",
+            "finding": "Division by zero."
+          },
+          "safetyAssessmentRevision": "table-quarantine-safety-assessment-revision:a57eba9bdea8ffe5a4b5e5dd42afc1a2cf67f1eac84d31de0e4e71b21c052180",
+          "provenance": [
+            "Repository-controlled exact binary validation."
+          ],
+          "limitations": [
+            "Quarantine does not qualify, correct, recommend or authorize mutation of this Definition."
+          ],
+          "authority": {
+            "reviewerId": "tunesight-governed-engineering-review",
+            "authorityRevision": "table-quarantine-review-authority-revision:2026-09-15-bmw-current-view-expansion"
+          },
+          "quarantinedAt": "2026-09-15T00:00:00.000Z",
+          "state": "unavailable_quarantined",
+          "permissions": {
+            "engineeringValueValid": false,
+            "editable": false,
+            "suggestedCalibrationEligible": false,
+            "reconstructionMutationEligible": false,
+            "flashingEligible": false
+          },
+          "contractVersion": "tunesight.calibration-table-quarantine.v1"
+        }
+      ]
     },
     {
       "relativePath": "B58gen1/00003081501102.xdf",
-      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
+      "family": "B58gen1",
+      "romSoftwareIdentity": "00003081501102",
+      "sourceArtifactId": "xdf-source:ec0dc8a3a6a5673bc4c19c896579cb22fa725de663d41e8b3951edc450dcd1ea",
+      "sourceArtifactDigest": "sha256:ec0dc8a3a6a5673bc4c19c896579cb22fa725de663d41e8b3951edc450dcd1ea",
+      "definitionSetId": "xdf-definition-set:fcb895da23c6d1cf5916b5b64936a1bb339ae1f8b29724f2d45b936625a89a63",
+      "definitionSetRevision": "xdf-definition-set-revision:f8529b658a28616b21e18e08028e4929efd56cfbc611b7d0a9962a5f887abcbb",
+      "definitionCount": 1154,
+      "binaryByteLength": 7864320,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00003081501102",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          262469,
+          6814977,
+          7863823
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 6835408,
+        "maximum": 7862112
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "c59341d9659728fdcc7d09ca069ddf8240b791c3814657f46cdfe7af63eaf893",
+          "byteLength": 7864320,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:a9bde745e09ca2bf757260ddebce5d89e43a1271fc588a92be57f45b8c07f3f0"
+        }
+      ],
+      "quarantines": [
+        {
+          "quarantineId": "table-quarantine:6734937bd1651e5ff88d682ccadf66bdad96f1d2d915db9dbe2cea73cf748d75",
+          "quarantineRevision": "table-quarantine-revision:84ef16419f853d543e00dca5fb57d460ccebab66d8aced495c925c008cbed724",
+          "relationship": {
+            "romSoftwareIdentity": "00003081501102",
+            "sourceArtifactId": "xdf-source:ec0dc8a3a6a5673bc4c19c896579cb22fa725de663d41e8b3951edc450dcd1ea",
+            "definitionSetRevision": "xdf-definition-set-revision:f8529b658a28616b21e18e08028e4929efd56cfbc611b7d0a9962a5f887abcbb"
+          },
+          "occurrence": {
+            "definitionIdentity": "xdf-definition:7e68ce712d0c2bdaf540e1d125b757cb9b616eb92e056be6cb6b90ce05588c1a",
+            "definitionRevisionId": "xdf-definition-revision:42026e596f3a1b7220bf5c609596e38b5cdb0e8138fd21ac9576e3023cb8ad35",
+            "sourceBindingDigest": "sha256:236f57c3cf09647cfc882dcd63d5b35265389e9f2d18fd18d14b046522d00c92",
+            "occurrence": 0
+          },
+          "affectedBinary": {
+            "digest": "c59341d9659728fdcc7d09ca069ddf8240b791c3814657f46cdfe7af63eaf893",
+            "role": "mapswitch",
+            "validationRevision": "bmw-full-validation-revision:a9bde745e09ca2bf757260ddebce5d89e43a1271fc588a92be57f45b8c07f3f0"
+          },
+          "failureClass": "invalid_engineering_conversion",
+          "failureEvidence": {
+            "rawOffsets": [
+              7445148
+            ],
+            "rawBytes": [
+              0,
+              0
+            ],
+            "rawValues": [
+              0
+            ],
+            "equation": "1/(X*0.000011518903) * 80.11750567498999",
+            "outcome": "invalid_numeric_result",
+            "finding": "Division by zero."
+          },
+          "safetyAssessmentRevision": "table-quarantine-safety-assessment-revision:d7b31651daefd1b6cca21689b8b1bc7f25fc4ee2a9002fd1feb6e8928f3f6bd3",
+          "provenance": [
+            "Repository-controlled exact binary validation."
+          ],
+          "limitations": [
+            "Quarantine does not qualify, correct, recommend or authorize mutation of this Definition."
+          ],
+          "authority": {
+            "reviewerId": "tunesight-governed-engineering-review",
+            "authorityRevision": "table-quarantine-review-authority-revision:2026-09-15-bmw-current-view-expansion"
+          },
+          "quarantinedAt": "2026-09-15T00:00:00.000Z",
+          "state": "unavailable_quarantined",
+          "permissions": {
+            "engineeringValueValid": false,
+            "editable": false,
+            "suggestedCalibrationEligible": false,
+            "reconstructionMutationEligible": false,
+            "flashingEligible": false
+          },
+          "contractVersion": "tunesight.calibration-table-quarantine.v1"
+        }
+      ]
     },
     {
       "relativePath": "B58gen1/00003081501D04.xdf",
-      "reason": "VIEW_TECHNICAL_OR_MEMBERSHIP_GATE_FAILED"
-    },
+      "family": "B58gen1",
+      "romSoftwareIdentity": "00003081501D04",
+      "sourceArtifactId": "xdf-source:7a5354f47b348d370396e321649e0a8ca46585a9c608ce3db2bfd716ac6e972e",
+      "sourceArtifactDigest": "sha256:7a5354f47b348d370396e321649e0a8ca46585a9c608ce3db2bfd716ac6e972e",
+      "definitionSetId": "xdf-definition-set:778a7542f4b360bb936d17c88816da0fd1167f253a5fb5edc53167930dd80a80",
+      "definitionSetRevision": "xdf-definition-set-revision:fb4d6a1aa843d45181df3998e4082fa4b436be8eaf1e7563daafac929530b3aa",
+      "definitionCount": 1155,
+      "binaryByteLength": 7864320,
+      "containerType": "bin",
+      "marker": {
+        "normalizedForm": "00003081501D04",
+        "detector": "bounded_hex_encoded_exact",
+        "offsets": [
+          262469,
+          6814977,
+          7863823
+        ]
+      },
+      "calibrationAddressSpace": [
+        {
+          "startAddress": 0,
+          "size": 8388608
+        }
+      ],
+      "definitionCompatibleAddressRange": {
+        "minimum": 6835424,
+        "maximum": 7862112
+      },
+      "supportingExactBinaries": [
+        {
+          "digest": "ba22ac9a8bbd56d4d71afc1e80d79d358ab80546fc0111f82ccc81e9fcee612c",
+          "byteLength": 7864320,
+          "containerType": "bin",
+          "sourceRole": "mapswitch",
+          "validationRevision": "bmw-full-validation-revision:bdc3d22c0704431144f42226f471ee28ae94bc93cf097e33d98ea9a5f7654f6a"
+        }
+      ],
+      "quarantines": [
+        {
+          "quarantineId": "table-quarantine:d2ba877d8724ef57e3432b8f58b4c11e2f8f47b1bf662ea0aa2115c3e36e4e4e",
+          "quarantineRevision": "table-quarantine-revision:f8af04c3eeb0d25dd6baba90e810d194fedd32ea57928a0121656c3f00d9be78",
+          "relationship": {
+            "romSoftwareIdentity": "00003081501D04",
+            "sourceArtifactId": "xdf-source:7a5354f47b348d370396e321649e0a8ca46585a9c608ce3db2bfd716ac6e972e",
+            "definitionSetRevision": "xdf-definition-set-revision:fb4d6a1aa843d45181df3998e4082fa4b436be8eaf1e7563daafac929530b3aa"
+          },
+          "occurrence": {
+            "definitionIdentity": "xdf-definition:7e68ce712d0c2bdaf540e1d125b757cb9b616eb92e056be6cb6b90ce05588c1a",
+            "definitionRevisionId": "xdf-definition-revision:42026e596f3a1b7220bf5c609596e38b5cdb0e8138fd21ac9576e3023cb8ad35",
+            "sourceBindingDigest": "sha256:d574e65c5a71d6fdac64a007f7578f785abdd9d45fc12974f489913330ac6df0",
+            "occurrence": 0
+          },
+          "affectedBinary": {
+            "digest": "ba22ac9a8bbd56d4d71afc1e80d79d358ab80546fc0111f82ccc81e9fcee612c",
+            "role": "mapswitch",
+            "validationRevision": "bmw-full-validation-revision:bdc3d22c0704431144f42226f471ee28ae94bc93cf097e33d98ea9a5f7654f6a"
+          },
+          "failureClass": "invalid_engineering_conversion",
+          "failureEvidence": {
+            "rawOffsets": [
+              7445148
+            ],
+            "rawBytes": [
+              0,
+              0
+            ],
+            "rawValues": [
+              0
+            ],
+            "equation": "1/(X*0.000011518903) * 80.11750567498999",
+            "outcome": "invalid_numeric_result",
+            "finding": "Division by zero."
+          },
+          "safetyAssessmentRevision": "table-quarantine-safety-assessment-revision:0d6ecf5a0d411979664cac22895eb28dd09fd2f36e047a7ae9cd591bf21a18bb",
+          "provenance": [
+            "Repository-controlled exact binary validation."
+          ],
+          "limitations": [
+            "Quarantine does not qualify, correct, recommend or authorize mutation of this Definition."
+          ],
+          "authority": {
+            "reviewerId": "tunesight-governed-engineering-review",
+            "authorityRevision": "table-quarantine-review-authority-revision:2026-09-15-bmw-current-view-expansion"
+          },
+          "quarantinedAt": "2026-09-15T00:00:00.000Z",
+          "state": "unavailable_quarantined",
+          "permissions": {
+            "engineeringValueValid": false,
+            "editable": false,
+            "suggestedCalibrationEligible": false,
+            "reconstructionMutationEligible": false,
+            "flashingEligible": false
+          },
+          "contractVersion": "tunesight.calibration-table-quarantine.v1"
+        }
+      ]
+    }
+  ],
+  "rejected": [
     {
       "relativePath": "B58gen2/00005D5532E605/00005D5532E605.xdf",
       "reason": "MISSING_BINARY_MEMBERSHIP_EVIDENCE"
@@ -3020,5 +3305,5 @@
       "reason": "MISSING_BINARY_MEMBERSHIP_EVIDENCE"
     }
   ],
-  "revision": "bmw-bulk-current-view-admission-revision:a6917653043482497f59d1655ed1529d3f2a3ea97d3225d8b28e0f50cc6883ee"
+  "revision": "bmw-bulk-current-view-admission-revision:b332da21c49ca9ddb0a011ef40e03e5fe54b8fc086d3810da72e9e32478c982c"
 }

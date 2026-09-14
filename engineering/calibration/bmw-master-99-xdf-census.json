@@ -42,19 +42,18 @@
       "extractionCapableCount": 1173,
       "conversionCount": 863,
       "identityNoOpCount": 310,
-      "quarantineCount": 0,
+      "quarantineCount": 1,
       "conflictCount": 0,
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "UNRESOLVED_CONFLICT",
+      "cohort": "VIEW_QUALIFIED_WITH_QUARANTINE",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen1/000030765A3C06.xdf",
@@ -126,19 +125,18 @@
       "extractionCapableCount": 1154,
       "conversionCount": 851,
       "identityNoOpCount": 303,
-      "quarantineCount": 0,
+      "quarantineCount": 1,
       "conflictCount": 0,
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "UNRESOLVED_CONFLICT",
+      "cohort": "VIEW_QUALIFIED_WITH_QUARANTINE",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen1/00003081501D04.xdf",
@@ -154,19 +152,18 @@
       "extractionCapableCount": 1155,
       "conversionCount": 851,
       "identityNoOpCount": 304,
-      "quarantineCount": 0,
+      "quarantineCount": 1,
       "conflictCount": 0,
       "binaryCount": 2,
       "duplicateOf": null,
       "lifecycleState": "current",
-      "cohort": "UNRESOLVED_CONFLICT",
+      "cohort": "VIEW_QUALIFIED_WITH_QUARANTINE",
       "capabilities": [
-        "CATALOGED"
+        "CATALOGED",
+        "VIEW_QUALIFIED"
       ],
-      "viewQualified": false,
-      "blockers": [
-        "Exhaustive Current VIEW technical or exact-marker membership validation failed."
-      ]
+      "viewQualified": true,
+      "blockers": []
     },
     {
       "relativePath": "B58gen1/00007972000705.xdf",
@@ -2722,18 +2719,18 @@
   ],
   "totals": {
     "cataloged": 99,
-    "viewQualified": 65,
-    "viewWithQuarantine": 1,
+    "viewQualified": 68,
+    "viewWithQuarantine": 4,
     "exactRomBindingMissing": 0,
     "binaryMembershipEvidenceMissing": 3,
     "ambiguous": 11,
-    "conflicted": 9,
+    "conflicted": 6,
     "duplicateLegacySuperseded": 11
   },
   "familyBreakdown": {
     "B58gen1": {
       "cataloged": 7,
-      "viewQualified": 2,
+      "viewQualified": 5,
       "definitions": 7872
     },
     "B58gen2": {

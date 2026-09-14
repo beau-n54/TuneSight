@@ -76,12 +76,12 @@ test("unsupported, conflicting, invalid, and oversized inputs fail closed", asyn
   assert.equal((await loadSubscriberCalibration({ bytes: new Uint8Array(SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES + 1), fileName: "large.bin", mimeType: null, observedAt })).status, "invalid_upload");
 });
 
-test("prior B58 publication and bulk-admitted 000079 enter Current-only while rejected Gen1 sources remain unavailable", async (context) => {
+test("prior and quarantine-aware B58 Gen1 publications enter truthful Current-only Workshop states", async (context) => {
   const fixtures = [
-    ["00003076501D02_original.bin", "00003076501D02"],
+    ["00003076501D02_MapSwitchBase.bin", "00003076501D02"],
     ["000030765A3C06_original.bin", "000030765A3C06"],
-    ["00003081501102_original.bin", "00003081501102"],
-    ["00003081501D04_original.bin", "00003081501D04"],
+    ["00003081501102_MapSwitchBase.bin", "00003081501102"],
+    ["00003081501D04_MapSwitchBase.bin", "00003081501D04"],
     ["00007972000705_original.bin", "00007972000705"],
   ] as const;
   const exactBytes = new Uint8Array(7_864_320), exactMarker = Buffer.from("00003076501103", "hex");
@@ -111,11 +111,12 @@ test("prior B58 publication and bulk-admitted 000079 enter Current-only while re
   for (const [fileName, identity] of fixtures) {
     const bytes = loadB58(fileName);
     const result = await loadSubscriberCalibration({ bytes, fileName, mimeType: "application/octet-stream", observedAt });
-    assert.equal(result.status, identity === "00007972000705" ? "workshop_ready" : "coverage_unavailable", identity);
+    const admitted = new Set(["00003076501D02", "00003081501102", "00003081501D04", "00007972000705"]);
+    assert.equal(result.status, admitted.has(identity) ? "workshop_ready" : "coverage_unavailable", identity);
     assert.equal(result.identity, identity);
     assert.equal(result.byteLength, bytes.byteLength);
-    assert.equal(result.coverage?.outcome, identity === "00007972000705" ? "EXACT_DEFINITION_COVERAGE" : "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
-    if (result.status === "workshop_ready") { assert.equal(result.material.reference, null); assert.ok("mode" in result.workshop); }
+    assert.equal(result.coverage?.outcome, admitted.has(identity) ? "EXACT_DEFINITION_COVERAGE" : "ROM_RECOGNIZED_DEFINITIONS_UNAVAILABLE");
+    if (result.status === "workshop_ready") { assert.equal(result.material.reference, null); assert.ok("mode" in result.workshop); if (identity !== "00007972000705") { assert.equal(result.quarantines.length, 1); assert.equal(result.workshop.summary.unavailable, 1); } }
     assert.doesNotMatch(JSON.stringify(result), /Development Evidence Preview|development_fixture|MapSwitch Dataset/);
   }
 });

@@ -6,12 +6,22 @@ import { BMW_BULK_VIEW_ADMISSION_MANIFEST, BulkViewAdmissionCatalog } from "./bu
 import { RepositoryDefinitionCatalog } from "./repositoryDefinitionCatalog.ts";
 import { loadSubscriberCalibration } from "./subscriberCalibrationProvider.ts";
 
-test("one immutable manifest bulk-admits 60 exact Current VIEW relationships and rejects six explicitly", () => {
-  assert.equal(BMW_BULK_VIEW_ADMISSION_MANIFEST.admitted.length, 60); assert.equal(BMW_BULK_VIEW_ADMISSION_MANIFEST.rejected.length, 6);
-  assert.equal(BulkViewAdmissionCatalog.listEntries().length, 60); assert.equal(RepositoryDefinitionCatalog.listEntries().length, 65);
-  assert.equal(new Set(RepositoryDefinitionCatalog.listEntries().map((entry) => entry.identity.romSoftwareIdentity)).size, 65);
+test("one immutable manifest bulk-admits 63 exact Current VIEW relationships and rejects three explicitly", () => {
+  assert.equal(BMW_BULK_VIEW_ADMISSION_MANIFEST.admitted.length, 63); assert.equal(BMW_BULK_VIEW_ADMISSION_MANIFEST.rejected.length, 3);
+  assert.equal(BulkViewAdmissionCatalog.listEntries().length, 63); assert.equal(RepositoryDefinitionCatalog.listEntries().length, 68);
+  assert.equal(new Set(RepositoryDefinitionCatalog.listEntries().map((entry) => entry.identity.romSoftwareIdentity)).size, 68);
   assert.ok(BulkViewAdmissionCatalog.listEntries().every((entry) => entry.referenceCapability.state === "reference_unavailable" && deriveWorkshopCapabilities(entry).mode === "current_only"));
   assert.doesNotMatch(JSON.stringify(BulkViewAdmissionCatalog.listEntries()), /EDIT_QUALIFIED|EXPORT_QUALIFIED|FLASH_QUALIFIED|Development Evidence Preview/);
+});
+
+test("three B58 Gen1 relationships use exact dependency-safe quarantine evidence", () => {
+  for (const identity of ["00003076501D02", "00003081501102", "00003081501D04"]) {
+    const entry = BulkViewAdmissionCatalog.listEntries().find((item) => item.identity.romSoftwareIdentity === identity)!;
+    assert.equal(entry.quarantines.length, 1);
+    assert.equal(entry.quarantines[0]?.failureClass, "invalid_engineering_conversion");
+    assert.equal(entry.quarantines[0]?.state, "unavailable_quarantined");
+    assert.equal(entry.referenceCapability.state, "reference_unavailable");
+  }
 });
 
 test("Christos relationship is admitted by the generic catalog and materializes Current-only", { timeout: 180_000 }, async () => {

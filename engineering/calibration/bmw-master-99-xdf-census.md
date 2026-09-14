@@ -5,19 +5,19 @@ Contract: `tunesight.bmw-master-catalog-census.v1`
 ## Totals
 
 - cataloged: 99
-- viewQualified: 65
-- viewWithQuarantine: 1
+- viewQualified: 68
+- viewWithQuarantine: 4
 - exactRomBindingMissing: 0
 - binaryMembershipEvidenceMissing: 3
 - ambiguous: 11
-- conflicted: 9
+- conflicted: 6
 - duplicateLegacySuperseded: 11
 
 ## Family breakdown
 
 | Family | Cataloged | VIEW qualified | Definitions |
 | --- | ---: | ---: | ---: |
-| B58gen1 | 7 | 2 | 7872 |
+| B58gen1 | 7 | 5 | 7872 |
 | B58gen2 | 45 | 37 | 55667 |
 | F series N55 S55 N13 | 13 | 0 | 14429 |
 | N54 | 8 | 4 | 4997 |
@@ -30,11 +30,11 @@ Contract: `tunesight.bmw-master-catalog-census.v1`
 | XDF | Definitions | Extracted | Converted | Quarantine | Conflicts | Cohort | Blocker |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
 | B58gen1/00003076501103.xdf | 1175 | 1175 | 1175 | 1 | 0 | VIEW_QUALIFIED_WITH_QUARANTINE | — |
-| B58gen1/00003076501D02.xdf | 1173 | 1173 | 1173 | 0 | 0 | UNRESOLVED_CONFLICT | Exhaustive Current VIEW technical or exact-marker membership validation failed. |
+| B58gen1/00003076501D02.xdf | 1173 | 1173 | 1173 | 1 | 0 | VIEW_QUALIFIED_WITH_QUARANTINE | — |
 | B58gen1/000030765A3C06.xdf | 1168 | 1166 | 1166 | 0 | 4 | UNRESOLVED_CONFLICT | One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine. |
 | B58gen1/000030765A5005.xdf | 951 | 949 | 949 | 0 | 4 | UNRESOLVED_CONFLICT | One or more representation, extraction, or conversion failures lack an accepted dependency-safe quarantine. |
-| B58gen1/00003081501102.xdf | 1154 | 1154 | 1154 | 0 | 0 | UNRESOLVED_CONFLICT | Exhaustive Current VIEW technical or exact-marker membership validation failed. |
-| B58gen1/00003081501D04.xdf | 1155 | 1155 | 1155 | 0 | 0 | UNRESOLVED_CONFLICT | Exhaustive Current VIEW technical or exact-marker membership validation failed. |
+| B58gen1/00003081501102.xdf | 1154 | 1154 | 1154 | 1 | 0 | VIEW_QUALIFIED_WITH_QUARANTINE | — |
+| B58gen1/00003081501D04.xdf | 1155 | 1155 | 1155 | 1 | 0 | VIEW_QUALIFIED_WITH_QUARANTINE | — |
 | B58gen1/00007972000705.xdf | 1096 | 1096 | 1096 | 0 | 0 | VIEW_QUALIFIED_EXACT | — |
 | B58gen2/00005D55289606/00005D55289606.xdf | 1198 | 1198 | 1198 | 0 | 0 | VIEW_QUALIFIED_EXACT | — |
 | B58gen2/00005D5528AA06/00005D5528AA06.xdf | 1205 | 1205 | 1205 | 0 | 0 | VIEW_QUALIFIED_EXACT | — |
