@@ -43,6 +43,23 @@ export function evaluateParsedXdfEquation(equation:ParsedXdfEquation,input:numbe
   try{const value=visit(equation.ast);if(!Number.isFinite(value)||Math.abs(value)>XDF_EQUATION_LIMITS.maximumResultMagnitude)return Object.freeze({outcome:"invalid_numeric_result",finding:"Equation result is non-finite or outside the supported range."});return Object.freeze({outcome:"converted",value});}catch(error){return Object.freeze({outcome:"invalid_numeric_result",finding:error instanceof Error?error.message:"Numeric evaluation failed."});}
 }
 
+export type ReversibleAffineEquation = Readonly<{ outcome: "reversible_affine"; scale: number; offset: number }> | Readonly<{ outcome: "not_reversibly_affine"; finding: string }>;
+export function deriveReversibleAffineEquation(equation: ParsedXdfEquation): ReversibleAffineEquation {
+  const visit = (node: XdfEquationAst): Readonly<{ scale: number; offset: number }> | null => {
+    if (node.kind === "literal") return { scale: 0, offset: node.value };
+    if (node.kind === "variable") return { scale: 1, offset: 0 };
+    if (node.kind === "unary") { const value = visit(node.operand); return value ? { scale: node.operator === "-" ? -value.scale : value.scale, offset: node.operator === "-" ? -value.offset : value.offset } : null; }
+    const left = visit(node.left), right = visit(node.right); if (!left || !right) return null;
+    if (node.operator === "+") return { scale: left.scale + right.scale, offset: left.offset + right.offset };
+    if (node.operator === "-") return { scale: left.scale - right.scale, offset: left.offset - right.offset };
+    if (node.operator === "*") { if (left.scale !== 0 && right.scale !== 0) return null; return left.scale === 0 ? { scale: right.scale * left.offset, offset: right.offset * left.offset } : { scale: left.scale * right.offset, offset: left.offset * right.offset }; }
+    if (right.scale !== 0 || right.offset === 0) return null;
+    return { scale: left.scale / right.offset, offset: left.offset / right.offset };
+  };
+  const affine = visit(equation.ast); if (!affine || !Number.isFinite(affine.scale) || !Number.isFinite(affine.offset) || affine.scale === 0) return Object.freeze({ outcome: "not_reversibly_affine", finding: "Equation is not a one-to-one finite affine function of raw X." });
+  return Object.freeze({ outcome: "reversible_affine", ...affine });
+}
+
 export type EngineeringAxisEvidence=Readonly<{axisId:string;outcome:"converted"|"identity"|"static_literal"|"unavailable"|"unsupported_expression"|"malformed_equation"|"invalid_numeric_result"|"missing_equation";equation:ParsedXdfEquation|null;equationSource:string|null;units:string|null;rawValues:readonly number[];engineeringValues:readonly number[];literalValues:readonly string[];offsets:readonly number[];finding:string|null}>;
 export type QualifiedEngineeringCalibrationValueEvidence=Readonly<{evidenceId:string;evidenceRevision:string;contractVersion:"tunesight.qualified-engineering-calibration-value-evidence.v1";outcome:"qualified_engineering_converted";sourceRawEvidenceId:string;sourceRawEvidenceRevision:string;exactBinaryDigest:string;romLayoutId:string;authorityChain:QualifiedRawCalibrationValueEvidence["authorityChain"];definitionSetRevisionId:string;definitionRevisionId:string;definitionIdentity:string;valueEquation:ParsedXdfEquation;equationSource:string;rawValues:readonly number[];engineeringValues:readonly number[];dimensions:QualifiedRawCalibrationValueEvidence["dimensions"];cellTrace:readonly Readonly<{index:number;row:number;column:number;rawOffset:number;rawValue:number;engineeringValue:number}>[];units:string|null;axes:readonly EngineeringAxisEvidence[];conversionFindings:readonly string[];provenance:readonly string[]}>;
 export type EngineeringValueConversionRequest=Readonly<{requestId:string;contractVersion:typeof ENGINEERING_VALUE_CONVERSION_CONTRACT;rawEvidence:QualifiedRawCalibrationValueEvidence;definition:XdfDefinitionRevision;expectedEquationSource:string;expectedUnits:string|null}>;

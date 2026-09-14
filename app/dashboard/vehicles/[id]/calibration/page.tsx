@@ -11,6 +11,7 @@ import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCa
 import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
 import type { CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
 import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
+import { createHash } from "node:crypto";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -98,7 +99,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
                 <span className="text-zinc-600"> · </span>{vehicle.engine_code || "Engine unknown"}
               </p>
             </div>
-            <p className="font-mono text-xs text-zinc-500">READ-ONLY WORKSPACE</p>
+            <p className="font-mono text-xs text-zinc-500">CURRENT IMMUTABLE · WORKING SEPARATE</p>
             <UploadCalibration vehicleId={vehicle.id}/>
           </div>
         </header>
@@ -148,7 +149,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
           ))}
         </section>
 
-        {currentOnlyWorkshop ? <CurrentOnlyWorkshopClient workshop={currentOnlyWorkshop} vehicleId={vehicle.id} subscriberSession={subscriberSession}/> : <WorkshopClient workshop={comparisonWorkshop!} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />}
+        {currentOnlyWorkshop ? <CurrentOnlyWorkshopClient workshop={currentOnlyWorkshop} vehicleId={vehicle.id} ownerScope={createHash("sha256").update(user.id).digest("hex").slice(0, 24)} subscriberSession={subscriberSession}/> : <WorkshopClient workshop={comparisonWorkshop!} vehicleId={vehicle.id} previewRom={subscriberSuccess ? undefined : previewRom} subscriberSession={subscriberSuccess ? subscriberSession : undefined} />}
 
         <details className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
           <summary className="cursor-pointer font-semibold text-zinc-200">Workshop concepts and evidence boundaries</summary>
@@ -159,7 +160,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
             <p><strong className="text-zinc-200">Unavailable:</strong> no numeric value is substituted when extraction or conversion cannot qualify a Definition.</p>
             <p><strong className="text-zinc-200">Engineering values:</strong> raw bytes converted under the bound Definition equation and units.</p>
             <p><strong className="text-zinc-200">TuneSight Suggested:</strong> reserved until authorised recommendation Evidence exists.</p>
-            <p><strong className="text-zinc-200">Working Calibration:</strong> reserved for a future governed editing workflow.</p>
+            <p><strong className="text-zinc-200">Working Calibration:</strong> a separate, reversible mutation history bound to this exact immutable Current Dataset. EDIT remains capability-gated.</p>
             <p><strong className="text-zinc-200">Semantics:</strong> engineering semantic interpretation is not yet bound.</p>
           </div>
         </details>

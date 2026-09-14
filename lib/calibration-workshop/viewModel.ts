@@ -130,6 +130,8 @@ export type WorkshopViewModel = Readonly<{
     semanticKnowledge: boolean;
     suggestedCalibration: false;
     workingCalibration: false;
+    workingCalibrationFoundation: true;
+    editAuthority: false;
   }>;
 }>;
 
@@ -387,7 +389,7 @@ export function buildWorkshopViewModel(input: {
       { id: "reference", label: "Reference", availability: "available", sourceRole: sourceRoleLabel(reference.sourceRole), datasetId: reference.datasetId, message: "Qualified reference Dataset" },
       { id: "current", label: "Current Calibration", availability: "available", sourceRole: sourceRoleLabel(current.sourceRole), datasetId: current.datasetId, message: input.source.kind === "subscriber_upload" ? "Qualified subscriber-supplied Current Dataset" : "Qualified current Dataset" },
       { id: "suggested", label: "TuneSight Suggested", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
-      { id: "working", label: "Working Calibration", availability: "unavailable", sourceRole: null, datasetId: null, message: "Not available in this Workshop stage" },
+      { id: "working", label: "Working Calibration", availability: "unavailable", sourceRole: null, datasetId: null, message: "Foundation available; exact EDIT authority is not yet published" },
     ],
     comparison: {
       totalDefinitions: comparison.totalDefinitionsConsidered,
@@ -418,6 +420,8 @@ export function buildWorkshopViewModel(input: {
       semanticKnowledge: definitions.some((definition) => definition.semantic.outcome === "exact" || definition.semantic.outcome === "partial"),
       suggestedCalibration: false,
       workingCalibration: false,
+      workingCalibrationFoundation: true,
+      editAuthority: false,
     },
   });
 }
