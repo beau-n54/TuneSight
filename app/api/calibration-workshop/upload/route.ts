@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loadSubscriberCalibration, SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 import { createSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import { consumeSubscriberCalibrationUpload, discardSubscriberCalibrationUpload, prepareSubscriberCalibrationUpload } from "@/lib/calibration-workshop/subscriberCalibrationStorage";
+import { persistSourceBinaryReconstructionLease, revokeSourceBinaryReconstructionLease } from "@/lib/calibration-workshop/sourceBinaryReconstructionStorage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,14 +29,20 @@ export async function POST(request: Request) {
       upload = await consumeSubscriberCalibrationUpload(body.lease, user.id, vehicleId);
       if (!upload.bytes.byteLength || upload.bytes.byteLength > SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES) return json({ outcome: "invalid_upload", error: "Calibration upload size is invalid." }, 413);
       const result = await loadSubscriberCalibration(upload);
+      let sourceLeaseId: string | null = null;
+      const sessionResult = result.status === "workshop_ready" ? await (async () => {
+        const current = result.material.current, sourceLease = await persistSourceBinaryReconstructionLease({ ownerId: user.id, vehicleId, bytes: upload.bytes, binding: { currentCalibrationId: current.exactBinaryIdentity.identityId, currentCalibrationRevision: current.datasetRevision, currentDatasetId: current.datasetId, currentDatasetRevision: current.datasetRevision, romLayoutId: current.romLayoutId, relationshipRevision: current.relationshipRevision, exactBinaryDigest: result.digest, byteLength: result.byteLength, containerType: result.container as "bin" | "dtf" } });
+        sourceLeaseId = sourceLease.leaseId; return Object.freeze({ ...result, sourceLease });
+      })() : result;
       let session: string;
-      try { session = await createSubscriberWorkshopSession(user.id, vehicleId, result); }
-      catch { return json({ outcome: "session_failure", error: "Calibration session could not be stored." }, 503); }
+      try { session = await createSubscriberWorkshopSession(user.id, vehicleId, sessionResult); }
+      catch { if (sourceLeaseId) await revokeSourceBinaryReconstructionLease(sourceLeaseId); return json({ outcome: "session_failure", error: "Calibration session could not be stored." }, 503); }
       return json({ outcome: result.status, session, status: result.status });
     } catch (error) {
       const code = error instanceof Error ? error.message : "";
       if (code === "PRIVATE_UPLOAD_LEASE_INVALID") return json({ outcome: "invalid_upload", error: "Calibration upload lease is invalid or expired." }, 400);
-      return json({ outcome: code.startsWith("PRIVATE_UPLOAD") ? "storage_failure" : "provider_rejection", error: code.startsWith("PRIVATE_UPLOAD") ? "Private calibration upload could not be processed." : "Calibration evidence was rejected by the governed provider." }, code.startsWith("PRIVATE_UPLOAD") ? 503 : 422);
+      const storageFailure = code.startsWith("PRIVATE_UPLOAD") || code.startsWith("SOURCE_BINARY");
+      return json({ outcome: storageFailure ? "storage_failure" : "provider_rejection", error: storageFailure ? "Private calibration storage could not complete processing." : "Calibration evidence was rejected by the governed provider." }, storageFailure ? 503 : 422);
     } finally {
       try { if (upload) await upload.cleanup(); else await discardSubscriberCalibrationUpload(body.lease, user.id, vehicleId); }
       catch { return json({ outcome: "storage_failure", error: "Private calibration upload cleanup failed." }, 503); }

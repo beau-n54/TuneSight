@@ -13,12 +13,13 @@ import { deriveWorkshopCapabilities, resolveMasterCalibration } from "./masterCa
 import { findRepositoryIdentity, RepositoryDefinitionCatalog } from "./repositoryDefinitionCatalog.ts";
 import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
 import { classifyEntryEditCapabilities, type CalibrationEditCapability } from "./editAuthority.ts";
+import type { SourceBinaryLeaseReceipt } from "./sourceBinaryReconstructionLease.ts";
 
 export const SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
 export type SubscriberCalibrationFailure = Readonly<{ status: "coverage_unavailable" | "invalid_upload"; title: string; message: string; identity: string | null; digest: string | null; container: string | null; byteLength: number | null; coverage: DefinitionCoverageResolution | null; timings: Readonly<Record<string, number>> }>;
 type SubscriberWorkshopMaterial = Readonly<{ reference: QualifiedCalibrationDataset; current: QualifiedCalibrationDataset; comparison: QualifiedCalibrationComparisonEvidence }>;
 type SubscriberCurrentOnlyMaterial = Readonly<{ reference: null; current: QualifiedCalibrationDataset; comparison: null }>;
-export type SubscriberCalibrationSuccess = Readonly<{ status: "workshop_ready"; workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel; material: SubscriberWorkshopMaterial | SubscriberCurrentOnlyMaterial; identity: string; digest: string; container: string; byteLength: number; coverage: DefinitionCoverageResolution; quarantines: readonly TableQuarantineRecord[]; editCapabilities: readonly CalibrationEditCapability[]; timings: Readonly<Record<string, number>> }>;
+export type SubscriberCalibrationSuccess = Readonly<{ status: "workshop_ready"; workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel; material: SubscriberWorkshopMaterial | SubscriberCurrentOnlyMaterial; identity: string; digest: string; container: string; byteLength: number; coverage: DefinitionCoverageResolution; quarantines: readonly TableQuarantineRecord[]; editCapabilities: readonly CalibrationEditCapability[]; timings: Readonly<Record<string, number>>; sourceLease?: SourceBinaryLeaseReceipt }>;
 export type SubscriberCalibrationResult = SubscriberCalibrationFailure | SubscriberCalibrationSuccess;
 
 const sha = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");

@@ -79,3 +79,10 @@ export function decideExportCapability(reconstructionQualified: boolean, integri
   if (integrity.state === "CHECKSUM_UNSUPPORTED") return freeze({ reconstruct: "RECONSTRUCT_QUALIFIED", export: "EXPORT_BLOCKED_CHECKSUM_UNSUPPORTED", flash: "FLASH_NOT_QUALIFIED", findings: integrity.findings });
   return freeze({ reconstruct: "RECONSTRUCT_QUALIFIED", export: "EXPORT_QUALIFIED", flash: "FLASH_NOT_QUALIFIED", findings: integrity.findings });
 }
+
+export function deriveExportActionState(input: Readonly<{ source: "active" | "expired" | "unavailable"; capability: ExportCapability }>) {
+  if (input.source !== "active") return freeze({ buildEnabled: false, exportEnabled: false, message: input.source === "expired" ? "Source BIN expired — re-upload the exact source." : "Source BIN unavailable — upload the exact source." });
+  if (input.capability.reconstruct !== "RECONSTRUCT_QUALIFIED") return freeze({ buildEnabled: false, exportEnabled: false, message: "Build Calibration unavailable — reconstruction qualification required." });
+  if (input.capability.export !== "EXPORT_QUALIFIED") return freeze({ buildEnabled: true, exportEnabled: false, message: "Export unavailable — checksum qualification required." });
+  return freeze({ buildEnabled: true, exportEnabled: true, message: "Export BIN is qualified for this exact relationship." });
+}
