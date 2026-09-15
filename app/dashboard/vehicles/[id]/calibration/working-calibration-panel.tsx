@@ -1,6 +1,7 @@
 "use client";
 
 import type { WorkingCalibration, WorkingEditOperation, WorkingEditPreview } from "@/lib/calibration-workshop/workingCalibration";
+import { validationExplanation, workingOperationLabel } from "@/lib/calibration-workshop/manualEditorUx";
 
 export type CalibrationDisplayMode = "current" | "working";
 
@@ -42,17 +43,18 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
       </div>
       <div className="grid gap-3 rounded-xl border border-zinc-800 bg-black/40 p-3 md:grid-cols-[minmax(150px,220px)_minmax(130px,1fr)_auto] md:items-end">
         <label className="text-xs text-zinc-400">Operation<select aria-label="Edit operation" value={operation} onChange={event => onOperation(event.target.value as WorkingEditOperation)} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"><option value="assign">Set value</option><option value="delta">Add / subtract</option><option value="percentage">Percentage change</option></select></label>
-        <label className="text-xs text-zinc-400">Engineering value<input aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "18.5" : operation === "delta" ? "+2.0" : "+5"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
+        <label className="text-xs text-zinc-400">Engineering value<input aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "Enter an exact value" : operation === "delta" ? "Enter an amount" : "Enter a percentage"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
         <button type="button" disabled={!editQualified || preview?.validation === "BLOCKED" || !preview || mode !== "working"} onClick={onApply} className="rounded-lg border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-200 disabled:border-zinc-700 disabled:text-zinc-600">Apply to {selectedCount} cell{selectedCount === 1 ? "" : "s"}</button>
       </div>
       <div className={`rounded-lg border p-3 text-xs ${preview?.validation === "VALID" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100" : preview?.validation === "WARNING" ? "border-amber-400/40 bg-amber-400/10 text-amber-100" : "border-zinc-700 bg-black/30 text-zinc-400"}`} role="status">
         <strong>{preview?.validation ?? (editQualified ? "Enter a value to validate" : "BLOCKED")}</strong>
-        <span className="ml-2">{preview ? `${selectedCount} governed coordinate${selectedCount === 1 ? "" : "s"} selected.` : "No valid edit is ready."}</span>
-        {[...blockers, ...warnings, ...(preview?.findings ?? [])].map(item => <p key={item} className="mt-1">{item}</p>)}
+        <span className="ml-2">{preview ? validationExplanation(preview.validation, preview.findings) : "No valid edit is ready."}</span>
+        <p className="mt-1">{selectedCount} governed coordinate{selectedCount === 1 ? "" : "s"} selected.</p>
+        <details className="mt-2"><summary className="cursor-pointer">Engineering Detail</summary>{[...blockers, ...warnings, ...(preview?.findings ?? [])].map(item => <p key={item} className="mt-1">{item}</p>)}</details>
       </div>
       <details className="rounded-lg border border-zinc-800 p-3" open={activeHistory.length > 0}>
         <summary className="cursor-pointer text-sm font-semibold">Change history · {activeHistory.length}</summary>
-        <ol className="mt-3 max-h-56 space-y-2 overflow-auto">{activeHistory.map(mutation => <li key={mutation.sequence} className="rounded-lg bg-black/40 p-3 text-xs"><div className="flex justify-between gap-3"><strong>#{mutation.sequence} · {definitionTitles[`${mutation.targets[0]!.definitionRevision}:${mutation.targets[0]!.occurrence}`] ?? "Governed Table"}</strong><span className={mutation.validation === "WARNING" ? "text-amber-200" : "text-emerald-200"}>{mutation.validation}</span></div><p className="mt-1 text-zinc-400">{mutation.operation} {mutation.operand} · {mutation.targets.length} cell{mutation.targets.length === 1 ? "" : "s"} · R{mutation.targets[0]!.row} C{mutation.targets[0]!.column}{mutation.targets.length > 1 ? ` → R${mutation.targets.at(-1)!.row} C${mutation.targets.at(-1)!.column}` : ""}</p><p className="mt-1 text-zinc-500">{mutation.before.slice(0, 8).map((value, index) => `${value} → ${mutation.after[index]}`).join(" · ")}{mutation.before.length > 8 ? ` · +${mutation.before.length - 8} more` : ""}</p></li>)}</ol>
+        <ol className="mt-3 max-h-56 space-y-2 overflow-auto">{activeHistory.map(mutation => <li key={mutation.sequence} className="rounded-lg bg-black/40 p-3 text-xs"><div className="flex justify-between gap-3"><strong>#{mutation.sequence} · {definitionTitles[`${mutation.targets[0]!.definitionRevision}:${mutation.targets[0]!.occurrence}`] ?? "Governed Table"}</strong><span className={mutation.validation === "WARNING" ? "text-amber-200" : "text-emerald-200"}>{mutation.validation}</span></div><p className="mt-1 text-zinc-400">{workingOperationLabel(mutation.operation, mutation.source)} · {mutation.operand} · {mutation.targets.length} cell{mutation.targets.length === 1 ? "" : "s"} · R{mutation.targets[0]!.row} C{mutation.targets[0]!.column}{mutation.targets.length > 1 ? ` → R${mutation.targets.at(-1)!.row} C${mutation.targets.at(-1)!.column}` : ""}</p><p className="mt-1 text-zinc-500">{mutation.before.slice(0, 8).map((value, index) => `${value} → ${mutation.after[index]}`).join(" · ")}{mutation.before.length > 8 ? ` · +${mutation.before.length - 8} more` : ""}</p></li>)}</ol>
       </details>
     </>}
 

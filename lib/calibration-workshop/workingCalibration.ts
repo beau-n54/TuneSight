@@ -2,6 +2,7 @@ export const WORKING_CALIBRATION_CONTRACT = "tunesight.working-calibration.v1" a
 
 export type WorkingValidationState = "VALID" | "WARNING" | "BLOCKED";
 export type WorkingEditOperation = "assign" | "delta" | "percentage";
+export type WorkingEditSource = "direct" | "toolbar";
 export type WorkingCellAddress = Readonly<{ definitionRevision: string; occurrence: number; index: number; row: number; column: number }>;
 export type WorkingCellSeed = WorkingCellAddress & Readonly<{ currentValue: number; units: string | null }>;
 export type WorkingEditCapability = Readonly<{
@@ -25,6 +26,7 @@ export type WorkingDefinitionSeed = Readonly<{
 export type WorkingMutation = Readonly<{
   sequence: number;
   operation: WorkingEditOperation;
+  source?: WorkingEditSource;
   operand: number;
   targets: readonly WorkingCellAddress[];
   before: readonly number[];
@@ -103,16 +105,16 @@ function validate(definition: WorkingDefinitionSeed | undefined, value: number):
   return freeze({ state: findings.length ? "BLOCKED" : definition?.capability.warnings.length ? "WARNING" : "VALID", findings: findings.length ? findings : [...(definition?.capability.warnings ?? [])] });
 }
 
-export function applyWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[]; updatedAt: string }>): WorkingEditResult {
+export function applyWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; source?: WorkingEditSource; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[]; updatedAt: string }>): WorkingEditResult {
   if (!input.targets.length) return freeze({ status: "blocked", calibration, findings: ["At least one cell must be selected."] });
   if (!Number.isFinite(input.operand) || !Number.isFinite(Date.parse(input.updatedAt))) return freeze({ status: "blocked", calibration, findings: ["Edit operand and timestamp must be valid."] });
   const definitions = input.definitions ?? definitionSeeds.get(calibration) ?? [], unique = [...new Map(input.targets.map((item) => [addressKey(item), item])).values()].sort((a, b) => addressKey(a).localeCompare(addressKey(b))), before: number[] = [], after: number[] = [], findings: string[] = [], states: WorkingValidationState[] = [];
   for (const target of unique) { const definition = definitions.find((item) => item.definitionRevision === target.definitionRevision && item.occurrence === target.occurrence), cell = currentCell(definitions, target); if (!cell || !definition || target.index < 0 || target.index >= definition.rows * definition.columns || target.row !== Math.floor(target.index / definition.columns) || target.column !== target.index % definition.columns) { findings.push("Cell coordinates are outside the bound Table dimensions."); continue; } const prior = workingCellValue(calibration, target, cell.currentValue)!, next = input.operation === "assign" ? input.operand : input.operation === "delta" ? prior + input.operand : prior * (1 + input.operand / 100); const result = validate(definition, next); before.push(prior); after.push(next); states.push(result.state); findings.push(...result.findings); }
   if (findings.length && (states.includes("BLOCKED") || before.length !== unique.length)) return freeze({ status: "blocked", calibration, findings: [...new Set(findings)] });
-  const history = calibration.mutations.slice(0, calibration.cursor), mutation = freeze({ sequence: history.length + 1, operation: input.operation, operand: input.operand, targets: unique, before, after, validation: severity(states), findings: [...new Set(findings)] });
+  const history = calibration.mutations.slice(0, calibration.cursor), mutation = freeze({ sequence: history.length + 1, operation: input.operation, source: input.source ?? "toolbar", operand: input.operand, targets: unique, before, after, validation: severity(states), findings: [...new Set(findings)] });
   return Object.freeze({ status: "applied" as const, calibration: revise({ ...calibration, mutations: [...history, mutation], cursor: history.length + 1, updatedAt: input.updatedAt }, definitions) });
 }
-export function previewWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[] }>): WorkingEditPreview {
+export function previewWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; source?: WorkingEditSource; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[] }>): WorkingEditPreview {
   const result = applyWorkingEdit(calibration, { ...input, updatedAt: calibration.updatedAt });
   if (result.status === "blocked") return freeze({ validation: "BLOCKED", findings: result.findings, before: [], after: [] });
   const mutation = result.calibration.mutations[result.calibration.cursor - 1]!;
