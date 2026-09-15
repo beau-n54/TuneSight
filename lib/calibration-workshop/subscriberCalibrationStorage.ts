@@ -5,6 +5,7 @@ import { resolveTrustedServerConfiguration } from "@/lib/supabase/trustedServerC
 import type { SubscriberCalibrationResult } from "./subscriberCalibrationProvider";
 import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation";
 import { decodeSubscriberSession, encodeSubscriberSession, expiredObjectPaths, issueUploadLease, resolveUploadLease, type ContainerExtension } from "./subscriberCalibrationPersistence";
+import { activeSubscriberSessionObjectPath } from "./subscriberSessionPointer";
 
 export const SUBSCRIBER_CALIBRATION_BUCKET = "subscriber-calibration-private";
 const BUCKET = SUBSCRIBER_CALIBRATION_BUCKET, RAW_PREFIX = "raw", SESSION_PREFIX = "sessions", CLEANUP_LIMIT = 24;
@@ -13,6 +14,13 @@ export const SUBSCRIBER_SESSION_TTL_MS = 30 * 60 * 1000;
 const opaqueId = () => randomBytes(24).toString("base64url");
 const rawPath = (id: string) => `${RAW_PREFIX}/${id}`;
 const sessionPath = (id: string) => `${SESSION_PREFIX}/${id}`;
+const activeSessionPath = (ownerId: string, vehicleId: string) => activeSubscriberSessionObjectPath(ownerId, vehicleId, resolveTrustedServerConfiguration(process.env).serviceRoleKey);
+async function readActiveSessionId(ownerId: string, vehicleId: string): Promise<string | null> {
+  const { data, error } = await createTrustedServerClient().storage.from(BUCKET).download(activeSessionPath(ownerId, vehicleId));
+  if (error || !data) return null;
+  const id = (await data.text()).trim();
+  return isSubscriberWorkshopSessionId(id) ? id : null;
+}
 async function cleanupPrefix(prefix: string, ttlMs: number, now = Date.now()) {
   const storage = createTrustedServerClient().storage.from(BUCKET);
   const { data, error } = await storage.list(prefix, { limit: CLEANUP_LIMIT, sortBy: { column: "created_at", order: "asc" } });
@@ -43,9 +51,12 @@ export async function discardSubscriberCalibrationUpload(lease: string, ownerId:
 }
 export async function createDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string, result: SubscriberCalibrationResult): Promise<string> {
   await cleanupPrefix(SESSION_PREFIX, SUBSCRIBER_SESSION_TTL_MS);
-  const id = opaqueId(), bytes = encodeSubscriberSession(ownerId, vehicleId, Date.now() + SUBSCRIBER_SESSION_TTL_MS, result);
-  const { error } = await createTrustedServerClient().storage.from(BUCKET).upload(sessionPath(id), bytes, { contentType: "application/octet-stream", cacheControl: "0", upsert: false });
+  const storage = createTrustedServerClient().storage.from(BUCKET), previousId = await readActiveSessionId(ownerId, vehicleId), id = opaqueId(), bytes = encodeSubscriberSession(ownerId, vehicleId, Date.now() + SUBSCRIBER_SESSION_TTL_MS, result);
+  const { error } = await storage.upload(sessionPath(id), bytes, { contentType: "application/octet-stream", cacheControl: "0", upsert: false });
   if (error) throw new Error("SUBSCRIBER_SESSION_WRITE_FAILED");
+  const pointer = await storage.upload(activeSessionPath(ownerId, vehicleId), new TextEncoder().encode(id), { contentType: "application/octet-stream", cacheControl: "0", upsert: true });
+  if (pointer.error) { await storage.remove([sessionPath(id)]); throw new Error("SUBSCRIBER_SESSION_POINTER_WRITE_FAILED"); }
+  if (previousId && previousId !== id) await storage.remove([sessionPath(previousId)]);
   return id;
 }
 export async function readDurableSubscriberWorkshopSession(id: string, ownerId: string, vehicleId: string): Promise<SubscriberCalibrationResult | null> {
@@ -53,4 +64,12 @@ export async function readDurableSubscriberWorkshopSession(id: string, ownerId: 
   const storage = createTrustedServerClient().storage.from(BUCKET), { data, error } = await storage.download(sessionPath(id));
   if (error || !data) return null;
   return decodeSubscriberSession(new Uint8Array(await data.arrayBuffer()), ownerId, vehicleId);
+}
+export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
+  const sessionId = await readActiveSessionId(ownerId, vehicleId);
+  if (!sessionId) return null;
+  const result = await readDurableSubscriberWorkshopSession(sessionId, ownerId, vehicleId);
+  if (result) return Object.freeze({ sessionId, result });
+  await createTrustedServerClient().storage.from(BUCKET).remove([activeSessionPath(ownerId, vehicleId), sessionPath(sessionId)]);
+  return null;
 }

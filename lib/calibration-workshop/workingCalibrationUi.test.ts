@@ -51,5 +51,7 @@ test("browser persistence stores derived mutation evidence rather than Current D
   assert.match(persistence, /currentDatasetRevision/);
   assert.match(persistence, /ownerScope/);
   assert.match(persistence, /vehicleId/);
-  assert.match(persistence, /definitions: _definitions/);
+  assert.match(persistence, /StoredWorkingCalibration/);
+  assert.doesNotMatch(persistence, /currentValue/);
+  assert.match(source, /resolveWorkingDefinition/);
 });

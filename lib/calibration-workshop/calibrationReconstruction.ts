@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { EngineeringBinary, ContainerType } from "../tunes/binaryContainer.ts";
 import type { QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDataset.ts";
 import type { XdfDefinitionRevision } from "../xdf/canonicalXdfDefinition.ts";
-import { listWorkingChanges, type WorkingCalibration } from "./workingCalibration.ts";
+import { listWorkingChanges, workingDefinitionSeed, type WorkingCalibration, type WorkingDefinitionSeed } from "./workingCalibration.ts";
 
 export const RAW_MUTATION_PLAN_CONTRACT = "tunesight.raw-mutation-plan.v1" as const;
 export const CALIBRATION_RECONSTRUCTION_CONTRACT = "tunesight.calibration-reconstruction.v1" as const;
@@ -32,7 +32,7 @@ function integerBytes(value: number, widthBits: 8 | 16 | 32, signed: boolean, en
   return Object.freeze([...buffer]);
 }
 
-export function buildRawMutationPlan(input: Readonly<{ original: EngineeringBinary; dataset: QualifiedCalibrationDataset; working: WorkingCalibration; definitions: readonly XdfDefinitionRevision[] }>): RawMutationPlan {
+export function buildRawMutationPlan(input: Readonly<{ original: EngineeringBinary; dataset: QualifiedCalibrationDataset; working: WorkingCalibration; definitions: readonly XdfDefinitionRevision[]; workingDefinitions?: readonly WorkingDefinitionSeed[] }>): RawMutationPlan {
   const blocked: { blocker: ReconstructionBlocker; finding: string }[] = [], mutations: PlannedRawMutation[] = [];
   const digest = createHash("sha256").update(input.original.bytes).digest("hex");
   if (digest !== input.dataset.exactBinaryIdentity.digest || input.original.byteLength !== input.dataset.exactBinaryIdentity.byteLength || input.working.currentDatasetId !== input.dataset.datasetId || input.working.currentDatasetRevision !== input.dataset.datasetRevision || input.working.romLayoutId !== input.dataset.romLayoutId || input.working.relationshipRevision !== input.dataset.relationshipRevision || input.working.definitionSetRevision !== input.dataset.definitionSetRevisionId) blocked.push({ blocker: "BINDING_MISMATCH", finding: "Original bytes, Current Dataset, Working Calibration, layout, relationship and Definition Set must bind exactly." });
@@ -40,8 +40,8 @@ export function buildRawMutationPlan(input: Readonly<{ original: EngineeringBina
   const datasetCounts = new Map<string, number>(), definitionCounts = new Map<string, number>();
   for (const item of input.dataset.definitions) { const occurrence = datasetCounts.get(item.definitionRevisionId) ?? 0; datasetCounts.set(item.definitionRevisionId, occurrence + 1); datasetOccurrences.set(occurrenceKey(item.definitionRevisionId, occurrence), item); }
   for (const item of input.definitions) { const occurrence = definitionCounts.get(item.revisionId) ?? 0; definitionCounts.set(item.revisionId, occurrence + 1); definitionOccurrences.set(occurrenceKey(item.revisionId, occurrence), item); }
-  for (const [sequence, change] of listWorkingChanges(input.working).entries()) {
-    const seed = input.working.definitions.find((item) => item.definitionRevision === change.address.definitionRevision && item.occurrence === change.address.occurrence), capability = seed?.capability;
+  for (const [sequence, change] of listWorkingChanges(input.working, input.workingDefinitions).entries()) {
+    const seed = input.workingDefinitions?.find((item) => item.definitionRevision === change.address.definitionRevision && item.occurrence === change.address.occurrence) ?? workingDefinitionSeed(input.working, change.address.definitionRevision, change.address.occurrence), capability = seed?.capability;
     const datasetDefinition = datasetOccurrences.get(occurrenceKey(change.address.definitionRevision, change.address.occurrence)), definition = definitionOccurrences.get(occurrenceKey(change.address.definitionRevision, change.address.occurrence));
     if (!seed || seed.availability !== "available") { blocked.push({ blocker: "QUARANTINE", finding: "Unavailable or quarantined definitions cannot enter reconstruction." }); continue; }
     if (!capability || capability.state !== "EDIT_QUALIFIED" || !capability.inverse || !datasetDefinition?.engineeringEvidence || !datasetDefinition.rawEvidence || !definition || definition.identity.status !== "derived" || !definition.identity.stableId) { blocked.push({ blocker: "BINDING_MISMATCH", finding: "Mutation lacks exact qualified Definition, Dataset, or EDIT binding." }); continue; }
