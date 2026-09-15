@@ -10,6 +10,7 @@ import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
 import type { EngineeringBinary } from "../tunes/binaryContainer.ts";
 
 export const MASTER_CALIBRATION_RESOLVER_CONTRACT = "tunesight.master-calibration-resolver.v1" as const;
+export const MASTER_CALIBRATION_RESOLVER_SCOPE = "CALIBRATION_CAPABILITY_ONLY" as const;
 
 export type CurrentCalibrationBinary = Readonly<{
   engineeringBinary: EngineeringBinary;
@@ -70,6 +71,7 @@ export type MasterCalibrationResolutionOutcome =
 
 export type MasterCalibrationResolution = Readonly<{
   contractVersion: typeof MASTER_CALIBRATION_RESOLVER_CONTRACT;
+  scope?: typeof MASTER_CALIBRATION_RESOLVER_SCOPE;
   outcome: MasterCalibrationResolutionOutcome;
   coverage: DefinitionCoverageResolution;
   catalogEntry: DefinitionCatalogEntry | null;
@@ -100,7 +102,7 @@ export function resolveMasterCalibration(input: Readonly<{
     || connectedBinary.container.toLowerCase() !== currentBinary.source.containerType.toLowerCase()
   ) {
     const coverage = resolveDefinitionCoverage({ connectedRom: input.connectedRom, recognizedRomIdentities: [], candidates: [], conflicts: ["Current Calibration binary does not match the connected ROM observation."] });
-    return Object.freeze({ contractVersion: MASTER_CALIBRATION_RESOLVER_CONTRACT, outcome: "INVALID_BINARY", coverage, catalogEntry: null, findings: Object.freeze([...coverage.findings]) });
+    return Object.freeze({ contractVersion: MASTER_CALIBRATION_RESOLVER_CONTRACT, scope: MASTER_CALIBRATION_RESOLVER_SCOPE, outcome: "INVALID_BINARY", coverage, catalogEntry: null, findings: Object.freeze([...coverage.findings]) });
   }
   const identities = input.catalog.listIdentities();
   const catalogEntries = input.catalog.listEntries();
@@ -121,6 +123,7 @@ export function resolveMasterCalibration(input: Readonly<{
   const resolvedOutcome = selected ? "EXACT_QUALIFIED_MATCH" : outcome(coverage);
   return Object.freeze({
     contractVersion: MASTER_CALIBRATION_RESOLVER_CONTRACT,
+    scope: MASTER_CALIBRATION_RESOLVER_SCOPE,
     outcome: resolvedOutcome,
     coverage,
     catalogEntry: selected,

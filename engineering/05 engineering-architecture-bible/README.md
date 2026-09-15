@@ -54,6 +54,8 @@ The eight Engineering Domains are:
 
 [Presentation](09-presentation.md) is an architectural layer, not an Engineering Domain. It communicates authoritative outputs and owns no engineering truth.
 
+[Vehicle Admission and Capability Independence](10-vehicle-admission-independence.md) is the Founder-ratified prospective clarification that prevents exact-ROM Calibration coverage from becoming a whole-vehicle admission gate while preserving independent capability authority.
+
 [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md) are the universal architectural standard by which these owners and consumers exchange qualified engineering truth. They are not a domain, runtime layer, framework or implementation interface.
 
 Within Knowledge, the foundational order is Engineering Ontology, Governed Vocabulary, Knowledge Entities, Engineering Assertions and Evidence. Ontology governs the nature of engineering concepts; Vocabulary governs their language; Knowledge records qualified engineering truth; and Evidence supports or contradicts that truth. These responsibilities shall not be collapsed.

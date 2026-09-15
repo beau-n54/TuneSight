@@ -29,7 +29,7 @@ test("composite catalogs ignore candidate shadows but fail closed for two active
   assert.equal(resolve(composeDefinitionCatalogs("ambiguous", [RepositoryDefinitionCatalog, acquired(second, "active")])).outcome, "AMBIGUOUS_MATCH");
 });
 
-test("the observed 00005D553C8C05 identity remains recognized and non-admitted", () => {
+test("an identity admitted by the bulk VIEW catalogue remains active in the repository catalogue", () => {
   const identity = RepositoryDefinitionCatalog.listIdentities().find((item) => item.romSoftwareIdentity === "00005D553C8C05");
-  assert.ok(identity); assert.equal(RepositoryDefinitionCatalog.listEntries().some((entry) => entry.identity.romSoftwareIdentity === identity.romSoftwareIdentity), false);
+  assert.ok(identity); assert.equal(RepositoryDefinitionCatalog.listEntries().some((entry) => entry.identity.romSoftwareIdentity === identity.romSoftwareIdentity), true);
 });

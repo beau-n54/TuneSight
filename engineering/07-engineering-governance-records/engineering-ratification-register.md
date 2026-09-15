@@ -1345,6 +1345,30 @@ The Founder accepts the five identified local implementation milestones and reco
 
 ---
 
+### TS-RAT-023
+
+| Field | Ratified Value |
+|---|---|
+| Register ID | TS-RAT-023 |
+| Date | 2026-09-15 |
+| Artefact Type | Prospective architectural clarification and cross-domain contract implementation |
+| Artefact | `engineering/05 engineering-architecture-bible/10-vehicle-admission-independence.md` |
+| Authority | Founder Beau |
+| Ratification Scope | Vehicle/platform admission independence from exact-ROM Calibration coverage; per-capability fail-closed envelope |
+| Founder Audit | Explicitly accepted and implementation authorised |
+| Historical Effect | Additive only; no prior ratification rewritten or superseded |
+| Production Effect | None until separately released and deployed |
+
+**Ratification Declaration**
+
+The Founder ratifies identity admission and capability admission as independent architectural decisions. A legitimate vehicle or platform is admitted only to the highest confidence supported by Vehicle Identity evidence, including with a newly observed or unresolved exact ROM. Calibration VIEW, EDIT, reconstruction, Export, Flash, telemetry and Analysis remain independently governed by their own qualified evidence and dependencies. Unknown does not mean unsupported and cannot grant guessed capability.
+
+**Preserved Authority**
+
+The 68 exact Current-VIEW relationships, 74,220 VIEW Tables, 74,165 EDIT- and reconstruction-qualified Tables, Working Calibration, Manual Editor, N54 comparison, B58 Current-only, quarantine, acquired-XDF architecture, checksum fail-closed behavior, locked Export and unqualified Flash remain unchanged. TS-RAT-009, TS-RAT-021 and TS-RAT-022 remain historically intact.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

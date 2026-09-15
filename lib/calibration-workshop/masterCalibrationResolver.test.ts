@@ -36,6 +36,7 @@ test("repository catalog preserves five prior relationships and exposes 63 bulk 
 test("exact N54 publication resolves and Workshop mode follows Reference capability", () => {
   const result = resolve("IJE0S", binary("IJE0S_original.bin"));
   assert.equal(result.outcome, "EXACT_QUALIFIED_MATCH");
+  assert.equal(result.scope, "CALIBRATION_CAPABILITY_ONLY");
   assert.equal(result.catalogEntry?.identity.romSoftwareIdentity, "IJE0S");
   assert.equal(deriveWorkshopCapabilities(result.catalogEntry!).mode, "reference_comparison");
 });
