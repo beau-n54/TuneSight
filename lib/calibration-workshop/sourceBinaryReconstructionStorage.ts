@@ -24,7 +24,7 @@ export async function persistSourceBinaryReconstructionLease(input: Readonly<{ o
   const objectId = opaque(), leaseId = opaque(), record = createSourceBinaryLeaseRecord({ ownerId: input.ownerId, vehicleId: input.vehicleId, objectId, leaseId, binding: input.binding, createdAt: (input.now ?? new Date()).toISOString() }), bucket = storage(), previous = await priorLeaseId(input.ownerId, input.vehicleId);
   const source = await bucket.upload(sourcePath(objectId), input.bytes, { contentType: "application/octet-stream", cacheControl: "0", upsert: false }); if (source.error) throw new Error("SOURCE_BINARY_WRITE_FAILED");
   const metadata = await bucket.upload(leasePath(leaseId), serialize(record), { contentType: "application/octet-stream", cacheControl: "0", upsert: false }); if (metadata.error) { await bucket.remove([sourcePath(objectId)]); throw new Error("SOURCE_BINARY_LEASE_WRITE_FAILED"); }
-  const pointer = await bucket.upload(activePath(input.ownerId, input.vehicleId), leaseId, { contentType: "text/plain", cacheControl: "0", upsert: true }); if (pointer.error) { await bucket.remove([sourcePath(objectId), leasePath(leaseId)]); throw new Error("SOURCE_BINARY_POINTER_WRITE_FAILED"); }
+  const pointer = await bucket.upload(activePath(input.ownerId, input.vehicleId), new TextEncoder().encode(leaseId), { contentType: "application/octet-stream", cacheControl: "0", upsert: true }); if (pointer.error) { await bucket.remove([sourcePath(objectId), leasePath(leaseId)]); throw new Error("SOURCE_BINARY_POINTER_WRITE_FAILED"); }
   if (previous && previous !== leaseId) await removeLease(previous);
   return record.receipt;
 }

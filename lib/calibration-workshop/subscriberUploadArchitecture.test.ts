@@ -13,6 +13,9 @@ test("production upload bypasses the Function body and keeps raw and session nam
   assert.doesNotMatch(route, /formData\(/);
   assert.match(storage, /RAW_PREFIX = "raw", SESSION_PREFIX = "sessions"/);
   assert.match(route, /finally[\s\S]*upload\.cleanup/);
+  assert.match(route, /TRANSIENT_PREPARATION/);
+  assert.match(route, /SESSION_WRITE/);
+  assert.match(route, /TRANSIENT_CLEANUP/);
 });
 
 test("the controlled bucket migration enforces private storage", () => {
@@ -20,4 +23,17 @@ test("the controlled bucket migration enforces private storage", () => {
   assert.match(migration, /subscriber-calibration-private/);
   assert.match(migration, /false/);
   assert.doesNotMatch(migration, /create policy|publicUrl/i);
+});
+
+test("every Source Binary object uses a MIME type permitted by the deployed private bucket", () => {
+  const migration = fs.readFileSync(path.resolve("supabase/migrations/20260913_add_private_subscriber_calibration_storage.sql"), "utf8");
+  const sourceStorage = fs.readFileSync(path.resolve("lib/calibration-workshop/sourceBinaryReconstructionStorage.ts"), "utf8");
+  const limit = Number(migration.match(/false,\s*(\d+)/)?.[1]);
+  const allowed = [...migration.matchAll(/'(application\/[^']+)'/g)].map((match) => match[1]);
+  const used = [...sourceStorage.matchAll(/contentType: "([^"]+)"/g)].map((match) => match[1]);
+  assert.ok(limit >= 7_864_320);
+  assert.ok(used.length >= 3);
+  assert.ok(used.every((contentType) => allowed.includes(contentType)), `${used.join(", ")} must be permitted by the deployed bucket`);
+  assert.doesNotMatch(sourceStorage, /contentType: "text\/plain"/);
+  assert.match(sourceStorage, /new TextEncoder\(\)\.encode\(leaseId\)/);
 });

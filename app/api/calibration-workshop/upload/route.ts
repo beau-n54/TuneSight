@@ -3,6 +3,7 @@ import { loadSubscriberCalibration, SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES } fr
 import { createSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import { consumeSubscriberCalibrationUpload, discardSubscriberCalibrationUpload, prepareSubscriberCalibrationUpload } from "@/lib/calibration-workshop/subscriberCalibrationStorage";
 import { persistSourceBinaryReconstructionLease, revokeSourceBinaryReconstructionLease } from "@/lib/calibration-workshop/sourceBinaryReconstructionStorage";
+import { classifySubscriberProcessingFailure } from "@/lib/calibration-workshop/subscriberProcessingFailure";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     if (body.action === "prepare") {
       if (!Number.isInteger(body.byteLength) || body.byteLength! <= 0 || body.byteLength! > SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES || !["bin", "dtf"].includes(body.extension ?? "")) return json({ outcome: "invalid_upload", error: `Calibration file must be a BIN or DTF between 1 byte and ${SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES} bytes.` }, 413);
       try { const prepared = await prepareSubscriberCalibrationUpload(user.id, vehicleId, body.extension as "bin" | "dtf"); return json({ outcome: "upload_ready", ...prepared }); }
-      catch { return json({ outcome: "storage_failure", error: "Private calibration upload could not be prepared." }, 503); }
+      catch { return json({ outcome: "storage_failure", code: "TRANSIENT_PREPARATION", error: "Private calibration upload could not be prepared." }, 503); }
     }
     if (body.action !== "process" || !body.lease) return json({ outcome: "invalid_upload", error: "A valid processing lease is required." }, 400);
     let upload: Awaited<ReturnType<typeof consumeSubscriberCalibrationUpload>> | null = null;
@@ -36,16 +37,14 @@ export async function POST(request: Request) {
       })() : result;
       let session: string;
       try { session = await createSubscriberWorkshopSession(user.id, vehicleId, sessionResult); }
-      catch { if (sourceLeaseId) await revokeSourceBinaryReconstructionLease(sourceLeaseId); return json({ outcome: "session_failure", error: "Calibration session could not be stored." }, 503); }
+      catch { if (sourceLeaseId) await revokeSourceBinaryReconstructionLease(sourceLeaseId); return json({ outcome: "session_failure", code: "SESSION_WRITE", error: "Calibration session could not be stored." }, 503); }
       return json({ outcome: result.status, session, status: result.status });
     } catch (error) {
-      const code = error instanceof Error ? error.message : "";
-      if (code === "PRIVATE_UPLOAD_LEASE_INVALID") return json({ outcome: "invalid_upload", error: "Calibration upload lease is invalid or expired." }, 400);
-      const storageFailure = code.startsWith("PRIVATE_UPLOAD") || code.startsWith("SOURCE_BINARY");
-      return json({ outcome: storageFailure ? "storage_failure" : "provider_rejection", error: storageFailure ? "Private calibration storage could not complete processing." : "Calibration evidence was rejected by the governed provider." }, storageFailure ? 503 : 422);
+      const failure = classifySubscriberProcessingFailure(error);
+      return json({ outcome: failure.outcome, code: failure.code, error: failure.error }, failure.status);
     } finally {
       try { if (upload) await upload.cleanup(); else await discardSubscriberCalibrationUpload(body.lease, user.id, vehicleId); }
-      catch { return json({ outcome: "storage_failure", error: "Private calibration upload cleanup failed." }, 503); }
+      catch { return json({ outcome: "storage_failure", code: "TRANSIENT_CLEANUP", error: "Private calibration upload cleanup failed." }, 503); }
     }
   } catch { return json({ outcome: "infrastructure_failure", error: "Calibration service is temporarily unavailable." }, 503); }
 }

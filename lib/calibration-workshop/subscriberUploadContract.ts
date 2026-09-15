@@ -3,7 +3,7 @@ export const MAX_SUBSCRIBER_RESPONSE_BYTES = 64 * 1024;
 export type SubscriberUploadOutcome =
   | { outcome: "upload_ready"; uploadId: string; uploadPath: string; uploadToken: string; lease: string }
   | { outcome: "workshop_ready" | "coverage_unavailable" | "invalid_upload"; session: string; status: string }
-  | { outcome: "provider_rejection" | "session_failure" | "storage_failure" | "infrastructure_failure"; error: string };
+  | { outcome: "provider_rejection" | "session_failure" | "storage_failure" | "infrastructure_failure"; error: string; code?: string };
 
 async function readBoundedBody(response: Response): Promise<string> {
   if (!response.body) return "";
