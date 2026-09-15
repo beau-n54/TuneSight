@@ -52,6 +52,7 @@ export type WorkingCalibration = Readonly<{
   validation: WorkingValidationState;
 }>;
 export type WorkingEditResult = Readonly<{ status: "applied"; calibration: WorkingCalibration }> | Readonly<{ status: "blocked"; calibration: WorkingCalibration; findings: readonly string[] }>;
+export type WorkingEditPreview = Readonly<{ validation: WorkingValidationState; findings: readonly string[]; before: readonly number[]; after: readonly number[] }>;
 
 const freeze = <T>(value: T): T => { if (Array.isArray(value)) return Object.freeze(value.map(freeze)) as T; if (value && typeof value === "object") return Object.freeze(Object.fromEntries(Object.entries(value).map(([key, item]) => [key, freeze(item)]))) as T; return value; };
 const canonical = (value: unknown): string => { if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value); if (typeof value === "number") { if (!Number.isFinite(value)) throw new Error("Working Calibration identity requires finite numbers."); return JSON.stringify(Object.is(value, -0) ? 0 : value); } if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`; if (!value || typeof value !== "object") throw new Error("Working Calibration identity contains unsupported material."); const record = value as Record<string, unknown>; return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonical(record[key])}`).join(",")}}`; };
@@ -106,6 +107,14 @@ export function applyWorkingEdit(calibration: WorkingCalibration, input: Readonl
   const history = calibration.mutations.slice(0, calibration.cursor), mutation = freeze({ sequence: history.length + 1, operation: input.operation, operand: input.operand, targets: unique, before, after, validation: severity(states), findings: [...new Set(findings)] });
   return freeze({ status: "applied", calibration: revise({ ...calibration, mutations: [...history, mutation], cursor: history.length + 1, updatedAt: input.updatedAt }) });
 }
+export function previewWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; operand: number; targets: readonly WorkingCellAddress[] }>): WorkingEditPreview {
+  const result = applyWorkingEdit(calibration, { ...input, updatedAt: calibration.updatedAt });
+  if (result.status === "blocked") return freeze({ validation: "BLOCKED", findings: result.findings, before: [], after: [] });
+  const mutation = result.calibration.mutations[result.calibration.cursor - 1]!;
+  return freeze({ validation: mutation.validation, findings: mutation.findings, before: mutation.before, after: mutation.after });
+}
 export function undoWorkingEdit(calibration: WorkingCalibration, updatedAt: string): WorkingCalibration { return calibration.cursor === 0 ? calibration : revise({ ...calibration, cursor: calibration.cursor - 1, updatedAt }); }
 export function redoWorkingEdit(calibration: WorkingCalibration, updatedAt: string): WorkingCalibration { return calibration.cursor >= calibration.mutations.length ? calibration : revise({ ...calibration, cursor: calibration.cursor + 1, updatedAt }); }
 export function listWorkingChanges(calibration: WorkingCalibration) { const values = valuesAt(calibration); return freeze(calibration.definitions.flatMap((definition) => definition.cells.map((cell) => ({ ...workingCellDelta(calibration, cell), address: cell, working: values.get(addressKey(cell))! })).filter((item) => item.delta !== 0))); }
+export function workingDefinitionHasChanges(calibration: WorkingCalibration, definitionRevision: string, occurrence: number): boolean { return listWorkingChanges(calibration).some((item) => item.address.definitionRevision === definitionRevision && item.address.occurrence === occurrence); }
+export function workingChangedDefinitionKeys(calibration: WorkingCalibration): readonly string[] { return freeze([...new Set(listWorkingChanges(calibration).map((item) => `${item.address.definitionRevision}:${item.address.occurrence}`))].sort()); }
