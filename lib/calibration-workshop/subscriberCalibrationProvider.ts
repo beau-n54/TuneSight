@@ -14,6 +14,7 @@ import { findRepositoryIdentity, RepositoryDefinitionCatalog } from "./repositor
 import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
 import { classifyEntryEditCapabilities, type CalibrationEditCapability } from "./editAuthority.ts";
 import type { SourceBinaryLeaseReceipt } from "./sourceBinaryReconstructionLease.ts";
+import { calibrationKnowledgeForRelationship } from "../knowledge/publishedCalibrationSemantics.ts";
 
 export const SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
 export type SubscriberCalibrationFailure = Readonly<{ status: "coverage_unavailable" | "invalid_upload"; title: string; message: string; identity: string | null; digest: string | null; container: string | null; byteLength: number | null; coverage: DefinitionCoverageResolution | null; timings: Readonly<Record<string, number>> }>;
@@ -62,6 +63,7 @@ export async function loadSubscriberCalibration(input: Readonly<{ bytes: Uint8Ar
 }
 
 export function buildSubscriberWorkshop(result: Pick<SubscriberCalibrationSuccess, "material" | "identity" | "digest" | "quarantines" | "editCapabilities">, selectedDefinition?: string | null): WorkshopViewModel | CurrentOnlyWorkshopViewModel {
-  if (result.material.reference === null || result.material.comparison === null) return buildCurrentOnlyWorkshopViewModel({ current: result.material.current, quarantines: result.quarantines, editCapabilities: result.editCapabilities, selectedKey: selectedDefinition });
-  return buildWorkshopViewModel({ reference: result.material.reference, current: result.material.current, comparison: result.material.comparison, editCapabilities: result.editCapabilities, source: { kind: "subscriber_upload", label: `${result.identity} governed Reference → subscriber Current`, fixtureIdentity: `subscriber-upload:${result.digest}` }, selectedKey: selectedDefinition });
+  const knowledgeRecords = calibrationKnowledgeForRelationship(result.material.current.relationshipRevision);
+  if (result.material.reference === null || result.material.comparison === null) return buildCurrentOnlyWorkshopViewModel({ current: result.material.current, quarantines: result.quarantines, editCapabilities: result.editCapabilities, knowledgeRecords, selectedKey: selectedDefinition });
+  return buildWorkshopViewModel({ reference: result.material.reference, current: result.material.current, comparison: result.material.comparison, editCapabilities: result.editCapabilities, knowledgeRecords, source: { kind: "subscriber_upload", label: `${result.identity} governed Reference → subscriber Current`, fixtureIdentity: `subscriber-upload:${result.digest}` }, selectedKey: selectedDefinition });
 }
