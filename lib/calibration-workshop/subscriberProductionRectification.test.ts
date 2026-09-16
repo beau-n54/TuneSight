@@ -55,7 +55,7 @@ test("N54 comparison sessions omit rebuildable Workshop presentation before priv
   if (result.status !== "workshop_ready") return;
   const fullBytes = serialize({ version: 1, ownerId: "owner", vehicleId: "vehicle", expiresAt: Date.now() + 1_800_000, result }).byteLength;
   const compact = encodeSubscriberSession("owner", "vehicle", Date.now() + 1_800_000, result), recovered = decodeSubscriberSession(compact, "owner", "vehicle");
-  assert.ok(fullBytes > 32_000_000, `expected production pressure from full N54 session, received ${fullBytes}`);
+  assert.ok(fullBytes > compact.byteLength + 2_000_000, `durable compaction must still remove rebuildable Workshop presentation: full ${fullBytes}, compact ${compact.byteLength}`);
   assert.ok(compact.byteLength < 28_000_000, `compact N54 session must retain safe headroom below the 32 MiB bucket ceiling: ${compact.byteLength}`);
   assert.equal(recovered?.status, "workshop_ready");
   if (recovered?.status === "workshop_ready") { assert.equal("mode" in recovered.workshop, false); assert.equal(recovered.workshop.definitions.length, result.workshop.definitions.length); }

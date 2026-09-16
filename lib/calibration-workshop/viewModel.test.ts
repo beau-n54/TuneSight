@@ -6,6 +6,7 @@ import type { QualifiedCalibrationComparisonEvidence } from "../xdf/qualifiedCal
 import {
   buildWorkshopViewModel,
   filterWorkshopDefinitions,
+  materializeWorkshopDefinition,
   selectWorkshopDefinitionKey,
 } from "./viewModel.ts";
 
@@ -75,6 +76,17 @@ test("selected Grid and cell delta data remain presentation-only", () => {
   assert.equal(model.selectedDefinition.cells[1]?.signedDelta, 1);
   assert.equal(model.selectedDefinition.cells[1]?.percentageDelta, 50);
   assert.equal(model.selectedDefinition.cells[1]?.referenceRawOffset, 101);
+});
+
+test("every table can be materialized client-side from the governed Workshop snapshot", () => {
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
+  assert.deepEqual(materializeWorkshopDefinition(model, model.selectedDefinition.summary.key), model.selectedDefinition);
+  const unchanged = materializeWorkshopDefinition(model, model.definitions[1]!.key);
+  assert.equal(unchanged.summary.title, "Unchanged map");
+  assert.equal(unchanged.cells[0]?.currentValue, 4);
+  assert.equal(unchanged.cells[0]?.referenceValue, 4);
+  assert.equal(unchanged.information.definitionSetRevision, model.source.definitionSetRevision);
+  assert.equal(materializeWorkshopDefinition(model, "unknown"), model.selectedDefinition);
 });
 
 test("every generated Definition retains structural information without semantic Knowledge", () => {

@@ -103,6 +103,21 @@ export type WorkshopDefinitionDetail = Readonly<{
   }>;
 }>;
 
+export type WorkshopTableMaterial = Readonly<{
+  key: string;
+  rows: number;
+  columns: number;
+  axes: WorkshopDefinitionDetail["axes"];
+  cells: readonly (readonly [number, number, number, number, number, number, number, number, number, number, number | null, 0 | 1])[];
+  unavailableStage: string | null;
+  findings: readonly string[];
+  equationRevision: string | null;
+  sourceArtifactDigest: string;
+  sourceDescription: string | null;
+  sourceCategory: string | null;
+  axisChangeState: "unchanged" | "changed" | "unavailable";
+}>;
+
 export type WorkshopViewModel = Readonly<{
   source: Readonly<{
     kind: "development_fixture" | "subscriber_upload";
@@ -115,6 +130,10 @@ export type WorkshopViewModel = Readonly<{
     relationshipRevision: string;
     definitionSetRevision: string;
     comparisonId: string;
+    referenceRole: string;
+    currentRole: string;
+    datasetProvenance: readonly string[];
+    datasetLimitations: readonly string[];
   }>;
   states: readonly WorkshopStateSlot[];
   comparison: Readonly<{
@@ -128,8 +147,8 @@ export type WorkshopViewModel = Readonly<{
     changedCells: number;
   }>;
   definitions: readonly WorkshopDefinitionSummary[];
+  tableMaterials: readonly WorkshopTableMaterial[];
   selectedDefinition: WorkshopDefinitionDetail;
-  workingDefinitions: readonly WorkingDefinitionSeed[];
   provenance: readonly string[];
   limitations: readonly string[];
   capabilities: Readonly<{
@@ -275,7 +294,7 @@ function axisValues(
 
 export function buildWorkshopDefinitionDetail(
   definition: DefinitionComparisonEvidence,
-  reference: QualifiedCalibrationDataset,
+  reference: QualifiedCalibrationDataset | undefined,
   summary: WorkshopDefinitionSummary,
   context?: Readonly<{
     definitionSetRevision: string;
@@ -287,11 +306,12 @@ export function buildWorkshopDefinitionDetail(
     datasetProvenance: readonly string[];
     limitations: readonly string[];
   }>,
+  referenceRecord?: QualifiedCalibrationDataset["definitions"][number] | null,
 ): WorkshopDefinitionDetail {
   const referenceEvidence = definition.referenceEngineeringEvidence;
   const currentEvidence = definition.modifiedEngineeringEvidence;
   const changes = new Map(definition.changedCells.map((cell) => [cell.index, cell]));
-  const datasetRecord = reference.definitions.filter(
+  const datasetRecord = referenceRecord ?? reference?.definitions.filter(
     (item) => item.definitionRevisionId === definition.definitionRevisionId,
   )[summary.occurrence];
   const cells = referenceEvidence && currentEvidence
@@ -338,7 +358,7 @@ export function buildWorkshopDefinitionDetail(
       workshopInstanceIdentity: summary.key,
       definitionIdentity: summary.definitionIdentity,
       definitionRevision: summary.definitionRevision,
-      definitionSetRevision: context?.definitionSetRevision ?? reference.definitionSetRevisionId,
+      definitionSetRevision: context?.definitionSetRevision ?? reference?.definitionSetRevisionId ?? "Unavailable",
       shape: summary.shape,
       dimensions: { rows: definition.dimensions?.rows ?? 0, columns: definition.dimensions?.columns ?? 0 },
       units: summary.units,
@@ -351,10 +371,10 @@ export function buildWorkshopDefinitionDetail(
       axisChangeState: definition.axisComparisons.some((axis) => axis.outcome === "changed") ? "changed" : definition.axisComparisons.some((axis) => axis.outcome === "comparison_unavailable") ? "unavailable" : "unchanged",
       referenceRole: context?.referenceRole ?? "Reference",
       currentRole: context?.currentRole ?? "Current",
-      romLayoutId: context?.romLayoutId ?? reference.romLayoutId,
-      referenceDatasetId: context?.referenceDatasetId ?? reference.datasetId,
+      romLayoutId: context?.romLayoutId ?? reference?.romLayoutId ?? "Unavailable",
+      referenceDatasetId: context?.referenceDatasetId ?? reference?.datasetId ?? "Unavailable",
       currentDatasetId: context?.currentDatasetId ?? "Unavailable",
-      datasetProvenance: context?.datasetProvenance ?? reference.provenance,
+      datasetProvenance: context?.datasetProvenance ?? reference?.provenance ?? [],
       sourceArtifactDigest: definition.sourceArtifactDigest,
       equationRevision: definition.equationRevision,
       limitations: context?.limitations ?? [],
@@ -387,7 +407,10 @@ export function buildWorkshopViewModel(input: {
   const selected = comparison.definitions[selectedIndex];
   const selectedSummary = definitions[selectedIndex];
   if (!selected || !selectedSummary) throw new Error("Qualified comparison contains no selectable Definition.");
-  const occurrences = new Map<string, number>(), workingDefinitions = current.definitions.map((definition): WorkingDefinitionSeed => { const occurrence = occurrences.get(definition.definitionRevisionId) ?? 0; occurrences.set(definition.definitionRevisionId, occurrence + 1); const editCapability = definitions.find((item) => item.definitionRevision === definition.definitionRevisionId && item.occurrence === occurrence)?.editCapability ?? { state: "VIEW_ONLY" as const, revision: null, inverse: null, engineeringMinimum: null, engineeringMaximum: null, warnings: [], blockers: ["EDIT authority is unavailable."] }; return deepFreeze({ definitionRevision: definition.definitionRevisionId, occurrence, rows: definition.dimensions?.rows ?? 0, columns: definition.dimensions?.columns ?? 0, availability: definition.engineeringEvidence ? "available" as const : "unavailable" as const, capability: editCapability, cells: definition.engineeringEvidence ? definition.engineeringEvidence.engineeringValues.map((currentValue, index) => { const trace = definition.engineeringEvidence!.cellTrace[index]!; return { definitionRevision: definition.definitionRevisionId, occurrence, index, row: trace.row, column: trace.column, currentValue, units: definition.units }; }) : [] }); });
+  const referenceOccurrences = new Map<string, number>(), referenceByOccurrence = new Map<string, QualifiedCalibrationDataset["definitions"][number]>();
+  for (const record of reference.definitions) { const occurrence = referenceOccurrences.get(record.definitionRevisionId) ?? 0; referenceOccurrences.set(record.definitionRevisionId, occurrence + 1); referenceByOccurrence.set(`${record.definitionRevisionId}:${occurrence}`, record); }
+  const sharedContext = { definitionSetRevision: reference.definitionSetRevisionId, romLayoutId: reference.romLayoutId, referenceDatasetId: reference.datasetId, currentDatasetId: current.datasetId, referenceRole: comparison.reference.role, currentRole: comparison.modified.role, datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])], limitations: [...new Set([...reference.limitations, ...current.limitations])] };
+  const tableMaterials = comparison.definitions.map((definition, index): WorkshopTableMaterial => { const summary = definitions[index]!, detail = buildWorkshopDefinitionDetail(definition, undefined, summary, sharedContext, referenceByOccurrence.get(`${definition.definitionRevisionId}:${summary.occurrence}`) ?? null); return deepFreeze({ key: summary.key, rows: detail.rows, columns: detail.columns, axes: detail.axes, cells: detail.cells.map(cell => [cell.index, cell.row, cell.column, cell.referenceRawOffset, cell.currentRawOffset, cell.referenceRawValue, cell.currentRawValue, cell.referenceValue, cell.currentValue, cell.signedDelta, cell.percentageDelta, cell.changed ? 1 : 0] as const), unavailableStage: detail.unavailableStage, findings: detail.findings, equationRevision: detail.equationRevision, sourceArtifactDigest: detail.sourceArtifactDigest, sourceDescription: detail.information.sourceDescription, sourceCategory: detail.information.sourceCategory, axisChangeState: detail.information.axisChangeState }); });
 
   return deepFreeze({
     source: {
@@ -401,6 +424,10 @@ export function buildWorkshopViewModel(input: {
       relationshipRevision: current.relationshipRevision,
       definitionSetRevision: current.definitionSetRevisionId,
       comparisonId: comparison.comparisonId,
+      referenceRole: comparison.reference.role,
+      currentRole: comparison.modified.role,
+      datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])],
+      datasetLimitations: [...new Set([...reference.limitations, ...current.limitations])],
     },
     states: [
       { id: "reference", label: "Reference", availability: "available", sourceRole: sourceRoleLabel(reference.sourceRole), datasetId: reference.datasetId, message: "Qualified reference Dataset" },
@@ -419,6 +446,7 @@ export function buildWorkshopViewModel(input: {
       changedCells: comparison.totalChangedCells,
     },
     definitions,
+    tableMaterials,
     selectedDefinition: buildWorkshopDefinitionDetail(selected, reference, selectedSummary, {
       definitionSetRevision: reference.definitionSetRevisionId,
       romLayoutId: reference.romLayoutId,
@@ -429,7 +457,6 @@ export function buildWorkshopViewModel(input: {
       datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])],
       limitations: [...new Set([...reference.limitations, ...current.limitations])],
     }),
-    workingDefinitions,
     provenance: [...new Set([...reference.provenance, ...current.provenance])],
     limitations: [...new Set([...reference.limitations, ...current.limitations, ...(input.source.kind === "subscriber_upload" ? ["Uploaded bytes are session-scoped and were not persisted."] : ["This controlled fixture is not derived from the selected vehicle."]), "Engineering semantic interpretation is not yet bound."])],
     capabilities: {
@@ -442,4 +469,17 @@ export function buildWorkshopViewModel(input: {
       editAuthority,
     },
   });
+}
+
+export function materializeWorkshopDefinition(workshop: WorkshopViewModel, key: string): WorkshopDefinitionDetail {
+  const summary = workshop.definitions.find(item => item.key === key), material = workshop.tableMaterials.find(item => item.key === key);
+  if (!summary || !material) return workshop.selectedDefinition;
+  return deepFreeze({ summary, rows: material.rows, columns: material.columns, axes: material.axes, cells: material.cells.map(cell => ({ index: cell[0], row: cell[1], column: cell[2], referenceRawOffset: cell[3], currentRawOffset: cell[4], referenceRawValue: cell[5], currentRawValue: cell[6], referenceValue: cell[7], currentValue: cell[8], signedDelta: cell[9], percentageDelta: cell[10], percentageState: cell[10] === null && cell[7] === 0 ? "undefined_from_zero" : cell[10] === null ? "unavailable" : "available", changed: cell[11] === 1, units: summary.units, equationRevision: material.equationRevision ?? "Unavailable" })), unavailableStage: material.unavailableStage, findings: material.findings, equationRevision: material.equationRevision, sourceArtifactDigest: material.sourceArtifactDigest, information: { workshopInstanceIdentity: summary.key, definitionIdentity: summary.definitionIdentity, definitionRevision: summary.definitionRevision, definitionSetRevision: workshop.source.definitionSetRevision, shape: summary.shape, dimensions: { rows: material.rows, columns: material.columns }, units: summary.units, axes: material.axes, sourceDescription: material.sourceDescription, sourceCategory: material.sourceCategory, availability: summary.available, comparisonOutcome: summary.outcome, changedCellCount: summary.changedCellCount, axisChangeState: material.axisChangeState, referenceRole: workshop.source.referenceRole, currentRole: workshop.source.currentRole, romLayoutId: workshop.source.romLayoutId, referenceDatasetId: workshop.source.referenceDatasetId, currentDatasetId: workshop.source.currentDatasetId, datasetProvenance: workshop.source.datasetProvenance, sourceArtifactDigest: material.sourceArtifactDigest, equationRevision: material.equationRevision, limitations: workshop.source.datasetLimitations } });
+}
+
+export function workingDefinitionFromWorkshop(workshop: WorkshopViewModel, definitionRevision: string, occurrence: number): WorkingDefinitionSeed | undefined {
+  const summary = workshop.definitions.find(item => item.definitionRevision === definitionRevision && item.occurrence === occurrence);
+  if (!summary) return undefined;
+  const detail = materializeWorkshopDefinition(workshop, summary.key);
+  return deepFreeze({ definitionRevision, occurrence, rows: detail.rows, columns: detail.columns, availability: summary.available ? "available" : "unavailable", capability: summary.editCapability ?? { state: "VIEW_ONLY", revision: null, inverse: null, engineeringMinimum: null, engineeringMaximum: null, warnings: [], blockers: ["EDIT authority is unavailable."] }, cells: detail.cells.map(cell => ({ definitionRevision, occurrence, index: cell.index, row: cell.row, column: cell.column, currentValue: cell.currentValue, units: cell.units })) });
 }
