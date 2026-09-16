@@ -21,6 +21,7 @@ export type WorkshopKnowledgeRecord = Readonly<{
   applicability: readonly string[];
   aliases: readonly QualifiedSemanticField<string>[];
   engineeringSystem: QualifiedSemanticField<string> | null;
+  relatedEngineeringSystems?: readonly QualifiedSemanticField<string>[];
   controls: readonly QualifiedSemanticField<string>[];
   whyItMatters: readonly QualifiedSemanticField<string>[];
   howToRead: readonly QualifiedSemanticField<string>[];
@@ -39,6 +40,7 @@ export type WorkshopSemanticBinding = Readonly<{
   knowledgeId: string | null;
   knowledgeRevision: string | null;
   engineeringSystem: QualifiedSemanticField<string> | null;
+  relatedEngineeringSystems: readonly QualifiedSemanticField<string>[];
   controls: readonly QualifiedSemanticField<string>[];
   whyItMatters: readonly QualifiedSemanticField<string>[];
   howToRead: readonly QualifiedSemanticField<string>[];
@@ -55,7 +57,7 @@ export type WorkshopSemanticBinding = Readonly<{
 }>;
 
 const authoritative = new Set(["verified", "founder_verified", "authoritatively_verified"]);
-const empty = (outcome: WorkshopSemanticOutcome, candidates: readonly string[], reason: string): WorkshopSemanticBinding => Object.freeze({ outcome, candidates: Object.freeze([...candidates]), knowledgeId: null, knowledgeRevision: null, engineeringSystem: null, controls: Object.freeze([]), whyItMatters: Object.freeze([]), howToRead: Object.freeze([]), directionalEffects: Object.freeze([]), operatingContexts: Object.freeze([]), engineeringConsiderations: Object.freeze([]), axisMeanings: Object.freeze([]), relatedCalibrations: Object.freeze([]), telemetryRelationships: Object.freeze([]), aliases: Object.freeze([]), provenance: Object.freeze([]), limitations: Object.freeze([]), unavailableReason: reason });
+const empty = (outcome: WorkshopSemanticOutcome, candidates: readonly string[], reason: string): WorkshopSemanticBinding => Object.freeze({ outcome, candidates: Object.freeze([...candidates]), knowledgeId: null, knowledgeRevision: null, engineeringSystem: null, relatedEngineeringSystems: Object.freeze([]), controls: Object.freeze([]), whyItMatters: Object.freeze([]), howToRead: Object.freeze([]), directionalEffects: Object.freeze([]), operatingContexts: Object.freeze([]), engineeringConsiderations: Object.freeze([]), axisMeanings: Object.freeze([]), relatedCalibrations: Object.freeze([]), telemetryRelationships: Object.freeze([]), aliases: Object.freeze([]), provenance: Object.freeze([]), limitations: Object.freeze([]), unavailableReason: reason });
 
 export function bindDefinitionKnowledge(definition: Readonly<{ key?: string; definitionIdentity: string | null; definitionRevision: string }>, records: readonly WorkshopKnowledgeRecord[]): WorkshopSemanticBinding {
   const appliesToInstance = (record: WorkshopKnowledgeRecord) => record.exactWorkshopInstanceIdentities.length === 0 || (definition.key !== undefined && record.exactWorkshopInstanceIdentities.includes(definition.key));
@@ -66,8 +68,8 @@ export function bindDefinitionKnowledge(definition: Readonly<{ key?: string; def
   const record = exact[0] ?? (contextual.length === 1 ? contextual[0] : undefined);
   if (!record) return contextual.length > 1 ? empty("ambiguous", contextual.map((item) => item.knowledgeId), "Multiple contextual Knowledge candidates remain plausible.") : empty("unavailable", [], "Engineering interpretation not yet available.");
   const outcome: WorkshopSemanticOutcome = exact[0] && authoritative.has(record.verification) ? "exact" : "partial";
-  const fields = [record.engineeringSystem, ...record.controls, ...record.whyItMatters, ...record.howToRead, ...record.directionalEffects, ...record.operatingContexts, ...record.engineeringConsiderations, ...record.axisMeanings, ...record.relatedCalibrations, ...record.telemetryRelationships].filter((field): field is NonNullable<typeof field> => field !== null);
-  return Object.freeze({ outcome, candidates: Object.freeze([record.knowledgeId]), knowledgeId: record.knowledgeId, knowledgeRevision: record.knowledgeRevision, engineeringSystem: record.engineeringSystem, controls: record.controls, whyItMatters: record.whyItMatters, howToRead: record.howToRead, directionalEffects: record.directionalEffects, operatingContexts: record.operatingContexts, engineeringConsiderations: record.engineeringConsiderations, axisMeanings: record.axisMeanings, relatedCalibrations: record.relatedCalibrations, telemetryRelationships: record.telemetryRelationships, aliases: Object.freeze(record.aliases.map((alias) => alias.value)), provenance: Object.freeze([...new Set(fields.flatMap((field) => field.provenance))]), limitations: Object.freeze([...new Set([...record.limitations, ...fields.flatMap((field) => field.limitations)])]), unavailableReason: outcome === "partial" ? "Definition-specific engineering interpretation remains incomplete." : null });
+  const fields = [record.engineeringSystem, ...(record.relatedEngineeringSystems ?? []), ...record.controls, ...record.whyItMatters, ...record.howToRead, ...record.directionalEffects, ...record.operatingContexts, ...record.engineeringConsiderations, ...record.axisMeanings, ...record.relatedCalibrations, ...record.telemetryRelationships].filter((field): field is NonNullable<typeof field> => field !== null);
+  return Object.freeze({ outcome, candidates: Object.freeze([record.knowledgeId]), knowledgeId: record.knowledgeId, knowledgeRevision: record.knowledgeRevision, engineeringSystem: record.engineeringSystem, relatedEngineeringSystems: Object.freeze([...(record.relatedEngineeringSystems ?? [])]), controls: record.controls, whyItMatters: record.whyItMatters, howToRead: record.howToRead, directionalEffects: record.directionalEffects, operatingContexts: record.operatingContexts, engineeringConsiderations: record.engineeringConsiderations, axisMeanings: record.axisMeanings, relatedCalibrations: record.relatedCalibrations, telemetryRelationships: record.telemetryRelationships, aliases: Object.freeze(record.aliases.map((alias) => alias.value)), provenance: Object.freeze([...new Set(fields.flatMap((field) => field.provenance))]), limitations: Object.freeze([...new Set([...record.limitations, ...fields.flatMap((field) => field.limitations)])]), unavailableReason: outcome === "partial" ? "Definition-specific engineering interpretation remains incomplete." : null });
 }
 
 export function searchDefinitionsByIntent<T extends Readonly<{ semantic: WorkshopSemanticBinding }>>(definitions: readonly T[], query: string): readonly T[] {
