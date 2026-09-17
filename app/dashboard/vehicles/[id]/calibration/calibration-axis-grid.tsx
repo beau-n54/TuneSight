@@ -1,0 +1,14 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { gridAxisLabel, type GridAxisPresentation } from "@/lib/calibration-workshop/gridAxisPresentation";
+
+const value = (item: number | string) => typeof item === "number" && !Number.isInteger(item) ? Number(item.toPrecision(7)).toLocaleString() : String(item);
+const sourceDetail = (axis: NonNullable<GridAxisPresentation["x"]>) => axis.engineeringName && axis.engineeringName !== axis.sourceName ? `Source: ${axis.sourceName}` : axis.sourceName !== "x" && axis.sourceName !== "y" ? `Source: ${axis.sourceName}` : null;
+
+export default function CalibrationAxisGrid({ presentation, rows, columns, renderCell, footer }: { presentation: GridAxisPresentation; rows: number; columns: number; renderCell: (row: number, column: number) => ReactNode; footer: ReactNode }) {
+  if (presentation.shape === "scalar") return <div className="mt-5"><div className="mb-3 text-xs text-zinc-400">{presentation.output.name}{presentation.output.units ? ` [${presentation.output.units}]` : ""} · Scalar</div><table className="border-separate border-spacing-1"><tbody><tr>{renderCell(0, 0)}</tr></tbody></table>{footer}</div>;
+  const x = presentation.x;
+  if (!x) return null;
+  return <div className="mt-5"><div className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-zinc-400"><span>{gridAxisLabel(x)}</span>{presentation.y && <span>{gridAxisLabel(presentation.y)}</span>}<span>{presentation.output.name}{presentation.output.units ? ` [${presentation.output.units}]` : ""}</span><span className="text-blue-300">Current axes</span>{presentation.referenceAxesDiffer && <span className="text-amber-300">Reference axes differ</span>}</div>{sourceDetail(x) && <p className="mb-2 text-[11px] text-zinc-500">{sourceDetail(x)}</p>}{presentation.y && sourceDetail(presentation.y) && <p className="mb-2 text-[11px] text-zinc-500">{sourceDetail(presentation.y)}</p>}<div className="max-h-[680px] overflow-auto"><table className="min-w-max border-separate border-spacing-1 text-right font-mono text-xs"><thead className="sticky top-0 z-20 bg-zinc-950"><tr><th className="sticky left-0 z-30 min-w-24 bg-zinc-950 p-2 text-left font-sans font-semibold text-zinc-400">{presentation.shape === "2D" ? "Y ↓ / X →" : "X →"}</th>{Array.from({ length: columns }, (_, column) => <th key={`axis-x-${column}`} className="min-w-28 bg-zinc-950 p-2 font-mono font-normal text-zinc-300">{value(x.values[column] ?? column)}</th>)}</tr></thead><tbody>{Array.from({ length: rows }, (_, row) => <tr key={`axis-y-${row}`}><th className="sticky left-0 z-10 min-w-24 bg-zinc-950 p-2 font-mono font-normal text-zinc-300">{presentation.y ? value(presentation.y.values[row] ?? row) : "Value"}</th>{Array.from({ length: columns }, (_, column) => renderCell(row, column))}</tr>)}</tbody></table></div>{footer}</div>;
+}

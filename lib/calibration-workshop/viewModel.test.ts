@@ -78,6 +78,19 @@ test("selected Grid and cell delta data remain presentation-only", () => {
   assert.equal(model.selectedDefinition.cells[1]?.referenceRawOffset, 101);
 });
 
+test("comparison Grid materializes Current axes while retaining changed Reference axes", () => {
+  const changed = definitions[0] as never as Record<string, unknown>;
+  const reference = engineering([1, 2]);
+  const current = { ...engineering([1, 3]), axes: [{ axisId: "X", outcome: "identity", units: "rpm", engineeringValues: [500, 1500], literalValues: [] }] };
+  const changedDefinition = { ...changed, referenceEngineeringEvidence: reference, modifiedEngineeringEvidence: current, axisComparisons: [{ axisId: "X", outcome: "changed" }] };
+  const changedComparison = { ...comparison, definitions: [changedDefinition, ...definitions.slice(1)], axisChangedDefinitions: 1 } as unknown as QualifiedCalibrationComparisonEvidence;
+  const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison: changedComparison, source });
+  assert.deepEqual(model.selectedDefinition.axes[0]?.values, [500, 1500]);
+  assert.deepEqual(model.selectedDefinition.referenceAxes[0]?.values, [0, 1000]);
+  assert.equal(model.selectedDefinition.information.axisChangeState, "changed");
+  assert.deepEqual(materializeWorkshopDefinition(model, model.selectedDefinition.summary.key).axes[0]?.values, [500, 1500]);
+});
+
 test("every table can be materialized client-side from the governed Workshop snapshot", () => {
   const model = buildWorkshopViewModel({ reference: dataset("stock_candidate"), current: dataset("mapswitch"), comparison, source });
   assert.deepEqual(materializeWorkshopDefinition(model, model.selectedDefinition.summary.key), model.selectedDefinition);
