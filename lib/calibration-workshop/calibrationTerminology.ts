@@ -12,7 +12,7 @@ export function buildCalibrationTerminology(input: Readonly<{ mode: CalibrationT
   const grid = buildGridAxisPresentation(input);
   const exact = input.semantic.outcome === "exact";
   const term = (axis: GridAxisPresentation["x"]): CalibrationTerm | null => axis ? freeze({ label: input.mode === "standard" ? axis.engineeringName ?? "Axis meaning not yet qualified" : "Source Axis", units: axis.units, sourceLabel: axis.sourceName, sourceUnits: axis.units, qualified: exact && Boolean(axis.engineeringName) }) : null;
-  const role = exact ? input.semantic.calibrationRole?.value ?? null : null;
+  const role = exact ? input.semantic.outputMeaning?.value ?? input.semantic.calibrationRole?.value ?? null : null;
   const unitQualified = !outputUnitUnqualified(input.outputUnits, input.semantic);
   return freeze({
     mode: input.mode,

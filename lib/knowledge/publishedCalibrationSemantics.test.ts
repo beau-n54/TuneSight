@@ -9,9 +9,9 @@ const n54Relationship = "qualified-rom-layout-applicability-revision:7bec3ec729b
 const b58Relationship = "qualified-rom-layout-applicability-revision:f2631e65861257af71b6b2c9c5b67919319c50bb9db16494d2ecfaeaa9603272";
 const heldRevision = "xdf-definition-revision:c5801ec096075ed64bcc6fe656c0ce5ac664e9a974df3dafa1afcbd2e8c0c51c";
 
-test("Founder publication contains exactly fourteen immutable accepted records and one unpublished hold", () => {
-  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.length, 14);
-  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "IJE0S").length, 7);
+test("Founder publication preserves the founding fourteen and adds three exact evidence-bound records while retaining the hold", () => {
+  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.length, 17);
+  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "IJE0S").length, 10);
   assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "00003076501103").length, 7);
   assert.equal(HELD_CALIBRATION_SEMANTICS.length, 1);
   assert.equal(HELD_CALIBRATION_SEMANTICS[0]?.definitionRevision, heldRevision);
@@ -32,7 +32,7 @@ test("Founder publication contains exactly fourteen immutable accepted records a
 });
 
 test("publication preserves exact ROM scope, source language, symbols and accepted caveats", () => {
-  assert.equal(calibrationKnowledgeForRelationship(n54Relationship).length, 7);
+  assert.equal(calibrationKnowledgeForRelationship(n54Relationship).length, 10);
   assert.equal(calibrationKnowledgeForRelationship(b58Relationship).length, 7);
   assert.deepEqual(calibrationKnowledgeForRelationship("qualified-rom-layout-applicability-revision:other"), []);
 
@@ -45,6 +45,12 @@ test("publication preserves exact ROM scope, source language, symbols and accept
   const pFactor = PUBLISHED_CALIBRATION_SEMANTICS.find(item => item.originalTitle === "WGDC P factor")!;
   assert.doesNotMatch(pFactor.knowledge.controls[0]!.value, /power|kilowatt|kW/i);
   assert.match(pFactor.knowledge.limitations.join(" "), /metadata only.*not.*physical power/i);
+  assert.equal(pFactor.knowledge.axisMeanings.length, 0);
+  assert.equal(pFactor.knowledge.outputMeaning, null);
+
+  const boost = PUBLISHED_CALIBRATION_SEMANTICS.find(item => item.originalTitle.startsWith("Boost Ceiling (Relative)"))!;
+  assert.deepEqual(boost.knowledge.axisMeanings.map(item => item.value), [{ axisId: "x", meaning: "Engine Speed" }, { axisId: "y", meaning: "Gear" }]);
+  assert.equal(boost.knowledge.outputMeaning?.value, "Relative Boost-pressure Ceiling");
 
   const protection = PUBLISHED_CALIBRATION_SEMANTICS.find(item => item.originalTitle.startsWith("Load limit factor"))!;
   assert.equal(protection.knowledge.engineeringSystem?.value, "Limiters & Safety");
@@ -58,9 +64,9 @@ test("exact subscriber Workshops publish only current-ROM semantics into navigat
   assert.equal(n54.status, "workshop_ready");
   if (n54.status !== "workshop_ready" || "mode" in n54.workshop) assert.fail("IJE0S must provide its comparison Workshop.");
   const n54Navigation = buildEngineeringNavigationIndex(n54.workshop.definitions);
-  assert.equal(n54Navigation.counts.ENGINEERING_QUALIFIED, 7);
-  assert.equal(n54Navigation.counts.essentials, 7);
-  assert.equal(filterEngineeringNavigation(n54Navigation, { mode: "all", query: "ethanol" }).filter(entry => entry.classification === "ENGINEERING_QUALIFIED").length, 3);
+  assert.equal(n54Navigation.counts.ENGINEERING_QUALIFIED, 10);
+  assert.equal(n54Navigation.counts.essentials, 10);
+  assert.equal(filterEngineeringNavigation(n54Navigation, { mode: "all", query: "ethanol" }).filter(entry => entry.classification === "ENGINEERING_QUALIFIED").length, 4);
   assert.equal(n54.workshop.definitions.find(item => item.definitionRevision === heldRevision)?.semantic.outcome, "unavailable");
   assert.ok(!JSON.stringify(n54.workshop).includes("BMWtchctr_pct_WgBasc_M"));
 

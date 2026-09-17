@@ -1,4 +1,5 @@
 import type { WorkshopSemanticBinding } from "./definitionKnowledgeBinding.ts";
+import { tuningEssentialSystem } from "./tuningEssentials.ts";
 
 export type EngineeringClassificationState = "ENGINEERING_QUALIFIED" | "SOURCE_DERIVED_CANDIDATE" | "UNCLASSIFIED";
 export type EngineeringNavigationMode = "all" | "essentials" | "systems" | "evidence";
@@ -29,7 +30,7 @@ export function buildEngineeringNavigationIndex<T extends EngineeringNavigableDe
   const entries = definitions.map((definition): EngineeringNavigationEntry<T> => {
     const semantic = definition.semantic, system = semantic?.engineeringSystem?.value.trim() || null;
     const classification: EngineeringClassificationState = system && semantic?.outcome === "exact" ? "ENGINEERING_QUALIFIED" : system && semantic?.outcome === "partial" ? "SOURCE_DERIVED_CANDIDATE" : "UNCLASSIFIED";
-    const systems = Object.freeze([...new Set([system, ...(semantic?.relatedEngineeringSystems?.map(field => field.value.trim()) ?? [])].filter((value): value is string => Boolean(value)))].sort(compare));
+    const systems = Object.freeze([...new Set([system, ...(semantic?.relatedEngineeringSystems?.map(field => field.value.trim()) ?? [])].filter((value): value is string => Boolean(value)).map(value => tuningEssentialSystem(value) ?? value))].sort(compare));
     const essential = classification === "ENGINEERING_QUALIFIED" && definition.available && Boolean(semantic && (semantic.controls.length || semantic.whyItMatters.length || semantic.operatingContexts.length));
     return Object.freeze({ definition, classification, systems, essential, englishName: classification === "ENGINEERING_QUALIFIED" ? semantic?.aliases[0] ?? null : null, originalTitle: definition.title });
   });
