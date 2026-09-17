@@ -24,3 +24,9 @@ test("Workshop reopens the latest owner-and-vehicle-scoped durable session witho
   assert.match(page, /activeSubscriberSession/);
   assert.doesNotMatch(page, /subscriberSession[^\n]*\?[^\n]*readSubscriberWorkshopSession[^\n]*:[^\n]*readLatestSubscriberWorkshopSession/);
 });
+
+test("vehicle-owned derived Workshop evidence has a bounded lifetime independent of the shorter source lease", () => {
+  const storage = fs.readFileSync(new URL("./subscriberCalibrationStorage.ts", import.meta.url), "utf8");
+  assert.match(storage, /30 \* 24 \* 60 \* 60 \* 1000/);
+  assert.match(storage, /Losing source bytes disables reconstruction, not VIEW/);
+});

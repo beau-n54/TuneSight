@@ -10,7 +10,9 @@ import { activeSubscriberSessionObjectPath } from "./subscriberSessionPointer";
 export const SUBSCRIBER_CALIBRATION_BUCKET = "subscriber-calibration-private";
 const BUCKET = SUBSCRIBER_CALIBRATION_BUCKET, RAW_PREFIX = "raw", SESSION_PREFIX = "sessions", CLEANUP_LIMIT = 24;
 export const RAW_UPLOAD_TTL_MS = 2 * 60 * 60 * 1000;
-export const SUBSCRIBER_SESSION_TTL_MS = 30 * 60 * 1000;
+// Derived governed Dataset evidence outlives the independently bounded raw-source
+// reconstruction lease. Losing source bytes disables reconstruction, not VIEW.
+export const SUBSCRIBER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const opaqueId = () => randomBytes(24).toString("base64url");
 const rawPath = (id: string) => `${RAW_PREFIX}/${id}`;
 const sessionPath = (id: string) => `${SESSION_PREFIX}/${id}`;
