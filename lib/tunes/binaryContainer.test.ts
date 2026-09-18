@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  engineeringLayoutContainerType,
   resolveBinaryContainer,
 } from "./binaryContainer.ts";
 import {
@@ -180,6 +181,12 @@ test("proven raw MG1 86T0 DTF resolves losslessly with extraction evidence", () 
     result.engineeringBinary.source
       .resolutionMethod,
     "dtf_raw_mg1_86t0_full_binary"
+  );
+  assert.equal(
+    engineeringLayoutContainerType(
+      result.engineeringBinary.source
+    ),
+    "bin"
   );
   assert.ok(
     result.engineeringBinary.source

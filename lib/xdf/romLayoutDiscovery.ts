@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { EngineeringBinary } from "../tunes/binaryContainer.ts";
+import { engineeringLayoutContainerType, type EngineeringBinary } from "../tunes/binaryContainer.ts";
 import type { InternalIdentityObservation } from "./applicabilityEvidenceProposal.ts";
 import {
   assessBinaryRomLayoutMembership,
@@ -181,7 +181,8 @@ export function constructRomLayoutDiscoveryRequest(input: Omit<RomLayoutDiscover
 
 function assessCandidate(request: RomLayoutDiscoveryRequest, descriptor: QualifiedRomLayoutDescriptor, registryVocabulary: ReadonlySet<string>): RomLayoutCandidateAssessment {
   const matching: string[] = [], exactMarkers: string[] = [], missing: string[] = [], contradictions: string[] = [], incompatibilities: string[] = [];
-  if (!descriptor.containerTypes.includes(request.binaryIdentity.containerType.toUpperCase())) incompatibilities.push("Binary container contradicts the qualified layout descriptor.");
+  const layoutContainer = engineeringLayoutContainerType({ containerType: request.binaryIdentity.containerType, resolutionMethod: request.binaryIdentity.resolutionMethod });
+  if (!descriptor.containerTypes.includes(layoutContainer.toUpperCase())) incompatibilities.push("Normalized Engineering Binary container contradicts the qualified layout descriptor.");
   if (descriptor.binaryByteLength !== request.engineeringBinary.byteLength) incompatibilities.push("Binary byte length contradicts the qualified layout descriptor.");
   if (request.independentlyQualifiedEcuFamily && request.independentlyQualifiedEcuFamily !== descriptor.ecuDmeFamily) incompatibilities.push("Independently qualified ECU/DME family Evidence contradicts the descriptor.");
   const expectedIdentifiers = new Set([...descriptor.romSoftwareIdentifiers, ...descriptor.calibrationSoftwareIdentifiers]);

@@ -142,8 +142,40 @@ test("a governed B58 Gen2 primary marker resolves despite a disclosed ancillary 
   for (const offset of [524613, 7339265, 8388111]) bytes.set(primary, offset);
   bytes.set(ancillary, 131371);
   const result = await loadSubscriberCalibration({ bytes, fileName: "subscriber.bin", mimeType: "application/octet-stream", observedAt });
-  assert.equal(result.status, "coverage_unavailable");
+  assert.equal(result.status, "workshop_ready");
   assert.equal(result.identity, "00005D553C8C05");
   assert.equal(result.coverage?.outcome, "EXACT_DEFINITION_COVERAGE");
+  if (result.status === "workshop_ready") {
+    assert.equal(result.material.reference, null);
+    assert.equal(result.material.comparison, null);
+    assert.equal(result.material.current.definitions.length, 1242);
+  }
   assert.doesNotMatch(JSON.stringify(result), /Development Evidence Preview|development_fixture/);
+});
+
+test("a proven raw MG1 DTF materializes the same governed Current-only Dataset", async () => {
+  const bytes = Buffer.alloc(8 * 1024 * 1024, 0xff);
+  const structuralMarkers = [
+    [0x2001a, "#DME_8XT0#C2#HWE#Hardware_DME8XT1_35UP"],
+    [0x2020a, "#DME_86Tx#C2#HWA#DME8.6.T_B58TUE_V1"],
+    [0x5fe1e, "#DME_86T0#C2#BTL#MDG1G_35up"],
+    [0x6a0540, "56/1/MG1CS201/11/MG1CS201_BX8TUE"],
+    [0x7ffe36, "#DME_86T0__________#C2#DST"],
+  ] as const;
+  for (const [offset, marker] of structuralMarkers) bytes.write(marker, offset, "ascii");
+  const primary = Buffer.from("00005D553C8C05", "hex"), ancillary = Buffer.from("00005D553C7805", "hex");
+  for (const offset of [524613, 7339265, 8388111]) bytes.set(primary, offset);
+  bytes.set(ancillary, 131371);
+
+  const result = await loadSubscriberCalibration({ bytes, fileName: "subscriber.dtf", mimeType: "application/octet-stream", observedAt });
+
+  assert.equal(result.status, "workshop_ready");
+  assert.equal(result.container, "dtf");
+  assert.equal(result.identity, "00005D553C8C05");
+  assert.equal(result.coverage?.outcome, "EXACT_DEFINITION_COVERAGE");
+  if (result.status === "workshop_ready") {
+    assert.equal(result.material.reference, null);
+    assert.equal(result.material.comparison, null);
+    assert.equal(result.material.current.definitions.length, 1242);
+  }
 });

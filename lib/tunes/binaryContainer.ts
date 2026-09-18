@@ -21,6 +21,17 @@ export type EngineeringBinary = Readonly<{
   source: BinaryContainerMetadata;
 }>;
 
+export type EngineeringLayoutContainerType = "bin" | "dtf";
+
+/**
+ * Returns the container representation used by ROM-layout coordinates. A
+ * validated raw MG1 DTF is already the complete coordinate-aligned binary;
+ * its source remains DTF while its EngineeringBinary layout is BIN-compatible.
+ */
+export function engineeringLayoutContainerType(input: Pick<BinaryContainerMetadata, "containerType" | "resolutionMethod">): EngineeringLayoutContainerType {
+  return input.containerType === "dtf" && input.resolutionMethod === "dtf_raw_mg1_86t0_full_binary" ? "bin" : input.containerType === "dtf" ? "dtf" : "bin";
+}
+
 export type ContainerResolutionFailureCode =
   | "missing_payload"
   | "invalid_container"
