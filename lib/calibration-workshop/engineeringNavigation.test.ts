@@ -64,9 +64,14 @@ test("BMW-wide census leaves every Table unclassified until runtime Knowledge is
 
 test("both subscriber Workshop variants integrate navigation without replacing persistent tabs or navigating routes", () => {
   const root = path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration");
+  const shared = fs.readFileSync(path.join(root, "engineering-navigation-control.tsx"), "utf8");
+  for (const label of ["All Tables", "Tuning Essentials", "Systems", "Changed / Evidence"]) assert.match(shared, new RegExp(label));
+  assert.match(shared, /Calibration Workspace engineering navigation/);
   for (const file of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
-    for (const label of ["All Tables", "Tuning Essentials", "Systems", "Changed / Evidence"]) assert.match(source, new RegExp(label));
+    assert.match(source, /import EngineeringNavigationControl/);
+    assert.equal(source.match(/<EngineeringNavigationControl /g)?.length, 1);
+    assert.doesNotMatch(source, /Table Explorer navigation/);
     assert.match(source, /WorkspaceTabs/);
     assert.match(source, /openWorkspaceTab/);
     assert.match(source, /knowledge_empty/);

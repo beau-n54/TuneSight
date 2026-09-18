@@ -9,9 +9,9 @@ const n54Relationship = "qualified-rom-layout-applicability-revision:7bec3ec729b
 const b58Relationship = "qualified-rom-layout-applicability-revision:f2631e65861257af71b6b2c9c5b67919319c50bb9db16494d2ecfaeaa9603272";
 const heldRevision = "xdf-definition-revision:c5801ec096075ed64bcc6fe656c0ce5ac664e9a974df3dafa1afcbd2e8c0c51c";
 
-test("Founder publication preserves the accepted seventeen and adds three exact I8A0S relationship records while retaining the hold", () => {
-  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.length, 20);
-  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "I8A0S").length, 3);
+test("Founder publication preserves the accepted seventeen and adds ten exact I8A0S relationship records while retaining the hold", () => {
+  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.length, 27);
+  assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "I8A0S").length, 10);
   assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "IJE0S").length, 10);
   assert.equal(PUBLISHED_CALIBRATION_SEMANTICS.filter(item => item.rom === "00003076501103").length, 7);
   assert.equal(HELD_CALIBRATION_SEMANTICS.length, 1);
@@ -33,7 +33,7 @@ test("Founder publication preserves the accepted seventeen and adds three exact 
 });
 
 test("publication preserves exact ROM scope, source language, symbols and accepted caveats", () => {
-  assert.equal(calibrationKnowledgeForRelationship("qualified-rom-layout-applicability-revision:bd3735b9751749c91ab429e1139a508f2fc04fbc21228f66a6c438ca9c2cba05").length, 3);
+  assert.equal(calibrationKnowledgeForRelationship("qualified-rom-layout-applicability-revision:bd3735b9751749c91ab429e1139a508f2fc04fbc21228f66a6c438ca9c2cba05").length, 10);
   assert.equal(calibrationKnowledgeForRelationship(n54Relationship).length, 10);
   assert.equal(calibrationKnowledgeForRelationship(b58Relationship).length, 7);
   assert.deepEqual(calibrationKnowledgeForRelationship("qualified-rom-layout-applicability-revision:other"), []);
@@ -66,9 +66,9 @@ test("exact subscriber Workshops publish only current-ROM semantics into navigat
   assert.equal(i8.status, "workshop_ready");
   if (i8.status !== "workshop_ready" || "mode" in i8.workshop) assert.fail("I8A0S must provide its comparison Workshop.");
   const i8Navigation = buildEngineeringNavigationIndex(i8.workshop.definitions);
-  assert.equal(i8Navigation.counts.ENGINEERING_QUALIFIED, 3);
-  assert.equal(i8Navigation.counts.essentials, 3);
-  assert.deepEqual(i8Navigation.entries.filter(entry => entry.essential).flatMap(entry => entry.systems).filter((value,index,array) => array.indexOf(value) === index).sort(), ["Boost & Air Control", "Load & Torque", "WGDC / Turbo Control"]);
+  assert.equal(i8Navigation.counts.ENGINEERING_QUALIFIED, 10);
+  assert.equal(i8Navigation.counts.essentials, 10);
+  assert.deepEqual(i8Navigation.entries.filter(entry => entry.essential).flatMap(entry => entry.systems).filter((value,index,array) => array.indexOf(value) === index).sort(), ["Boost & Air Control", "Fueling / Lambda", "IAT / Temperature Compensation", "Ignition / Timing", "Load & Torque", "Protection / Safety / Limiters", "WGDC / Turbo Control"]);
 
   const n54Bytes = new Uint8Array(fs.readFileSync("BMW-XDFs-master/N54/IJE0S_MapSwitchBase.bin"));
   const n54 = await loadSubscriberCalibration({ bytes: n54Bytes, fileName: "subscriber.bin", mimeType: "application/octet-stream", observedAt: "2026-09-17T00:00:00.000Z" });
