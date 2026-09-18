@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any -- legacy Tune record shape is outside this bounded role-assignment slice */
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -15,11 +16,12 @@ export default function TunePage() {
   const supabase = useMemo(() => createClient(), []);
 
   const [userId, setUserId] = useState<string | null>(null);
-  const [vehicle, setVehicle] = useState<any>(null);
   const [tunes, setTunes] = useState<any[]>([]);
   const [tuneProfiles, setTuneProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentCalibrationTuneId, setCurrentCalibrationTuneId] = useState<string | null>(null);
+  const [assigningCurrent, setAssigningCurrent] = useState<string | null>(null);
   const [containerResult, setContainerResult] = useState<{
     title: string;
     status: string;
@@ -58,8 +60,6 @@ export default function TunePage() {
         return;
       }
 
-      setVehicle(vehicleData);
-
       const { data: tunesData } = await supabase
         .from("tunes")
         .select("*")
@@ -68,6 +68,9 @@ export default function TunePage() {
         .order("created_at", { ascending: false });
 
       setTunes(tunesData ?? []);
+
+      const roles = await fetch(`/api/vehicles/calibration-role?vehicleId=${encodeURIComponent(vehicleId)}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : null).catch(() => null);
+      setCurrentCalibrationTuneId(roles?.currentTuneId ?? null);
 
       const tuneIds = tunesData?.map((t: { id: string }) => t.id) ?? [];
 
@@ -85,6 +88,18 @@ export default function TunePage() {
 
     loadPage();
   }, [router, supabase, vehicleId]);
+
+  async function setAsCurrentCalibration(tuneId: string) {
+    setAssigningCurrent(tuneId);
+    try {
+      const response = await fetch(`/api/vehicles/calibration-role?vehicleId=${encodeURIComponent(vehicleId)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "current", tuneId }) });
+      const result = await response.json();
+      if (!response.ok || result.outcome !== "current_assigned") throw new Error(result.error ?? "Current Calibration could not be assigned.");
+      setCurrentCalibrationTuneId(tuneId);
+      setContainerResult({ title: "Current Calibration assigned", status: "success", message: "The existing private Tune artifact is now the vehicle Current Calibration. Calibration Workshop can recover it without re-upload." });
+    } catch (error) { setContainerResult({ title: "Current Calibration unavailable", status: "error", message: error instanceof Error ? error.message : "Current Calibration could not be assigned." }); }
+    finally { setAssigningCurrent(null); }
+  }
 
   const tunesWithProfiles = tunes.map((tune) => {
     const profile = tuneProfiles.find((p) => p.tune_id === tune.id);
@@ -109,44 +124,6 @@ export default function TunePage() {
       buildRomIdentityFromTuneProfile(latestTuneProfile);
 
   const stockTunes = tunes.filter((t) => t.is_stock_reference);
-
-  const testTuneData = {
-    detectedType:
-      latestTuneProfile?.rom_platform ??
-      latestTuneProfile?.detected_platform ??
-      "CUSTOM binary tune profile",
-
-    likelyRom:
-      latestTuneProfile?.rom_family ??
-      latestTuneProfile?.detected_rom ??
-      "UNKNOWN",
-
-    ecu: latestTuneProfile?.ecu_family ?? "Unknown ECU",
-
-    xdf: latestTuneProfile?.xdf_suggested ?? "No XDF matched",
-
-    confidence:
-      typeof latestTuneProfile?.rom_confidence === "number"
-        ? `${Math.round(latestTuneProfile.rom_confidence * 100)}%`
-        : typeof latestTuneProfile?.confidence === "number"
-          ? `${Math.round(latestTuneProfile.confidence * 100)}%`
-          : "LOW",
-
-    notes: [
-      latestTuneProfile?.rom_platform
-        ? `Platform detected: ${latestTuneProfile.rom_platform}`
-        : "No platform detected.",
-      latestTuneProfile?.ecu_family
-        ? `ECU detected: ${latestTuneProfile.ecu_family}`
-        : "No ECU detected.",
-      latestTuneProfile?.rom_family
-        ? `ROM detected: ${latestTuneProfile.rom_family}`
-        : "No ROM detected.",
-      latestTuneProfile?.xdf_suggested
-        ? `XDF matched: ${latestTuneProfile.xdf_suggested}`
-        : "No XDF matched.",
-    ],
-  };
 
   async function handleSaveTune(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -440,6 +417,12 @@ export default function TunePage() {
                     <div className="mt-2 inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
                       Comparison Ready
                     </div>
+                  )}
+
+                  {!tune.is_stock_reference && tune.storage_path && (
+                    <button type="button" onClick={() => setAsCurrentCalibration(tune.id)} disabled={assigningCurrent !== null || currentCalibrationTuneId === tune.id} className="mt-3 rounded-lg border border-blue-400/40 px-3 py-2 text-sm font-semibold text-blue-200 transition hover:bg-blue-400/10 disabled:cursor-not-allowed disabled:opacity-60">
+                      {currentCalibrationTuneId === tune.id ? "Current Calibration" : assigningCurrent === tune.id ? "Qualifying…" : "Set as Current Calibration"}
+                    </button>
                   )}
 
                   {tune.file_name && (

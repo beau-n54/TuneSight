@@ -59,3 +59,10 @@ test("owner and vehicle scopes are explicit and Working remains Dataset-bound", 
   assert.equal(first.currentCalibration?.datasetIdentity, "dataset:current");
   assert.equal(first.currentCalibration?.datasetRevision, "dataset-revision:current");
 });
+
+test("Reference-only cannot be manufactured from a result without qualified Current", () => {
+  const result = resolveVehicleOwnedCalibrationEvidence({ ownerId: "owner", vehicleId: "vehicle", result: null });
+  assert.equal(result.outcome, "no_evidence");
+  assert.equal(result.referenceCalibration, null);
+  assert.equal(result.currentCalibration, null);
+});
