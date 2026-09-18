@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { CalibrationTerminologyMode } from "@/lib/calibration-workshop/calibrationTerminology";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { CalibrationTerminology, CalibrationTerminologyMode } from "@/lib/calibration-workshop/calibrationTerminology";
 
 const KEY = "tunesight.calibration.terminology-mode";
+const CalibrationTerminologyContext = createContext<CalibrationTerminology | null>(null);
+export const useCalibrationTerminologyScope = () => useContext(CalibrationTerminologyContext);
+export function CalibrationTerminologyScope({ terminology, children }: { terminology: CalibrationTerminology; children: ReactNode }) { return <CalibrationTerminologyContext.Provider value={terminology}>{children}</CalibrationTerminologyContext.Provider>; }
 export function useCalibrationTerminologyMode() {
   const [mode, setMode] = useState<CalibrationTerminologyMode>("standard");
   useEffect(() => { const stored = window.localStorage.getItem(KEY); if (stored === "engineer") queueMicrotask(() => setMode("engineer")); }, []);

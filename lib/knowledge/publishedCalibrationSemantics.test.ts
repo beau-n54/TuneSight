@@ -100,6 +100,6 @@ test("subscriber clients present qualified English primary names and retain orig
   for (const file of ["app/dashboard/vehicles/[id]/calibration/workshop-client.tsx", "app/dashboard/vehicles/[id]/calibration/current-only-workshop-client.tsx"]) {
     const source = fs.readFileSync(file, "utf8");
     assert.match(source, /semanticTitle/);
-    assert.match(source, /primary!==definition\.title|primary !== item\.title/);
+    assert.match(source, /primary\s*!==\s*(?:definition|item)\.title/);
   }
 });

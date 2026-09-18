@@ -103,5 +103,5 @@ test("workspace source preserves independent panels, structural borders, changed
   assert.match(tabs, /Working changes/);
   assert.match(tabs, /onCloseOthers/);
   assert.match(layout, /xl:grid-cols-1/);
-  assert.match(comparison, /key=`\$\{detail\.summary\.definitionRevision\}:\$\{detail\.summary\.occurrence\}:\$\{i\}`/);
+  assert.match(comparison, /key\s*=\s*`\$\{detail\.summary\.definitionRevision\}:\$\{detail\.summary\.occurrence\}:\$\{i\}`/);
 });

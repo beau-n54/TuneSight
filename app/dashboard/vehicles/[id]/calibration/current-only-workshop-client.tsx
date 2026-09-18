@@ -1,90 +1,1084 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { filterCurrentOnlyDefinitions, currentOnlyVisualization, type CurrentOnlyDefinition, type CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
-import { applyWorkingEdit, createWorkingCalibration, previewWorkingEdit, redoWorkingEdit, undoWorkingEdit, workingCellDelta, workingCellValue, workingChangedDefinitionKeys, type WorkingCalibration, type WorkingEditOperation } from "@/lib/calibration-workshop/workingCalibration";
+import {
+  filterCurrentOnlyDefinitions,
+  currentOnlyVisualization,
+  type CurrentOnlyDefinition,
+  type CurrentOnlyWorkshopViewModel,
+} from "@/lib/calibration-workshop/currentOnlyViewModel";
+import {
+  applyWorkingEdit,
+  createWorkingCalibration,
+  previewWorkingEdit,
+  redoWorkingEdit,
+  undoWorkingEdit,
+  workingCellDelta,
+  workingCellValue,
+  workingChangedDefinitionKeys,
+  type WorkingCalibration,
+  type WorkingEditOperation,
+} from "@/lib/calibration-workshop/workingCalibration";
 import { createBrowserWorkingCalibrationStore } from "@/lib/calibration-workshop/workingCalibrationPersistence";
-import WorkingCalibrationPanel, { type CalibrationDisplayMode } from "./working-calibration-panel";
+import WorkingCalibrationPanel, {
+  type CalibrationDisplayMode,
+} from "./working-calibration-panel";
 import DirectGridCell from "./direct-grid-cell";
 import { engineeringToRawRepresentation } from "@/lib/calibration-workshop/manualEditorUx";
-import { activateWorkspaceTab, closeOtherWorkspaceTabs, closeWorkspaceTab, createWorkspaceTab, openWorkspaceTab, updateActiveWorkspaceTab, type WorkspaceTabsState } from "@/lib/calibration-workshop/workspaceTabs";
+import {
+  activateWorkspaceTab,
+  closeOtherWorkspaceTabs,
+  closeWorkspaceTab,
+  createWorkspaceTab,
+  openWorkspaceTab,
+  updateActiveWorkspaceTab,
+  type WorkspaceTabsState,
+} from "@/lib/calibration-workshop/workspaceTabs";
 import { deriveWorkshopLayout } from "@/lib/calibration-workshop/workspaceLayout";
 import WorkspaceTabs from "./workspace-tabs";
-import { buildEngineeringNavigationIndex, engineeringNavigationEmptyState, filterEngineeringNavigation, type EngineeringNavigationMode } from "@/lib/calibration-workshop/engineeringNavigation";
-import { buildGridAxisPresentation, gridAxisCoordinate } from "@/lib/calibration-workshop/gridAxisPresentation";
+import {
+  buildEngineeringNavigationIndex,
+  engineeringNavigationEmptyState,
+  filterEngineeringNavigation,
+  type EngineeringNavigationMode,
+} from "@/lib/calibration-workshop/engineeringNavigation";
+import {
+  buildGridAxisPresentation,
+  gridAxisCoordinate,
+} from "@/lib/calibration-workshop/gridAxisPresentation";
 import CalibrationAxisGrid from "./calibration-axis-grid";
-import CalibrationTerminologyControl, { useCalibrationTerminologyMode } from "./calibration-terminology-control";
-import { buildCalibrationTerminology, calibrationTermLabel, type CalibrationTerminologyMode } from "@/lib/calibration-workshop/calibrationTerminology";
+import CalibrationTerminologyControl, {
+  CalibrationTerminologyScope,
+  useCalibrationTerminologyMode,
+  useCalibrationTerminologyScope,
+} from "./calibration-terminology-control";
+import {
+  buildCalibrationTerminology,
+  calibrationTableLabel,
+  calibrationTermLabel,
+  type CalibrationTerminologyMode,
+} from "@/lib/calibration-workshop/calibrationTerminology";
 import EngineeringNavigationControl from "./engineering-navigation-control";
 
 type Availability = "all" | CurrentOnlyDefinition["availability"];
-const filters: readonly Readonly<{ id: Availability; label: string }>[] = Object.freeze([{ id: "all", label: "All Tables" }, { id: "current_available", label: "Current available" }, { id: "unavailable", label: "Unavailable" }, { id: "unavailable_quarantined", label: "Quarantined" }]);
-const shown = (value: number) => Number.isInteger(value) ? value.toLocaleString() : Number(value.toPrecision(7)).toLocaleString();
-const coordinateValue = (value: number | string) => typeof value === "number" ? shown(value) : value;
-const semanticTitle = (item: CurrentOnlyDefinition) => item.semantic.outcome === "exact" ? item.semantic.aliases[0] ?? item.title : item.title;
+const filters: readonly Readonly<{ id: Availability; label: string }>[] =
+  Object.freeze([
+    { id: "all", label: "All Tables" },
+    { id: "current_available", label: "Current available" },
+    { id: "unavailable", label: "Unavailable" },
+    { id: "unavailable_quarantined", label: "Quarantined" },
+  ]);
+const shown = (value: number) =>
+  Number.isInteger(value)
+    ? value.toLocaleString()
+    : Number(value.toPrecision(7)).toLocaleString();
+const coordinateValue = (value: number | string) =>
+  typeof value === "number" ? shown(value) : value;
+const semanticTitle = (
+  item: CurrentOnlyDefinition,
+  mode: CalibrationTerminologyMode = "standard",
+) => calibrationTableLabel(mode, item.title, item.semantic);
 
 function DefinitionName({ item }: { item: CurrentOnlyDefinition }) {
-  const primary = semanticTitle(item);
-  return <><span className="block font-medium">{primary}</span>{primary !== item.title && <span className="mt-1 block text-xs text-zinc-500">{item.title}</span>}</>;
+  const mode = useCalibrationTerminologyScope()?.mode ?? "standard",
+    primary = semanticTitle(item, mode);
+  return (
+    <>
+      <span className="block font-medium">{primary}</span>
+      {primary !== item.title && (
+        <span className="mt-1 block text-xs text-zinc-500">{item.title}</span>
+      )}
+    </>
+  );
 }
 
-export default function CurrentOnlyWorkshopClient({ workshop, vehicleId, ownerScope }: { workshop: CurrentOnlyWorkshopViewModel; vehicleId: string; ownerScope: string; subscriberSession?: string }) {
-  const initialTab = useMemo(() => createWorkspaceTab({ definitionKey: workshop.selectedDefinition.key, definitionRevision: workshop.selectedDefinition.definitionRevision, occurrence: workshop.selectedDefinition.occurrence, datasetRevision: workshop.source.currentDatasetRevision, title: workshop.selectedDefinition.title }), [workshop.selectedDefinition, workshop.source.currentDatasetRevision]);
-  const [search, setSearch] = useState(""), [filter, setFilter] = useState<Availability>("all"), [navigationMode, setNavigationMode] = useState<EngineeringNavigationMode>("all"), [selectedSystem, setSelectedSystem] = useState<string | null>(null), [workspace, setWorkspace] = useState<WorkspaceTabsState>(() => ({ tabs: [initialTab], activeId: initialTab.id })), [working, setWorking] = useState<WorkingCalibration | null>(null), [displayMode, setDisplayMode] = useState<CalibrationDisplayMode>("current"), [saveStatus, setSaveStatus] = useState<"loading" | "saved" | "not-created">("loading"), [explorerCollapsed, setExplorerCollapsed] = useState(false), [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+export default function CurrentOnlyWorkshopClient({
+  workshop,
+  vehicleId,
+  ownerScope,
+}: {
+  workshop: CurrentOnlyWorkshopViewModel;
+  vehicleId: string;
+  ownerScope: string;
+  subscriberSession?: string;
+}) {
+  const initialTab = useMemo(
+    () =>
+      createWorkspaceTab({
+        definitionKey: workshop.selectedDefinition.key,
+        definitionRevision: workshop.selectedDefinition.definitionRevision,
+        occurrence: workshop.selectedDefinition.occurrence,
+        datasetRevision: workshop.source.currentDatasetRevision,
+        title: workshop.selectedDefinition.title,
+      }),
+    [workshop.selectedDefinition, workshop.source.currentDatasetRevision],
+  );
+  const [search, setSearch] = useState(""),
+    [filter, setFilter] = useState<Availability>("all"),
+    [navigationMode, setNavigationMode] =
+      useState<EngineeringNavigationMode>("all"),
+    [selectedSystem, setSelectedSystem] = useState<string | null>(null),
+    [workspace, setWorkspace] = useState<WorkspaceTabsState>(() => ({
+      tabs: [initialTab],
+      activeId: initialTab.id,
+    })),
+    [working, setWorking] = useState<WorkingCalibration | null>(null),
+    [displayMode, setDisplayMode] = useState<CalibrationDisplayMode>("current"),
+    [saveStatus, setSaveStatus] = useState<"loading" | "saved" | "not-created">(
+      "loading",
+    ),
+    [explorerCollapsed, setExplorerCollapsed] = useState(false),
+    [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const [terminologyMode, setTerminologyMode] = useCalibrationTerminologyMode();
-  const navigation = useMemo(() => buildEngineeringNavigationIndex(workshop.definitions.map(definition => ({ ...definition, available: definition.availability === "current_available" }))), [workshop.definitions]);
-  const navigationDefinitions = useMemo(() => filterEngineeringNavigation(navigation, { mode: navigationMode, system: selectedSystem, query: search }).map(entry => entry.definition), [navigation, navigationMode, selectedSystem, search]);
-  const definitions = useMemo(() => filterCurrentOnlyDefinitions(navigationDefinitions, "", filter), [navigationDefinitions, filter]);
-  const navigationEmpty = engineeringNavigationEmptyState(navigation, { mode: navigationMode, system: selectedSystem, query: search }, definitions.length);
-  const activeTab = workspace.tabs.find(tab => tab.id === workspace.activeId) ?? workspace.tabs[0]!, detail = workshop.definitions.find(item => item.key === activeTab.definitionKey) ?? workshop.selectedDefinition, view = activeTab.view, selectedCells = activeTab.selectedCells, operation = activeTab.operation, operand = activeTab.operand, visual = useMemo(() => currentOnlyVisualization(detail), [detail]), selectedCell = selectedCells[0] ?? 0, cell = detail.cells[selectedCell] ?? detail.cells[0] ?? null;
-  const terminology = useMemo(() => buildCalibrationTerminology({ mode: terminologyMode, sourceTitle: detail.title, shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units }), [detail, terminologyMode]);
-  const setTab = (update: Parameters<typeof updateActiveWorkspaceTab>[1]) => setWorkspace(state => updateActiveWorkspaceTab(state, update));
-  const setView = (next: "grid" | "2d" | "3d") => setTab({ view: next }), setSelectedCells = (next: readonly number[]) => setTab({ selectedCells: next }), setOperation = (next: WorkingEditOperation) => setTab({ operation: next }), setOperand = (next: string) => setTab({ operand: next });
-  const scope = useMemo(() => ({ ownerScope, vehicleId, currentDatasetId: workshop.source.currentDatasetId }), [ownerScope, vehicleId, workshop.source.currentDatasetId]);
-  const resolveWorkingDefinition = useCallback((definitionRevision: string, occurrence: number) => { const definition = workshop.definitions.find((item) => item.definitionRevision === definitionRevision && item.occurrence === occurrence); return definition ? { definitionRevision, occurrence, rows: definition.rows, columns: definition.columns, availability: definition.availability === "current_available" ? "available" as const : definition.availability === "unavailable_quarantined" ? "quarantined" as const : "unavailable" as const, capability: definition.editCapability, cells: definition.cells.map((item) => ({ definitionRevision, occurrence, index: item.index, row: item.row, column: item.column, currentValue: item.currentValue, units: item.units })) } : undefined; }, [workshop.definitions]);
-  const activeWorkingDefinition = useMemo(() => resolveWorkingDefinition(detail.definitionRevision, detail.occurrence), [detail.definitionRevision, detail.occurrence, resolveWorkingDefinition]);
-  const newWorking = useCallback((createdAt = new Date().toISOString()) => createWorkingCalibration({ ownerScope, vehicleId, currentDatasetId: workshop.source.currentDatasetId, currentDatasetRevision: workshop.source.currentDatasetRevision, romLayoutId: workshop.source.romLayoutId, relationshipRevision: workshop.source.relationshipRevision, definitionSetRevision: workshop.source.definitionSetRevision, createdAt }), [ownerScope, vehicleId, workshop.source]);
-  useEffect(() => { const seed = newWorking("2000-01-01T00:00:00.000Z"), restored = createBrowserWorkingCalibrationStore(window.localStorage).load(scope, seed, resolveWorkingDefinition); setWorking(restored); setDisplayMode(restored ? "working" : "current"); setSaveStatus(restored ? "saved" : "not-created"); }, [scope, newWorking, resolveWorkingDefinition]);
-  useEffect(() => { if (working) { createBrowserWorkingCalibrationStore(window.localStorage).save(working); setSaveStatus("saved"); } }, [working]);
-  const createWorking = () => { setWorking(newWorking()); setDisplayMode("working"); };
-  const selectCell = (index: number, region = false) => { if (!region || selectedCells.length === 0) { setSelectedCells([index]); return; } const anchor = detail.cells[selectedCells[0]!]!, target = detail.cells[index]!; const minRow = Math.min(anchor.row, target.row), maxRow = Math.max(anchor.row, target.row), minColumn = Math.min(anchor.column, target.column), maxColumn = Math.max(anchor.column, target.column); setSelectedCells(detail.cells.filter((item) => item.row >= minRow && item.row <= maxRow && item.column >= minColumn && item.column <= maxColumn).map((item) => item.index)); };
-  const targets = useMemo(() => selectedCells.flatMap(index => { const selected = detail.cells[index]; return selected ? [{ definitionRevision: detail.definitionRevision, occurrence: detail.occurrence, index, row: selected.row, column: selected.column }] : []; }), [detail, selectedCells]);
-  const preview = useMemo(() => working && operand.trim() && activeWorkingDefinition ? previewWorkingEdit(working, { operation, operand: Number(operand), targets, definitions: [activeWorkingDefinition] }) : null, [working, operation, operand, targets, activeWorkingDefinition]);
-  const changedDefinitionKeys = useMemo(() => new Set(working ? workingChangedDefinitionKeys(working) : []), [working]);
-  const apply = () => { if (!working || !preview || preview.validation === "BLOCKED" || !activeWorkingDefinition) return; const result = applyWorkingEdit(working, { operation, operand: Number(operand), targets, definitions: [activeWorkingDefinition], updatedAt: new Date().toISOString() }); if (result.status === "applied") { setWorking(result.calibration); setSaveStatus("saved"); } };
-  const navigateCell = (index: number) => { const next = Math.max(0, Math.min(detail.cells.length - 1, index)); setSelectedCells([next]); requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(`[data-working-cell="${next}"]`)?.focus()); };
-  const commitDirect = (index: number, value: number) => { const selected = detail.cells[index]; if (!working || displayMode !== "working" || !activeWorkingDefinition || detail.editCapability.state !== "EDIT_QUALIFIED" || !selected) return { status: "blocked" as const, findings: ["Direct editing is available only for EDIT-qualified cells in WORKING mode."] }; const target = { definitionRevision: detail.definitionRevision, occurrence: detail.occurrence, index, row: selected.row, column: selected.column }, result = applyWorkingEdit(working, { operation: "assign", source: "direct", operand: value, targets: [target], definitions: [activeWorkingDefinition], updatedAt: new Date().toISOString() }); if (result.status === "blocked") return result; const mutation = result.calibration.mutations[result.calibration.cursor - 1]!; setWorking(result.calibration); setSaveStatus("saved"); return { status: "applied" as const, validation: mutation.validation, findings: mutation.findings }; };
-  const openTable = (item: CurrentOnlyDefinition) => { const tab = createWorkspaceTab({ definitionKey: item.key, definitionRevision: item.definitionRevision, occurrence: item.occurrence, datasetRevision: workshop.source.currentDatasetRevision, title: item.title }); setWorkspace(state => openWorkspaceTab(state, tab)); const url = new URL(window.location.href); url.searchParams.set("definition", item.key); window.history.replaceState(null, "", url); };
-  const layout = deriveWorkshopLayout({ explorerCollapsed, inspectorCollapsed, focusWorkspace: false });
-  return <section className={`grid gap-4 ${layout.columns}`} data-persistent-workshop-shell="current-only">
-    {layout.explorerVisible ? <aside className="bmw-border rounded-2xl bg-zinc-950 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">Table Explorer</p><button type="button" onClick={() => setExplorerCollapsed(true)} className="rounded border border-zinc-700 px-2 py-1 text-xs">Collapse</button></div><input aria-label="Search Tables" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search Tables" className="mt-3 w-full rounded-lg border border-zinc-700 bg-black px-3 py-2 text-sm"/><div className="mt-3 flex flex-wrap gap-2">{filters.map(item => <button key={item.id} type="button" onClick={() => setFilter(item.id)} className={`rounded-lg border px-2 py-1 text-xs ${filter === item.id ? "border-blue-400 text-blue-200" : "border-zinc-700 text-zinc-400"}`}>{item.label}</button>)}</div><div className="mt-4 max-h-[700px] space-y-1 overflow-auto">{definitions.map(item => { const changed = changedDefinitionKeys.has(`${item.definitionRevision}:${item.occurrence}`); return <button type="button" key={item.key} onClick={() => openTable(item)} className={`block w-full rounded-lg border p-3 text-left text-sm ${item.key === detail.key ? "border-blue-400/50 bg-blue-400/10" : changed ? "border-emerald-400/30 bg-emerald-400/5" : "border-zinc-800"}`}><DefinitionName item={item}/><span className="mt-1 flex gap-2 text-xs text-zinc-500"><span>{item.availability.replaceAll("_", " ")}</span>{changed && <span className="text-emerald-300">Working changes</span>}{item.editCapability.state !== "EDIT_QUALIFIED" && <span className="text-amber-300">Non-editable</span>}</span></button>; })}{!definitions.length&&<p className="p-4 text-sm text-zinc-500">{navigationEmpty==="knowledge_empty"?`No qualified ${selectedSystem??"Tuning"} Essentials Tables are available for this calibration yet.`:"No Tables match the current search or filter."}</p>}</div></aside> : <button type="button" onClick={() => setExplorerCollapsed(false)} className="bmw-border rounded-xl bg-zinc-950 px-3 py-2 text-xs text-blue-200 xl:self-start" aria-label="Restore Table Explorer">Tables ›</button>}
-    <main className="bmw-border min-w-0 rounded-2xl bg-zinc-950 p-5"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-800 pb-4"><div><p className="text-xs uppercase tracking-[.16em] text-blue-300">{displayMode === "working" ? "Working Calibration" : "Current Calibration · Immutable"}</p><h2 className="mt-1 text-xl font-semibold">{terminologyMode === "standard" ? semanticTitle(detail) : detail.title}</h2>{terminologyMode === "engineer" && detail.semantic.sourceSymbol && <p className="mt-1 font-mono text-xs text-zinc-400">{detail.semantic.sourceSymbol}</p>}<p className="mt-1 text-xs text-zinc-500">{detail.rows} × {detail.columns} · {detail.units ?? "units not supplied"}</p></div><div className="flex flex-wrap gap-2"><CalibrationTerminologyControl mode={terminologyMode} onMode={setTerminologyMode}/><div className="flex rounded-lg border border-zinc-700 p-1">{(["grid", "2d", "3d"] as const).map(mode => { const enabled = visual.capabilities[mode === "2d" ? "twoDimensional" : mode === "3d" ? "threeDimensional" : "grid"]; return <button key={mode} type="button" disabled={!enabled} onClick={() => setView(mode)} className={`rounded px-4 py-2 text-xs font-semibold ${view === mode ? "bg-blue-500/20 text-blue-200" : enabled ? "text-zinc-400" : "text-zinc-700"}`}>{mode === "grid" ? "Grid" : mode.toUpperCase()}</button>; })}</div></div></div><div className="mt-3 flex flex-wrap gap-3 text-xs text-zinc-400"><span>{terminology.x?calibrationTermLabel("X",terminology.x):"No X axis"}</span><span>{terminology.y?calibrationTermLabel("Y",terminology.y):"No Y axis"}</span><span>Cells · {terminology.output.label}{terminology.output.units?` [${terminology.output.units}]`:""}</span></div>{terminology.mode==="standard"&&(terminology.controls||terminology.whyItMatters)&&<div className="mt-3 grid gap-3 rounded-xl border border-zinc-800 bg-black/40 p-3 text-sm sm:grid-cols-2">{terminology.controls&&<div><p className="text-[10px] font-semibold uppercase tracking-wide text-blue-300">What it controls</p><p className="mt-1 text-zinc-300">{terminology.controls}</p></div>}{terminology.whyItMatters&&<div><p className="text-[10px] font-semibold uppercase tracking-wide text-blue-300">Why it matters</p><p className="mt-1 text-zinc-300">{terminology.whyItMatters}</p></div>}</div>}
-      <EngineeringNavigationControl navigation={navigation} mode={navigationMode} selectedSystem={selectedSystem} onMode={setNavigationMode} onSystem={setSelectedSystem}/>
-      <WorkspaceTabs tabs={workspace.tabs} activeId={workspace.activeId} changedKeys={changedDefinitionKeys} onActivate={id => setWorkspace(state => activateWorkspaceTab(state, id))} onClose={id => setWorkspace(state => closeWorkspaceTab(state, id))} onCloseOthers={id => setWorkspace(state => closeOtherWorkspaceTabs(state, id))}/>
-      <WorkingCalibrationPanel mode={displayMode} onMode={setDisplayMode} working={working} onCreate={createWorking} onUndo={() => working && setWorking(undoWorkingEdit(working, new Date().toISOString()))} onRedo={() => working && setWorking(redoWorkingEdit(working, new Date().toISOString()))} operation={operation} onOperation={setOperation} operand={operand} onOperand={setOperand} preview={preview} onApply={apply} selectedCount={selectedCells.length} definitionTitles={Object.fromEntries(workshop.definitions.map(item => [`${item.definitionRevision}:${item.occurrence}`, item.title]))} editQualified={detail.editCapability.state === "EDIT_QUALIFIED"} blockers={detail.editCapability.blockers} warnings={detail.editCapability.warnings} saveStatus={saveStatus}/>
-      {detail.availability !== "current_available" ? <div className="mt-5 rounded-xl border border-amber-400/35 bg-amber-400/10 p-5" role="alert"><p className="font-semibold text-amber-200">{detail.availability === "unavailable_quarantined" ? "Unavailable / Quarantined" : "Unavailable"}</p>{detail.findings.map(item => <p key={item} className="mt-2 text-sm text-amber-50">{item}</p>)}<p className="mt-3 text-sm text-zinc-300">Editing, Suggested Calibration, reconstruction mutation and flashing eligibility are prohibited.</p></div> : view === "grid" ? <CurrentGrid detail={detail} terminologyMode={terminologyMode} working={working} displayMode={displayMode} selected={selectedCells} onSelect={selectCell} onNavigate={navigateCell} onCommit={commitDirect}/> : <CurrentPlot detail={detail} terminologyMode={terminologyMode} perspective={view === "3d"} working={displayMode === "working" ? working : null}/>}</main>
-    {layout.inspectorVisible ? <CurrentInspector detail={detail} terminologyMode={terminologyMode} cell={cell} working={working} displayMode={displayMode} onCollapse={() => setInspectorCollapsed(true)}/> : <button type="button" onClick={() => setInspectorCollapsed(false)} className="bmw-border rounded-xl bg-zinc-950 px-3 py-2 text-xs text-blue-200 xl:self-start" aria-label="Restore Cell Inspector">‹ Inspector</button>}
-  </section>;
+  const navigation = useMemo(
+    () =>
+      buildEngineeringNavigationIndex(
+        workshop.definitions.map((definition) => ({
+          ...definition,
+          available: definition.availability === "current_available",
+        })),
+      ),
+    [workshop.definitions],
+  );
+  const navigationDefinitions = useMemo(
+    () =>
+      filterEngineeringNavigation(navigation, {
+        mode: navigationMode,
+        system: selectedSystem,
+        query: search,
+      }).map((entry) => entry.definition),
+    [navigation, navigationMode, selectedSystem, search],
+  );
+  const definitions = useMemo(
+    () => filterCurrentOnlyDefinitions(navigationDefinitions, "", filter),
+    [navigationDefinitions, filter],
+  );
+  const navigationEmpty = engineeringNavigationEmptyState(
+    navigation,
+    { mode: navigationMode, system: selectedSystem, query: search },
+    definitions.length,
+  );
+  const activeTab =
+      workspace.tabs.find((tab) => tab.id === workspace.activeId) ??
+      workspace.tabs[0]!,
+    detail =
+      workshop.definitions.find(
+        (item) => item.key === activeTab.definitionKey,
+      ) ?? workshop.selectedDefinition,
+    view = activeTab.view,
+    selectedCells = activeTab.selectedCells,
+    operation = activeTab.operation,
+    operand = activeTab.operand,
+    visual = useMemo(() => currentOnlyVisualization(detail), [detail]),
+    selectedCell = selectedCells[0] ?? 0,
+    cell = detail.cells[selectedCell] ?? detail.cells[0] ?? null;
+  const terminology = useMemo(
+    () =>
+      buildCalibrationTerminology({
+        mode: terminologyMode,
+        sourceTitle: detail.title,
+        shape: detail.shape,
+        rows: detail.rows,
+        columns: detail.columns,
+        axes: detail.axes,
+        semantic: detail.semantic,
+        outputUnits: detail.units,
+      }),
+    [detail, terminologyMode],
+  );
+  const displayTabs = useMemo(
+    () =>
+      workspace.tabs.map((tab) => {
+        const definition = workshop.definitions.find(
+          (item) => item.key === tab.definitionKey,
+        );
+        return definition
+          ? { ...tab, title: semanticTitle(definition, terminologyMode) }
+          : tab;
+      }),
+    [workspace.tabs, workshop.definitions, terminologyMode],
+  );
+  const setTab = (update: Parameters<typeof updateActiveWorkspaceTab>[1]) =>
+    setWorkspace((state) => updateActiveWorkspaceTab(state, update));
+  const setView = (next: "grid" | "2d" | "3d") => setTab({ view: next }),
+    setSelectedCells = (next: readonly number[]) =>
+      setTab({ selectedCells: next }),
+    setOperation = (next: WorkingEditOperation) => setTab({ operation: next }),
+    setOperand = (next: string) => setTab({ operand: next });
+  const scope = useMemo(
+    () => ({
+      ownerScope,
+      vehicleId,
+      currentDatasetId: workshop.source.currentDatasetId,
+    }),
+    [ownerScope, vehicleId, workshop.source.currentDatasetId],
+  );
+  const resolveWorkingDefinition = useCallback(
+    (definitionRevision: string, occurrence: number) => {
+      const definition = workshop.definitions.find(
+        (item) =>
+          item.definitionRevision === definitionRevision &&
+          item.occurrence === occurrence,
+      );
+      return definition
+        ? {
+            definitionRevision,
+            occurrence,
+            rows: definition.rows,
+            columns: definition.columns,
+            availability:
+              definition.availability === "current_available"
+                ? ("available" as const)
+                : definition.availability === "unavailable_quarantined"
+                  ? ("quarantined" as const)
+                  : ("unavailable" as const),
+            capability: definition.editCapability,
+            cells: definition.cells.map((item) => ({
+              definitionRevision,
+              occurrence,
+              index: item.index,
+              row: item.row,
+              column: item.column,
+              currentValue: item.currentValue,
+              units: item.units,
+            })),
+          }
+        : undefined;
+    },
+    [workshop.definitions],
+  );
+  const activeWorkingDefinition = useMemo(
+    () =>
+      resolveWorkingDefinition(detail.definitionRevision, detail.occurrence),
+    [detail.definitionRevision, detail.occurrence, resolveWorkingDefinition],
+  );
+  const newWorking = useCallback(
+    (createdAt = new Date().toISOString()) =>
+      createWorkingCalibration({
+        ownerScope,
+        vehicleId,
+        currentDatasetId: workshop.source.currentDatasetId,
+        currentDatasetRevision: workshop.source.currentDatasetRevision,
+        romLayoutId: workshop.source.romLayoutId,
+        relationshipRevision: workshop.source.relationshipRevision,
+        definitionSetRevision: workshop.source.definitionSetRevision,
+        createdAt,
+      }),
+    [ownerScope, vehicleId, workshop.source],
+  );
+  useEffect(() => {
+    const seed = newWorking("2000-01-01T00:00:00.000Z"),
+      restored = createBrowserWorkingCalibrationStore(window.localStorage).load(
+        scope,
+        seed,
+        resolveWorkingDefinition,
+      );
+    setWorking(restored);
+    setDisplayMode(restored ? "working" : "current");
+    setSaveStatus(restored ? "saved" : "not-created");
+  }, [scope, newWorking, resolveWorkingDefinition]);
+  useEffect(() => {
+    if (working) {
+      createBrowserWorkingCalibrationStore(window.localStorage).save(working);
+      setSaveStatus("saved");
+    }
+  }, [working]);
+  const createWorking = () => {
+    setWorking(newWorking());
+    setDisplayMode("working");
+  };
+  const selectCell = (index: number, region = false) => {
+    if (!region || selectedCells.length === 0) {
+      setSelectedCells([index]);
+      return;
+    }
+    const anchor = detail.cells[selectedCells[0]!]!,
+      target = detail.cells[index]!;
+    const minRow = Math.min(anchor.row, target.row),
+      maxRow = Math.max(anchor.row, target.row),
+      minColumn = Math.min(anchor.column, target.column),
+      maxColumn = Math.max(anchor.column, target.column);
+    setSelectedCells(
+      detail.cells
+        .filter(
+          (item) =>
+            item.row >= minRow &&
+            item.row <= maxRow &&
+            item.column >= minColumn &&
+            item.column <= maxColumn,
+        )
+        .map((item) => item.index),
+    );
+  };
+  const targets = useMemo(
+    () =>
+      selectedCells.flatMap((index) => {
+        const selected = detail.cells[index];
+        return selected
+          ? [
+              {
+                definitionRevision: detail.definitionRevision,
+                occurrence: detail.occurrence,
+                index,
+                row: selected.row,
+                column: selected.column,
+              },
+            ]
+          : [];
+      }),
+    [detail, selectedCells],
+  );
+  const preview = useMemo(
+    () =>
+      working && operand.trim() && activeWorkingDefinition
+        ? previewWorkingEdit(working, {
+            operation,
+            operand: Number(operand),
+            targets,
+            definitions: [activeWorkingDefinition],
+          })
+        : null,
+    [working, operation, operand, targets, activeWorkingDefinition],
+  );
+  const changedDefinitionKeys = useMemo(
+    () => new Set(working ? workingChangedDefinitionKeys(working) : []),
+    [working],
+  );
+  const apply = () => {
+    if (
+      !working ||
+      !preview ||
+      preview.validation === "BLOCKED" ||
+      !activeWorkingDefinition
+    )
+      return;
+    const result = applyWorkingEdit(working, {
+      operation,
+      operand: Number(operand),
+      targets,
+      definitions: [activeWorkingDefinition],
+      updatedAt: new Date().toISOString(),
+    });
+    if (result.status === "applied") {
+      setWorking(result.calibration);
+      setSaveStatus("saved");
+    }
+  };
+  const navigateCell = (index: number) => {
+    const next = Math.max(0, Math.min(detail.cells.length - 1, index));
+    setSelectedCells([next]);
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLButtonElement>(`[data-working-cell="${next}"]`)
+        ?.focus(),
+    );
+  };
+  const commitDirect = (index: number, value: number) => {
+    const selected = detail.cells[index];
+    if (
+      !working ||
+      displayMode !== "working" ||
+      !activeWorkingDefinition ||
+      detail.editCapability.state !== "EDIT_QUALIFIED" ||
+      !selected
+    )
+      return {
+        status: "blocked" as const,
+        findings: [
+          "Direct editing is available only for EDIT-qualified cells in WORKING mode.",
+        ],
+      };
+    const target = {
+        definitionRevision: detail.definitionRevision,
+        occurrence: detail.occurrence,
+        index,
+        row: selected.row,
+        column: selected.column,
+      },
+      result = applyWorkingEdit(working, {
+        operation: "assign",
+        source: "direct",
+        operand: value,
+        targets: [target],
+        definitions: [activeWorkingDefinition],
+        updatedAt: new Date().toISOString(),
+      });
+    if (result.status === "blocked") return result;
+    const mutation =
+      result.calibration.mutations[result.calibration.cursor - 1]!;
+    setWorking(result.calibration);
+    setSaveStatus("saved");
+    return {
+      status: "applied" as const,
+      validation: mutation.validation,
+      findings: mutation.findings,
+    };
+  };
+  const openTable = (item: CurrentOnlyDefinition) => {
+    const tab = createWorkspaceTab({
+      definitionKey: item.key,
+      definitionRevision: item.definitionRevision,
+      occurrence: item.occurrence,
+      datasetRevision: workshop.source.currentDatasetRevision,
+      title: item.title,
+    });
+    setWorkspace((state) => openWorkspaceTab(state, tab));
+    const url = new URL(window.location.href);
+    url.searchParams.set("definition", item.key);
+    window.history.replaceState(null, "", url);
+  };
+  const layout = deriveWorkshopLayout({
+    explorerCollapsed,
+    inspectorCollapsed,
+    focusWorkspace: false,
+  });
+  return (
+    <CalibrationTerminologyScope terminology={terminology}>
+      <section
+        className={`grid gap-4 ${layout.columns}`}
+        data-persistent-workshop-shell="current-only"
+      >
+        {layout.explorerVisible ? (
+          <aside className="bmw-border rounded-2xl bg-zinc-950 p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">
+                Table Explorer
+              </p>
+              <button
+                type="button"
+                onClick={() => setExplorerCollapsed(true)}
+                className="rounded border border-zinc-700 px-2 py-1 text-xs"
+              >
+                Collapse
+              </button>
+            </div>
+            <input
+              aria-label="Search Tables"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search Tables"
+              className="mt-3 w-full rounded-lg border border-zinc-700 bg-black px-3 py-2 text-sm"
+            />
+            <div className="mt-3 flex flex-wrap gap-2">
+              {filters.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setFilter(item.id)}
+                  className={`rounded-lg border px-2 py-1 text-xs ${filter === item.id ? "border-blue-400 text-blue-200" : "border-zinc-700 text-zinc-400"}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-4 max-h-[700px] space-y-1 overflow-auto">
+              {definitions.map((item) => {
+                const changed = changedDefinitionKeys.has(
+                  `${item.definitionRevision}:${item.occurrence}`,
+                );
+                return (
+                  <button
+                    type="button"
+                    key={item.key}
+                    onClick={() => openTable(item)}
+                    className={`block w-full rounded-lg border p-3 text-left text-sm ${item.key === detail.key ? "border-blue-400/50 bg-blue-400/10" : changed ? "border-emerald-400/30 bg-emerald-400/5" : "border-zinc-800"}`}
+                  >
+                    <DefinitionName item={item} />
+                    <span className="mt-1 flex gap-2 text-xs text-zinc-500">
+                      <span>{item.availability.replaceAll("_", " ")}</span>
+                      {changed && (
+                        <span className="text-emerald-300">
+                          Working changes
+                        </span>
+                      )}
+                      {item.editCapability.state !== "EDIT_QUALIFIED" && (
+                        <span className="text-amber-300">Non-editable</span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+              {!definitions.length && (
+                <p className="p-4 text-sm text-zinc-500">
+                  {navigationEmpty === "knowledge_empty"
+                    ? `No qualified ${selectedSystem ?? "Tuning"} Essentials Tables are available for this calibration yet.`
+                    : "No Tables match the current search or filter."}
+                </p>
+              )}
+            </div>
+          </aside>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setExplorerCollapsed(false)}
+            className="bmw-border rounded-xl bg-zinc-950 px-3 py-2 text-xs text-blue-200 xl:self-start"
+            aria-label="Restore Table Explorer"
+          >
+            Tables ›
+          </button>
+        )}
+        <main className="bmw-border min-w-0 rounded-2xl bg-zinc-950 p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-800 pb-4">
+            <div>
+              <p className="text-xs uppercase tracking-[.16em] text-blue-300">
+                {displayMode === "working"
+                  ? "Working Calibration"
+                  : "Current Calibration · Immutable"}
+              </p>
+              <h2 className="mt-1 text-xl font-semibold">
+                {terminology.tableName}
+              </h2>
+              {terminologyMode === "engineer" &&
+                detail.semantic.sourceSymbol && (
+                  <p className="mt-1 font-mono text-xs text-zinc-400">
+                    {detail.semantic.sourceSymbol}
+                  </p>
+                )}
+              <p className="mt-1 text-xs text-zinc-500">
+                {detail.rows} × {detail.columns} ·{" "}
+                {detail.units ?? "units not supplied"}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <CalibrationTerminologyControl
+                mode={terminologyMode}
+                onMode={setTerminologyMode}
+              />
+              <div className="flex rounded-lg border border-zinc-700 p-1">
+                {(["grid", "2d", "3d"] as const).map((mode) => {
+                  const enabled =
+                    visual.capabilities[
+                      mode === "2d"
+                        ? "twoDimensional"
+                        : mode === "3d"
+                          ? "threeDimensional"
+                          : "grid"
+                    ];
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      disabled={!enabled}
+                      onClick={() => setView(mode)}
+                      className={`rounded px-4 py-2 text-xs font-semibold ${view === mode ? "bg-blue-500/20 text-blue-200" : enabled ? "text-zinc-400" : "text-zinc-700"}`}
+                    >
+                      {mode === "grid" ? "Grid" : mode.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3 text-xs text-zinc-400">
+            <span>
+              {terminology.x
+                ? calibrationTermLabel("X", terminology.x)
+                : "No X axis"}
+            </span>
+            <span>
+              {terminology.y
+                ? calibrationTermLabel("Y", terminology.y)
+                : "No Y axis"}
+            </span>
+            <span>
+              Cells · {terminology.output.label}
+              {terminology.output.units ? ` [${terminology.output.units}]` : ""}
+            </span>
+          </div>
+          {terminology.mode === "standard" &&
+            (terminology.controls || terminology.whyItMatters) && (
+              <div className="mt-3 grid gap-3 rounded-xl border border-zinc-800 bg-black/40 p-3 text-sm sm:grid-cols-2">
+                {terminology.controls && (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-300">
+                      What it controls
+                    </p>
+                    <p className="mt-1 text-zinc-300">{terminology.controls}</p>
+                  </div>
+                )}
+                {terminology.whyItMatters && (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-300">
+                      Why it matters
+                    </p>
+                    <p className="mt-1 text-zinc-300">
+                      {terminology.whyItMatters}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          <EngineeringNavigationControl
+            navigation={navigation}
+            mode={navigationMode}
+            selectedSystem={selectedSystem}
+            onMode={setNavigationMode}
+            onSystem={setSelectedSystem}
+          />
+          <WorkspaceTabs
+            tabs={displayTabs}
+            activeId={workspace.activeId}
+            changedKeys={changedDefinitionKeys}
+            onActivate={(id) =>
+              setWorkspace((state) => activateWorkspaceTab(state, id))
+            }
+            onClose={(id) =>
+              setWorkspace((state) => closeWorkspaceTab(state, id))
+            }
+            onCloseOthers={(id) =>
+              setWorkspace((state) => closeOtherWorkspaceTabs(state, id))
+            }
+          />
+          <WorkingCalibrationPanel
+            mode={displayMode}
+            onMode={setDisplayMode}
+            working={working}
+            onCreate={createWorking}
+            onUndo={() =>
+              working &&
+              setWorking(undoWorkingEdit(working, new Date().toISOString()))
+            }
+            onRedo={() =>
+              working &&
+              setWorking(redoWorkingEdit(working, new Date().toISOString()))
+            }
+            operation={operation}
+            onOperation={setOperation}
+            operand={operand}
+            onOperand={setOperand}
+            preview={preview}
+            onApply={apply}
+            selectedCount={selectedCells.length}
+            definitionTitles={Object.fromEntries(
+              workshop.definitions.map((item) => [
+                `${item.definitionRevision}:${item.occurrence}`,
+                item.title,
+              ]),
+            )}
+            editQualified={detail.editCapability.state === "EDIT_QUALIFIED"}
+            blockers={detail.editCapability.blockers}
+            warnings={detail.editCapability.warnings}
+            saveStatus={saveStatus}
+          />
+          {detail.availability !== "current_available" ? (
+            <div
+              className="mt-5 rounded-xl border border-amber-400/35 bg-amber-400/10 p-5"
+              role="alert"
+            >
+              <p className="font-semibold text-amber-200">
+                {detail.availability === "unavailable_quarantined"
+                  ? "Unavailable / Quarantined"
+                  : "Unavailable"}
+              </p>
+              {detail.findings.map((item) => (
+                <p key={item} className="mt-2 text-sm text-amber-50">
+                  {item}
+                </p>
+              ))}
+              <p className="mt-3 text-sm text-zinc-300">
+                Editing, Suggested Calibration, reconstruction mutation and
+                flashing eligibility are prohibited.
+              </p>
+            </div>
+          ) : view === "grid" ? (
+            <CurrentGrid
+              detail={detail}
+              terminologyMode={terminologyMode}
+              working={working}
+              displayMode={displayMode}
+              selected={selectedCells}
+              onSelect={selectCell}
+              onNavigate={navigateCell}
+              onCommit={commitDirect}
+            />
+          ) : (
+            <CurrentPlot
+              detail={detail}
+              terminologyMode={terminologyMode}
+              perspective={view === "3d"}
+              working={displayMode === "working" ? working : null}
+            />
+          )}
+        </main>
+        {layout.inspectorVisible ? (
+          <CurrentInspector
+            detail={detail}
+            terminologyMode={terminologyMode}
+            cell={cell}
+            working={working}
+            displayMode={displayMode}
+            onCollapse={() => setInspectorCollapsed(true)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setInspectorCollapsed(false)}
+            className="bmw-border rounded-xl bg-zinc-950 px-3 py-2 text-xs text-blue-200 xl:self-start"
+            aria-label="Restore Cell Inspector"
+          >
+            ‹ Inspector
+          </button>
+        )}
+      </section>
+    </CalibrationTerminologyScope>
+  );
 }
 
-function CurrentInspector({ detail, terminologyMode, cell, working, displayMode, onCollapse }: { detail: CurrentOnlyDefinition; terminologyMode: CalibrationTerminologyMode; cell: CurrentOnlyDefinition["cells"][number] | null; working: WorkingCalibration | null; displayMode: CalibrationDisplayMode; onCollapse: () => void }) {
-  const presentation = useMemo(() => buildGridAxisPresentation({ shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units }), [detail]);
-  const terminology = useMemo(() => buildCalibrationTerminology({ mode: terminologyMode, sourceTitle: detail.title, shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units }), [detail, terminologyMode]);
-  void terminology;
-  if (!cell) return <aside className="bmw-border rounded-2xl bg-zinc-950 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">Cell Inspector</p><button type="button" onClick={onCollapse} className="rounded border border-zinc-700 px-2 py-1 text-xs">Collapse</button></div><p className="mt-4">No qualified cell is available.</p></aside>;
-  const coordinate = gridAxisCoordinate(presentation, cell.row, cell.column), delta = working ? workingCellDelta(working, { definitionRevision: detail.definitionRevision, occurrence: detail.occurrence, index: cell.index, row: cell.row, column: cell.column }, cell.currentValue) : null, workingRaw = displayMode === "working" && delta ? engineeringToRawRepresentation(delta.working, detail.editCapability.inverse) : null;
-  return <aside className="bmw-border rounded-2xl bg-zinc-950 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">Cell Inspector</p><button type="button" onClick={onCollapse} className="rounded border border-zinc-700 px-2 py-1 text-xs">Collapse</button></div><dl className="mt-4 grid grid-cols-2 gap-2 text-sm" data-selection={`${detail.definitionRevision}:${detail.occurrence}:${cell.index}`}><dt className="text-zinc-500">Row / column</dt><dd>R{cell.row + 1} / C{cell.column + 1}</dd>{coordinate.x && <><dt className="text-zinc-500">X</dt><dd>{coordinateValue(coordinate.x.value)} {coordinate.x.units}</dd></>}{coordinate.y && <><dt className="text-zinc-500">Y</dt><dd>{coordinateValue(coordinate.y.value)} {coordinate.y.units}</dd></>}<dt className="text-zinc-500">Current</dt><dd>{shown(cell.currentValue)} {cell.units}</dd><dt className="text-zinc-500">Working</dt><dd>{working ? shown(delta?.working ?? cell.currentValue) : "Not created"}</dd><dt className="text-zinc-500">Delta</dt><dd>{delta ? shown(delta.delta) : "Unavailable"}</dd><dt className="text-zinc-500">Percentage delta</dt><dd>{delta?.percentageDelta === null ? "Undefined from zero" : delta ? `${shown(delta.percentageDelta)}%` : "Unavailable"}</dd><dt className="text-zinc-500">Raw representation</dt><dd>{workingRaw === null ? shown(cell.currentRawValue) : shown(workingRaw)}</dd><dt className="text-zinc-500">Raw state</dt><dd>{workingRaw === null ? "CURRENT" : "WORKING"}</dd><dt className="text-zinc-500">EDIT capability</dt><dd>{detail.editCapability.state}</dd><dt className="text-zinc-500">Reference</dt><dd>Not established</dd></dl><h3 className="mt-6 font-semibold">Table Information</h3><p className="mt-2 break-all font-mono text-xs text-zinc-500">{detail.definitionRevision}</p>{[...detail.editCapability.warnings, ...detail.editCapability.blockers].map(item => <p key={item} className="mt-2 text-xs text-amber-200">{item}</p>)}{detail.provenance.map(item => <p key={item} className="mt-2 text-xs text-zinc-400">{item}</p>)}</aside>;
+function CurrentInspector({
+  detail,
+  terminologyMode,
+  cell,
+  working,
+  displayMode,
+  onCollapse,
+}: {
+  detail: CurrentOnlyDefinition;
+  terminologyMode: CalibrationTerminologyMode;
+  cell: CurrentOnlyDefinition["cells"][number] | null;
+  working: WorkingCalibration | null;
+  displayMode: CalibrationDisplayMode;
+  onCollapse: () => void;
+}) {
+  const presentation = useMemo(
+    () =>
+      buildGridAxisPresentation({
+        shape: detail.shape,
+        rows: detail.rows,
+        columns: detail.columns,
+        axes: detail.axes,
+        semantic: detail.semantic,
+        outputUnits: detail.units,
+      }),
+    [detail],
+  );
+  const terminology = useMemo(
+    () =>
+      buildCalibrationTerminology({
+        mode: terminologyMode,
+        sourceTitle: detail.title,
+        shape: detail.shape,
+        rows: detail.rows,
+        columns: detail.columns,
+        axes: detail.axes,
+        semantic: detail.semantic,
+        outputUnits: detail.units,
+      }),
+    [detail, terminologyMode],
+  );
+  if (!cell)
+    return (
+      <aside className="bmw-border rounded-2xl bg-zinc-950 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">
+            Cell Inspector
+          </p>
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="rounded border border-zinc-700 px-2 py-1 text-xs"
+          >
+            Collapse
+          </button>
+        </div>
+        <p className="mt-4">No qualified cell is available.</p>
+      </aside>
+    );
+  const coordinate = gridAxisCoordinate(presentation, cell.row, cell.column),
+    delta = working
+      ? workingCellDelta(
+          working,
+          {
+            definitionRevision: detail.definitionRevision,
+            occurrence: detail.occurrence,
+            index: cell.index,
+            row: cell.row,
+            column: cell.column,
+          },
+          cell.currentValue,
+        )
+      : null,
+    workingRaw =
+      displayMode === "working" && delta
+        ? engineeringToRawRepresentation(
+            delta.working,
+            detail.editCapability.inverse,
+          )
+        : null;
+  return (
+    <aside className="bmw-border rounded-2xl bg-zinc-950 p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-[.16em] text-blue-300">
+          Cell Inspector
+        </p>
+        <button
+          type="button"
+          onClick={onCollapse}
+          className="rounded border border-zinc-700 px-2 py-1 text-xs"
+        >
+          Collapse
+        </button>
+      </div>
+      <dl
+        className="mt-4 grid grid-cols-2 gap-2 text-sm"
+        data-selection={`${detail.definitionRevision}:${detail.occurrence}:${cell.index}`}
+      >
+        <dt className="text-zinc-500">Row / column</dt>
+        <dd>
+          R{cell.row + 1} / C{cell.column + 1}
+        </dd>
+        {coordinate.x && (
+          <>
+            <dt className="text-zinc-500">{terminology.x?.label ?? "X"}</dt>
+            <dd>
+              {coordinateValue(coordinate.x.value)} {terminology.x?.units}
+            </dd>
+          </>
+        )}
+        {coordinate.y && (
+          <>
+            <dt className="text-zinc-500">{terminology.y?.label ?? "Y"}</dt>
+            <dd>
+              {coordinateValue(coordinate.y.value)} {terminology.y?.units}
+            </dd>
+          </>
+        )}
+        <dt className="text-zinc-500">Current</dt>
+        <dd>
+          {shown(cell.currentValue)} {terminology.output.units}
+        </dd>
+        <dt className="text-zinc-500">Working</dt>
+        <dd>
+          {working ? shown(delta?.working ?? cell.currentValue) : "Not created"}
+        </dd>
+        <dt className="text-zinc-500">Delta</dt>
+        <dd>{delta ? shown(delta.delta) : "Unavailable"}</dd>
+        <dt className="text-zinc-500">Percentage delta</dt>
+        <dd>
+          {delta?.percentageDelta === null
+            ? "Undefined from zero"
+            : delta
+              ? `${shown(delta.percentageDelta)}%`
+              : "Unavailable"}
+        </dd>
+        <dt className="text-zinc-500">Raw representation</dt>
+        <dd>
+          {workingRaw === null
+            ? shown(cell.currentRawValue)
+            : shown(workingRaw)}
+        </dd>
+        <dt className="text-zinc-500">Raw state</dt>
+        <dd>{workingRaw === null ? "CURRENT" : "WORKING"}</dd>
+        <dt className="text-zinc-500">EDIT capability</dt>
+        <dd>{detail.editCapability.state}</dd>
+        <dt className="text-zinc-500">Reference</dt>
+        <dd>Not established</dd>
+      </dl>
+      <h3 className="mt-6 font-semibold">Table Information</h3>
+      <p className="mt-2 break-all font-mono text-xs text-zinc-500">
+        {detail.definitionRevision}
+      </p>
+      {[
+        ...detail.editCapability.warnings,
+        ...detail.editCapability.blockers,
+      ].map((item) => (
+        <p key={item} className="mt-2 text-xs text-amber-200">
+          {item}
+        </p>
+      ))}
+      {detail.provenance.map((item) => (
+        <p key={item} className="mt-2 text-xs text-zinc-400">
+          {item}
+        </p>
+      ))}
+    </aside>
+  );
 }
 
-function CurrentGrid({ detail, terminologyMode, working, displayMode, selected, onSelect, onNavigate, onCommit }: { detail: CurrentOnlyDefinition; terminologyMode: CalibrationTerminologyMode; working: WorkingCalibration | null; displayMode: CalibrationDisplayMode; selected: readonly number[]; onSelect: (index: number, region?: boolean) => void; onNavigate: (index: number) => void; onCommit: (index: number, value: number) => ReturnType<Parameters<typeof DirectGridCell>[0]["onCommit"]> }) {
-  const presentation = useMemo(() => buildGridAxisPresentation({ shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units }), [detail]);
-  const terminology = useMemo(() => buildCalibrationTerminology({ mode: terminologyMode, sourceTitle: detail.title, shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units }), [detail, terminologyMode]);
-  return <CalibrationAxisGrid presentation={presentation} terminology={terminology} rows={detail.rows} columns={detail.columns} renderCell={(row, column) => { const index = row * detail.columns + column, item = detail.cells[index]; if (!item) return <td key={`missing-${index}`}>—</td>; const address = { definitionRevision: detail.definitionRevision, occurrence: detail.occurrence, index: item.index, row: item.row, column: item.column }, delta = working ? workingCellDelta(working, address, item.currentValue) : null, value = displayMode === "working" && working ? workingCellValue(working, address, item.currentValue) ?? item.currentValue : item.currentValue, key = `${detail.definitionRevision}:${detail.occurrence}:${item.index}`; return <td key={key} className="p-0.5"><DirectGridCell cellKey={key} index={item.index} row={item.row} column={item.column} columnCount={detail.columns} value={value} currentValue={item.currentValue} changed={Boolean(displayMode === "working" && delta?.delta)} selected={selected.includes(item.index)} canEdit={Boolean(displayMode === "working" && working && detail.editCapability.state === "EDIT_QUALIFIED")} onSelect={onSelect} onNavigate={onNavigate} onCommit={next => onCommit(item.index, next)} format={shown}/></td>; }} footer={<p className="mt-2 text-xs text-zinc-500">Drag or Shift-click selects a rectangular region. Arrow keys move by governed cell coordinates. In WORKING mode, double-click or press Enter on an editable cell; Enter applies, Escape cancels, and Tab moves between cells.</p>}/>;
+function CurrentGrid({
+  detail,
+  terminologyMode,
+  working,
+  displayMode,
+  selected,
+  onSelect,
+  onNavigate,
+  onCommit,
+}: {
+  detail: CurrentOnlyDefinition;
+  terminologyMode: CalibrationTerminologyMode;
+  working: WorkingCalibration | null;
+  displayMode: CalibrationDisplayMode;
+  selected: readonly number[];
+  onSelect: (index: number, region?: boolean) => void;
+  onNavigate: (index: number) => void;
+  onCommit: (
+    index: number,
+    value: number,
+  ) => ReturnType<Parameters<typeof DirectGridCell>[0]["onCommit"]>;
+}) {
+  const presentation = useMemo(
+    () =>
+      buildGridAxisPresentation({
+        shape: detail.shape,
+        rows: detail.rows,
+        columns: detail.columns,
+        axes: detail.axes,
+        semantic: detail.semantic,
+        outputUnits: detail.units,
+      }),
+    [detail],
+  );
+  const terminology = useMemo(
+    () =>
+      buildCalibrationTerminology({
+        mode: terminologyMode,
+        sourceTitle: detail.title,
+        shape: detail.shape,
+        rows: detail.rows,
+        columns: detail.columns,
+        axes: detail.axes,
+        semantic: detail.semantic,
+        outputUnits: detail.units,
+      }),
+    [detail, terminologyMode],
+  );
+  return (
+    <CalibrationAxisGrid
+      presentation={presentation}
+      terminology={terminology}
+      rows={detail.rows}
+      columns={detail.columns}
+      renderCell={(row, column) => {
+        const index = row * detail.columns + column,
+          item = detail.cells[index];
+        if (!item) return <td key={`missing-${index}`}>—</td>;
+        const address = {
+            definitionRevision: detail.definitionRevision,
+            occurrence: detail.occurrence,
+            index: item.index,
+            row: item.row,
+            column: item.column,
+          },
+          delta = working
+            ? workingCellDelta(working, address, item.currentValue)
+            : null,
+          value =
+            displayMode === "working" && working
+              ? (workingCellValue(working, address, item.currentValue) ??
+                item.currentValue)
+              : item.currentValue,
+          key = `${detail.definitionRevision}:${detail.occurrence}:${item.index}`;
+        return (
+          <td key={key} className="p-0.5">
+            <DirectGridCell
+              cellKey={key}
+              index={item.index}
+              row={item.row}
+              column={item.column}
+              columnCount={detail.columns}
+              value={value}
+              currentValue={item.currentValue}
+              changed={Boolean(displayMode === "working" && delta?.delta)}
+              selected={selected.includes(item.index)}
+              canEdit={Boolean(
+                displayMode === "working" &&
+                  working &&
+                  detail.editCapability.state === "EDIT_QUALIFIED",
+              )}
+              onSelect={onSelect}
+              onNavigate={onNavigate}
+              onCommit={(next) => onCommit(item.index, next)}
+              format={shown}
+            />
+          </td>
+        );
+      }}
+      footer={
+        <p className="mt-2 text-xs text-zinc-500">
+          Drag or Shift-click selects a rectangular region. Arrow keys move by
+          governed cell coordinates. In WORKING mode, double-click or press
+          Enter on an editable cell; Enter applies, Escape cancels, and Tab
+          moves between cells.
+        </p>
+      }
+    />
+  );
 }
 
-function CurrentPlot({ detail, terminologyMode, perspective, working }: { detail: CurrentOnlyDefinition; terminologyMode: CalibrationTerminologyMode; perspective: boolean; working: WorkingCalibration | null }) {
-  const values = detail.cells.map(item => working ? workingCellValue(working, { definitionRevision: detail.definitionRevision, occurrence: detail.occurrence, index: item.index, row: item.row, column: item.column }) ?? item.currentValue : item.currentValue), minimum = Math.min(...values), maximum = Math.max(...values), span = maximum - minimum || 1;
-  const points = values.map((value, index) => `${(index / Math.max(1, values.length - 1)) * 100},${95 - ((value - minimum) / span) * 85}`).join(" ");
-  const terminology = buildCalibrationTerminology({ mode: terminologyMode, sourceTitle: detail.title, shape: detail.shape, rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.semantic, outputUnits: detail.units });
-  return <div className={`mt-5 rounded-xl border border-zinc-800 bg-black p-4 ${perspective ? "[transform:perspective(900px)_rotateX(18deg)]" : ""}`}><p className="text-xs text-zinc-400">{terminology.x?.label ?? "No X axis"} · {terminology.y?.label ?? "No Y axis"} · {terminology.output.label}</p><svg role="img" aria-label={perspective ? `${working ? "Working" : "Current"} 3D Table visualization` : `${working ? "Working" : "Current"} 2D Table visualization`} viewBox="0 0 100 100" className="h-[420px] w-full" preserveAspectRatio="none"><polyline points={points} fill="none" stroke="#60a5fa" strokeWidth="1.5" vectorEffect="non-scaling-stroke"/></svg><p className="mt-2 text-xs text-zinc-500">{working ? "Working values with immutable Current baseline" : "Current engineering values only"} · Reference and comparison unavailable</p></div>;
+function CurrentPlot({
+  detail,
+  terminologyMode,
+  perspective,
+  working,
+}: {
+  detail: CurrentOnlyDefinition;
+  terminologyMode: CalibrationTerminologyMode;
+  perspective: boolean;
+  working: WorkingCalibration | null;
+}) {
+  const values = detail.cells.map((item) =>
+      working
+        ? (workingCellValue(working, {
+            definitionRevision: detail.definitionRevision,
+            occurrence: detail.occurrence,
+            index: item.index,
+            row: item.row,
+            column: item.column,
+          }) ?? item.currentValue)
+        : item.currentValue,
+    ),
+    minimum = Math.min(...values),
+    maximum = Math.max(...values),
+    span = maximum - minimum || 1;
+  const points = values
+    .map(
+      (value, index) =>
+        `${(index / Math.max(1, values.length - 1)) * 100},${95 - ((value - minimum) / span) * 85}`,
+    )
+    .join(" ");
+  const terminology = buildCalibrationTerminology({
+    mode: terminologyMode,
+    sourceTitle: detail.title,
+    shape: detail.shape,
+    rows: detail.rows,
+    columns: detail.columns,
+    axes: detail.axes,
+    semantic: detail.semantic,
+    outputUnits: detail.units,
+  });
+  return (
+    <div
+      className={`mt-5 rounded-xl border border-zinc-800 bg-black p-4 ${perspective ? "[transform:perspective(900px)_rotateX(18deg)]" : ""}`}
+    >
+      <p className="text-xs text-zinc-400">
+        {terminology.x?.label ?? "No X axis"} ·{" "}
+        {terminology.y?.label ?? "No Y axis"} · {terminology.output.label}
+      </p>
+      <svg
+        role="img"
+        aria-label={
+          perspective
+            ? `${working ? "Working" : "Current"} 3D Table visualization`
+            : `${working ? "Working" : "Current"} 2D Table visualization`
+        }
+        viewBox="0 0 100 100"
+        className="h-[420px] w-full"
+        preserveAspectRatio="none"
+      >
+        <polyline
+          points={points}
+          fill="none"
+          stroke="#60a5fa"
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <p className="mt-2 text-xs text-zinc-500">
+        {working
+          ? "Working values with immutable Current baseline"
+          : "Current engineering values only"}{" "}
+        · Reference and comparison unavailable
+      </p>
+    </div>
+  );
 }

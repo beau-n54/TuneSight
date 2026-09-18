@@ -3,16 +3,20 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
 import { buildCalibrationSurfaceMesh, moveSelectedCell, type CalibrationVisualState, type CalibrationVisualizationModel } from "@/lib/calibration-workshop/visualizationModel";
 import type { WorkshopDefinitionDetail } from "@/lib/calibration-workshop/viewModel";
+import type { CalibrationTerminology } from "@/lib/calibration-workshop/calibrationTerminology";
+import { useCalibrationTerminologyScope } from "./calibration-terminology-control";
 
 type Projected = { cellIndex: number; x: number; y: number; depth: number; height: number; changed: boolean; row: number; column: number };
 
-export default function CalibrationSurface3D({ model, detail, state, selectedCell, onSelect }: {
+export default function CalibrationSurface3D({ model, detail, state, terminology, selectedCell, onSelect }: {
   model: CalibrationVisualizationModel;
   detail: WorkshopDefinitionDetail;
   state: CalibrationVisualState;
+  terminology?: CalibrationTerminology;
   selectedCell: number;
   onSelect: (index: number) => void;
 }) {
+  const scopedTerminology = useCalibrationTerminologyScope(), labels = (terminology ?? scopedTerminology)!;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(-0.65);
   const [tilt, setTilt] = useState(0.72);
@@ -70,11 +74,11 @@ export default function CalibrationSurface3D({ model, detail, state, selectedCel
       context.fillStyle = point.cellIndex === selectedCell ? "#f8fafc" : point.changed ? "#fbbf24" : state === "reference" ? "#a1a1aa" : "#38bdf8"; context.fill();
     }
     context.fillStyle = "#a1a1aa"; context.font = "12px ui-monospace, monospace";
-    context.fillText(`${model.columnAxis.id}${model.columnAxis.units ? ` (${model.columnAxis.units})` : ""}`, 16, rect.height - 18);
-    context.fillText(`${model.rowAxis.id}${model.rowAxis.units ? ` (${model.rowAxis.units})` : ""}`, 16, 24);
-    context.fillText(`Z — value${model.valueUnits ? ` (${model.valueUnits})` : ""}`, Math.max(16, rect.width - 220), 24);
+    context.fillText(`${labels.x?.label ?? model.columnAxis.id}${labels.x?.units ? ` (${labels.x.units})` : ""}`, 16, rect.height - 18);
+    context.fillText(`${labels.y?.label ?? model.rowAxis.id}${labels.y?.units ? ` (${labels.y.units})` : ""}`, 16, 24);
+    context.fillText(`${labels.output.label}${labels.output.units ? ` (${labels.output.units})` : ""}`, Math.max(16, rect.width - 220), 24);
     if (!mesh.available) { context.fillStyle = "#fbbf24"; context.fillText(`Wireframe fallback: ${mesh.reason}`, 16, rect.height - 42); }
-  }, [model, detail, state, selectedCell, values, mesh, rotation, tilt, zoom]);
+  }, [model, detail, state, labels, selectedCell, values, mesh, rotation, tilt, zoom]);
 
   const pointerDown = (event: PointerEvent<HTMLCanvasElement>) => { drag.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); };
   const pointerMove = (event: PointerEvent<HTMLCanvasElement>) => { if (!drag.current) return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; drag.current={x:event.clientX,y:event.clientY}; setRotation((value)=>value+dx*0.008); setTilt((value)=>Math.max(0.25,Math.min(1.25,value+dy*0.006))); };

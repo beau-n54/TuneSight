@@ -60,7 +60,8 @@ test("shared Grid source provides sticky headers, frozen Y context and responsiv
   assert.match(grid, /sticky top-0/);
   assert.match(grid, /sticky left-0/);
   assert.match(grid, /overflow-auto/);
-  assert.match(grid, /Y ↓ \/ X →/);
+  assert.match(grid, /terminology\?\.y\?\.label/);
+  assert.match(grid, /terminology\?\.x\?\.label/);
   for (const client of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
     const source = fs.readFileSync(`app/dashboard/vehicles/[id]/calibration/${client}`, "utf8");
     assert.match(source, /CalibrationAxisGrid/);

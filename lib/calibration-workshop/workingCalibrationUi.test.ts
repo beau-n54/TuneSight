@@ -24,8 +24,8 @@ test("comparison Workshop exposes the same governed Working mutation path only f
   for (const label of ["Create Working Calibration", "Set value", "Add / subtract", "Percentage change", "Undo", "Redo", "Apply"]) {
     assert.match(experience, new RegExp(label));
   }
-  assert.match(comparisonSource, /subscriberSession&&/);
-  assert.match(comparisonSource, /editQualified=\{detail\.summary\.editCapability\?\.state==="EDIT_QUALIFIED"\}/);
+  assert.match(comparisonSource, /subscriberSession\s*&&/);
+  assert.match(comparisonSource, /editQualified=\{\s*detail\.summary\.editCapability\?\.state\s*===\s*"EDIT_QUALIFIED"\s*\}/);
   assert.match(comparisonSource, /workingCellValue/);
   assert.match(comparisonSource, /workingCellDelta/);
   assert.doesNotMatch(comparisonSource, /if\s*\([^)]*(?:N54|B58|S58|I8A0S|00003076501103)/);
