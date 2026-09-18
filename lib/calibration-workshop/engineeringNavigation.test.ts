@@ -3,7 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { bindDefinitionKnowledge, type QualifiedSemanticField, type WorkshopKnowledgeRecord } from "./definitionKnowledgeBinding.ts";
-import { buildEngineeringNavigationIndex, filterEngineeringNavigation } from "./engineeringNavigation.ts";
+import { buildEngineeringNavigationIndex, engineeringNavigationEmptyState, filterEngineeringNavigation } from "./engineeringNavigation.ts";
+import { TUNING_ESSENTIAL_SYSTEMS } from "./tuningEssentials.ts";
 import { buildBmwEngineeringNavigationCensus } from "./engineeringNavigationCensus.ts";
 
 const field = <T>(value: T, id: string): QualifiedSemanticField<T> => ({ value, assertionId: id, assertionRevision: "1", authority: "engineering", provenance: ["governed"], limitations: [] });
@@ -27,14 +28,19 @@ test("All Tables stays complete while Systems and Essentials are exact-ROM scope
   assert.deepEqual(filterEngineeringNavigation(index, { mode: "essentials" }).map(entry => entry.definition.key), ["boost"]);
   assert.equal(index.entries.find(entry => entry.definition.key === "fuel")?.classification, "ENGINEERING_QUALIFIED");
   assert.equal(index.entries.find(entry => entry.definition.key === "fuel")?.essential, false);
+  assert.deepEqual(index.systems.map(system => system.label).slice(0, 7), TUNING_ESSENTIAL_SYSTEMS);
+  assert.equal(engineeringNavigationEmptyState(index, { mode: "systems", system: "Ignition / Timing" }, 0), "knowledge_empty");
+  assert.equal(engineeringNavigationEmptyState(index, { mode: "all", query: "no-result" }, 0), "filter_zero");
 });
 
-test("literal search remains complete and engineering-intent search requires qualified or candidate Knowledge", () => {
+test("literal search remains complete while engineering-intent search requires qualified Knowledge", () => {
   const records = [record("verified", "qualified")];
   const index = buildEngineeringNavigationIndex([definition("qualified", "BMW Quelldruck", records), definition("plain", "Literal Lambda Table", records)]);
   assert.deepEqual(filterEngineeringNavigation(index, { mode: "all", query: "Quelldruck" }).map(entry => entry.definition.key), ["qualified"]);
   assert.deepEqual(filterEngineeringNavigation(index, { mode: "all", query: "Boost Target" }).map(entry => entry.definition.key), ["qualified"]);
   assert.deepEqual(filterEngineeringNavigation(index, { mode: "all", query: "Lambda" }).map(entry => entry.definition.key), ["plain"]);
+  const candidate = buildEngineeringNavigationIndex([definition("candidate", "Opaque source", [record("candidate", "candidate")])]);
+  assert.equal(filterEngineeringNavigation(candidate, { mode: "all", query: "boost target" }).length, 0);
 });
 
 test("qualified related systems preserve deterministic multi-system membership", () => {
@@ -63,6 +69,8 @@ test("both subscriber Workshop variants integrate navigation without replacing p
     for (const label of ["All Tables", "Tuning Essentials", "Systems", "Changed / Evidence"]) assert.match(source, new RegExp(label));
     assert.match(source, /WorkspaceTabs/);
     assert.match(source, /openWorkspaceTab/);
+    assert.match(source, /knowledge_empty/);
+    assert.match(source, /No qualified/);
     assert.doesNotMatch(source, /buildWorkshopDeepLink|from "next\/link"/);
   }
 });

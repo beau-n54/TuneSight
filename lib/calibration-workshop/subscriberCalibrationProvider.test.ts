@@ -3,6 +3,8 @@ import fs from "node:fs";
 import test from "node:test";
 import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel } from "./visualizationModel.ts";
 import { buildSubscriberWorkshop, loadSubscriberCalibration, SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES } from "./subscriberCalibrationProvider.ts";
+import { buildEngineeringNavigationIndex, engineeringNavigationEmptyState } from "./engineeringNavigation.ts";
+import { TUNING_ESSENTIAL_SYSTEMS } from "./tuningEssentials.ts";
 
 const observedAt = "2026-09-02T00:00:00.000Z";
 const load = (name: string) => new Uint8Array(fs.readFileSync(`BMW-XDFs-master/N54/${name}`));
@@ -177,5 +179,12 @@ test("a proven raw MG1 DTF materializes the same governed Current-only Dataset",
     assert.equal(result.material.reference, null);
     assert.equal(result.material.comparison, null);
     assert.equal(result.material.current.definitions.length, 1242);
+    assert.ok("mode" in result.workshop);
+    if ("mode" in result.workshop) {
+      const navigation = buildEngineeringNavigationIndex(result.workshop.definitions.map(definition => ({ ...definition, available: definition.availability === "current_available" })));
+      assert.equal(navigation.counts.essentials, 0);
+      assert.deepEqual(navigation.systems.map(system => system.label).slice(0, 7), TUNING_ESSENTIAL_SYSTEMS);
+      assert.equal(engineeringNavigationEmptyState(navigation, { mode: "systems", system: "Fueling / Lambda" }, 0), "knowledge_empty");
+    }
   }
 });
