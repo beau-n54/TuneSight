@@ -5,14 +5,14 @@ import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/l
 import WorkshopClient from "./workshop-client";
 import CurrentOnlyWorkshopClient from "./current-only-workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
-import { isSubscriberWorkshopSessionId, readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
+import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import UploadCalibration from "./upload-calibration";
 import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
 import type { CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
 import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
 import { createHash } from "node:crypto";
-import { selectSubscriberWorkshopEntry } from "@/lib/calibration-workshop/subscriberWorkshopEntry";
+import { resolveSubscriberWorkshopSession, selectSubscriberWorkshopEntry } from "@/lib/calibration-workshop/subscriberWorkshopEntry";
 import { resolveVehicleOwnedCalibrationEvidence } from "@/lib/calibration-workshop/vehicleOwnedCalibrationEvidence";
 import { recoverVehicleOwnedTuneCalibration } from "@/lib/calibration-workshop/vehicleOwnedTuneMaterialization.server";
 
@@ -32,8 +32,6 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
   const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
-  const requestedSubscriberSession = Array.isArray(query.session) ? query.session[0] : query.session;
-  const subscriberSession = isSubscriberWorkshopSessionId(requestedSubscriberSession) ? requestedSubscriberSession : undefined;
   const previewSelection = selectN54PreviewRom(requestedPreviewRom);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -47,23 +45,21 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     .single();
   if (error || !vehicle) notFound();
 
-  if (requestedSubscriberSession && !subscriberSession) redirect(`/dashboard/vehicles/${vehicle.id}/calibration`);
-
-  const latestSubscriberSession = subscriberSession ? null : await readLatestSubscriberWorkshopSession(user.id, vehicle.id);
-  let activeSubscriberSession = subscriberSession ?? latestSubscriberSession?.sessionId;
-  let subscriberResult = subscriberSession ? await readSubscriberWorkshopSession(subscriberSession, user.id, vehicle.id) : latestSubscriberSession?.result ?? null;
-  if (!subscriberSession && !subscriberResult) {
-    const recovered = await recoverVehicleOwnedTuneCalibration(user.id, vehicle.id);
-    if (recovered) { activeSubscriberSession = recovered.sessionId; subscriberResult = recovered.result; }
-  }
-  if (subscriberSession && (!subscriberResult || subscriberResult.status !== "workshop_ready")) {
-    const result = subscriberResult;
+  const session = await resolveSubscriberWorkshopSession({ requestedSession: query.session, ownerId: user.id, vehicleId: vehicle.id }, {
+    readSession: readSubscriberWorkshopSession,
+    readLatest: readLatestSubscriberWorkshopSession,
+    recoverVehicle: recoverVehicleOwnedTuneCalibration,
+  });
+  const activeSubscriberSession = session.sessionId;
+  const subscriberResult = session.result;
+  const vehicleEvidence = resolveVehicleOwnedCalibrationEvidence({ ownerId: user.id, vehicleId: vehicle.id, result: subscriberResult });
+  const subscriberSuccess = vehicleEvidence.workshop;
+  const entry = selectSubscriberWorkshopEntry({ subscriberReady: Boolean(subscriberSuccess), explicitSession: session.explicit, requestedPreviewRom, runtimeEnvironment: process.env.NODE_ENV });
+  if (entry.mode === "session_unavailable") {
+    const result = subscriberResult?.status !== "workshop_ready" ? subscriberResult : null;
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className={`rounded-2xl border p-6 ${result?.coverage?.outcome === "CONFLICT" ? "border-red-400/40 bg-red-400/10" : "border-amber-400/35 bg-amber-400/10"}`} role="alert"><p className="text-xs font-bold uppercase tracking-[0.18em]">{result?.title ?? "Calibration session unavailable"}</p><h2 className="mt-3 text-2xl font-bold">{result?.message ?? "The bounded localhost session expired or is unavailable. Re-open the Calibration file."}</h2>{result&&<dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">ROM/software</dt><dd>{result.identity ?? "Not established"}</dd><dt className="text-zinc-500">Container</dt><dd>{result.container ?? "Unresolved"}</dd><dt className="text-zinc-500">Byte size</dt><dd>{result.byteLength?.toLocaleString() ?? "Unavailable"}</dd><dt className="text-zinc-500">Binary digest</dt><dd className="break-all font-mono text-xs">{result.digest ?? "Unavailable"}</dd><dt className="text-zinc-500">Definition coverage</dt><dd>{result.coverage?.outcome ?? "INVALID"}</dd></dl>}{result?.coverage?.findings.map(finding=><p key={finding} className="mt-3 text-sm text-zinc-300">{finding}</p>)}{result?.coverage?.discoveryPackage&&<p className="mt-3 break-all font-mono text-xs text-zinc-400">Discovery Evidence: {result.coverage.discoveryPackage.packageRevision}</p>}<p className="mt-4 text-sm">TuneSight did not guess or fall back to a Development Evidence Preview.</p></section></div></main>;
   }
 
-  const vehicleEvidence = resolveVehicleOwnedCalibrationEvidence({ ownerId: user.id, vehicleId: vehicle.id, result: subscriberResult });
-  const subscriberSuccess = vehicleEvidence.workshop;
-  const entry = selectSubscriberWorkshopEntry({ subscriberReady: Boolean(subscriberSuccess), requestedPreviewRom, runtimeEnvironment: process.env.NODE_ENV });
   if (entry.mode === "empty") {
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><p className="mt-2 text-zinc-400">{vehicle.year || "Unknown Year"} {vehicle.make || "Unknown Make"} {vehicle.model || "Unknown Model"}<span className="text-zinc-600"> · </span>{vehicle.engine_code || "Engine unknown"}</p><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6" role="status"><h2 className="text-xl font-bold">No Current Calibration loaded</h2><p className="mt-2 text-sm text-zinc-400">Open Calibration File to begin.</p><p className="mt-3 text-xs text-zinc-500">No Calibration evidence, addresses, Definitions or values have been substituted.</p></section></div></main>;
   }

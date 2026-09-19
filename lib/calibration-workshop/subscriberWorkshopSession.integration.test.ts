@@ -19,10 +19,15 @@ test("production sessions use private object storage rather than invocation-loca
 
 test("Workshop reopens the latest owner-and-vehicle-scoped durable session without falling back from an explicit token", () => {
   const page = fs.readFileSync(new URL("../../app/dashboard/vehicles/[id]/calibration/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /subscriberSession \? null : await readLatestSubscriberWorkshopSession\(user\.id, vehicle\.id\)/);
-  assert.match(page, /subscriberSession \? await readSubscriberWorkshopSession/);
+  assert.match(page, /resolveSubscriberWorkshopSession\(\{ requestedSession: query\.session, ownerId: user\.id, vehicleId: vehicle\.id \}/);
+  assert.match(page, /readSession: readSubscriberWorkshopSession/);
+  assert.match(page, /readLatest: readLatestSubscriberWorkshopSession/);
+  assert.match(page, /explicitSession: session\.explicit/);
+  const failure = page.indexOf('if (entry.mode === "session_unavailable")');
+  assert.ok(failure >= 0 && failure < page.indexOf('if (entry.mode === "empty")'));
+  assert.match(page.slice(failure, page.indexOf('if (entry.mode === "empty")')), /return <main[\s\S]*Calibration session unavailable/);
   assert.match(page, /activeSubscriberSession/);
-  assert.doesNotMatch(page, /subscriberSession[^\n]*\?[^\n]*readSubscriberWorkshopSession[^\n]*:[^\n]*readLatestSubscriberWorkshopSession/);
+  assert.doesNotMatch(page, /redirect\(`\/dashboard\/vehicles/);
 });
 
 test("vehicle-owned derived Workshop evidence has a bounded lifetime independent of the shorter source lease", () => {

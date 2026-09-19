@@ -37,5 +37,6 @@ test("Calibration entry uses session first, then vehicle role recovery, then neu
   const role = page.indexOf("recoverVehicleOwnedTuneCalibration");
   const empty = page.indexOf('entry.mode === "empty"');
   assert.ok(session >= 0 && role > session && empty > role);
-  assert.match(page, /!subscriberSession && !subscriberResult/);
+  assert.match(page, /recoverVehicle: recoverVehicleOwnedTuneCalibration/);
+  assert.match(page, /resolveVehicleOwnedCalibrationEvidence\(\{ ownerId: user\.id, vehicleId: vehicle\.id, result: subscriberResult \}/);
 });

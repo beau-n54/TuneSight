@@ -70,7 +70,7 @@ test("both subscriber Workshop variants integrate navigation without replacing p
   for (const file of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     assert.match(source, /import EngineeringNavigationControl/);
-    assert.equal(source.match(/<EngineeringNavigationControl /g)?.length, 1);
+    assert.equal(source.match(/<EngineeringNavigationControl(?=\s|\/?>)/g)?.length, 1);
     assert.doesNotMatch(source, /Table Explorer navigation/);
     assert.match(source, /WorkspaceTabs/);
     assert.match(source, /openWorkspaceTab/);
