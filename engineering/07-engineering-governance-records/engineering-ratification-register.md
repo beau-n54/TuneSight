@@ -1369,6 +1369,67 @@ The 68 exact Current-VIEW relationships, 74,220 VIEW Tables, 74,165 EDIT- and re
 
 ---
 
+### TS-RAT-024
+
+| Field | Ratified Value |
+|---|---|
+| Register ID | TS-RAT-024 |
+| Founder Approval Date | 2026-09-20 |
+| Artefact Type | Architecture and acceptance-contract ratification |
+| Artefact Name | Universal Product Experience and Universal Calibration Workspace Architecture |
+| Authority | Founder Beau, following Founder and Bob's final audit |
+| Baseline Commit | `840b75d444f67e22c6003202ebb39e7c17cb403d` — Enforce fail-closed Calibration sessions |
+| Canonical Location | `engineering/05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/` |
+| Status | RATIFIED ARCHITECTURE — IMPLEMENTATION REQUIRES SEPARATE FOUNDER AUTHORITY |
+| Historical Effect | Additive; TS-RAT-001 through TS-RAT-023 remain unchanged |
+| Implementation / Production Effect | No implementation, deployment or release authority; U0 not yet authorised |
+
+**Canonical Architecture Artefacts**
+
+- [README — invariant, authority and decisions](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/README.md>)
+- [01 — shell, evidence and identity](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/01-shell-evidence-identity.md>)
+- [02 — universal Table presentation](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/02-table-presentation.md>)
+- [03 — modes, navigation and guidance](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/03-modes-navigation-guidance.md>)
+- [04 — professional and dyno boundaries](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/04-professional-dyno-boundaries.md>)
+- [05 — acceptance and regression](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/05-acceptance-regression.md>)
+- [06 — incremental migration](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/06-migration-work-packages.md>)
+
+**Founder Ratification Declaration and Scope**
+
+Founder ratifies the TuneSight-wide Universal Product Experience invariant: admitted platforms share the same fundamental product-interface structure, navigation and interaction model. Platform, engine, DME, ROM, chassis, source format and evidence availability may change data and capability states, never create unrelated versions of TuneSight. This applies across Vehicle Dashboard, Logs and Log History, Analysis, Calibration, Live Telemetry, future BMW Coding, Diagnostics and professional/dyno evidence surfaces. Calibration is the first formally governed domain application; other domains require their own bounded architecture and migration programmes and are not declared migrated.
+
+The ratified Calibration architecture requires one shell across admitted platforms and comparison, Current-only, missing Reference/Current, quarantined and unresolved evidence states. Strict truthful geometry prohibits flattened all-cell lines as meaningful 2D, tilted lines as 3D, dimension-only axis assignment, invented engineering axes and interpolation across unqualified cells. Qualified Grid remains the fallback when genuine geometry is unavailable.
+
+Current remains immutable; Working separate, sparse and governed; Suggested distinct. Reference, comparison, VIEW, EDIT, RECONSTRUCT, Export and Flash remain independently qualified. Exact identity, owner/vehicle binding, explicit-token fail-closed behavior, quarantine, durable-view/source-lease separation and unknown state are preserved. Export remains checksum/integrity locked; Flash remains unavailable.
+
+Standard and Engineer consume identical engineering evidence without changing identities, values, capabilities, tabs, selected cells, Working/history or engineering results. Standard is the new-user/profile default; explicit preference may be remembered. Desktop/laptop are full-editing surfaces, including smaller laptops through collapse/Focus; tablet defaults to review pending explicit interaction/safety validation; phone remains read-only until editing is separately designed and validated. Display suitability does not change EDIT qualification.
+
+Related Tables require exact qualified relationships; Understand communicates qualified education rather than generated tuning advice; semantic absence uses truthful owner-supplied reasons. Engineering Navigation, exact occurrence identity, the seven systems and qualification distinctions remain governed.
+
+Starter, Pro and Workshop packaging remains separate from presentation modes. Entitlements may limit entry/actions but never alter truth or create capability. Pro and Workshop share the core Calibration Workspace; Workshop adds professional business workflow. Pricing, final Starter Calibration access and quotas are not fixed here.
+
+Browser-only Working is insufficient for professional Workshop production completion. A separately governed server revision/collaboration programme is mandatory before that completion: immutable lineage, actor/time attribution, custody, notes/reviews, staff permissions, conflict protection, branching/reconciliation without silent overwrite, exact evidence associations, versioned migration/rollback and security/retention/customer consent. The browser store remains during U0–U6 unless separately authorised.
+
+Future dyno integration is an adapter-neutral evidence boundary only. Dyno measurements, DME telemetry and TuneSight-derived calculations remain distinct, retaining exact run/vehicle/calibration association, raw provenance, correction/environment metadata and uncertainty.
+
+The acceptance/regression contract and U0–U6 incremental sequence are ratified with existing rollback and Founder validation gates. U0 Shared Contract Projection is first in principle, but requires a separately issued implementation instruction. The 12-open-tab/six-derived-Table limits are provisional migration limits only; protected input, Working changes and relevant history cannot be silently evicted, capacity requires an explicit decision and final capacity requires measured professional review.
+
+**Preserved Testing Truth**
+
+The accepted local baseline is 757 deterministic tests: 754 passing and three deliberately held presentation-contract failures — `Related Table`, `Understand` and `semantic.unavailableReason`. They remain visible until separately authorised U4 work implements and validates the actual contracts. Ratification does not make the tests pass. No test is altered by this record.
+
+**Explicit Exclusions**
+
+- No application implementation authorised by ratification alone; no U0 implementation yet.
+- No application or test changes, new engineering qualification, dependency changes or production Knowledge qualification.
+- No Export unlock, Flash, Suggested Calibration generation or DTC execution.
+- No database or tenancy schema, dyno control or pricing enforcement.
+- No deployment or release authority, and no push authority.
+
+The baseline session-fix commit remains accepted locally and unpushed; this entry does not claim it is deployed or present on `origin/main`. Earlier ratifications and historical work-package statements remain intact.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

@@ -56,6 +56,8 @@ The eight Engineering Domains are:
 
 [Vehicle Admission and Capability Independence](10-vehicle-admission-independence.md) is the Founder-ratified prospective clarification that prevents exact-ROM Calibration coverage from becoming a whole-vehicle admission gate while preserving independent capability authority.
 
+[Universal Product Experience and Universal Calibration Workspace](11-universal-product-experience-and-calibration-workspace/README.md) is Founder-ratified architecture under [TS-RAT-024](../07-engineering-governance-records/engineering-ratification-register.md#ts-rat-024), dated 20 September 2026. Its Universal Product Experience invariant applies TuneSight-wide; Calibration is its first formally governed domain application. Vehicle Dashboard, Logs/Log History, Analysis, Live Telemetry, future Coding, Diagnostics and professional/dyno evidence surfaces require their own bounded architecture and migration programmes. This entry does not claim those migrations are complete. U0 is first in principle but remains unauthorised pending a separate Founder implementation instruction.
+
 [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md) are the universal architectural standard by which these owners and consumers exchange qualified engineering truth. They are not a domain, runtime layer, framework or implementation interface.
 
 Within Knowledge, the foundational order is Engineering Ontology, Governed Vocabulary, Knowledge Entities, Engineering Assertions and Evidence. Ontology governs the nature of engineering concepts; Vocabulary governs their language; Knowledge records qualified engineering truth; and Evidence supports or contradicts that truth. These responsibilities shall not be collapsed.
