@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
-import { buildCalibrationSurfaceMesh, moveSelectedCell, type CalibrationVisualState, type CalibrationVisualizationModel } from "@/lib/calibration-workshop/visualizationModel";
+import { buildCalibrationSurfaceMesh, moveSelectedCell, type CalibrationVisualizationModel } from "@/lib/calibration-workshop/visualizationModel";
 import type { WorkshopDefinitionDetail } from "@/lib/calibration-workshop/viewModel";
 import type { CalibrationTerminology } from "@/lib/calibration-workshop/calibrationTerminology";
 import { useCalibrationTerminologyScope } from "./calibration-terminology-control";
+
+import type { SurfacePresentation } from "@/lib/calibration-workshop/sharedWorkspacePresentationState";
 
 type Projected = { cellIndex: number; x: number; y: number; depth: number; height: number; changed: boolean; row: number; column: number };
 
 export default function CalibrationSurface3D({ model, detail, state, terminology, selectedCell, onSelect }: {
   model: CalibrationVisualizationModel;
   detail: WorkshopDefinitionDetail;
-  state: CalibrationVisualState;
+  state: SurfacePresentation;
   terminology?: CalibrationTerminology;
   selectedCell: number;
   onSelect: (index: number) => void;
@@ -86,5 +88,5 @@ export default function CalibrationSurface3D({ model, detail, state, terminology
   const keyDown = (event: KeyboardEvent<HTMLCanvasElement>) => { const movement: Record<string,[number,number]>={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0]}; const delta=movement[event.key]; if(delta){event.preventDefault();onSelect(moveSelectedCell(detail,selectedCell,...delta));} };
   const wheel = (event: WheelEvent<HTMLCanvasElement>) => { event.preventDefault(); setZoom((value)=>Math.max(.65,Math.min(1.8,value-event.deltaY*.001))); };
 
-  return <div><canvas ref={canvasRef} className="h-[520px] w-full touch-none rounded-xl border border-zinc-800 bg-black outline-none focus-visible:ring-2 focus-visible:ring-blue-400" tabIndex={0} aria-label={`Interactive ${state} Calibration surface. Arrow keys select cells; drag rotates; wheel zooms.`} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onKeyDown={keyDown} onWheel={wheel}/><div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500"><span>Drag to rotate · wheel to zoom · arrows to select · neutral shading represents numerical height only</span><button type="button" className="rounded border border-zinc-700 px-3 py-1 text-zinc-300" onClick={()=>{setRotation(-.65);setTilt(.72);setZoom(1);}}>Reset view</button></div></div>;
+  return <div><canvas ref={canvasRef} className="h-[520px] w-full touch-none rounded-xl border border-zinc-800 bg-black outline-none focus-visible:ring-2 focus-visible:ring-blue-400" tabIndex={0} aria-label={`Interactive ${state} Calibration surface. Arrow keys select cells; drag rotates; wheel zooms.`} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onKeyDown={keyDown} onWheel={wheel}/><div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500"><span>{state === "working" ? "Working" : state === "reference" ? "Reference" : "Current"} surface · Drag to rotate · wheel to zoom · arrows to select · neutral shading represents numerical height only</span><button type="button" className="rounded border border-zinc-700 px-3 py-1 text-zinc-300" onClick={()=>{setRotation(-.65);setTilt(.72);setZoom(1);}}>Reset view</button></div></div>;
 }

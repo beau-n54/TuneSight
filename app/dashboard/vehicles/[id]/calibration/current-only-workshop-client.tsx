@@ -724,7 +724,7 @@ export default function CurrentOnlyWorkshopClient({
   );
 }
 
-function CurrentInspector({
+export function CurrentInspector({
   detail,
   terminologyMode,
   cell,
@@ -894,7 +894,7 @@ function CurrentInspector({
   );
 }
 
-function CurrentGrid({
+export function CurrentGrid({
   detail,
   terminologyMode,
   working,
@@ -903,12 +903,18 @@ function CurrentGrid({
   onSelect,
   onNavigate,
   onCommit,
+  interactionAllowed = true,
+  onEditingChange,
+  onDraftCancelled,
 }: {
   detail: CurrentOnlyDefinition;
   terminologyMode: CalibrationTerminologyMode;
   working: WorkingCalibration | null;
   displayMode: CalibrationDisplayMode;
   selected: readonly number[];
+  interactionAllowed?: boolean;
+  onEditingChange?: (index: number, editing: boolean) => void;
+  onDraftCancelled?: () => void;
   onSelect: (index: number, region?: boolean) => void;
   onNavigate: (index: number) => void;
   onCommit: (
@@ -981,13 +987,15 @@ function CurrentGrid({
               changed={Boolean(displayMode === "working" && delta?.delta)}
               selected={selected.includes(item.index)}
               canEdit={Boolean(
-                displayMode === "working" &&
+                interactionAllowed && displayMode === "working" &&
                   working &&
                   detail.editCapability.state === "EDIT_QUALIFIED",
               )}
               onSelect={onSelect}
               onNavigate={onNavigate}
               onCommit={(next) => onCommit(item.index, next)}
+              onEditingChange={editing => onEditingChange?.(item.index, editing)}
+              onDraftCancelled={onDraftCancelled}
               format={shown}
             />
           </td>

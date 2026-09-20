@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { validationExplanation } from "@/lib/calibration-workshop/manualEditorUx";
 import type { WorkingValidationState } from "@/lib/calibration-workshop/workingCalibration";
 
+import { DIRECT_DRAFT_CANCELLED, directDraftPolicy, discardRevokedDraft, submitDirectDraft } from "@/lib/calibration-workshop/sharedWorkspacePresentationState";
+
 type DirectEditResult = Readonly<{ status: "applied"; validation: WorkingValidationState; findings: readonly string[] }> | Readonly<{ status: "blocked"; findings: readonly string[] }>;
 
-export default function DirectGridCell({ cellKey, index, row, column, columnCount, value, currentValue, referenceValue, changed, selected, canEdit, onSelect, onNavigate, onCommit, format }: {
+export default function DirectGridCell({ cellKey, index, row, column, columnCount, value, currentValue, referenceValue, changed, selected, canEdit, onSelect, onNavigate, onCommit, format, onEditingChange, onDraftCancelled }: {
   cellKey: string;
   index: number;
   row: number;
@@ -22,17 +24,30 @@ export default function DirectGridCell({ cellKey, index, row, column, columnCoun
   onNavigate: (index: number) => void;
   onCommit: (value: number) => DirectEditResult;
   format: (value: number) => string;
+  onEditingChange?: (editing: boolean) => void;
+  onDraftCancelled?: () => void;
 }) {
   const [editing, setEditing] = useState(false), [draft, setDraft] = useState(""), [feedback, setFeedback] = useState<Readonly<{ state: WorkingValidationState; findings: readonly string[] }> | null>(null);
-  const begin = () => { if (!canEdit) return; onSelect(index); setDraft(String(value)); setFeedback(null); setEditing(true); };
-  const cancel = () => { setEditing(false); setDraft(""); setFeedback(null); };
+  const policy = directDraftPolicy(editing, canEdit);
+  useEffect(() => {
+    if (!policy.cancel) return;
+    queueMicrotask(() => {
+      discardRevokedDraft(true, false, () => {
+        setEditing(false); setDraft(""); setFeedback({ state: "BLOCKED", findings: [DIRECT_DRAFT_CANCELLED] });
+      }, onEditingChange, onDraftCancelled);
+    });
+  }, [policy.cancel, onEditingChange, onDraftCancelled]);
+  const begin = () => { if (!canEdit) return; onSelect(index); setDraft(String(value)); setFeedback(null); setEditing(true); onEditingChange?.(true); };
+  const cancel = () => { setEditing(false); setDraft(""); setFeedback(null); onEditingChange?.(false); };
   const commit = () => {
+    if (!policy.canSubmit) return false;
     if (!draft.trim()) { setFeedback({ state: "BLOCKED", findings: ["Working value must be supplied."] }); return false; }
-    const result = onCommit(Number(draft));
+    const result = submitDirectDraft(editing, canEdit, Number(draft), onCommit);
+    if (!result) return false;
     if (result.status === "blocked") { setFeedback({ state: "BLOCKED", findings: result.findings }); return false; }
-    setFeedback({ state: result.validation, findings: result.findings }); setEditing(false); setDraft(""); return true;
+    setFeedback({ state: result.validation, findings: result.findings }); setEditing(false); setDraft(""); onEditingChange?.(false); return true;
   };
-  if (editing) return <div className="min-w-28 rounded-lg border border-blue-300 bg-black p-1">
+  if (policy.showInput) return <div className="min-w-28 rounded-lg border border-blue-300 bg-black p-1">
     <input autoFocus aria-label={`Edit cell row ${row} column ${column}`} value={draft} onChange={event => setDraft(event.target.value)} inputMode="decimal" onKeyDown={event => {
       if (event.key === "Escape") { event.preventDefault(); cancel(); }
       else if (event.key === "Enter") { event.preventDefault(); if (commit()) onNavigate(index); }

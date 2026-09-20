@@ -757,6 +757,7 @@ export default function WorkshopClient({
                     </span>
                   </div>
                   <CalibrationPlot2D
+                    presentation={displayMode === "working" ? "reference-working" : "reference-current"}
                     model={visual}
                     terminology={terminology}
                     direction={
@@ -778,7 +779,7 @@ export default function WorkshopClient({
                   <CalibrationSurface3D
                     model={visual}
                     detail={detail}
-                    state="current"
+                    state={displayMode === "working" ? "working" : "current"}
                     terminology={terminology}
                     selectedCell={selectedCell}
                     onSelect={(index) => selectCell(index)}
@@ -971,7 +972,7 @@ function Unavailable({
     </div>
   );
 }
-function Grid({
+export function Grid({
   detail,
   terminology,
   currentCells,
@@ -980,6 +981,8 @@ function Grid({
   canEdit,
   onNavigate,
   onCommit,
+  onEditingChange,
+  onDraftCancelled,
 }: {
   detail: WorkshopViewModel["selectedDefinition"];
   terminology: CalibrationTerminology;
@@ -991,6 +994,8 @@ function Grid({
     typeof buildCalibrationVisualizationModel
   >["columnAxis"];
   canEdit: boolean;
+  onEditingChange?: (index: number, editing: boolean) => void;
+  onDraftCancelled?: () => void;
   onNavigate: (index: number) => void;
   onCommit: (
     index: number,
@@ -1034,6 +1039,8 @@ function Grid({
               changed={item.changed}
               selected={selected.includes(i)}
               canEdit={canEdit}
+              onEditingChange={editing => onEditingChange?.(item.index, editing)}
+              onDraftCancelled={onDraftCancelled}
               onSelect={onSelect}
               onNavigate={onNavigate}
               onCommit={(value) => onCommit(i, value)}
@@ -1055,7 +1062,7 @@ function Grid({
     />
   );
 }
-function Inspector({
+export function Inspector({
   workshop,
   cell,
   currentCell,

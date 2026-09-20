@@ -5,7 +5,9 @@ import { validationExplanation, workingOperationLabel } from "@/lib/calibration-
 
 export type CalibrationDisplayMode = "current" | "working";
 
-export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus }: {
+export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, interactionAllowed = true, createAllowed = true }: {
+  interactionAllowed?: boolean;
+  createAllowed?: boolean;
   mode: CalibrationDisplayMode;
   onMode: (mode: CalibrationDisplayMode) => void;
   working: WorkingCalibration | null;
@@ -35,16 +37,16 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
       <p className="text-xs text-zinc-400" role="status">{saveStatus === "saved" ? "Saved in this subscriber Workshop" : saveStatus === "loading" ? "Restoring saved Working Calibration…" : "Working Calibration not created"}</p>
     </div>
 
-    {!working ? <div><p className="text-sm text-zinc-300">Current Calibration is immutable. Create one separate Working Calibration from this exact Current Dataset to begin editing.</p><button type="button" onClick={onCreate} className="mt-3 rounded-lg border border-blue-400 bg-blue-400/10 px-4 py-2 text-sm font-semibold text-blue-100">Create Working Calibration</button></div> : <>
+    {!working ? <div><p className="text-sm text-zinc-300">Current Calibration is immutable. Create one separate Working Calibration from this exact Current Dataset to begin editing.</p><button type="button" disabled={!interactionAllowed || !createAllowed} onClick={onCreate} className="mt-3 rounded-lg border border-blue-400 bg-blue-400/10 px-4 py-2 text-sm font-semibold text-blue-100">Create Working Calibration</button></div> : <>
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300">{working.state === "dirty" ? `${working.cursor} applied change${working.cursor === 1 ? "" : "s"}` : "No Working changes"}</span>
-        <button type="button" disabled={working.cursor === 0} onClick={onUndo} className="rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40">Undo</button>
-        <button type="button" disabled={working.cursor >= working.mutations.length} onClick={onRedo} className="rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40">Redo</button>
+        <button type="button" disabled={!interactionAllowed || working.cursor === 0} onClick={onUndo} className="rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40">Undo</button>
+        <button type="button" disabled={!interactionAllowed || working.cursor >= working.mutations.length} onClick={onRedo} className="rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40">Redo</button>
       </div>
       <div className="grid gap-3 rounded-xl border border-zinc-800 bg-black/40 p-3 md:grid-cols-[minmax(150px,220px)_minmax(130px,1fr)_auto] md:items-end">
-        <label className="text-xs text-zinc-400">Operation<select aria-label="Edit operation" value={operation} onChange={event => onOperation(event.target.value as WorkingEditOperation)} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"><option value="assign">Set value</option><option value="delta">Add / subtract</option><option value="percentage">Percentage change</option></select></label>
-        <label className="text-xs text-zinc-400">Engineering value<input aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "Enter an exact value" : operation === "delta" ? "Enter an amount" : "Enter a percentage"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
-        <button type="button" disabled={!editQualified || preview?.validation === "BLOCKED" || !preview || mode !== "working"} onClick={onApply} className="rounded-lg border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-200 disabled:border-zinc-700 disabled:text-zinc-600">Apply to {selectedCount} cell{selectedCount === 1 ? "" : "s"}</button>
+        <label className="text-xs text-zinc-400">Operation<select disabled={!interactionAllowed} aria-label="Edit operation" value={operation} onChange={event => onOperation(event.target.value as WorkingEditOperation)} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"><option value="assign">Set value</option><option value="delta">Add / subtract</option><option value="percentage">Percentage change</option></select></label>
+        <label className="text-xs text-zinc-400">Engineering value<input disabled={!interactionAllowed} aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "Enter an exact value" : operation === "delta" ? "Enter an amount" : "Enter a percentage"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
+        <button type="button" disabled={!interactionAllowed || !editQualified || preview?.validation === "BLOCKED" || !preview || mode !== "working"} onClick={onApply} className="rounded-lg border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-200 disabled:border-zinc-700 disabled:text-zinc-600">Apply to {selectedCount} cell{selectedCount === 1 ? "" : "s"}</button>
       </div>
       <div className={`rounded-lg border p-3 text-xs ${preview?.validation === "VALID" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100" : preview?.validation === "WARNING" ? "border-amber-400/40 bg-amber-400/10 text-amber-100" : "border-zinc-700 bg-black/30 text-zinc-400"}`} role="status">
         <strong>{preview?.validation ?? (editQualified ? "Enter a value to validate" : "BLOCKED")}</strong>

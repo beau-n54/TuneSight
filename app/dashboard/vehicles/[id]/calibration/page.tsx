@@ -3,6 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { developmentCalibrationWorkshopProvider, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
 import WorkshopClient from "./workshop-client";
+import SharedWorkspaceClient, { EmptySharedWorkspace } from "./shared-workspace-client";
+import { buildSharedWorkspacePayload, sharedWorkspaceContextKey, type SharedWorkspacePayload } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
+import { subscriberWorkspacePresentation } from "@/lib/calibration-workshop/sharedWorkspacePresentation.server";
+import { dispatchWorkspace, maskRetainedWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceDispatch";
 import CurrentOnlyWorkshopClient from "./current-only-workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
 import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
@@ -60,7 +64,10 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className={`rounded-2xl border p-6 ${result?.coverage?.outcome === "CONFLICT" ? "border-red-400/40 bg-red-400/10" : "border-amber-400/35 bg-amber-400/10"}`} role="alert"><p className="text-xs font-bold uppercase tracking-[0.18em]">{result?.title ?? "Calibration session unavailable"}</p><h2 className="mt-3 text-2xl font-bold">{result?.message ?? "The bounded localhost session expired or is unavailable. Re-open the Calibration file."}</h2>{result&&<dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">ROM/software</dt><dd>{result.identity ?? "Not established"}</dd><dt className="text-zinc-500">Container</dt><dd>{result.container ?? "Unresolved"}</dd><dt className="text-zinc-500">Byte size</dt><dd>{result.byteLength?.toLocaleString() ?? "Unavailable"}</dd><dt className="text-zinc-500">Binary digest</dt><dd className="break-all font-mono text-xs">{result.digest ?? "Unavailable"}</dd><dt className="text-zinc-500">Definition coverage</dt><dd>{result.coverage?.outcome ?? "INVALID"}</dd></dl>}{result?.coverage?.findings.map(finding=><p key={finding} className="mt-3 text-sm text-zinc-300">{finding}</p>)}{result?.coverage?.discoveryPackage&&<p className="mt-3 break-all font-mono text-xs text-zinc-400">Discovery Evidence: {result.coverage.discoveryPackage.packageRevision}</p>}<p className="mt-4 text-sm">TuneSight did not guess or fall back to a Development Evidence Preview.</p></section></div></main>;
   }
 
+  const presentation = subscriberWorkspacePresentation();
+  const sharedContext = { ownerId: createHash("sha256").update(user.id).digest("hex").slice(0, 24), vehicleId: vehicle.id, sessionId: activeSubscriberSession ?? null, sourceMode: "subscriber" as const };
   if (entry.mode === "empty") {
+    if (presentation === "shared") return <EmptySharedWorkspace upload={<UploadCalibration vehicleId={vehicle.id}/>} vehicle={vehicle} context={sharedContext} reason={subscriberResult && subscriberResult.status !== "workshop_ready" ? subscriberResult.message : "Open Calibration File to begin."}/>;
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><p className="mt-2 text-zinc-400">{vehicle.year || "Unknown Year"} {vehicle.make || "Unknown Make"} {vehicle.model || "Unknown Model"}<span className="text-zinc-600"> · </span>{vehicle.engine_code || "Engine unknown"}</p><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6" role="status"><h2 className="text-xl font-bold">No Current Calibration loaded</h2><p className="mt-2 text-sm text-zinc-400">Open Calibration File to begin.</p><p className="mt-3 text-xs text-zinc-500">No Calibration evidence, addresses, Definitions or values have been substituted.</p></section></div></main>;
   }
 
@@ -83,12 +90,23 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   }
 
   const previewRom = entry.mode === "development_preview" && previewSelection.status === "valid" ? previewSelection.rom : undefined;
-  let workshop;
-  try { workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom); }
+  let workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel;
+  let sharedPayload: SharedWorkspacePayload | null = null;
+  try {
+    workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
+    if (subscriberSuccess) {
+      workshop = maskRetainedWorkspace(workshop, subscriberSuccess);
+      sharedPayload = dispatchWorkspace<SharedWorkspacePayload | null>(presentation, () => null,
+        () => buildSharedWorkspacePayload(workshop, subscriberSuccess, sharedContext, definition));
+    }
+  }
   catch (error) {
     const diagnostic = publicWorkshopFailureDiagnostic(error);
     console.error("CALIBRATION_WORKSHOP_FAILURE", diagnostic.errorId, error);
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><section className="rounded-2xl border border-red-400/30 bg-zinc-900 p-6" role="alert"><h1 className="text-xl font-bold">Calibration Evidence unavailable</h1><p className="mt-2 text-sm text-zinc-400">The controlled Workshop Evidence could not be loaded. No calibration values have been substituted.</p><dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">Diagnostic ID</dt><dd className="font-mono">{diagnostic.errorId}</dd><dt className="text-zinc-500">Failure stage</dt><dd>{diagnostic.stage}</dd><dt className="text-zinc-500">Elapsed</dt><dd>{diagnostic.elapsedMs} ms</dd></dl>{Object.entries(diagnostic.completedStageTimings).length > 0 && <p className="mt-4 font-mono text-xs text-zinc-500">Completed: {Object.entries(diagnostic.completedStageTimings).map(([stage, elapsed]) => `${stage} ${elapsed} ms`).join(" · ")}</p>}<p className="mt-4 text-sm text-zinc-400">No file paths, binary data, identities, tokens or resource names are included in this diagnostic.</p></section></div></main>;
+  }
+  if (sharedPayload && presentation === "shared") {
+    return <SharedWorkspaceClient upload={<UploadCalibration vehicleId={vehicle.id}/>} key={JSON.stringify([sharedWorkspaceContextKey(sharedContext, workshop), definition ?? null])} workshop={workshop} evidence={sharedPayload} context={sharedContext} vehicle={vehicle} requestedKey={definition}/>;
   }
   const currentOnlyWorkshop = isCurrentOnlyWorkshop(workshop) ? workshop : null;
   const comparisonWorkshop = isCurrentOnlyWorkshop(workshop) ? null : workshop;
