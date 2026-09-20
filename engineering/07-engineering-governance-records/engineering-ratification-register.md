@@ -1430,6 +1430,78 @@ The baseline session-fix commit remains accepted locally and unpushed; this entr
 
 ---
 
+### TS-RAT-025
+
+| Field | Ratified Value |
+|---|---|
+| Register ID | TS-RAT-025 |
+| Founder Acceptance / Release Confirmation Date | 2026-09-21 |
+| Artefact Type | Bounded implementation, validation and release acceptance reconciliation |
+| Artefact Name | U0 Shared Calibration Contract Projection Implementation |
+| Authority | Founder Beau, following Founder and Bob's U0 acceptance |
+| Architecture Authority | [TS-RAT-024](#ts-rat-024) — Universal Product Experience and Universal Calibration Workspace Architecture |
+| Implementation Commit | `a2526cb8f87845b33b2bdd718a489533fc58d032` — Add shared Calibration table projection |
+| Parent / Baseline Commit | `5767f6aec986d256f78729b5f11e5a28a765a616` — Ratify universal product and Calibration workspace architecture |
+| Contract Version | `tunesight.shared-table-projection.v1` |
+| Implementation Status | U0 COMPLETE AND ACCEPTED within its bounded shared-contract scope |
+| Release / Production Status | RELEASED AND DEPLOYED; Founder confirms Vercel safely completed production deployment of the exact implementation commit |
+| Visible Product Effect | None; the internal projection has no production route or UI consumer |
+| Historical Effect | Additive; TS-RAT-001 through TS-RAT-024 remain unchanged |
+| Further Authority | Documentation reconciliation only; U1 and all additional implementation require separate Founder authority |
+
+**Acceptance Declaration and Evidence Provenance**
+
+Founder and Bob accept U0 — Shared Contract Projection as implemented, validated and released within the separately authorised U0 boundary. The acceptance date above records the present release-confirmation and governance instruction; the implementation commit is dated 20 September 2026. It does not invent an exact production-deployment timestamp. Successful production deployment is Founder-confirmed evidence, not a new deployment audit performed during this documentation task.
+
+TS-RAT-024 remains the architecture authority and its original no-implementation-authority declaration remains historically intact. U0 completion follows the subsequent bounded implementation, commit and push instructions; neither architecture ratification alone nor this reconciliation grants U1 authority. Production deployment proves release of the unused internal projection, not visible Universal Workspace completion.
+
+**Exact Implementation Artefacts**
+
+- [lib/calibration-workshop/sharedTableProjection.ts](../../lib/calibration-workshop/sharedTableProjection.ts)
+- [lib/calibration-workshop/sharedTableProjection.fixtures.ts](../../lib/calibration-workshop/sharedTableProjection.fixtures.ts)
+- [lib/calibration-workshop/sharedTableProjection.test.ts](../../lib/calibration-workshop/sharedTableProjection.test.ts)
+
+These are the complete three-file implementation commit: 766 additions and zero deletions. The fixture adapter and controlled synthetic vectors are test-only; they do not establish new physical vehicle evidence, engineering qualification or production Knowledge.
+
+**Read-only Contract and Identity Boundary**
+
+- Existing Evidence, Knowledge, identity, comparison, quarantine, edit, reconstruction/Export and Working owners remain authoritative. The projection consumes their already-authorised outputs in one direction; owners and production routes/UI do not consume or depend on this new module. Its direct imports are owner-contract types. It performs no loading, network or storage access, qualification, conversion, mutation or persistence.
+- Exact selected-Table identity is the unambiguous tuple of contract version, `selected-table`, owner ID, vehicle ID, session ID, source mode, native Table key, Definition revision and exact occurrence. It is independent of evidence-slot contents and survives Current/Reference absence, quarantine and comparison versus Current-only state. No title, platform label or Current-layer identity substitutes for selection identity. The test adapter checks that the native key agrees with the supplied revision and occurrence.
+- Evidence-layer identities retain exact Dataset/revision, binary identity/digest, ROM layout, relationship revision, Definition-set revision and Definition occurrence binding. The complete projection identity separately includes evidence-layer identities and Working ID/revision; stable selected-Table identity does not imply unchanged evidence. Explicit owner-contract disagreements remain failures, never silent requalification.
+- Current and Reference retain their own availability, unresolved, read-failure, unavailable and quarantine outcomes. Current, Reference, Working and Suggested remain distinct slots; Working retains its separately bound identity and Suggested generation remains unavailable. Missing Reference never changes Current into Stock or creates comparison authority.
+- VIEW, EDIT, RECONSTRUCT, Export and Flash remain independent outcomes from the existing owners. Presentation geometry neither grants capability nor changes qualification. Export remains checksum/integrity locked and Flash remains unavailable.
+- Source X/Y identifiers, coordinate values, order and units are preserved. Scalar Tables have no line/surface geometry. Line support requires genuine bound axes and complete qualified topology; surface support additionally requires finite numeric, ordered, nondegenerate axes. Missing, ambiguous or incomplete geometry remains explicit with qualified Grid as the fallback; no invented axes, flattened all-cell geometry, interpolation or title/dimension-only inference is introduced.
+- Recursive snapshots copy projection content before freezing projection-owned objects and arrays. Caller-owned Evidence, Knowledge bindings, cells, axes, semantic bindings and capability objects are neither frozen nor mutated. Upstream identities and runtime behavior remain unchanged.
+
+**Accepted Validation Evidence**
+
+| Evidence | Accepted result and boundary |
+|---|---|
+| U0 contract tests | 48 / 48 passing |
+| Relevant identity/provider/session tests | 40 / 40 passing |
+| Accepted deterministic regression | 805 tests: 802 passing; only the same three deliberately held U4 presentation-contract failures |
+| Held U4 failures | `Related Table`, `Understand`, `semantic.unavailableReason` in `tablePresentation.test.ts`; unchanged and not represented as passing |
+| Type-check | Passed |
+| Changed-file lint | Passed |
+| Authenticated localhost | N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only passed without browser runtime errors; existing subscriber workflows, with no Development Preview substitution |
+| Production release | Founder confirms safe successful Vercel production deployment of `a2526cb8f87845b33b2bdd718a489533fc58d032` |
+
+The prior 757-test / 754-pass baseline remains historical evidence under TS-RAT-024; adding the 48 U0 tests yields the accepted 805-test / 802-pass total with the same three holds. These accepted results are carried forward without an application test rerun for this documentation-only reconciliation. Localhost acceptance and production release are distinct evidence dimensions; release does not claim new production browser validation or a migrated visible shell.
+
+**Preserved Product Boundaries and Follow-ups**
+
+Existing routes, layouts, renderers, mutation engines, persistence and subscriber workflows are unchanged. No visible shell migration is complete; no renderer replacement occurred. No new engineering qualification, semantic Knowledge, database or persistence change, Export unlock, Flash, Suggested Calibration generation, DTC execution or dyno capability was introduced.
+
+U1 Shared Shell is the next proposed slice, not authorised. The three U4 failures remain deliberate holds. Live Telemetry remains unfinished and separately prioritised; no physical adapter/RPM/Boost proof is added by Calibration validation. The professional server-revision/collaboration programme remains a mandatory future Workshop production gate under TS-RAT-024.
+
+The seven [existing observations outside U0](engineering-project-status.md#existing-observations-outside-u0) remain separate follow-ups: Founder B58 Gen1 vehicle context versus historical B58gen2 Definition-source family; provider `observedDmeFamily` semantics; older dashboard Development Preview wording; Current-only Explorer narrow-column collapse; login timeout/exception recovery; form-field `id`/`name` metadata; and legacy `loadRomLibrary.test.ts` runner compatibility. They are not attributed to U0, fixed, reclassified or accepted as newly authorised work here.
+
+**Safe Rollback Boundary**
+
+The [U0 migration boundary](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/06-migration-work-packages.md#ratified-migration-sequence>) permits a later separately authorised normal revert/removal of the unused projection and its two supporting fixture/test files, returning this scope to baseline `5767f6aec986d256f78729b5f11e5a28a765a616`. There is no production consumer, route dispatch, persisted format or database migration to reverse. Preserve existing evidence, Working state/history and prior Git history; this record performs or authorises no rollback, deployment or additional implementation.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

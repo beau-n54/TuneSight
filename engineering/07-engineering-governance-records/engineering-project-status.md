@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 20 September 2026
+**Last Updated:** 21 September 2026
 
 
 
@@ -64,15 +64,15 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** Calibration runtime baseline released; Universal Product Experience and Calibration Workspace architecture ratified; governance package awaiting final diff review.
+**Current Engineering Phase:** Universal Product Experience and Calibration Workspace architecture ratified; U0 Shared Contract Projection complete, accepted, released and deployed; U0 governance reconciliation awaiting Founder and Bob's final diff review.
 
-**Current Active Work Package:** Documentation-only TS-RAT-024 governance reconciliation; no new implementation work package activated.
+**Current Active Work Package:** Documentation-only TS-RAT-025 U0 governance reconciliation; no further implementation work package activated.
 
-**Current Objective:** Canonicalise the ratified architecture and reconcile current status without changing runtime behavior.
+**Current Objective:** Record the accepted U0 implementation, validation and production release separately from unchanged visible product behavior and future implementation authority.
 
-**Next Authorised Objective:** No implementation authorised. U0 Shared Contract Projection is first in principle but awaits a separate Founder implementation instruction. No deployment or release is authorised.
+**Next Authorised Objective:** Founder and Bob's final diff review of this governance package. U1 Shared Shell is the next proposed slice but remains unauthorised. This documentation task grants no staging, commit, push, deployment or further implementation authority.
 
-**Next Subsystem Definition:** U0–U6 follows the ratified migration sequence. Live Telemetry remains unfinished and near the front of the queue; neither programme gains implementation authority through this status update. Existing WP-011.7 and WP-011.2 validation/hold boundaries remain unchanged.
+**Next Subsystem Definition:** U0 is complete; proposed U1–U6 follows the ratified migration sequence and requires separately bounded Founder authority. Live Telemetry remains unfinished and separately prioritised near the front of the queue. Neither programme gains implementation authority through this status update. Existing WP-011.7 and WP-011.2 validation/hold boundaries remain unchanged.
 
 **Current Engineering Hold:** WP-003 - Vehicle Identity Implementation; Knowledge integration dependency satisfied, formal hold disposition pending Founder review
 
@@ -151,22 +151,23 @@ Standards define stable, assessable and implementation-independent obligations. 
 
 ---
 
-## Current Reconciliation — 20 September 2026
+## Current Reconciliation — 21 September 2026
 
-This living update records the Founder's supplied release and physical-validation evidence, the accepted local reconciliation/test results and repository commit/ref inspection. It does not claim a new deployment audit or physical test was performed during this documentation task. Historical ratification entries and work-package records remain unchanged.
+This living update records Founder and Bob's acceptance of U0, the Founder's confirmation that Vercel safely completed production deployment of the exact implementation commit, the accepted validation results and local repository commit/ref inspection. It does not claim a new deployment audit, application test run, production browser test or physical vehicle test during this documentation task. Historical ratification entries and work-package records remain unchanged. The acceptance/release confirmation in the present instruction is dated 21 September 2026; the implementation commit is dated 20 September 2026, and no exact deployment timestamp is inferred.
 
 | Status dimension | Current bounded position |
 |---|---|
-| Released production | The eight-commit Calibration programme ends at `ece1f0a9f5e5f58aa825cae4f0a3ee8e81e2122e`, the accepted released checkpoint. The locally recorded `origin/main` points there; no fetch or deployment occurs in this reconciliation. |
-| Physically Founder-validated Calibration | Vehicle-owned N54 BIN-backed Calibration and B58 Gen1 Supra DTF-backed Calibration; these are file/evidence workflows, not proof of vehicle telemetry or DME writing. |
-| Accepted local, unpushed | `840b75d444f67e22c6003202ebb39e7c17cb403d` — `Enforce fail-closed Calibration sessions`. Local `main` is one commit ahead of the recorded `origin/main`. This fix is not represented as deployed or present on `origin/main`. |
-| Ratified architecture | [Universal Product Experience and Universal Calibration Workspace](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/README.md>), [TS-RAT-024](engineering-ratification-register.md#ts-rat-024), Founder approval 20 September 2026. Architecture ratification is not runtime completion. |
-| Planned, unauthorised implementation | U0 Shared Contract Projection first in principle, followed by U1–U6; separate Founder implementation instruction required. No U0 work has begun. |
+| Ratified architecture | [Universal Product Experience and Universal Calibration Workspace](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/README.md>), [TS-RAT-024](engineering-ratification-register.md#ts-rat-024), Founder approval 20 September 2026. Architecture ratification alone grants no implementation or release authority. |
+| Completed U0 implementation | Shared Contract Projection complete and accepted within its bounded scope, recorded by [TS-RAT-025](engineering-ratification-register.md#ts-rat-025); implementation commit `a2526cb8f87845b33b2bdd718a489533fc58d032`, parent/baseline `5767f6aec986d256f78729b5f11e5a28a765a616`. |
+| Released production | U0 is released and deployed. Founder confirms Vercel safely completed production deployment of `a2526cb8f87845b33b2bdd718a489533fc58d032`. Local `main`, HEAD and cached `origin/main` match that commit, with 0 / 0 ahead/behind at reconciliation. No fetch, push or deployment is performed by this task. |
+| Visible product behavior | Shared projection remains internal, unused by production routes or UI. Existing routes, layouts, renderers, mutation engines, persistence and subscriber workflows remain unchanged; deployment does not establish visible Universal Workspace completion. |
+| Accepted workflow anchors | Authenticated localhost N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only passed without runtime errors and without Development Preview substitution. Earlier Founder-validated BIN/DTF file workflows remain preserved; they are not vehicle telemetry or DME-writing proof. |
+| Proposed, unauthorised implementation | U1 Shared Shell is next proposed, followed by the remaining ratified U2–U6 sequence. U1 has not begun and requires a separate Founder instruction; no visible shell migration is complete. |
 | Unverified / unfinished | Live Telemetry and MHD orange physical RPM/Boost proof; Analysis-to-exact-Calibration-Table handoff; checksum-qualified Export; Flash; professional server revision/collaboration. |
 
 ### Released Calibration programme
 
-The accepted released eight-commit sequence is:
+The released history comprises the original eight-commit Calibration programme followed by the accepted session fix, architecture package and U0 projection:
 
 | Commit | Subject |
 |---|---|
@@ -178,22 +179,51 @@ The accepted released eight-commit sequence is:
 | `6839704ce43fa4ac413887d9cb1cf210397556e6` | Complete Calibration Tuning Essentials presentation |
 | `e46c0207eecd2b7b6917a068ab9ee75f968a1082` | Complete I8A0S Tuning Essentials coverage |
 | `ece1f0a9f5e5f58aa825cae4f0a3ee8e81e2122e` | Refine Calibration enthusiast terminology |
+| `840b75d444f67e22c6003202ebb39e7c17cb403d` | Enforce fail-closed Calibration sessions |
+| `5767f6aec986d256f78729b5f11e5a28a765a616` | Ratify universal product and Calibration workspace architecture |
+| `a2526cb8f87845b33b2bdd718a489533fc58d032` | Add shared Calibration table projection |
 
-The Calibration Workshop and Manual Editor exist. The accepted runtime baseline includes vehicle-owned evidence, immutable Current, sparse separate Working Calibration, direct governed Grid editing, history and undo/redo, Grid axes, Engineering Navigation, Tuning Essentials groundwork and Standard/Engineer terminology. N54 comparison and B58/Supra Current-only remain distinct current clients pending the ratified universal-shell migration; existing capability is not a claim that U0–U6 is implemented. Qualified semantic groundwork does not imply complete engineering interpretation for every Definition.
+The Calibration Workshop and Manual Editor exist. The accepted runtime baseline includes vehicle-owned evidence, immutable Current, sparse separate Working Calibration, direct governed Grid editing, history and undo/redo, Grid axes, Engineering Navigation, Tuning Essentials groundwork and Standard/Engineer terminology. N54 comparison and B58/Supra Current-only remain distinct current clients pending the ratified universal-shell migration. U0 adds the unused internal projection; it does not replace either client or establish U1–U6 completion. Qualified semantic groundwork does not imply complete engineering interpretation for every Definition.
 
-### Accepted local session integrity and testing
+### Accepted session integrity and U0 validation
 
-The unpushed `840b75d...` commit preserves ordinary no-token scoped recovery, but explicit malformed, empty, repeated, unavailable, expired or wrong-owner/vehicle tokens fail closed without latest-session, vehicle-role or Development Preview substitution. Valid explicit sessions retain exact binding.
+The released `840b75d444f67e22c6003202ebb39e7c17cb403d` commit preserves ordinary no-token scoped recovery, but explicit malformed, empty, repeated, unavailable, expired or wrong-owner/vehicle tokens fail closed without latest-session, vehicle-role or Development Preview substitution. Valid explicit sessions retain exact binding. This accepted behavior is unchanged by U0.
 
-Accepted deterministic baseline: **757 tests; 754 passing; three deliberately held presentation-contract failures** in `tablePresentation.test.ts`: `Related Table`, `Understand` and `semantic.unavailableReason`. They remain visible until authorised U4 work delivers and validates their actual contracts. Ratification does not make those tests pass. Type-checking and changed-file lint passed in the accepted rectification; no application tests were rerun for this documentation-only reconciliation.
+Accepted U0 validation comprises **48 / 48 U0 tests**, **40 / 40 relevant identity/provider/session tests**, passed type-checking and passed changed-file lint. The accepted deterministic regression total is **805 tests; 802 passing; three deliberately held presentation-contract failures** in `tablePresentation.test.ts`: `Related Table`, `Understand` and `semantic.unavailableReason`. The preceding 757-test / 754-pass baseline remains historical; the 48 U0 tests account for the new total. The same three holds remain visible until separately authorised U4 work delivers and validates their actual contracts. They were not altered or counted as passing.
+
+Authenticated localhost validation passed for N54 comparison, B58 Gen1 Current-only and Founder-validated Supra DTF Current-only without browser runtime errors. The workflows used existing subscriber evidence, with no Development Preview substitution. Production deployment was subsequently confirmed safe and successful by Founder for the exact U0 commit. These are distinct evidence claims: no new production browser acceptance or visible Universal Workspace completion is inferred. No application tests were rerun for this documentation-only reconciliation.
+
+### U0 shared-contract completion and release boundary
+
+[TS-RAT-025](engineering-ratification-register.md#ts-rat-025) records the accepted three-file implementation and contract `tunesight.shared-table-projection.v1`. Application/Presentation consumes existing authorised Evidence and Knowledge owner outputs through a read-only projection; it performs no loading, network/storage access, qualification, conversion, mutation or persistence. No production route, component, renderer, provider or persistence module imports it.
+
+Selected-Table identity binds the exact owner/vehicle/session/source mode, native key, Definition revision and occurrence independently of evidence contents; Current/Reference absence and comparison state cannot replace that identity. Evidence-layer and complete projection identities remain separately revision-bound. Current, Reference, Working and Suggested remain separate, and VIEW, EDIT, RECONSTRUCT, Export and Flash retain independent owner outcomes. Truthful source axes and complete qualified topology gate geometry; qualified Grid remains the fallback. Recursive copying before freezing protects caller-owned Evidence, Knowledge, cells, axes, semantics and capabilities from mutation or freezing.
+
+U0 is complete, accepted, released and deployed, but remains internal and unconsumed by the visible UI. Existing routes, layouts, renderers, mutation, persistence and subscriber workflows are unchanged. No visible shell migration is complete; no renderer replacement occurred. No new engineering qualification or semantic Knowledge was added. No database or persistence change occurred. Export remains checksum/integrity locked; Flash and Suggested Calibration generation remain unavailable; no DTC or dyno capability was introduced.
+
+A separately authorised rollback can remove/revert the unused projection and its two fixture/test files to the accepted parent baseline without changing route dispatch, evidence, Working history or persisted formats. No rollback is authorised or performed here. U1 Shared Shell remains the next proposed slice, not authorised by this completed U0 checkpoint or its deployment.
+
+### Existing observations outside U0
+
+These observations pre-exist this U0 reconciliation and remain separately tracked follow-ups. They are not attributed to U0, fixed, reclassified or granted implementation authority by this record.
+
+| Existing observation | Preserved distinction / follow-up boundary |
+|---|---|
+| Founder B58 Gen1 vehicle context versus historical B58gen2 Definition-source family | Preserve Founder vehicle-generation context separately from the historical Definition-source family for `00005D553C8C05`; do not reclassify the anchor or change qualification to reconcile labels. |
+| Provider `observedDmeFamily` semantics | The provider-label semantic discrepancy remains explicit for separate owner-contract review; no owner output or interpretation is changed by U0. |
+| Older dashboard Development Preview wording | Existing wording remains a separate presentation follow-up; it was not used as substitute evidence for authenticated subscriber acceptance. |
+| Current-only Explorer narrow-column collapse behavior | Existing responsive/panel behavior remains outside U0; no shell or layout repair occurred. |
+| Login handler timeout and exception recovery | Missing timeout/exception recovery remains a pre-existing follow-up. The earlier `EACCES` transport failure belonged to Codey's restricted execution environment and grants no authority to modify TuneSight authentication. |
+| Form-field `id` / `name` metadata | Missing field metadata remains a separate existing form follow-up; no form was changed. |
+| Legacy `loadRomLibrary.test.ts` runner compatibility | Runner compatibility remains a separate existing test-tooling follow-up; no runner or test was changed in this governance task. |
 
 ### Ratified scope and remaining boundaries
 
 The TuneSight-wide product invariant applies to Vehicle Dashboard, Logs/Log History, Analysis, Calibration, Live Telemetry, future BMW Coding, Diagnostics and professional/dyno evidence surfaces. Calibration is the first formally governed domain application; other domains still require their own bounded architecture and migration programmes. No migration-completion claim is made for those domains.
 
-One universal Calibration shell, independent evidence/capability states, truthful geometry with Grid fallback, identical engineering truth across Standard/Engineer, qualified Related Tables, Understand and explicit semantic absence are ratified. Standard is the new-profile default. Desktop/laptop editing, tablet review pending validation and phone read-only review are the approved device boundaries. Current 12-tab/six-derived-Table bounds are provisional; protected state must not be silently evicted. U0 is first in principle but remains unauthorised.
+One universal Calibration shell, independent evidence/capability states, truthful geometry with Grid fallback, identical engineering truth across Standard/Engineer, qualified Related Tables, Understand and explicit semantic absence are ratified. Standard is the new-profile default. Desktop/laptop editing, tablet review pending validation and phone read-only review are the approved device boundaries. Current 12-tab/six-derived-Table bounds are provisional; protected state must not be silently evicted. U0 is complete only within its accepted internal projection scope; U1 Shared Shell remains proposed and unauthorised.
 
-Export remains checksum/integrity locked; Flash remains unavailable. VIEW, EDIT and RECONSTRUCT are distinct; source-binary lease expiry does not erase independently durable view evidence or Working history. Suggested generation, DTC execution and dyno control are not authorised. Analysis-to-exact-Calibration-Table handoff remains unfinished; provisional cross-references do not establish exact navigation authority.
+Export remains checksum/integrity locked; Flash remains unavailable. VIEW, EDIT and RECONSTRUCT are distinct; source-binary lease expiry does not erase independently durable view evidence or Working history. Suggested Calibration generation remains unavailable; DTC execution and dyno control are not authorised or introduced by U0. Analysis-to-exact-Calibration-Table handoff remains unfinished; provisional cross-references do not establish exact navigation authority.
 
 Server-side professional calibration revision/collaboration persistence is a mandatory future Workshop production gate, including lineage, attribution, custody, permissions, notes/reviews, conflict protection, branching/reconciliation, exact evidence association, migration/rollback and security/retention/customer consent. Browser-local Working remains through U0–U6 unless a separate programme is authorised. Universal-shell completion will not by itself establish professional Workshop production completion.
 
@@ -279,7 +309,9 @@ WP-004 Knowledge Implementation
             +-- FOUNDER RATIFIED
             +-- QUALIFIED CALIBRATION RUNTIME AND MANUAL EDITOR IMPLEMENTED
             +-- UNIVERSAL WORKSPACE ARCHITECTURE RATIFIED (TS-RAT-024)
-            +-- U0 IMPLEMENTATION NOT AUTHORISED
+            +-- U0 INTERNAL PROJECTION COMPLETE, ACCEPTED AND DEPLOYED (TS-RAT-025)
+            +-- NO PRODUCTION UI CONSUMER / VISIBLE SHELL MIGRATION
+            +-- U1 SHARED SHELL PROPOSED, NOT AUTHORISED
             +-- NOT A WP-003 HOLD DEPENDENCY
 ```
 
@@ -340,7 +372,7 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-002 Repository Architecture Foundation | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
 | WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED; WP-004.2 Knowledge integration dependency satisfied | Founder production validation completed across the accepted WP-004.2 scope; formal WP-003 hold disposition remains pending | ENGINEERING HOLD pending Founder review | Not ratified as a completed Work Package |
 | WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified, WP-004.2 complete and WP-004.3 canonical Knowledge contracts complete | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed; WP-004.3 deterministic contract and synthetic publication validation passed | IN PROGRESS | WP-004.1 and WP-004.2 implementation scopes, WP-004.3 architecture and the WP-004.3 contract reconciliation are ratified; parent Work Package completion has not been declared |
-| WP-004.3 Engineering Calibration Intelligence Architecture | Architecture ratified; universal workspace architecture TS-RAT-024 | Qualified Calibration runtime, Workshop/Manual Editor and bounded semantic groundwork implemented; universal migration not implemented | Founder-validated N54 BIN and B58 Gen1 Supra DTF workflows; accepted local baseline 757 tests, 754 passing, three held | Broader programme incomplete; U0 awaits separate authority | TS-RAT-009/021/022 historical scopes preserved; TS-RAT-023 capability independence; TS-RAT-024 architecture only |
+| WP-004.3 Engineering Calibration Intelligence Architecture | Architecture ratified; universal workspace architecture TS-RAT-024 | Qualified Calibration runtime, Workshop/Manual Editor and bounded semantic groundwork implemented; U0 internal projection complete and deployed without production consumer; visible migration incomplete | Authenticated N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only accepted; U0 48/48 and identity/provider/session 40/40; regression 805 tests, 802 passing, same three held; type-check/lint passed | Broader programme incomplete; U0 accepted and released; U1 proposed but unauthorised | TS-RAT-009/021/022 historical scopes preserved; TS-RAT-023 capability independence; TS-RAT-024 architecture only; TS-RAT-025 bounded U0 implementation/validation/release acceptance |
 | WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
 | WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
 | WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
@@ -520,9 +552,9 @@ The permanent ratification is recorded as [TS-RAT-004](engineering-ratification-
 
 **Founder Ratification:** [TS-RAT-009](engineering-ratification-register.md#ts-rat-009)
 
-**Implementation Status:** CANONICAL CONTRACTS AND ACCEPTED CALIBRATION RUNTIME IMPLEMENTED; UNIVERSAL WORKSPACE MIGRATION NOT IMPLEMENTED
+**Implementation Status:** CANONICAL CONTRACTS AND ACCEPTED CALIBRATION RUNTIME IMPLEMENTED; U0 INTERNAL PROJECTION COMPLETE AND DEPLOYED; VISIBLE UNIVERSAL WORKSPACE MIGRATION INCOMPLETE
 
-**Runtime Integration Status:** QUALIFIED VEHICLE-OWNED CALIBRATION WORKSHOP AND MANUAL EDITOR IMPLEMENTED
+**Runtime Integration Status:** QUALIFIED VEHICLE-OWNED CALIBRATION WORKSHOP AND MANUAL EDITOR IMPLEMENTED; U0 HAS NO PRODUCTION CONSUMER
 
 **Production Calibration Knowledge Population:** BOUNDED TUNING ESSENTIALS / TERMINOLOGY GROUNDWORK EXISTS; GENERAL COVERAGE INCOMPLETE
 
@@ -558,19 +590,19 @@ Definition Authority
 
 A source XDF definition requires qualified applicability and semantic validity. Once sufficiently qualified and deterministically decoded, its values constitute authoritative Evidence of the instructions encoded in the exact Calibration revision. Those instructions do not prove actual runtime behaviour; Runtime Evidence establishes what occurred.
 
-The broader Calibration/XDF programme remains incomplete despite the existing Workshop, Manual Editor and qualified evidence paths. TS-RAT-024 now governs the universal workspace migration, preserving distinct Reference/Stock, Current, Suggested and Working states. Implementation, server revision persistence and any future Export qualification require their separately bounded authority.
+The broader Calibration/XDF programme remains incomplete despite the existing Workshop, Manual Editor and qualified evidence paths. TS-RAT-024 now governs the universal workspace migration, preserving distinct Reference/Stock, Current, Suggested and Working states. U0 completion and release are recorded under TS-RAT-025 without changing visible product behavior. U1 and later implementation, server revision persistence and any future Export qualification require their separately bounded authority.
 
 ### Historical milestones and current continuation
 
 [TS-RAT-022](engineering-ratification-register.md#ts-rat-022) remains the permanent record of the earlier local XDF extraction and Native Vehicle Data foundation checkpoint. Its five-local-commit status, 99-file census, then-missing Workshop/Manual Editor and then-unstarted applicability statements describe that historical scope, not the current product. Historical work-package files and ratification entries are preserved unchanged.
 
-Current Calibration, release, local session-fix, validation, testing and architecture status is recorded in [Current Reconciliation — 20 September 2026](#current-reconciliation--20-september-2026). Vehicle admission remains independent of exact-ROM Calibration coverage under TS-RAT-023. Exact qualified Calibration relationships exist; the universal architecture does not broaden their authority or declare complete platform coverage.
+Current Calibration, U0 completion/release, session integrity, validation, testing and architecture status is recorded in [Current Reconciliation — 21 September 2026](#current-reconciliation--21-september-2026). Vehicle admission remains independent of exact-ROM Calibration coverage under TS-RAT-023. Exact qualified Calibration relationships exist; the universal architecture does not broaden their authority or declare complete platform coverage.
 
 THOR and MHD orange remain independent physical-validation targets. Live Telemetry is unfinished; MHD orange and physical live RPM/Boost proof remain outstanding. No synthetic validation or file-backed Calibration workflow is vehicle telemetry proof. Direct Logging, Diagnostics and exact Analysis-to-Calibration handoff remain unfinished separately bounded capabilities; no DTC execution or Flash is authorised here.
 
 ### Next Authorised Objective
 
-Documentation-only governance reconciliation. U0 Shared Contract Projection is first in principle under TS-RAT-024, but a separately issued Founder implementation instruction is required before work begins. No runtime implementation, database/dependency change, deployment or release is authorised by this ratification.
+Documentation-only TS-RAT-025 reconciliation for Founder and Bob's final diff review. U0 is complete, accepted, released and deployed within its internal contract scope. U1 Shared Shell is next proposed but requires a separately issued Founder instruction before work begins. No further runtime implementation, database/dependency change, staging, commit, push or deployment is authorised by this reconciliation.
 
 ---
 
@@ -754,7 +786,7 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 ## Current Blockers and Qualifications
 
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
-- WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture and canonical Knowledge contract implementation are complete and Founder ratified within that boundary under TS-RAT-009 and TS-RAT-021. Qualified Calibration runtime, Workshop/Manual Editor and bounded Tuning Essentials semantic groundwork now exist. The broader programme remains incomplete; universal migration is not implemented, and parent WP-004 completion has not been declared.
+- WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture and canonical Knowledge contract implementation are complete and Founder ratified within that boundary under TS-RAT-009 and TS-RAT-021. Qualified Calibration runtime, Workshop/Manual Editor and bounded Tuning Essentials semantic groundwork now exist. The broader programme remains incomplete; U0 internal projection is complete and deployed without a production consumer, visible universal migration is incomplete, and parent WP-004 completion has not been declared.
 - WP-004.5.1 Engineering Ontology Architecture is Founder ratified under [TS-RAT-011](engineering-ratification-register.md#ts-rat-011). Ontology implementation, TS-KO-000001 and production Knowledge population remain on Engineering Hold.
 - TS-STD-000 Engineering Standards Framework is Founder ratified under [TS-RAT-012](engineering-ratification-register.md#ts-rat-012). TS-STD-001 Engineering Truth Standard is Founder ratified under [TS-RAT-013](engineering-ratification-register.md#ts-rat-013) and is authoritative; its ratification establishes no implementation or production Knowledge authority.
 - TS-STD-002 Engineering Evidence Integrity Standard is Founder ratified under [TS-RAT-015](engineering-ratification-register.md#ts-rat-015). It establishes no implementation or production Evidence authority.
@@ -768,7 +800,8 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - Primary Results scope communication, timing-event extent, B58 Gen1 logged-gear propagation, possible future AccelerationRun / GearSegment / ShiftEvent architecture and future channel-specific telemetry education remain separate open engineering items. None is closed or implemented by the accepted Telemetry Workspace milestone.
 - WP-001, WP-002, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
 - WP-005.0.1 through WP-005.0.6, WP-005.0 and parent WP-005 are complete and Founder production-validated under TS-RAT-020. WP-005.1 runtime remains on Engineering Hold and requires separate Founder authority.
-- TS-RAT-024 ratifies architecture only. U0 remains unauthorised; the local session fix remains unpushed; three presentation failures remain held; Live Telemetry and physical MHD orange RPM/Boost proof remain outstanding; Export is checksum-locked and Flash unavailable.
+- TS-RAT-024 remains architecture-only historical authority. TS-RAT-025 records accepted U0 implementation, validation and production release; the session fix and architecture package are released predecessors. U0 has no production consumer and no visible shell migration is complete. U1 remains unauthorised; the three U4 presentation failures remain held; Live Telemetry and physical MHD orange RPM/Boost proof remain outstanding; Export is checksum/integrity locked and Flash unavailable.
+- The seven [existing observations outside U0](#existing-observations-outside-u0) remain explicit separate follow-ups without fixes or reclassification. The mandatory future professional server-revision/collaboration production gate remains open.
 - Architecture Bible Ratification does not by itself establish runtime implementation, validation or Work Package completion.
 - Any pre-ratification status wording within the rewritten Architecture Bible is governed by the later explicit Founder ratification recorded in TS-RAT-003.
 
