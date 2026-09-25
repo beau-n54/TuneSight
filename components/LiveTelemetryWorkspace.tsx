@@ -4,21 +4,25 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deriveBoostActualKpa } from "@/lib/vehicle-interface/enetObd";
 import { createCanonicalLiveRecording, type RecordedTelemetrySample, type RecordingState } from "@/lib/vehicle-interface/liveRecording";
 import LiveTelemetryGauge, { type GraphTiming } from "./LiveTelemetryGauge";
+import LiveBridgeControls from "./LiveBridgeControls";
+import { bridgeFailureMessage, createLocalBridgeClient } from "@/lib/vehicle-interface/localBridgeClient";
 import { appendTrace, channelTitles as titles, isObservedSample as isValidSample, type LiveSample, type TracePoint } from "@/lib/vehicle-interface/liveTelemetryPresentation";
 import { createTelemetryScheduler } from "@/lib/vehicle-interface/liveTelemetryScheduler";
 import { BrowserRecordingStore, retainRecording } from "@/lib/vehicle-interface/offlineRecordingQueue";
 
 type Props = { vehicle: Readonly<{ id: string; name: string; description: string; engineCode: string }> };
-type ConnectionState = "disconnected" | "connecting" | "connected" | "failed";
+type ConnectionState = "disconnected" | "connecting" | "connected" | "disconnecting" | "failed";
 type Channel = Readonly<{ key: string; unit: string; revisionId: string; state: "qualified_available" | "unsupported" }>;
 type Sample = LiveSample & { browserReceivedMonotonicMs?: number };
 type Session = Readonly<{ id: string; host: string; identity: Readonly<{ dme: string | null; vin: string | null; applicationSoftwareVersion: string | null; sparePartNumber: string | null; romSoftwareIdentity: string | null }>; identityReads?: Readonly<Record<string, string>> }>;
-const BRIDGE = "http://127.0.0.1:57631";
 const EXPECTED_ROM = "00003076501103";
 
 
 export default function LiveTelemetryWorkspace({ vehicle }: Props) {
-  const [token, setToken] = useState("");
+  const [bridge] = useState(() => createLocalBridgeClient());
+  const [manualToken, setManualToken] = useState("");
+  const [bridgeFinding, setBridgeFinding] = useState("Looking for the local TuneSight Bridge…");
+  const connectionRequest = useRef(false);
   const [state, setState] = useState<ConnectionState>("disconnected");
   const [finding, setFinding] = useState("No live vehicle session. Values are never simulated on this page.");
   const [session, setSession] = useState<Session | null>(null);
@@ -37,30 +41,38 @@ export default function LiveTelemetryWorkspace({ vehicle }: Props) {
   useEffect(() => { selectedRef.current = selected; }, [selected]);
   useEffect(() => { recordingRef.current = recordingState; }, [recordingState]);
   useEffect(() => () => { if (downloadUrl) URL.revokeObjectURL(downloadUrl); }, [downloadUrl]);
+  useEffect(() => {
+    let active = true;
+    void bridge.pair().then(() => { if (active) setBridgeFinding("Local bridge found"); })
+      .catch(error => { if (active) setBridgeFinding(bridgeFailureMessage(error)); });
+    return () => { active = false; };
+  }, [bridge]);
 
-  const call = useCallback(async <T,>(path: string, init?: RequestInit): Promise<T> => {
-    const response = await fetch(`${BRIDGE}${path}`, { ...init, headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...init?.headers }, cache: "no-store", credentials: "omit", redirect: "error", signal: init?.signal ?? AbortSignal.timeout(path === "/v1/connect" ? 20000 : 5000) });
-    const payload = await response.json() as T & { error?: string };
-    if (!response.ok) throw new Error(payload.error ?? `bridge_${response.status}`);
-    return payload;
-  }, [token]);
+  const call = useCallback(<T,>(path: "/v1/connect" | "/v1/sample" | "/v1/disconnect", init?: RequestInit): Promise<T> => bridge.call<T>(path, init), [bridge]);
 
   const connect = useCallback(async () => {
-    if (token.length < 32) { setFinding("Enter the session token printed by the local bridge. It is held only in this page memory."); return; }
-    setState("connecting"); setFinding("Discovering BMW ENET and opening a read-only DME session…");
+    if (connectionRequest.current || state === "connected") return;
+    connectionRequest.current = true;
+    setState("connecting"); setFinding("Pairing with the local bridge, then discovering BMW ENET…");
     try {
+      await bridge.setManualToken(manualToken);
       const payload = await call<{ session: Session; channels: readonly Channel[] }>("/v1/connect", { method: "POST", body: "{}" });
+      setBridgeFinding("Local bridge found"); setManualToken("");
       const exactRom = payload.session.identity.romSoftwareIdentity;
       const resolvedSession = payload.session;
       setLatest({}); setTraces({}); setTraceOrigin(Date.now());
       setSession(resolvedSession); setChannels(payload.channels); setSelected(payload.channels.filter((item) => item.state === "qualified_available").slice(0, 6).map((item) => item.key)); setState("connected");
       setFinding(exactRom ? `Bridge reports observed exact ROM/software identifier ${exactRom}; offline context is separate.` : "Read-only session established. Exact ROM/software identity was not independently returned, so offline expected-ROM context remains unconfirmed (not a conflict).");
-    } catch (error) { setState("failed"); setSession(null); setChannels([]); setFinding(`Connection failed: ${error instanceof Error ? error.message : "unknown_error"}. No value was inferred.`); }
-  }, [call, token]);
+    } catch (error) { setState("failed"); setSession(null); setChannels([]); const message = bridgeFailureMessage(error); setBridgeFinding(message); setFinding(message); }
+    finally { connectionRequest.current = false; }
+  }, [bridge, call, manualToken, state]);
 
   const disconnect = useCallback(async () => {
+    if (connectionRequest.current) return;
+    connectionRequest.current = true; setState("disconnecting");
     try { if (session) await call("/v1/disconnect", { method: "POST", body: "{}" }); } catch { /* local detach is still completed */ }
     setState("disconnected"); setSession(null); setChannels([]); setSelected([]); setLatest({}); setTraces({}); recordingRef.current = "ready"; setRecordingState("ready"); setRecordedSampleCount(0); recordingSamples.current = []; recordingStarted.current = null; setFinding("Disconnected. The next Connect creates a replacement read-only vehicle session.");
+    connectionRequest.current = false;
   }, [call, session]);
 
   useEffect(() => {
@@ -98,7 +110,7 @@ export default function LiveTelemetryWorkspace({ vehicle }: Props) {
             provenance: item.key === "boost.actual" ? `Derived from fresh serial Mode 01 absolute pressures; ${item.finding}` : "Observed response from the connected DME. acquiredAt is bridge response completion; ECU internal acquisition time is unknown." })));
           setRecordedSampleCount(recordingSamples.current.length);
         }
-      } catch (error) { if (!stopped) { setState("failed"); setFinding(`Live read stopped: ${error instanceof Error ? error.message : "unknown_error"}. Check bridge token/origin and browser Local Network Access permission; no security bypass is used.`); return; } }
+      } catch (error) { if (!stopped) { setState("failed"); setFinding(`Live read stopped. ${bridgeFailureMessage(error)}`); return; } }
       if (!stopped) timer = setTimeout(() => void poll(), 0);
     };
     void poll();
@@ -121,8 +133,8 @@ export default function LiveTelemetryWorkspace({ vehicle }: Props) {
   };
 
   return <div className="space-y-6">
-    <section className="bmw-border rounded-2xl bg-gradient-to-br from-zinc-900 to-blue-950/30 p-6"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">BMW-wide · Read only</p><div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="text-3xl font-bold">Live Telemetry</h1><p className="mt-2 text-zinc-300">{vehicle.name}</p><p className="text-sm text-zinc-500">{vehicle.description} · Garage engine context: {vehicle.engineCode}</p></div><div className="flex flex-wrap items-end gap-3"><label className="text-xs text-zinc-400">Bridge token<input aria-label="Bridge token" type="password" value={token} onChange={(event) => setToken(event.target.value)} autoComplete="off" disabled={state === "connected" || state === "connecting"} className="mt-1 block w-64 rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-white" /></label><button onClick={connect} disabled={state === "connecting" || state === "connected"} className="rounded-xl bg-blue-500 px-5 py-3 font-semibold text-white disabled:opacity-50">{state === "connecting" ? "Connecting…" : "Connect BMW"}</button><button onClick={disconnect} className="rounded-xl border border-zinc-600 px-5 py-3">Disconnect</button></div></div></section>
-    <p className="text-sm text-zinc-400">For hosted TuneSight, the bridge must explicitly trust the exact site HTTPS origin via TUNESIGHT_BRIDGE_ALLOWED_ORIGINS. Keep 127.0.0.1:57631 and the session token; approve Local Network Access only for your trusted TuneSight site if the browser prompts. No public bridge or tunnel is required.</p>
+    <section className="bmw-border rounded-2xl bg-gradient-to-br from-zinc-900 to-blue-950/30 p-6"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">BMW-wide · Read only</p><div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="text-3xl font-bold">Live Telemetry</h1><p className="mt-2 text-zinc-300">{vehicle.name}</p><p className="text-sm text-zinc-500">{vehicle.description} · Garage engine context: {vehicle.engineCode}</p></div><LiveBridgeControls state={state} finding={bridgeFinding} manualToken={manualToken} onManualToken={setManualToken} onConnect={() => void connect()} onDisconnect={() => void disconnect()} /></div></section>
+    <p className="text-sm text-zinc-400">Start the TuneSight Bridge on this laptop, then press Connect BMW. Allow Local Network Access for your trusted TuneSight site if prompted. The bridge stays on 127.0.0.1:57631; automatic pairing does not expose your vehicle publicly.</p>
     <section className="grid gap-4 md:grid-cols-4"><Status title="Connection" value={state} /><Status title="Transport" value={session ? `ENET · ${session.host}` : "ENET cable"} /><Status title="DME / ECU" value={session?.identity.dme ?? "Not observed"} /><Status title="ROM / software" value={session?.identity.romSoftwareIdentity ?? `Expected ${EXPECTED_ROM} · not observed`} /></section>
     <section className="rounded-2xl border border-amber-700/50 bg-amber-950/20 p-5"><p className="font-semibold text-amber-200">Current finding</p><p className="mt-2 text-sm text-amber-100/80">{finding}</p>{session && <p className="mt-2 text-xs text-zinc-400">Application software DID: {session.identity.applicationSoftwareVersion ?? "unavailable"} · Spare-part DID: {session.identity.sparePartNumber ?? "unavailable"}. Neither is relabelled as exact ROM authority. Read outcomes: {JSON.stringify(session.identityReads ?? "not reported by this bridge version")}.</p>}</section>
     <section className="bmw-border rounded-2xl bg-zinc-900 p-6"><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold">Live channels</h2><p className="mt-1 text-sm text-zinc-400">Only channels advertised by this connected DME are selectable. Requested spacing: RPM 100 ms, other fast channels 250 ms, slow channels 1000 ms; actual rates below are measured, not guaranteed. Times mark bridge response completion, not the ECU internal sensor instant.</p></div><p className="text-sm text-zinc-400">{selected.length} selected · {available.length} DME-advertised</p></div>{selectable.length === 0 ? <div className="mt-5 rounded-xl border border-dashed border-zinc-700 p-6 text-sm text-zinc-400">Connect the authenticated local ENET bridge. No Development Preview or synthetic fallback is used.</div> : <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectable.map((channel) => <button key={channel.key} onClick={() => setSelected((current) => current.includes(channel.key) ? current.filter((key) => key !== channel.key) : [...current, channel.key])} className={`rounded-xl border p-4 text-left ${selected.includes(channel.key) ? "border-blue-400 bg-blue-950/40" : "border-zinc-700"}`}><p className="font-medium">{titles[channel.key] ?? channel.key}</p><p className="mt-1 text-xs text-zinc-500">{channel.unit} · {channel.key === "boost.actual" ? "derived from two observed absolute pressures" : "DME advertised Mode 01 support"}</p></button>)}</div>}</section>

@@ -5,6 +5,7 @@ import net from "node:net";
 import { pathToFileURL } from "node:url";
 import { ENET_DISCOVERY_PORT, ENET_HSFZ_PORT, ENET_OBD_CHANNELS, decodeHsfzFrames, encodeDmeRequest, encodeHsfzFrame, parseObdResponse, supportedPids } from "../lib/vehicle-interface/enetObd.ts";
 import { bridgeOriginAllowed, trustedBridgeOrigins } from "../lib/vehicle-interface/bridgeSecurity.ts";
+import { BRIDGE_PAIRING_CONTRACT, BRIDGE_TOKEN_LIFETIME_MS, BRIDGE_TOKEN_RENEWAL_MS } from "../lib/vehicle-interface/bridgePairingContract.ts";
 import type { LiveSample } from "../lib/vehicle-interface/liveTelemetryPresentation.ts";
 
 const bind = "127.0.0.1";
@@ -133,8 +134,12 @@ export class EnetReadOnlyConnection {
   }
   disconnect() { this.generation++; this.socket?.destroy(); this.socket = null; this.session = null; this.remainder = Buffer.alloc(0); }
 }
-export function createVehicleBridge(options: { token: string; origins: ReadonlySet<string>; connection: EnetReadOnlyConnection }) {
-  if (options.token.length < 32) throw new Error("bridge_token_requires_at_least_32_characters");
+export function createVehicleBridge(options: { token?: string; origins: ReadonlySet<string>; connection: EnetReadOnlyConnection; now?: () => number }) {
+  if (options.token !== undefined && options.token.length < 32) throw new Error("bridge_token_requires_at_least_32_characters");
+  // Copy and validate even when constructed outside the CLI. Never trust a mutable caller Set.
+  const origins = trustedBridgeOrigins([...options.origins].join(","));
+  const now = options.now ?? Date.now;
+  let token = options.token ?? randomBytes(24).toString("base64url"), expiresAt = now() + BRIDGE_TOKEN_LIFETIME_MS;
   let busy = false;
   const { connection } = options;
   function json(res: http.ServerResponse, status: number, value: unknown) { res.writeHead(status, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify(value)); }
@@ -145,16 +150,28 @@ export function createVehicleBridge(options: { token: string; origins: ReadonlyS
   }
   const server = http.createServer(async (req, res) => {
     const address = server.address();
-    if (!bridgeOriginAllowed(req.headers.origin, req.headers.host, options.origins, typeof address === "object" && address ? address.port : 57631)) return json(res, 403, { error: "origin_or_host_not_allowed" });
+    // Check the actual listener, not only the untrusted Host header. Fail closed for wildcard binds.
+    if (!address || typeof address !== "object" || address.address !== bind || req.socket.remoteAddress !== bind) return json(res, 403, { error: "loopback_binding_required" });
+    const countHeader = (name: string) => req.rawHeaders.filter((_, i) => i % 2 === 0 && req.rawHeaders[i].toLowerCase() === name).length;
+    if (countHeader("origin") !== 1 || countHeader("host") !== 1 || !bridgeOriginAllowed(req.headers.origin, req.headers.host, origins, address.port)) return json(res, 403, { error: "origin_or_host_not_allowed" });
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin!); res.setHeader("Vary", "Origin");
+    res.setHeader("Cache-Control", "no-store");
     res.setHeader("Access-Control-Allow-Headers", "authorization,content-type"); res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     if (req.method === "OPTIONS") {
       if (!["GET", "POST"].includes(String(req.headers["access-control-request-method"])) || String(req.headers["access-control-request-headers"] ?? "").split(",").some(h => h.trim() && !["authorization", "content-type"].includes(h.trim().toLowerCase()))) return json(res, 403, { error: "preflight_not_allowed" });
+      if (req.headers["access-control-request-private-network"] !== undefined && req.headers["access-control-request-private-network"] !== "true") return json(res, 403, { error: "preflight_not_allowed" });
       if (req.headers["access-control-request-private-network"] === "true") res.setHeader("Access-Control-Allow-Private-Network", "true");
       res.setHeader("Access-Control-Max-Age", "600"); return res.writeHead(204).end();
     }
-    const supplied = Buffer.from(req.headers.authorization ?? ""), expected = Buffer.from(`Bearer ${options.token}`);
-    if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return json(res, 401, { error: "authentication_failed" });
+    if (req.method === "GET" && req.url === "/v1/pair") {
+      // A non-safelisted Content-Type forces browser CORS preflight, including on localhost.
+      // Browsers enforce LNA permission; no server can infer that permission from a header alone.
+      if (req.headers["content-type"] !== "application/json") return json(res, 400, { error: "pairing_preflight_required" });
+      if (expiresAt <= now() + BRIDGE_TOKEN_RENEWAL_MS) { token = randomBytes(24).toString("base64url"); expiresAt = now() + BRIDGE_TOKEN_LIFETIME_MS; }
+      return json(res, 200, { contract: BRIDGE_PAIRING_CONTRACT, token, expiresAt });
+    }
+    const supplied = Buffer.from(req.headers.authorization ?? ""), expected = Buffer.from(`Bearer ${token}`);
+    if (now() >= expiresAt || supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return json(res, 401, { error: "authentication_failed" });
     if (req.method === "GET" && req.url === "/v1/status") return json(res, 200, { state: connection.session ? "connected" : "ready", authenticatedSession: Boolean(connection.session), session: connection.publicSession() });
     if (req.method === "POST" && req.url === "/v1/disconnect") { connection.disconnect(); return json(res, 200, { state: "disconnected" }); }
     if (busy) return json(res, 409, { error: "bridge_busy" });
@@ -167,16 +184,21 @@ export function createVehicleBridge(options: { token: string; origins: ReadonlyS
         return json(res, 200, { samples: await connection.sample(input.channels) });
       }
       return json(res, 404, { error: "operation_not_allowed" });
-    } catch (error) { connection.disconnect(); return json(res, 503, { error: error instanceof Error ? error.message : "bridge_failure" }); }
+    } catch (error) {
+      connection.disconnect();
+      // Never echo parser input, request bodies, bearer values or arbitrary exception text.
+      const message = error instanceof Error ? error.message : "";
+      const allowed = ["vehicle_discovery_timeout", "vehicle_connect_timeout", "vehicle_response_timeout", "vehicle_not_connected", "vehicle_connection_closed", "dme_support_not_observed", "connection_cancelled", "support_changed_after_identity_timeout", "payload_too_large"];
+      return json(res, 503, { error: allowed.includes(message) ? message : "bridge_failure" });
+    }
     finally { busy = false; }
   });
   server.requestTimeout = 10_000;
   return server;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const token = process.env.TUNESIGHT_BRIDGE_TOKEN ?? randomBytes(24).toString("base64url");
   const origins = trustedBridgeOrigins(process.env.TUNESIGHT_BRIDGE_ALLOWED_ORIGINS), connection = new EnetReadOnlyConnection(process.env.TUNESIGHT_ENET_HOST);
-  const server = createVehicleBridge({ token, origins, connection });
-  server.listen(57631, bind, () => { console.log(`TuneSight read-only ENET bridge: http://${bind}:57631`); console.log(`Session token: ${token}`); console.log(`Allowed origins: ${[...origins].join(", ")}`); console.log("No write, flash, coding, DTC-clear, adaptation, actuator, or raw-proxy route exists."); });
+  const server = createVehicleBridge({ origins, connection });
+  server.listen(57631, bind, () => { console.log(`TuneSight read-only ENET bridge: http://${bind}:57631`); console.log("Automatic pairing ready; tokens expire after 15 minutes and remain in memory only."); console.log(`Allowed origins: ${[...origins].join(", ")}`); console.log("No write, flash, coding, DTC-clear, adaptation, actuator, or raw-proxy route exists."); });
   process.on("SIGINT", () => { connection.disconnect(); server.close(() => process.exit(0)); });
 }

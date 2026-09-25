@@ -31,6 +31,6 @@ test("recording contract preserves the same per-channel samples and rejects regr
 
 test("executable bridge has only the bounded read-only HTTP surface", () => {
   const source = readFileSync(new URL("../../scripts/tunesightVehicleBridge.ts", import.meta.url), "utf8");
-  assert.deepEqual([...source.matchAll(/req\.url === "([^"]+)"/g)].map((match) => match[1]).sort(), ["/v1/status", "/v1/connect", "/v1/sample", "/v1/disconnect"].sort());
+  assert.deepEqual([...source.matchAll(/req\.url === "([^"]+)"/g)].map((match) => match[1]).sort(), ["/v1/status", "/v1/pair", "/v1/connect", "/v1/sample", "/v1/disconnect"].sort());
   assert.match(source, /127\.0\.0\.1/); assert.match(source, /Bearer/); assert.doesNotMatch(source, /req\.url === "\/v1\/(?:write|flash|code|clear|actuate|proxy)/);
 });

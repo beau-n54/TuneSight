@@ -1,5 +1,7 @@
+import { DEFAULT_BRIDGE_ORIGINS } from "./bridgePairingContract.ts";
+
 export function trustedBridgeOrigins(value: string | undefined): ReadonlySet<string> {
-  const entries = (value ?? "http://localhost:3000,http://127.0.0.1:3000").split(",").map(v => v.trim()).filter(Boolean);
+  const entries = (value ?? DEFAULT_BRIDGE_ORIGINS.join(",")).split(",").map(v => v.trim()).filter(Boolean);
   if (!entries.length) throw new Error("bridge_origins_required");
   for (const entry of entries) {
     const url = new URL(entry);
