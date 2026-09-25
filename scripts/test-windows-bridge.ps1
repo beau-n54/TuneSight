@@ -9,7 +9,7 @@ $existing = Get-NetTCPConnection -LocalPort 57631 -State Listen -ErrorAction Sil
 if ($existing -and -not $OccupiedPortOnly) { throw 'Existing bridge listener: do not disturb it; close it yourself or test on another machine' }
 if ($OccupiedPortOnly -and -not $existing) { throw 'Occupied-port-only test requires an existing listener and never creates one' }
 $origin = 'https://tunesight-beta.vercel.app'
-$headers = @{ Origin=$origin; 'Content-Type'='application/json' }
+$headers = @{ Origin=$origin }
 $exe = Join-Path $install 'TuneSightBridge.exe'
 $summary = [ordered]@{ controlledInstallerSmoke=$true; cleanWindowsUser=$false; physicalVehicle=$false }
 function Install-Beta {
@@ -18,7 +18,8 @@ function Install-Beta {
 }
 function Wait-Pair {
     for ($attempt=0; $attempt -lt 30; $attempt++) {
-        try { return Invoke-RestMethod 'http://127.0.0.1:57631/v1/pair' -Headers $headers -TimeoutSec 1 } catch { Start-Sleep -Milliseconds 200 }
+        # PowerShell GET drops Content-Type from -Headers; its dedicated parameter preserves the required preflight marker.
+        try { return Invoke-RestMethod 'http://127.0.0.1:57631/v1/pair' -ContentType 'application/json' -Headers $headers -TimeoutSec 1 } catch { Start-Sleep -Milliseconds 200 }
     }
     throw 'Packaged bridge never became ready'
 }
