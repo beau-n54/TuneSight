@@ -17,6 +17,8 @@ jobs:
       - name: Relevant read-only bridge and telemetry regressions
         shell: pwsh
         run: node --experimental-strip-types --test lib/vehicle-interface/*.test.ts
+      - name: Generate Next.js declarations for a clean checkout
+        run: npx next typegen
       - run: npx tsc --noEmit
       - name: Focused lint
         run: npx eslint desktop/bridge/desktopBridge.ts lib/vehicle-interface/bridgeVersion.ts lib/vehicle-interface/enetDiscovery.ts lib/vehicle-interface/bridgeRelease.ts lib/vehicle-interface/desktopBridge.test.ts lib/vehicle-interface/bridgePairing.test.ts lib/vehicle-interface/localBridgeClient.ts scripts/tunesightVehicleBridge.ts components/LiveBridgeControls.tsx components/BridgeDownload.tsx app/bridge/page.tsx lib/vehicle-interface/localBridgePairing.browser.test.tsx scripts/verifyBridgePairingUi.mjs scripts/verifyWindowsBridgeSources.mjs

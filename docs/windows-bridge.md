@@ -59,6 +59,7 @@ From a clean committed checkout on Windows:
 ```powershell
 npm ci
 node --experimental-strip-types --test lib/vehicle-interface/*.test.ts
+npx next typegen
 npx tsc --noEmit
 # Run focused lint for every changed TS/TSX/MJS file.
 npm run build
