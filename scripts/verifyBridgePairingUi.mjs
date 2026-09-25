@@ -1,5 +1,5 @@
 /** Reproducible, isolated browser UI validation using installed Next/React/TypeScript only.
- * Run: node scripts/verifyBridgePairingUi.mjs; open the printed loopback URL; expect seven PASS lines.
+ * Run: node scripts/verifyBridgePairingUi.mjs; open the printed loopback URL; expect eleven PASS lines.
  * No vehicle, subscriber account, dependency installation or application configuration changes.
  */
 import path from "node:path";
@@ -16,7 +16,7 @@ const output = fs.mkdtempSync(path.join(os.tmpdir(), "tunesight-pairing-ui-"));
 const entry = path.join(output, "entry.tsx"), loader = path.join(output, "loader.cjs");
 fs.writeFileSync(entry, `import {runLocalBridgePairingUiTests} from ${JSON.stringify(path.join(repo, "lib/vehicle-interface/localBridgePairing.browser.test").replaceAll("\\", "/"))};
 const results=document.getElementById('results')!;
-void runLocalBridgePairingUiTests(document.getElementById('workspace')!,message=>{const p=document.createElement('p');p.textContent=message;results.append(p)}).then(()=>{results.append('COMPLETE: 7 browser assertions passed')}).catch(error=>{results.append('FAILED: '+error.message)});`, "utf8");
+void runLocalBridgePairingUiTests(document.getElementById('workspace')!,message=>{const p=document.createElement('p');p.textContent=message;results.append(p)}).then(()=>{results.append('COMPLETE: 11 browser assertions passed')}).catch(error=>{results.append('FAILED: '+error.message)});`, "utf8");
 fs.writeFileSync(loader, `const ts=require(${JSON.stringify(require.resolve("typescript"))});module.exports=function(source){return ts.transpileModule(source,{fileName:this.resourcePath,compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;};`, "utf8");
 const fallback = Object.fromEntries(Object.entries({ crypto: "crypto-browserify", buffer: "buffer", events: "events", stream: "stream-browserify", string_decoder: "string_decoder", util: "util", vm: "vm-browserify" }).map(([key, value]) => [key, require.resolve("next/dist/compiled/" + value)]));
 // Match Next's existing browser polyfills for the unchanged vehicle-definition dependencies.

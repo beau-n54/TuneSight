@@ -4,6 +4,8 @@
  */
 import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import BridgeDownload from "../../components/BridgeDownload";
+import { DESKTOP_BRIDGE_COMPATIBILITY } from "./bridgeVersion";
 import LiveTelemetryWorkspace from "../../components/LiveTelemetryWorkspace";
 import { BRIDGE_PAIRING_CONTRACT, BRIDGE_TOKEN_LIFETIME_MS, BRIDGE_URL } from "./bridgePairingContract";
 
@@ -32,7 +34,7 @@ export async function runLocalBridgePairingUiTests(container: HTMLElement, repor
         pairs++;
         if (mode === "old") return reply({ error: "authentication_failed" }, 401);
         if (mode === "untrusted") return reply({}, 403);
-        return reply({ contract: BRIDGE_PAIRING_CONTRACT, token, expiresAt: Date.now() + BRIDGE_TOKEN_LIFETIME_MS });
+        return reply({ contract: BRIDGE_PAIRING_CONTRACT, token, expiresAt: Date.now() + BRIDGE_TOKEN_LIFETIME_MS, ...(mode === "desktop" || mode === "incompatible" ? { version: { ...DESKTOP_BRIDGE_COMPATIBILITY, protocolVersion: mode === "incompatible" ? 2 : 1 } } : {}) });
       }
       check(new Headers(init?.headers).get("Authorization") === `Bearer ${token}`, "Vehicle routes require bearer");
       if (url.endsWith("/connect")) {
@@ -82,6 +84,17 @@ export async function runLocalBridgePairingUiTests(container: HTMLElement, repor
     button("Connect BMW").click(); await until(() => text().includes("ENET cable/DME not found"));
     check(!button("Connect BMW").disabled, "DME failure must allow retry");
     report("PASS: bridge discovery remains distinct from missing ENET/DME");
+    for (const [scenario, expected] of [["desktop", "Installed and running: TuneSight Bridge"], ["success", "legacy Node workflow"], ["incompatible", "Update TuneSight Bridge"], ["denied", "Local Network Access denied"]]) {
+      root?.unmount(); await until(() => active === 0); mode = scenario; maximum = 0; pairs = 0; connects = 0;
+      root = createRoot(container); root.render(<StrictMode><BridgeDownload /></StrictMode>);
+      await until(() => Boolean(button("Check installed bridge")));
+      check(!container.querySelector('a[href*="releases/download"]'), "Draft must never expose a public download");
+      button("Check installed bridge").click();
+      await until(() => text().includes(expected));
+      check(connects === 0 && maximum <= 1 && pairs <= 1, "Download status never opens vehicle or overlaps pairing");
+      check(!container.innerHTML.includes(token), "Download status never reveals credentials");
+      report(`PASS: download area ${scenario}, truthful version/permission, no draft link or credential`);
+    }
   } finally {
     root?.unmount(); await until(() => active === 0);
     window.fetch = originalFetch; navigator.permissions.query = originalQuery;

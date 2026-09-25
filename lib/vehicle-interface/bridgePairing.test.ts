@@ -25,7 +25,8 @@ test("Hosted and both development origins pair without a bearer, only on loopbac
     assert.equal(response.headers.get("Cache-Control"), "no-store"); assert.equal(response.headers.get("Set-Cookie"), null);
     const paired = await response.json(); assert.equal(paired.contract, BRIDGE_PAIRING_CONTRACT); assert.equal(paired.token, token);
     assert.ok(paired.expiresAt > Date.now()); assert.ok(paired.expiresAt <= Date.now() + BRIDGE_TOKEN_LIFETIME_MS);
-    assert.deepEqual(Object.keys(paired).sort(), ["contract", "expiresAt", "token"]);
+    assert.deepEqual(Object.keys(paired).sort(), ["contract", "expiresAt", "token", "version"]);
+    assert.deepEqual(paired.version, { desktopVersion: null, protocolVersion: 1, minimumHostedVersion: 1 });
   }
   assert.equal(requests.length, 0);
 }));

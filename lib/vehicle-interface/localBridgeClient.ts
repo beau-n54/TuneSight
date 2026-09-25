@@ -1,7 +1,10 @@
 import { BRIDGE_PAIRING_CONTRACT, BRIDGE_TOKEN_LIFETIME_MS, BRIDGE_TOKEN_RENEWAL_MS, BRIDGE_URL } from "./bridgePairingContract.ts";
+import { compatibleBridgeVersion, type BridgeVersion } from "./bridgeVersion.ts";
 
 const messages = {
-  update_required: "Update TuneSight Bridge. The installed bridge does not support this automatic pairing contract. Restart the updated Node bridge; Advanced manual pairing is available for an older bridge.",
+  update_required: "Update TuneSight Bridge or reload the current hosted TuneSight page. The bridge and page versions are incompatible. Advanced manual pairing is available only for a legacy bridge without automatic pairing.",
+  unsupported_network: "Unsupported ENET network condition. Connect a direct ENET cable and allow Windows to assign its automatic link-local IPv4 address. No network settings were changed.",
+  enet_cable_missing: "ENET cable not detected. Connect the ENET cable to this laptop and turn on the vehicle ignition.",
   network_denied: "Local Network Access denied. Allow local network access for this TuneSight site in your browser's site permissions, then press Connect BMW again.",
   unavailable: "Local bridge unavailable. If the bridge is not running, start it on this laptop. If it is running, check Local Network Access permission and its exact trusted origin: an untrusted hosted origin is blocked. The browser cannot distinguish a blocked request from an offline bridge. If you are running an older bridge, Update TuneSight Bridge to support this site and automatic pairing.",
   untrusted_origin: "Untrusted hosted origin or invalid local bridge address. Use the approved TuneSight site and check the bridge's exact allowed origins; do not disable origin checks.",
@@ -29,6 +32,7 @@ export function createLocalBridgeClient(dependencies: {
   const request = dependencies.fetch ?? fetch, now = dependencies.now ?? Date.now;
   const denied = dependencies.networkDenied ?? localNetworkDenied;
   let token = "", expiresAt = 0, manual = false;
+  let version: BridgeVersion | null = null;
   let queue: Promise<unknown> = Promise.resolve();
   // Strict Mode's setup/cleanup/setup and a Connect click share one request queue/cache.
   // Cleanup does not abort a probe that the next setup is about to reuse; fetch is time bounded.
@@ -57,19 +61,24 @@ export function createLocalBridgeClient(dependencies: {
       || !("token" in payload) || typeof payload.token !== "string" || !/^[A-Za-z0-9_-]{32,256}$/.test(payload.token)
       || !("expiresAt" in payload) || typeof payload.expiresAt !== "number" || !Number.isFinite(payload.expiresAt)
       || payload.expiresAt <= now() || payload.expiresAt > now() + BRIDGE_TOKEN_LIFETIME_MS + 5000) throw new LocalBridgeError("update_required");
+    // Legacy pairing-v1 Node bridges remain usable; absent metadata is never labelled a desktop installation.
+    if ("version" in payload && !compatibleBridgeVersion(payload.version)) throw new LocalBridgeError("update_required");
+    const metadata = "version" in payload ? payload.version as BridgeVersion : null;
+    version = metadata ? { desktopVersion: metadata.desktopVersion, protocolVersion: metadata.protocolVersion, minimumHostedVersion: metadata.minimumHostedVersion } : null;
     token = payload.token; expiresAt = payload.expiresAt; manual = false;
   };
   return {
     pair: () => enqueue(pair),
+    version: () => version ? { ...version } : null,
     setManualToken: (value: string) => enqueue(async () => {
       if (!value && !manual) return; // Preserve an already discovered automatic pairing.
       if (value && (value.length < 32 || value.length > 256 || /[\r\n]/.test(value))) throw new LocalBridgeError("authentication_failed");
       token = value; manual = Boolean(value); expiresAt = 0;
     }),
-    call: <T>(path: "/v1/connect" | "/v1/sample" | "/v1/disconnect", init: RequestInit = {}): Promise<T> => enqueue(async () => {
+    call: <T>(path: "/v1/connect" | "/v1/sample" | "/v1/disconnect" | "/v1/status", init: RequestInit = {}): Promise<T> => enqueue(async () => {
       if (init.signal?.aborted) throw new LocalBridgeError("bridge_failure");
       await pair();
-      const authenticated = () => send(path, { ...init, method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${token}` } });
+      const authenticated = () => send(path, { ...init, method: path === "/v1/status" ? "GET" : "POST", headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${token}` } });
       let response = await authenticated();
       // 401 is returned before vehicle work. One renewal/retry handles bridge restart or expiry.
       if (response.status === 401 && !manual) { token = ""; expiresAt = 0; await pair(); response = await authenticated(); }
@@ -79,6 +88,7 @@ export function createLocalBridgeClient(dependencies: {
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
         const code = payload?.error;
+        if (code === "unsupported_network" || code === "enet_cable_missing") throw new LocalBridgeError(code);
         if (["vehicle_discovery_timeout", "vehicle_connect_timeout", "vehicle_response_timeout", "vehicle_not_connected", "vehicle_connection_closed", "dme_support_not_observed"].includes(code)) throw new LocalBridgeError("vehicle_missing");
         throw new LocalBridgeError("bridge_failure");
       }

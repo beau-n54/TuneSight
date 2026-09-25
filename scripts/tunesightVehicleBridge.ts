@@ -7,6 +7,8 @@ import { ENET_DISCOVERY_PORT, ENET_HSFZ_PORT, ENET_OBD_CHANNELS, decodeHsfzFrame
 import { bridgeOriginAllowed, trustedBridgeOrigins } from "../lib/vehicle-interface/bridgeSecurity.ts";
 import { BRIDGE_PAIRING_CONTRACT, BRIDGE_TOKEN_LIFETIME_MS, BRIDGE_TOKEN_RENEWAL_MS } from "../lib/vehicle-interface/bridgePairingContract.ts";
 import type { LiveSample } from "../lib/vehicle-interface/liveTelemetryPresentation.ts";
+import { NODE_BRIDGE_VERSION, type BridgeVersion } from "../lib/vehicle-interface/bridgeVersion.ts";
+import type { EnetTarget } from "../lib/vehicle-interface/enetDiscovery.ts";
 
 const bind = "127.0.0.1";
 export class EnetReadOnlyConnection {
@@ -17,8 +19,11 @@ export class EnetReadOnlyConnection {
   private readonly host?: string;
   private readonly vehiclePort: number;
   private readonly timeoutMs: number;
-  constructor(host?: string, vehiclePort = ENET_HSFZ_PORT, timeoutMs = 2500) { this.host = host; this.vehiclePort = vehiclePort; this.timeoutMs = timeoutMs; }
+  private readonly resolveTarget?: () => Promise<EnetTarget>;
+  private localAddress?: string;
+  constructor(host?: string, vehiclePort = ENET_HSFZ_PORT, timeoutMs = 2500, resolveTarget?: () => Promise<EnetTarget>) { this.host = host; this.vehiclePort = vehiclePort; this.timeoutMs = timeoutMs; this.resolveTarget = resolveTarget; }
   private async discover(): Promise<string> {
+    if (this.resolveTarget) { const target = await this.resolveTarget(); this.localAddress = target.localAddress; return target.host; }
     if (this.host) return this.host;
     return new Promise((resolve, reject) => {
       const udp = dgram.createSocket("udp4");
@@ -58,7 +63,7 @@ export class EnetReadOnlyConnection {
     });
   }
   private async openSocket(host: string) {
-    const socket = net.createConnection({ host, port: this.vehiclePort }); this.socket = socket;
+    const socket = net.createConnection({ host, port: this.vehiclePort, localAddress: this.localAddress }); this.socket = socket;
     socket.setNoDelay(true);
     // A socket error outside a transaction must not crash the bridge.
     socket.on("error", () => { if (this.socket === socket) this.session = null; });
@@ -134,7 +139,7 @@ export class EnetReadOnlyConnection {
   }
   disconnect() { this.generation++; this.socket?.destroy(); this.socket = null; this.session = null; this.remainder = Buffer.alloc(0); }
 }
-export function createVehicleBridge(options: { token?: string; origins: ReadonlySet<string>; connection: EnetReadOnlyConnection; now?: () => number }) {
+export function createVehicleBridge(options: { token?: string; origins: ReadonlySet<string>; connection: EnetReadOnlyConnection; now?: () => number; version?: BridgeVersion; onState?: (state: "connected" | "disconnected" | "vehicle_unavailable" | "unsupported_network") => void }) {
   if (options.token !== undefined && options.token.length < 32) throw new Error("bridge_token_requires_at_least_32_characters");
   // Copy and validate even when constructed outside the CLI. Never trust a mutable caller Set.
   const origins = trustedBridgeOrigins([...options.origins].join(","));
@@ -168,16 +173,16 @@ export function createVehicleBridge(options: { token?: string; origins: Readonly
       // Browsers enforce LNA permission; no server can infer that permission from a header alone.
       if (req.headers["content-type"] !== "application/json") return json(res, 400, { error: "pairing_preflight_required" });
       if (expiresAt <= now() + BRIDGE_TOKEN_RENEWAL_MS) { token = randomBytes(24).toString("base64url"); expiresAt = now() + BRIDGE_TOKEN_LIFETIME_MS; }
-      return json(res, 200, { contract: BRIDGE_PAIRING_CONTRACT, token, expiresAt });
+      return json(res, 200, { contract: BRIDGE_PAIRING_CONTRACT, token, expiresAt, version: options.version ?? NODE_BRIDGE_VERSION });
     }
     const supplied = Buffer.from(req.headers.authorization ?? ""), expected = Buffer.from(`Bearer ${token}`);
     if (now() >= expiresAt || supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return json(res, 401, { error: "authentication_failed" });
     if (req.method === "GET" && req.url === "/v1/status") return json(res, 200, { state: connection.session ? "connected" : "ready", authenticatedSession: Boolean(connection.session), session: connection.publicSession() });
-    if (req.method === "POST" && req.url === "/v1/disconnect") { connection.disconnect(); return json(res, 200, { state: "disconnected" }); }
+    if (req.method === "POST" && req.url === "/v1/disconnect") { connection.disconnect(); options.onState?.("disconnected"); return json(res, 200, { state: "disconnected" }); }
     if (busy) return json(res, 409, { error: "bridge_busy" });
     busy = true;
     try {
-      if (req.method === "POST" && req.url === "/v1/connect") return json(res, 200, { session: await connection.connect(), channels: ENET_OBD_CHANNELS.map(v => ({ key: v.channel.channelKey, unit: v.channel.unit, revisionId: v.channel.revisionId, state: connection.session!.supported.has(v.pid) ? "qualified_available" : "unsupported" })) });
+      if (req.method === "POST" && req.url === "/v1/connect") { const session = await connection.connect(); options.onState?.("connected"); return json(res, 200, { session, channels: ENET_OBD_CHANNELS.map(v => ({ key: v.channel.channelKey, unit: v.channel.unit, revisionId: v.channel.revisionId, state: connection.session!.supported.has(v.pid) ? "qualified_available" : "unsupported" })) }); }
       if (req.method === "POST" && req.url === "/v1/sample") {
         const input = await body(req);
         if (!Array.isArray(input.channels) || !input.channels.length || input.channels.length > 16 || input.channels.some(k => typeof k !== "string" || !ENET_OBD_CHANNELS.some(v => v.channel.channelKey === k))) return json(res, 400, { error: "invalid_channel_selection" });
@@ -188,7 +193,8 @@ export function createVehicleBridge(options: { token?: string; origins: Readonly
       connection.disconnect();
       // Never echo parser input, request bodies, bearer values or arbitrary exception text.
       const message = error instanceof Error ? error.message : "";
-      const allowed = ["vehicle_discovery_timeout", "vehicle_connect_timeout", "vehicle_response_timeout", "vehicle_not_connected", "vehicle_connection_closed", "dme_support_not_observed", "connection_cancelled", "support_changed_after_identity_timeout", "payload_too_large"];
+      options.onState?.(message === "unsupported_network" ? "unsupported_network" : "vehicle_unavailable");
+      const allowed = ["unsupported_network", "enet_cable_missing", "vehicle_discovery_timeout", "vehicle_connect_timeout", "vehicle_response_timeout", "vehicle_not_connected", "vehicle_connection_closed", "dme_support_not_observed", "connection_cancelled", "support_changed_after_identity_timeout", "payload_too_large"];
       return json(res, 503, { error: allowed.includes(message) ? message : "bridge_failure" });
     }
     finally { busy = false; }

@@ -1,0 +1,13 @@
+TuneSight Bridge 0.1.0-beta.1 - Founder testing only
+
+This installer is unsigned. Windows SmartScreen may warn or block it; a SHA-256 checksum establishes artifact integrity, not publisher identity. Do not disable Windows security. Public subscriber release requires code signing and Founder approval after clean installation and full hosted-to-car validation.
+
+Requires Windows x64, Windows 10 build 19041 or later / Windows 11 and .NET Framework 4.8 (included in those Windows versions). Includes the Node.js runtime; no separate Node.js, Git, npm or terminal is required.
+
+Connect direct ENET, turn on ignition, open hosted TuneSight and press Connect BMW. Windows must assign an automatic 169.254.x.x link-local IPv4 address to the Ethernet interface. Normal internet can continue over Wi-Fi. Browser Local Network Access permission may be required.
+
+The bridge permits read-only DME observations. It has no flash, coding, DTC clear, adaptation, actuator or raw proxy routes. An observed DME endpoint is not proof of exact ROM/software identity.
+
+Installation is per user. Start with Windows is enabled by default and can be changed in the installer or tray menu. Quit and uninstall are available. Local diagnostic logs contain bounded status categories, not credentials or vehicle samples. Uninstall retains those support logs; remove them yourself if no longer needed.
+
+Bundled Node.js third-party notices are included in runtime/NODE-LICENSE.txt. No TuneSight code-signing claim is made by Node.js's own signature.

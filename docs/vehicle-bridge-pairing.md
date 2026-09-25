@@ -65,3 +65,7 @@ check all selected channels and recording/export, disconnect/reconnect, and veri
 renewal during a session exceeding 15 minutes. Also check denied permission and
 bridge-stopped recovery. Hosted physical acceptance remains a separate observation;
 controlled tests do not substitute for it. Manual fallback remains until that passes.
+
+## Windows desktop beta
+
+The packaged Windows bridge reuses this pairing contract and the same read-only diagnostic implementation. See [Windows bridge installation, security and release process](windows-bridge.md). The Node workflow remains available for engineering use. The unsigned installer is a Founder draft until clean installation and hosted-to-car acceptance pass.
