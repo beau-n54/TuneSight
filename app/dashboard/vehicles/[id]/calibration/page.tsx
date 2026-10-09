@@ -11,7 +11,7 @@ import CurrentOnlyWorkshopClient from "./current-only-workshop-client";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
 import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import UploadCalibration from "./upload-calibration";
-import { buildSubscriberWorkshop } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
+import { selectRestoredSubscriberWorkshop } from "@/lib/calibration-workshop/selectRestoredSubscriberWorkshop";
 import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
 import type { CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
 import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
@@ -28,6 +28,7 @@ type PageProps = {
 // Cold, fail-closed Dataset materialization parses controlled XDF/BIN Evidence.
 // Deployment platforms consume this static route value from the Next build output.
 export const maxDuration = 60;
+export const preferredRegion = "syd1";
 
 function isCurrentOnlyWorkshop(workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel): workshop is CurrentOnlyWorkshopViewModel { return "mode" in workshop && workshop.mode === "current_only"; }
 
@@ -93,7 +94,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   let workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel;
   let sharedPayload: SharedWorkspacePayload | null = null;
   try {
-    workshop = subscriberSuccess ? buildSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
+    workshop = subscriberSuccess ? selectRestoredSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
     if (subscriberSuccess) {
       workshop = maskRetainedWorkspace(workshop, subscriberSuccess);
       sharedPayload = dispatchWorkspace<SharedWorkspacePayload | null>(presentation, () => null,
