@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import * as nodeModule from "node:module";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { serialize } from "node:v8";
 import test, { before } from "node:test";
 import ts from "typescript";
-import { loadBindings } from "next/dist/build/swc/index.js";
-import { getAppPageStaticInfo } from "next/dist/build/analysis/get-page-static-info.js";
 import type { SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
 import { selectRestoredSubscriberWorkshop } from "./selectRestoredSubscriberWorkshop.ts";
 import { buildSharedWorkspacePayload } from "./sharedWorkspaceAdapter.ts";
@@ -36,6 +35,9 @@ hook.deregister();
 
 const pagePath = "app/dashboard/vehicles/[id]/calibration/page.tsx";
 const routePath = "app/api/calibration-workshop/projection/route.ts";
+// Escape the literal App Router brackets rather than matching directories named i or d.
+const pagePattern = "app/dashboard/vehicles/[[]id[]]/calibration/page.tsx";
+const vercelConfig = JSON.parse(fs.readFileSync("vercel.json", "utf8"));
 const context = { ownerId: "phase-one-owner", vehicleId: "phase-one-vehicle", sessionId: "a".repeat(32), sourceMode: "subscriber" as const };
 const anchors: SubscriberCalibrationSuccess[] = [];
 before(async () => {
@@ -57,7 +59,12 @@ before(async () => {
   }
 });
 
-for (const entry of [pagePath, routePath]) test(`Phase 1: static Sydney literal preserves Node/duration for ${entry}`, async () => {
+// These are configuration guards. Region assignment also requires inspection of
+// the real Vercel builder output; Next static analysis alone is not deployment proof.
+for (const entry of [pagePath, routePath]) test(`Phase 1: Vercel Sydney target preserves Node/duration for ${entry}`, () => {
+  const pattern = entry === pagePath ? pagePattern : routePath;
+  assert.equal(path.posix.matchesGlob(entry, pattern), true);
+  assert.deepEqual(vercelConfig.functions[pattern], { regions: ["syd1"] });
   const source = ts.createSourceFile(entry, fs.readFileSync(entry, "utf8"), ts.ScriptTarget.Latest, true);
   const config = new Map<string, string>();
   for (const statement of source.statements) {
@@ -66,25 +73,29 @@ for (const entry of [pagePath, routePath]) test(`Phase 1: static Sydney literal 
       if (ts.isIdentifier(declaration.name) && declaration.initializer) config.set(declaration.name.text, declaration.initializer.getText(source));
     }
   }
-  assert.equal(config.get("preferredRegion"), '"syd1"');
+  assert.equal(config.has("preferredRegion"), false);
   assert.equal(config.get("runtime") ?? '"nodejs"', '"nodejs"');
   assert.equal(config.get("maxDuration"), "60");
   assert.doesNotMatch(source.text, /^["']use client["']/m);
-  await loadBindings();
-  const info = await getAppPageStaticInfo({ pageFilePath: entry, nextConfig: {}, isDev: false, page: entry,
-    pageType: "app" as Parameters<typeof getAppPageStaticInfo>[0]["pageType"] });
-  assert.equal(info.preferredRegion, "syd1");
-  assert.equal(info.runtime ?? "nodejs", "nodejs");
-  assert.equal(info.maxDuration, 60);
-  assert.equal(info.hadUnsupportedValue, false);
 });
 test("Phase 1: region scope, existing page dispatch and projection authentication stay bounded", () => {
+  assert.deepEqual(vercelConfig, {
+    $schema: "https://openapi.vercel.sh/vercel.json",
+    functions: { [routePath]: { regions: ["syd1"] }, [pagePattern]: { regions: ["syd1"] } },
+  });
   const files = (root: string): string[] => fs.readdirSync(root, { withFileTypes: true }).flatMap(entry => {
     const path = root + "/" + entry.name;
     return entry.isDirectory() ? files(path) : /\.tsx?$/.test(path) ? [path] : [];
   });
-  const regions = files("app").filter(file => /export const preferredRegion\s*=/.test(fs.readFileSync(file, "utf8"))).map(file => file.replaceAll("\\", "/"));
-  assert.deepEqual(regions.sort(), [pagePath, routePath].sort());
+  const appFiles = files("app");
+  const patterns = Object.keys(vercelConfig.functions);
+  const matched = appFiles.filter(file => patterns.some(pattern => path.posix.matchesGlob(file, pattern)));
+  assert.deepEqual(matched.sort(), [pagePath, routePath].sort());
+  for (const other of ["i", "d", "another-id", "[vehicleId]"]) {
+    assert.equal(path.posix.matchesGlob(pagePath.replace("[id]", other), pagePattern), false);
+  }
+  const regions = appFiles.filter(file => /export const preferredRegion\s*=/.test(fs.readFileSync(file, "utf8")));
+  assert.deepEqual(regions, []);
   const page = fs.readFileSync(pagePath, "utf8"), route = fs.readFileSync(routePath, "utf8");
   assert.match(page, /subscriberSuccess \? selectRestoredSubscriberWorkshop\(subscriberSuccess, definition\) : await developmentCalibrationWorkshopProvider\.loadVehicleWorkshop/);
   assert.doesNotMatch(page, /buildSubscriberWorkshop/);

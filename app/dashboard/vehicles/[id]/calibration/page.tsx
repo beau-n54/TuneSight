@@ -28,7 +28,6 @@ type PageProps = {
 // Cold, fail-closed Dataset materialization parses controlled XDF/BIN Evidence.
 // Deployment platforms consume this static route value from the Next build output.
 export const maxDuration = 60;
-export const preferredRegion = "syd1";
 
 function isCurrentOnlyWorkshop(workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel): workshop is CurrentOnlyWorkshopViewModel { return "mode" in workshop && workshop.mode === "current_only"; }
 

@@ -6,7 +6,6 @@ import { loadSubscriberTableProjection } from "@/lib/calibration-workshop/shared
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-export const preferredRegion = "syd1";
 
 /** Read-only projection request: no recovery, upload, session creation or persistence. */
 export async function POST(request: Request) {
