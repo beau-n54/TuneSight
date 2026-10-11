@@ -1502,6 +1502,68 @@ The [U0 migration boundary](<../05 engineering-architecture-bible/11-universal-p
 
 ---
 
+### TS-RAT-026
+
+| Field | Ratified Value |
+|---|---|
+| Register ID | TS-RAT-026 |
+| Closure date | 2026-10-12 (Australia/Brisbane; live execution began 2026-10-11 UTC) |
+| Artefact | Security and Trust Production Closure |
+| Authority | Founder Beau's explicit conditional implementation, managed-canary, Production release, preservation and separate governance-closure instruction |
+| Application commit | `65b0652227595547196ae339b9508772ebe255c8` — Enforce Security and Trust boundaries |
+| Application parent | `cb43823990cb421bd7e8242c01964f7f341804db` — Deploy Calibration compute in Sydney |
+| Implementation scope | 129 files; 4,365 insertions and 4,726 deletions |
+| Production | Vercel deployment `HoFUokJ7iU6NrCGSxya8x7g5v5uz` Ready; canonical https://tunesight-beta.vercel.app serves the matching application |
+| Acceptance | SECURITY AND TRUST BASELINE CLOSED within this bounded programme after matching live application/database/Storage/Auth gates |
+| Historical effect | Additive; TS-RAT-001 through TS-RAT-025 remain unchanged |
+| Further authority | No new feature, expanded beta/paid-product acceptance, next audit implementation, Export or vehicle-write authority |
+
+**Acceptance provenance and migration order**
+
+This records execution of Founder's prior conditional closure authority after the live gates passed; it does not invent a new post-release Founder review. Founder confirmed receipt of the single genuine recovery email. No password or current Founder session was changed.
+
+The managed canary and matching Production application use, in this exact order:
+
+1. [20261011000100_security_trust_baseline.sql](../../supabase/migrations/20261011000100_security_trust_baseline.sql)
+2. [20261011000200_calibration_repair_lease.sql](../../supabase/migrations/20261011000200_calibration_repair_lease.sql)
+3. [20261011000300_storage_deletion_outbox.sql](../../supabase/migrations/20261011000300_storage_deletion_outbox.sql)
+
+Production schema/security metadata and scheduled physical database backups were checked before application. A temporary mutation freeze protected the database/application transition and was removed after Ready; final frozen-relation count was zero. Physical database backup does not include Storage bytes, which were protected separately by verified copies. Once durable security records exist, recovery requires a coordinated forward correction, not permissive-policy restoration, inventory removal or application-only rollback.
+
+**Managed, live and controlled evidence**
+
+- Managed Supabase canary: 25 passed, zero failed, synthetic data only; ordered application and reapplication, real RLS/grants/Storage, signup/profile protection, reservations/retries/concurrency, leases, deletion interruption and signed-access expiry were exercised.
+- Temporary branch creation requested 2026-10-11T12:14:09.791Z; deletion requested 17:54:53.312Z and an empty preview-branch list confirmed by 17:55:10Z. Request lifecycle was 5h 40m 44s, below six hours. At USD 0.01344/hour, estimated cost was USD 0.07632. Actual billed duration/cost was not exposed; this is not an invoice. No second branch or paid upgrade was created.
+- Canary process limitation: complete pre-migration metadata was not exported before first application. Existing structures were compared with the preserved Production baseline afterward; no synthetic result is presented as a missing pre-application snapshot.
+- Production security metadata: 85 new policies, 10 security triggers, 359 table-privilege rows and 2,946 column-privilege rows match the managed contracts; 56 pre-existing Production policies remain unchanged. Eighteen security function bodies match. Seven internal functions have narrower service-role EXECUTE grants on first application; no widening was needed. Eight legacy permissive Storage policies remain constrained by the new restrictive guards and were exercised in the live matrix.
+- Live Production: 25 core scenarios and seven deployed HTTP/upload/Auth scenarios passed, plus the retained MHD and BM3/B58 Analysis counterexamples. Anonymous/cross-owner denial, entitlement expiry/suspension, profile protection, bounded malformed uploads, stable retry identity, lease/deletion recovery, 60-second owner-checked source access and no-store boundaries passed. All synthetic cloud records and objects were removed.
+- Recovery email: exactly one request was accepted by Supabase and delivery was Founder-confirmed. Link handling, expiry/failure and loading-state recovery were controlled tests; no actual credential change was used to repeat those cases.
+- Controlled browser validation: 24 Auth/bridge/native-recording checks plus 15 actual Shared Workspace/native-storage durability checks passed. Quota/abort never falsely report Saved, exact revision readback and retry work, unsaved input protects exit, owner/vehicle scope is isolated, interrupted export contains only committed samples, and retention/sample bounds hold. These are synthetic browser tests, not physical-car acceptance.
+
+**Preservation and subscriber acceptance**
+
+All 343 historical source objects were copied and verified by byte count and SHA-256. The 314 owner/vehicle-consistent references were migrated to opaque owner-controlled paths; 29 unreferenced objects were preserved in server-only quarantine. All 343 recovery copies remain inventoried. Each old exposed path was retired only after recoverability and applicable checked 60-second access were established. All 314 actual historical URLs returned denied/unavailable responses while their original tokens were still unexpired. No URL or subscriber path is reproduced here; no automatic retention deletion was introduced.
+
+Per-object access verification used current owner entitlement, exact owner/vehicle/source binding and service-issued 60-second full-byte/hash readback. The actual deployed subscriber download route was independently exercised with two synthetic authenticated owners. This does not claim impersonated sessions for real owners. Non-pointer source/derived values across thirteen public tables remained hash-identical; intentional changes were source pointers, matching provenance pointers, removal of stored bearer URLs and maintained timestamps.
+
+Authenticated N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only Production workflows passed read-only smoke: BMW borders, Explorer, newly selected exact Table projection and Cell Inspector, immutable Current, unchanged/not-created Working, locked Export and unavailable Flash. No Production browser console errors were observed. The supported browser retained a 784 × 668 viewport despite an override request; this is stacked-presentation evidence, not fresh desktop layout acceptance. Existing accepted desktop layout remains separate. Both Calibration functions were observed executing in `syd1` with Node.js 24.x and 60-second maxima; unrelated region configuration was unchanged. The residual 4–5-second projection latency remains a wider-audit follow-up.
+
+**Validation, dependency exception and operational limits**
+
+Final reconciled Node evidence: 1,378 tests; 1,373 pass; only the three unchanged U4 holds fail; two named optional fixtures skip. Holds remain `Related Table`, `Understand` and `semantic.unavailableReason` in `tablePresentation.test.ts`. Optional skips are private ROM-library metadata without `ROM_LIBRARY_ROOT` and the unavailable Founder physical MapSwitch fixture. TypeScript, whole-repository ESLint (538 files; zero errors/warnings), UTF-8/whitespace, isolated network-enabled build, automatic Production build and disposable PostgreSQL (28/28) passed. XDF evidence was byte-reconciled without double-counting.
+
+Production dependency audit is zero. Full audit retains five High entries from one unpatched development-only `braces@3.0.3` advisory, GHSA-vfj7-8cjw-p6xm / CVE-2026-93687. There is no supported patched path; unsafe overrides/downgrades and disabling lint were rejected. It is absent from all 50 Production runtime traces, receives no subscriber files, and trusted-only lint/CI use bounded reviewed source; the isolated build has no service-role credentials. Vercel Git Fork Protection and source/build-log protection are enabled. Next build does not execute the affected ESLint preset. This is a monitored contained exception, not a vulnerability-free full dependency tree.
+
+Vercel firewall and system mitigations are active, Bot Protection logs events, and no recent alert was shown. BotID SDK is not installed; OWASP rules require an unpurchased higher plan. No paid protection, speculative broad rate rule, domain change or public vehicle tunnel was added. A pre-existing duplicate React key for repeated Working detail findings was observed only in controlled development rendering; its expression is unchanged from the baseline and remains a non-security presentation follow-up.
+
+**Continuing boundaries**
+
+The complete project audit is not closed. U4, broader engineering Explanation, identity/source-family semantics, connected exact-ROM observation, residual latency, U2–U6, server revision/collaboration, installer/physical hardware coverage, commercial and launch gates remain separately governed. Export, Flash, Suggested generation, DTC execution, dyno and other vehicle-write capabilities remain unavailable or separately held. No subscriber Calibration value, Working state or evidence bytes were changed. The next proposed non-security step is accepted-release/remaining-audit governance reconciliation (audit Proposal A), requiring a separately bounded instruction.
+
+Detailed local evidence is retained in `TuneSight-Security-Trust-Managed-Closure-cb43823/TuneSight-Security-Trust-Production-Final-Report.html` and its associated result files. This record contains aggregate preservation results only.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
