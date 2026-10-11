@@ -7,8 +7,8 @@ function average(values: number[]): number {
 
 export function segmentPulls(parsedLog: ParsedLog): PullWindow[] {
   const throttle =
-    parsedLog.channels.throttle ||
     parsedLog.channels.accelerator_pedal ||
+    parsedLog.channels.throttle ||
     parsedLog.channels.pedal ||
     [];
 

@@ -45,6 +45,7 @@ const implementedAuthoritativeTranslators = new Set<LoggerPlatform>([
 ]);
 
 const requiredCoreChannels = Object.freeze([
+  "time",
   "rpm",
   "boostPsi",
   "boostTargetPsi",
@@ -81,7 +82,7 @@ function hasInvalidRequiredObservation(rows: readonly TranslatedLogRow[]): boole
   return rows.some((row) =>
     requiredCoreChannels.some((channel) => {
       const value = row[channel];
-      return value !== null && value !== undefined && !Number.isFinite(value);
+      return typeof value !== "number" || !Number.isFinite(value);
     })
   );
 }
@@ -202,6 +203,14 @@ export function qualifyTranslatedEvidenceSource(
     return invalidOrIncomplete(translatedLog, context, "no_usable_rows");
   }
 
+  if (translatedLog.missingCoreChannels.length > 0) {
+    return invalidOrIncomplete(
+      translatedLog,
+      context,
+      "missing_required_core_channels"
+    );
+  }
+
   if (
     !Number.isSafeInteger(translatedLog.rowCount) ||
     translatedLog.rowCount < 1 ||
@@ -215,12 +224,9 @@ export function qualifyTranslatedEvidenceSource(
     );
   }
 
-  if (translatedLog.missingCoreChannels.length > 0) {
-    return invalidOrIncomplete(
-      translatedLog,
-      context,
-      "missing_required_core_channels"
-    );
+
+  if (translatedLog.rows.some((row, index, rows) => index > 0 && row.time! <= rows[index - 1].time!)) {
+    return invalidOrIncomplete(translatedLog, context, "invalid_source_observations");
   }
 
   return deepCloneFreeze({

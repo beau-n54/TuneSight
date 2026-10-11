@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { resolveTrustedServerConfiguration } from "./trustedServerConfiguration.ts";
+import { fetchWithTimeout } from "../security/networkTimeout.ts";
 
 export function createTrustedServerClient(): SupabaseClient {
   const configuration = resolveTrustedServerConfiguration(process.env);
@@ -10,6 +11,7 @@ export function createTrustedServerClient(): SupabaseClient {
     configuration.supabaseUrl,
     configuration.serviceRoleKey,
     {
+      global: { fetch: fetchWithTimeout },
       auth: {
         autoRefreshToken: false,
         persistSession: false,

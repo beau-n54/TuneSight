@@ -1,8 +1,8 @@
-import { getMissingCoreChannels, read } from "./helpers.ts";
+import { getMissingCoreChannels, read, readTemperatureC } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
 const MHD_ALIASES = {
-  time: ["Time", "time", "TIME", "Time (s)", "Timestamp", "timestamp"],
+  time: ["Time", "time", "TIME", "Time (s)"],
 
   rpm: [
     "RPM",
@@ -13,45 +13,12 @@ const MHD_ALIASES = {
     "Engine speed[1/min]",
   ],
 
-  boost: [
-    "Boost Mean PSI",
-    "Boost PSI",
-    "Boost (PSI)",
-    "Boost",
-    "boost",
-    "Boost (Pre-Throttle)[psig]",
-    "(RAM) Boost (Pre-Throttle)[psig]",
-    "(RAM) Boost (MAP)[psig]",
-  ],
+  boost: ["Boost Mean PSI", "Boost PSI", "Boost (PSI)", "Boost (Pre-Throttle)[psig]", "(RAM) Boost (Pre-Throttle)[psig]", "(RAM) Boost (MAP)[psig]"],
 
-  boostTarget: [
-    "Boost target (PSI)",
-    "Boost Target",
-    "Boost Target PSI",
-    "Boost Setpoint (PSI)",
-    "Load req.",
-    "Load req",
-    "Requested Load",
-    "Load requested",
-    "boost_target",
-    "Boost pressure (Target)[psig]",
-    "(RAM) Boost Pressure (Target)[psig]",
-    "(RAM) Boost Pressure (Manifold Target)[psig]",
-  ],
-
-  iat: [
-    "IAT (*C)",
-    "IAT (C)",
-    "IAT",
-    "iat",
-    "IAT[F]",
-    "Intake Air Temp",
-    "Intake Air Temperature",
-  ],
+  boostTarget: ["Boost target (PSI)", "Boost Target PSI", "Boost Setpoint (PSI)", "Boost pressure (Target)[psig]", "(RAM) Boost Pressure (Target)[psig]", "(RAM) Boost Pressure (Manifold Target)[psig]"],
 
   afr: [
     "Lambda bank 1 (AFR)",
-    "Lambda bank 2 (AFR)",
     "Lambda[AFR]",
     "Lambda Act.[AFR]",
     "AFR",
@@ -59,123 +26,29 @@ const MHD_ALIASES = {
     "Bank 1 AFR",
   ],
 
-  lambda: ["Lambda", "Lambda Bank 1", "Lambda Bank 2"],
+  lambda: ["Lambda", "Lambda Bank 1"],
 
-  railPressure: [
-    "Rail pressure (PSI)",
-    "Rail Pressure (PSI)",
-    "Rail Pressure",
-    "HPFP",
-    "Fuel Rail Pressure",
-    "rail_pressure",
-    "railPressure",
-    "rail_pressure_psi",
-    "fuel_rail_pressure",
-    "fuelRailPressure",
-    "HPFP Act.[psig]",
-  ],
+  railPressure: ["Rail pressure (PSI)", "Rail Pressure (PSI)", "rail_pressure_psi", "HPFP Act.[psig]"],
 
-  lpfp: [
-    "Fuel low pressure sensor (PSI)",
-    "Fuel Low Pressure Sensor (PSI)",
-    "Low pressure fuel pump (PSI)",
-    "LPFP (PSI)",
-    "LPFP",
-    "Low Pressure Fuel Pump",
-    "lpfp",
-    "lpfp_psi",
-    "fuel_low_pressure",
-    "LPFP Act. (Raw)[psig]",
-  ],
+  lpfp: ["Fuel low pressure sensor (PSI)", "Fuel Low Pressure Sensor (PSI)", "Low pressure fuel pump (PSI)", "LPFP (PSI)", "lpfp_psi", "LPFP Act. (Raw)[psig]"],
 
-  wgdc: [
-    "WGDC Bank 1 (%)",
-    "WGDC Bank 1",
-    "WGDC",
-    "Wastegate Duty Cycle",
-    "wgdc",
-    "WGDC[%]",
-  ],
+  wgdc: ["WGDC Bank 1 (%)", "WGDC[%]"],
 
-  throttle: [
-    "Throttle Position",
-    "Throttle",
-    "throttle",
-    "Throttle Angle[%]",
-  ],
+  throttle: ["Throttle Position (%)", "Throttle Angle[%]"],
 
   acceleratorPedal: ["Accel. Pedal[%]", "Accel Ped. Pos. (%)"],
 
-  timingCyl1: [
-    "timing_correction_cyl_1",
-    "Cyl1 Timing Cor (*)",
-    "Timing Cyl. 1",
-    "Timing Cyl 1",
-    "Ignition Timing Cyl 1",
-    "cyl1_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 1[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 1[°]",
-  ],
+  timingCyl1: ["Cyl1 Timing Cor (*)", "Cyl 1 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 1[°]"],
 
-  timingCyl2: [
-    "timing_correction_cyl_2",
-    "Cyl2 Timing Cor (*)",
-    "Timing Cyl. 2",
-    "Timing Cyl 2",
-    "Ignition Timing Cyl 2",
-    "cyl2_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 2[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 2[°]",
-  ],
+  timingCyl2: ["Cyl2 Timing Cor (*)", "Cyl 2 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 2[°]"],
 
-  timingCyl3: [
-    "timing_correction_cyl_3",
-    "Cyl3 Timing Cor (*)",
-    "Timing Cyl. 3",
-    "Timing Cyl 3",
-    "Ignition Timing Cyl 3",
-    "cyl3_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 3[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 3[°]",
-  ],
+  timingCyl3: ["Cyl3 Timing Cor (*)", "Cyl 3 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 3[°]"],
 
-  timingCyl4: [
-    "timing_correction_cyl_4",
-    "Cyl4 Timing Cor (*)",
-    "Cyl 4 Timing Cor (*)",
-    "Cyl4 Timing Correction",
-    "Cyl 4 Timing Correction",
-    "Timing Correction Cyl 4",
-    "Timing Cyl 4 Correction",
-    "Timing Cyl. 4",
-    "Timing Cyl 4",
-    "Ignition Timing Cyl 4",
-    "cyl4_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 4[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 4[°]",
-  ],
+  timingCyl4: ["Cyl4 Timing Cor (*)", "Cyl 4 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 4[°]"],
 
-  timingCyl5: [
-    "timing_correction_cyl_5",
-    "Cyl5 Timing Cor (*)",
-    "Timing Cyl. 5",
-    "Timing Cyl 5",
-    "Ignition Timing Cyl 5",
-    "cyl5_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 5[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 5[°]",
-  ],
+  timingCyl5: ["Cyl5 Timing Cor (*)", "Cyl 5 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 5[°]"],
 
-  timingCyl6: [
-    "timing_correction_cyl_6",
-    "Cyl6 Timing Cor (*)",
-    "Timing Cyl. 6",
-    "Timing Cyl 6",
-    "Ignition Timing Cyl 6",
-    "cyl6_timing",
-    "(RAM) Ignition Timing Corr. Cyl. 6[ï¿½]",
-    "(RAM) Ignition Timing Corr. Cyl. 6[°]",
-  ],
+  timingCyl6: ["Cyl6 Timing Cor (*)", "Cyl 6 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 6[°]"],
 };
 
 export function translateMhdRows(
@@ -197,6 +70,8 @@ export function translateMhdRows(
       time: read(row, MHD_ALIASES.time),
       rpm: read(row, MHD_ALIASES.rpm),
       throttle: acceleratorPedal ?? throttlePlate,
+      throttlePlate,
+      acceleratorPedal,
       boostPsi,
       boostTargetPsi,
       boostErrorPsi,
@@ -211,7 +86,8 @@ export function translateMhdRows(
       timingCyl4: read(row, MHD_ALIASES.timingCyl4),
       timingCyl5: read(row, MHD_ALIASES.timingCyl5),
       timingCyl6: read(row, MHD_ALIASES.timingCyl6),
-      iat: read(row, MHD_ALIASES.iat),
+      iat: readTemperatureC(row),
+      ethanol: read(row, ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content[%]"]),
     };
   });
 

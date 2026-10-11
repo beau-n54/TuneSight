@@ -1,14 +1,21 @@
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { listPage, LIST_PAGE_SIZE } from "@/lib/security/listBounds";
+import ListPagination from "@/components/ListPagination";
+import LogFileInput from "@/components/LogFileInput";
 
 type PageProps = {
+  searchParams: Promise<{page?: string}>;
   params: Promise<{
     id: string;
   }>;
 };
 
-export default async function LogsPage({ params }: PageProps) {
+export default async function LogsPage({ params, searchParams }: PageProps) {
+  const page = listPage((await searchParams).page);
+  await requireSubscriberPage();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -31,12 +38,13 @@ export default async function LogsPage({ params }: PageProps) {
     notFound();
   }
 
-  const { data: logs } = await supabase
+  const { data: logRows } = await supabase
     .from("logs")
     .select("*")
     .eq("vehicle_id", vehicle.id)
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id").range(page*LIST_PAGE_SIZE, (page+1)*LIST_PAGE_SIZE);
+  const logs = logRows?.slice(0,LIST_PAGE_SIZE);
 
   return (
     <main className="min-h-screen bg-black px-6 py-10 text-white">
@@ -55,6 +63,7 @@ export default async function LogsPage({ params }: PageProps) {
           </p>
         </div>
 
+        <ListPagination path={`/dashboard/vehicles/${id}/logs`} page={page} hasMore={(logRows?.length ?? 0)>LIST_PAGE_SIZE}/>
         <form
           action="/api/vehicles/update-log"
           method="POST"
@@ -66,14 +75,7 @@ export default async function LogsPage({ params }: PageProps) {
           <div className="bmw-border space-y-4 rounded-2xl bg-zinc-900 p-6">
             <h2 className="text-xl font-semibold">Upload Log File</h2>
 
-            <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Log File</label>
-              <input
-                type="file"
-                name="logFile"
-                className="cursor-pointer block w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white file:cursor-pointer file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-4 file:py-2 file:text-white hover:file:bg-zinc-700"
-              />
-            </div>
+            <LogFileInput />
 
             <div className="space-y-2">
               <label className="text-sm text-zinc-400">Log Name</label>
@@ -120,9 +122,9 @@ export default async function LogsPage({ params }: PageProps) {
                     </p>
                   )}
 
-                  {log.file_url && (
+                  {(log.raw_source_storage_path || log.file_url) && (
                     <a
-                      href={log.file_url}
+                      href={`/api/vehicles/source-download?kind=log&id=${encodeURIComponent(log.id)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-3 inline-flex text-sm text-blue-400 transition hover:text-blue-300"

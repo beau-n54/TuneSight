@@ -18,6 +18,8 @@ export type TranslatedLogRow = {
   time?: number | null;
   rpm?: number | null;
   throttle?: number | null;
+  throttlePlate?: number | null;
+  acceleratorPedal?: number | null;
   boostPsi?: number | null;
   boostTargetPsi?: number | null;
   boostErrorPsi?: number | null;
@@ -33,6 +35,7 @@ export type TranslatedLogRow = {
   timingCyl5?: number | null;
   timingCyl6?: number | null;
   iat?: number | null;
+  ethanol?: number | null;
 };
 
 export type TranslatedLog = {

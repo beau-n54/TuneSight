@@ -1,5 +1,7 @@
 "use client";
 
+import { hasUnpersistedWorking, persistWorkingRevision, type WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
+
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { comparisonRendererDefinition, currentRendererDefinition, exactWorkspaceDefinition, isCurrentOnly,
   resolveProjectedWorkingDefinition, resolveRetainedWorkingDefinition, type SharedWorkspacePayload, type SharedWorkspaceWorkshop } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
@@ -100,7 +102,7 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
   const [search, setSearch] = useState(""), [navigationMode, setNavigationMode] = useState<EngineeringNavigationMode>("all");
   const [system, setSystem] = useState<string | null>(null), [evidenceFilter, setEvidenceFilter] = useState("all");
   const [working, setWorking] = useState<WorkingCalibration | null>(null), [displayMode, setDisplayMode] = useState<CalibrationDisplayMode>("current");
-  const [saveStatus, setSaveStatus] = useState<"loading" | "saved" | "not-created">("loading");
+  const [saveStatus, setSaveStatus] = useState<WorkingSaveStatus>("loading");
   const [pendingCells, setPendingCells] = useState<ReadonlySet<number>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
   const displayEditing = useSyncExternalStore(subscribeDisplay, () => window.matchMedia(editingMedia).matches && !recognizedReviewDevice(navigator.userAgent, navigator.platform, navigator.maxTouchPoints), () => false);
@@ -111,25 +113,44 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
   const seed = useCallback(() => createWorkingCalibration({ ownerScope: context.ownerId, vehicleId: context.vehicleId,
     currentDatasetId: source.currentDatasetId, currentDatasetRevision: source.currentDatasetRevision, romLayoutId: source.romLayoutId,
     relationshipRevision: source.relationshipRevision, definitionSetRevision: source.definitionSetRevision, createdAt: new Date().toISOString() }), [context, source]);
-  const savedRevision = useRef<string | null>(null);
   const resolveDefinition = useCallback((revision: string, occurrence: number) =>
     resolveRetainedWorkingDefinition(workshop, revision, occurrence), [workshop]);
+  const [persistedRevision, setPersistedRevision] = useState<string | null>(null);
+  const [saveAttempt, setSaveAttempt] = useState(0);
+  const visibleSaveStatus: WorkingSaveStatus = hasUnpersistedWorking(working, persistedRevision) ? (saveStatus === "failed" ? "failed" : "unsaved") : saveStatus;
+  const retryLocalSave = () => { if (!working) { window.location.reload(); return; } setSaveAttempt(attempt => attempt + 1); };
   useEffect(() => {
-    const current = seed(), restored = createBrowserWorkingCalibrationStore(window.localStorage).load(current, current, resolveDefinition);
-    savedRevision.current = restored?.workingCalibrationRevision ?? null;
-    queueMicrotask(() => { setWorking(restored); setDisplayMode(restored ? "working" : "current"); setSaveStatus(restored ? "saved" : "not-created"); });
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      try {
+        const current = seed();
+        const restored = createBrowserWorkingCalibrationStore(window.localStorage, true).load(current, current, resolveDefinition);
+        setPersistedRevision(restored?.workingCalibrationRevision ?? null);
+        setWorking(restored);
+        setDisplayMode(restored ? "working" : "current");
+        setSaveStatus(restored ? "saved" : "not-created");
+      } catch { setSaveStatus("failed"); }
+    });
+    return () => { active = false; };
   }, [seed, resolveDefinition]);
   useEffect(() => {
-    if (!working || savedRevision.current === working.workingCalibrationRevision) return;
-    try { createBrowserWorkingCalibrationStore(window.localStorage).save(working); savedRevision.current = working.workingCalibrationRevision; queueMicrotask(() => setSaveStatus("saved")); }
-    catch { queueMicrotask(() => setNotice("Working changes could not be saved in this browser. Keep this workspace open.")); }
-  }, [working]);
+    if (!working || working.workingCalibrationRevision === persistedRevision) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const result = persistWorkingRevision(working, value => createBrowserWorkingCalibrationStore(window.localStorage, true).save(value));
+      if (result.status === "saved") setPersistedRevision(result.revision);
+      setSaveStatus(result.status);
+    });
+    return () => { active = false; };
+  }, [working, persistedRevision, saveAttempt]);
   useEffect(() => {
-    if (!pendingCells.size && !workspace.tabs.some(tab => tab.operand.trim())) return;
+    if (!hasUnpersistedWorking(working, persistedRevision) && !(pendingCells.size > 0 || workspace.tabs.some(tab => tab.operand.trim()))) return;
     const protect = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", protect);
     return () => window.removeEventListener("beforeunload", protect);
-  }, [pendingCells, workspace.tabs]);
+  }, [working, persistedRevision, pendingCells, workspace.tabs]);
   const activeKey = active?.definitionKey;
   const activeEvidence = activeKey ? loaded[activeKey] : undefined;
   const projection = activeEvidence?.status === "ready" ? activeEvidence.projection : null;
@@ -203,7 +224,7 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
   const targets = active && currentDetail ? active.selectedCells.flatMap(index => currentDetail.cells[index] ? [{ definitionRevision: active.definitionRevision, occurrence: active.occurrence,
     index, row: currentDetail.cells[index].row, column: currentDetail.cells[index].column }] : []) : [];
   const editQualified = projection?.slots.current.state === "available" && projection.capabilities.edit?.state === "EDIT_QUALIFIED";
-  const canMutate = interaction.editing && editQualified && saveStatus !== "loading";
+  const canMutate = interaction.editing && editQualified && saveStatus !== "loading" && !(saveStatus === "failed" && !working);
   const preview = working && active?.operand.trim() && activeSeed ? previewWorkingEdit(working, { operation: active.operation, operand: Number(active.operand), targets, definitions: [activeSeed] }) : null;
   function commitCell(index: number, value: number) {
     if (!canMutate || !working || !activeSeed || !active || displayMode !== "working" || !currentDetail?.cells[index]) return { status: "blocked" as const, findings: ["Editing is unavailable in this context."] };
@@ -247,7 +268,7 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
       operation={active?.operation ?? "assign"} onOperation={operation => updateTab({ operation })} operand={active?.operand ?? ""} onOperand={operand => updateTab({ operand })} preview={preview}
       onApply={() => { if (!canMutate || !working || !active || !activeSeed || displayMode !== "working" || !guardPending()) return; const result = applyWorkingEdit(working, { operation: active.operation, source: "toolbar", operand: Number(active.operand), targets, definitions: [activeSeed], updatedAt: new Date().toISOString() }); if (result.status === "applied") { setWorking(result.calibration); updateTab({ operand: "" }); } else setNotice(result.findings.join(" ")); }}
       selectedCount={targets.length} definitionTitles={Object.fromEntries(workshop.definitions.map(item => [`${item.definitionRevision}:${item.occurrence}`, item.title]))}
-      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={saveStatus}/>}
+      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}/>}
     limitations={<><p>Current remains immutable. Working and history outlive Table tabs. The 12-tab capacity is a provisional migration limit.</p><p>Source lease and reconstruction owners remain authoritative; this shell does not request reconstruction, Export or Flash.</p>{workshop.limitations.map((item, index) => <p key={index} className="mt-1">{item}</p>)}</>}/>;
   return terminology ? <CalibrationTerminologyScope terminology={terminology}>{content}</CalibrationTerminologyScope> : content;
 }

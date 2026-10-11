@@ -126,75 +126,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 items-stretch">
-            <Link href="/plans/starter" className="bmw-border rounded-2xl bg-zinc-950 p-6 hover:scale-[1.02] transition block">
-              <h3 className="text-2xl font-semibold mb-3">Starter</h3>
-              <p className="text-zinc-400 mb-5">
-                For single-vehicle BMW owners who want reliable diagnostic clarity without workshop-level volume.
-              </p>
-              <p className="text-4xl font-bold mb-6">$19<span className="text-base text-zinc-400">/mo</span></p>
-              <ul className="space-y-2 text-sm text-zinc-300">
-                <li>1 Vehicle</li>
-                <li>10 Log Analyses / Month</li>
-                <li>5 Tune Uploads / Month</li>
-                <li>Complete Diagnostic Reports</li>
-                <li>Log & Tune Cross-Reference</li>
-                <li>Root Cause Identification</li>
-                <li>Vehicle Setup Profile</li>
-                <li>Software Updates</li>
-              </ul>
-            </Link>
-
-            <Link href="/plans/pro" className="bmw-border rounded-2xl bg-zinc-950 p-6 shadow-lg shadow-blue-500/10 hover:scale-[1.02] transition block relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-xs font-bold text-white">
-                MOST POPULAR
-              </div>
-              <h3 className="text-2xl font-semibold mb-3">Pro</h3>
-              <p className="text-zinc-400 mb-5">
-                For active enthusiasts managing up to 3 BMWs with unlimited logs, unlimited tune uploads, and full platform access.
-              </p>
-              <p className="text-4xl font-bold mb-6">$49<span className="text-base text-zinc-400">/mo</span></p>
-              <ul className="space-y-2 text-sm text-zinc-300">
-                <li>Up to 3 Vehicles</li>
-                <li>Unlimited Log Analyses</li>
-                <li>Unlimited Tune Uploads</li>
-                <li>Full TuneSight Diagnostic Platform</li>
-                <li>Complete Cross-Reference Analysis</li>
-                <li>Calibration Recommendations</li>
-                <li>Vehicle Setup Intelligence</li>
-                <li>Complete Analysis History</li>
-                <li>Priority Support</li>
-                <li>All Future Platform Updates</li>
-              </ul>
-            </Link>
-
-            <Link href="/plans/workshop" className="bmw-border rounded-2xl bg-zinc-950 p-6 hover:scale-[1.02] transition block">
-              <h3 className="text-2xl font-semibold mb-3">Workshop</h3>
-              <p className="text-zinc-400 mb-5">
-                Professional diagnostics for tuners, workshops, and performance businesses managing customer vehicles at scale.
-              </p>
-              <p className="text-4xl font-bold mb-6">$200<span className="text-base text-zinc-400">/mo</span></p>
-              <ul className="space-y-2 text-sm text-zinc-300">
-                <li>Includes every Pro feature, plus:</li>
-                <li>Unlimited Vehicles</li>
-                <li>Unlimited Log Analyses</li>
-                <li>Unlimited Tune Uploads</li>
-                <li>Full TuneSight Diagnostic Platform</li>
-                <li>Complete Cross-Reference Analysis</li>
-                <li>Calibration Recommendations</li>
-                <li>Vehicle Setup Intelligence</li>
-                <li>Complete Analysis History</li>
-                <li>Customer Vehicle Management</li>
-                <li>Customer Diagnostic History</li>
-                <li>Workshop Dashboard</li>
-                <li>Customer Tune Archive</li>
-                <li>Team Access</li>
-                <li>Priority Support</li>
-                <li>Early Access to New Features</li>
-                <li>All Future Platform Updates</li>
-              </ul>
-            </Link>
-          </div>
+          <div className="bmw-border rounded-2xl bg-zinc-950 p-6 text-center"><p className="text-xl font-semibold">Controlled, unpaid beta</p><p className="mt-3 text-zinc-400">Starter, Pro and Workshop subscriptions are not available for purchase. Access requires beta approval; this page grants no entitlement.</p><Link href="/login" className="mt-5 inline-block underline">Sign in to your beta account</Link></div>
         </section>
 
         <section className="bmw-border rounded-2xl bg-zinc-950/80 p-8 md:p-10 mb-16 text-center">

@@ -1,7 +1,8 @@
+import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const formData = await request.formData();
   const supabase = await createClient();
 
@@ -68,3 +69,4 @@ export async function POST(request: Request) {
     { status: 303 }
   );
 }
+export const POST = protectSubscriberRequest(handlePOST, 32768);

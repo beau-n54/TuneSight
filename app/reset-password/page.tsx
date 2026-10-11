@@ -19,13 +19,14 @@ export default function ResetPasswordPage() {
     let mounted = true;
 
     const checkSession = async () => {
+      try {
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!mounted) return;
 
-      if (session) {
+      if (user) {
         setSessionReady(true);
         setMessage("");
         return;
@@ -33,6 +34,7 @@ export default function ResetPasswordPage() {
 
       setSessionReady(false);
       setMessage("Recovery session missing. Please request a fresh reset link.");
+      } catch { if (mounted) { setSessionReady(false); setMessage("Recovery session could not be verified. Check your connection and reopen the reset link."); } }
     };
 
     checkSession();
@@ -43,6 +45,7 @@ export default function ResetPasswordPage() {
   }, [supabase.auth]);
 
   const handleUpdatePassword = async () => {
+    if (loading) return;
     setMessage("");
 
     if (!sessionReady) {
@@ -67,6 +70,7 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
 
+    try {
     const { error } = await supabase.auth.updateUser({
       password,
     });
@@ -77,13 +81,15 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    await supabase.auth.signOut();
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
+    if (signOutError) { setMessage("Password updated, but local sign-out failed. Use Account → Log out before leaving this browser."); return; }
 
     setMessage("Password updated successfully. Redirecting to login...");
 
-    setTimeout(() => {
-      router.push("/login");
-    }, 1500);
+    router.replace("/login");
+    router.refresh();
+    } catch { setMessage("Password update could not be confirmed. Check your connection and request a fresh recovery link if needed."); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -101,6 +107,7 @@ export default function ResetPasswordPage() {
 
         <input
           type="password"
+          id="new-password" name="password" autoComplete="new-password" aria-label="New password"
           placeholder="New password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -111,6 +118,7 @@ export default function ResetPasswordPage() {
         <input
           type="password"
           placeholder="Confirm new password"
+          id="confirm-password" name="confirmPassword" autoComplete="new-password" aria-label="Confirm new password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           disabled={!sessionReady || loading}

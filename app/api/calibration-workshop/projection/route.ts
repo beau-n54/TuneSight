@@ -1,3 +1,4 @@
+import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
 import { createHash } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /** Read-only projection request: no recovery, upload, session creation or persistence. */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const headers = { "Cache-Control": "private, no-store" };
   try {
     const text = await request.text();
@@ -25,3 +26,5 @@ export async function POST(request: Request) {
     return Response.json({ status: "unavailable", code: "REQUEST_FAILED", finding: "Projection evidence is unavailable." }, { status: 400, headers });
   }
 }
+
+export const POST = protectSubscriberRequest(handlePOST, 32768);

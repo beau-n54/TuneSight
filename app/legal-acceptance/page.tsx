@@ -14,9 +14,11 @@ export default function LegalAcceptancePage() {
   const [error, setError] = useState("");
 
   async function handleAccept() {
+    if (isSaving) return;
     setIsSaving(true);
     setError("");
 
+    try {
     const {
       data: { user },
       error: authError,
@@ -43,6 +45,8 @@ export default function LegalAcceptancePage() {
     }
 
     router.push("/beta-access");
+    } catch { setError("Legal acceptance could not be saved. Please retry."); }
+    finally { setIsSaving(false); }
   }
 
   return (

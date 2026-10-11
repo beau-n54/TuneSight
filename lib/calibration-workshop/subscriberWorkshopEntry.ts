@@ -7,6 +7,7 @@ export async function resolveSubscriberWorkshopSession(input: Readonly<{
   requestedSession: string | string[] | undefined;
   ownerId: string;
   vehicleId: string;
+  allowRecovery?: boolean;
 }>, readers: Readonly<{
   readSession: (id: string, ownerId: string, vehicleId: string) => Promise<SubscriberCalibrationResult | null>;
   readLatest: (ownerId: string, vehicleId: string) => Promise<RecoveredSession | null>;
@@ -20,7 +21,7 @@ export async function resolveSubscriberWorkshopSession(input: Readonly<{
     return { explicit: true, sessionId, result };
   }
   const recovered = await readers.readLatest(input.ownerId, input.vehicleId)
-    ?? await readers.recoverVehicle(input.ownerId, input.vehicleId);
+    ?? (input.allowRecovery === true ? await readers.recoverVehicle(input.ownerId, input.vehicleId) : null);
   return { explicit: false, sessionId: recovered?.sessionId, result: recovered?.result ?? null };
 }
 

@@ -14,10 +14,10 @@ import type {
 import { segmentPulls } from "../logs/segmentPulls";
 import { detectEvents } from "../logs/detectEvents";
 import { buildReasoningForEvent } from "./reasoningEngine";
-import { analyzePerCylinderIntelligence } from "@/lib/logs/perCylinderIntelligence";
+import { qualifiedAnalysisPlatform } from "./qualifiedAnalysisInput";
+import { maximumObserved as max, minimumObserved as min } from "../logging/numericSummary";
 import {
   getFuelPressureThresholds,
-  validateFuelAgainstTune,
 } from "./fuelValidation";
 import { runAnalysisPipeline } from "./core/analysisPipeline";
 import { buildWarnings as buildPipelineWarnings } from "./core/buildWarnings";
@@ -29,16 +29,6 @@ import { crossReferenceXdfTables } from "@/lib/xdf";
 function average(values: number[]): number | null {
   if (!values.length) return null;
   return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
-
-function max(values: number[]): number | null {
-  if (!values.length) return null;
-  return Math.max(...values);
-}
-
-function min(values: number[]): number | null {
-  if (!values.length) return null;
-  return Math.min(...values);
 }
 
 function severityRank(severity: "low" | "medium" | "high" | "critical"): number {
@@ -67,16 +57,7 @@ function buildSummary(parsedLog: ParsedLog): LogSummary {
   parsedLog.channels["boost target psi"] ||
   [];
 
-const boostTarget = rawBoostTarget.map((value) => {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return n;
-
-  // Safety clamp for bad parser/unit scaling.
-  // If target is showing 185–240 on a normal PSI test log, convert it back down.
-  if (n > 80) return n / 10;
-
-  return n;
-});
+const boostTarget = rawBoostTarget;
   const iat = parsedLog.channels.iat || [];
   const afr = parsedLog.channels.afr || [];
   const rail = parsedLog.channels.rail_pressure || [];
@@ -84,6 +65,7 @@ const boostTarget = rawBoostTarget.map((value) => {
   const wgdc = parsedLog.channels.wgdc || [];
   const ethanol = parsedLog.channels.ethanol || [];
   const throttle = parsedLog.channels.throttle || [];
+  const observed = (key: string, fallback: number[]) => parsedLog.evidenceTelemetry?.[key] ?? fallback;
 
   const cylTimingCorrections: Record<string, number | null> = {};
 
@@ -93,45 +75,7 @@ const boostTarget = rawBoostTarget.map((value) => {
       cylTimingCorrections[key] = min(parsedLog.channels[key]);
     });
 
-    const diagnosticTimeline = [];
-
-if (typeof max(boost) === "number" && typeof max(boostTarget) === "number") {
-  const boostError = max(boostTarget)! - max(boost)!;
-
-  if (boostError > 3) {
-    diagnosticTimeline.push({
-      timestamp: 0,
-      event: "Boost undershoot detected",
-      severity: "medium" as const,
-    });
-  }
-}
-
-if ((min(rail) ?? 9999) < 1500) {
-  diagnosticTimeline.push({
-    timestamp: 0,
-    event: "Rail pressure drop detected",
-    severity: "high" as const,
-  });
-}
-
-if ((min(lpfp) ?? 9999) < 50) {
-  diagnosticTimeline.push({
-    timestamp: 0,
-    event: "LPFP pressure drop detected",
-    severity: "medium" as const,
-  });
-}
-
-if ((min(Object.values(cylTimingCorrections).filter(
-  (value): value is number => typeof value === "number"
-)) ?? 0) < -3) {
-  diagnosticTimeline.push({
-    timestamp: 0,
-    event: "Timing correction detected",
-    severity: "high" as const,
-  });
-}
+    const diagnosticTimeline: LogSummary["diagnosticTimeline"] = [];
 
     const worstCylinder =
   Object.entries(cylTimingCorrections)
@@ -149,26 +93,27 @@ if ((min(Object.values(cylTimingCorrections).filter(
     minLpfp: min(lpfp),
     maxWgdc: max(wgdc),
     ethanolContent: average(ethanol),
-    throttleClosureDetected: throttle.some((value) => value < 70),
+    throttleClosureDetected: null,
     telemetry: {
-      rpm: parsedLog.rpm ?? (parsedLog.channels as any)?.rpm ?? [],
-      boost,
-      boostTarget,
-      iat,
-      afr,
-      rail,
-      railPressure: rail,
-      rail_pressure: rail,
-      lpfp,
-      wgdc,
+      timestamps: parsedLog.timestamps,
+      rpm: parsedLog.rpm,
+      boost: observed("boost", boost),
+      boostTarget: observed("boost_target", boostTarget),
+      iat: observed("iat", iat),
+      afr: observed("afr", afr),
+      rail: observed("rail_pressure", rail),
+      railPressure: observed("rail_pressure", rail),
+      rail_pressure: observed("rail_pressure", rail),
+      lpfp: observed("lpfp", lpfp),
+      wgdc: observed("wgdc", wgdc),
       ethanol,
-      throttle,
-      timing_correction_cyl_1: parsedLog.channels.timing_correction_cyl_1 ?? [],
-      timing_correction_cyl_2: parsedLog.channels.timing_correction_cyl_2 ?? [],
-      timing_correction_cyl_3: parsedLog.channels.timing_correction_cyl_3 ?? [],
-      timing_correction_cyl_4: parsedLog.channels.timing_correction_cyl_4 ?? [],
-      timing_correction_cyl_5: parsedLog.channels.timing_correction_cyl_5 ?? [],
-      timing_correction_cyl_6: parsedLog.channels.timing_correction_cyl_6 ?? [],
+      throttle: observed("throttle", throttle),
+      timing_correction_cyl_1: observed("timing_correction_cyl_1", parsedLog.channels.timing_correction_cyl_1 ?? []),
+      timing_correction_cyl_2: observed("timing_correction_cyl_2", parsedLog.channels.timing_correction_cyl_2 ?? []),
+      timing_correction_cyl_3: observed("timing_correction_cyl_3", parsedLog.channels.timing_correction_cyl_3 ?? []),
+      timing_correction_cyl_4: observed("timing_correction_cyl_4", parsedLog.channels.timing_correction_cyl_4 ?? []),
+      timing_correction_cyl_5: observed("timing_correction_cyl_5", parsedLog.channels.timing_correction_cyl_5 ?? []),
+      timing_correction_cyl_6: observed("timing_correction_cyl_6", parsedLog.channels.timing_correction_cyl_6 ?? []),
    },
     max_timing_correction: min(
   Object.values(cylTimingCorrections).filter(
@@ -483,90 +428,59 @@ function buildQuickVerdict(
   };
 }
 
-type PerCylinderRow = Record<string, number | string | null | undefined>;
-
 export function buildAnalysisResult(input: {
   parsedLog: ParsedLog;
   vehicle: VehicleSetup | null;
   tuneProfile: TuneProfile | null;
   xdfTables?: ParsedXdfTable[];
 }): AnalysisResult {
+  if (!input.parsedLog.sampleCount || input.parsedLog.timestamps.length !== input.parsedLog.sampleCount
+    || input.parsedLog.rpm.length !== input.parsedLog.sampleCount || !input.parsedLog.rpm.every(Number.isFinite)
+    || input.parsedLog.timestamps.some((value, index, all) => !Number.isFinite(value) || (index > 0 && value <= all[index - 1]))
+    || Object.values(input.parsedLog.channels).some(values => values.length > 0 && (values.length !== input.parsedLog.sampleCount || !values.every(Number.isFinite)))) throw new Error("Analysis requires aligned finite observations and a qualified timebase.");
   const pullWindows = segmentPulls(input.parsedLog);
   const summary = buildSummary(input.parsedLog);
 
-  const perCylinderAnalysis = analyzePerCylinderIntelligence(
-  Object.entries(input.parsedLog.channels).map(([key, values]) => {
-    return values.reduce<PerCylinderRow[]>((rows, value, index) => {
-  if (!rows[index]) {
-    rows[index] = {};
-  }
+  const platform = qualifiedAnalysisPlatform(input.vehicle);
+  const inputQualification = { contract: "qualified-source-v1" as const, platform, missingChannels: input.parsedLog.unavailableChannels ?? [] };
+  const pipelineResult = runAnalysisPipeline({
+    platform,
+    ethanolContent: summary.ethanolContent,
+    maxBoost: summary.maxBoost,
+    maxBoostTarget: summary.maxBoostTarget,
+    maxWgdc: summary.maxWgdc,
+    boostIntent: input.tuneProfile?.boostIntent,
+    fuelingIntent: input.tuneProfile?.fuelingIntent,
+  });
+  const fuelValidation = pipelineResult.fuel;
+  const pipelineWarnings = buildPipelineWarnings(pipelineResult);
+  const fuelPressureThresholds = fuelValidation.detectedFuel === "unavailable" ? null : getFuelPressureThresholds(fuelValidation.detectedFuel);
+  if (platform !== "n54") return {
+    inputQualification,
+    quickVerdict: { status: "caution", summary: "Analysis unavailable: this engine context has no qualified rule contract. N54 rules were not applied.", confidence: 0, pullQuality: "questionable" },
+    warnings: [], pipelineWarnings: [], suggestedFixes: [], crossReferences: [], xdfCrossReferences: [],
+    summary, fuelValidation, fuelPressureThresholds: null, events: [], routedEvents: [], pullWindows: [],
+    telemetry: summary.telemetry, worstCylinder: null, diagnosticTimeline: [],
+  };
 
-  rows[index][key] = value;
-
-  return rows;
-}, []);
-  }).flat()
-);
-
-  const fuelValidation = validateFuelAgainstTune({
-  platform: "n54",
-
-  ethanolContent: Number(
-    (summary as any).ethanolContent ??
-      (summary as any).ethanol_content
-  ),
-
-  fuelingIntent:
-    (input.tuneProfile as any)?.fuelingIntent ??
-    (input.tuneProfile as any)?.fueling_intent,
-});
-
-const pipelineResult = runAnalysisPipeline({
-  platform: "n54",
-
-  ethanolContent: Number(
-    (summary as any).ethanolContent ??
-      (summary as any).ethanol_content
-  ),
-
-  maxBoost: Number(
-    (summary as any).maxBoost ??
-      (summary as any).max_boost
-  ),
-
-  maxBoostTarget: Number(
-    (summary as any).maxBoostTarget ??
-      (summary as any).max_boost_target
-  ),
-
-  maxWgdc: Number(summary.maxWgdc),
-
- boostIntent: input.tuneProfile?.boostIntent,
-
-  fuelingIntent: input.tuneProfile?.fuelingIntent,
-
-});
-
-
-const boostValidation = pipelineResult.boost;
-const pipelineWarnings = buildPipelineWarnings(pipelineResult);
-const fuelPressureThresholds = getFuelPressureThresholds(
-  fuelValidation.detectedFuel
-);
-
-  const rawEvents = detectEvents(input.parsedLog, pullWindows, {
-  railDropThreshold: fuelPressureThresholds.minRailPressure,
-  railCriticalThreshold: Math.round(
-    fuelPressureThresholds.minRailPressure * 0.82
-  ),
-  lpfpDropThreshold: fuelPressureThresholds.minLpfpPressure,
-  lpfpCriticalThreshold: Math.round(
-    fuelPressureThresholds.minLpfpPressure * 0.75
-  ),
-});
+  const rawEvents = detectEvents(input.parsedLog, pullWindows, fuelPressureThresholds ? {
+    railDropThreshold: fuelPressureThresholds.minRailPressure,
+    railCriticalThreshold: Math.round(fuelPressureThresholds.minRailPressure * 0.82),
+    lpfpDropThreshold: fuelPressureThresholds.minLpfpPressure,
+    lpfpCriticalThreshold: Math.round(fuelPressureThresholds.minLpfpPressure * 0.75),
+  } : undefined).filter(event => {
+    if (!fuelPressureThresholds && ["rail_pressure_drop", "hpfp_capacity_limit", "lpfp_drop", "lean_under_load"].includes(event.type)) return false;
+    // Never let a detector's fallback value become reported measurement evidence.
+    return event.supportingChannels.every(key => {
+      const values = input.parsedLog.channels[key];
+      return values && values.length === input.parsedLog.sampleCount && values.every(Number.isFinite);
+    });
+  });
   const events = sortEvents(rawEvents);
+  summary.throttleClosureDetected = input.parsedLog.channels.throttle?.length === input.parsedLog.sampleCount
+    ? events.some(event => event.type === "throttle_closure") : null;
   const xdfFindingTypes = events.flatMap((event) => {
-  const type = String((event as any)?.type ?? "").toLowerCase();
+  const type = String(event.type).toLowerCase();
 
   if (type.includes("boost")) return ["overboost"];
   if (type.includes("rail")) return ["railPressureDrop"];
@@ -584,19 +498,7 @@ const routedEvents = [
   ...routedWarningEvents,
 ];
 
-  const effectiveTuneProfile =
-  input.tuneProfile &&
-  Number((summary as any).ethanolContent ?? (summary as any).ethanol_content ?? 0) >= 50 &&
-  (
-    (input.tuneProfile as any).fuelingIntent === "pump" ||
-    (input.tuneProfile as any).fueling_intent === "pump"
-  )
-    ? {
-        ...input.tuneProfile,
-        fuelingIntent: "full_ethanol",
-        fueling_intent: "full_ethanol",
-      }
-    : input.tuneProfile;
+  const effectiveTuneProfile = input.tuneProfile;
 
  const xdfTables = input.xdfTables ?? [];
 
@@ -619,10 +521,6 @@ const warnings = buildEventWarnings(
   effectiveTuneProfile as TuneProfile | null
 );
 
-const unifiedWarnings = [
-  ...warnings,
-  ...pipelineWarnings,
-];
 
 const suggestedFixes = buildSuggestedFixes(
   events,
@@ -641,7 +539,14 @@ const quickVerdict = buildQuickVerdict(
   effectiveTuneProfile as TuneProfile | null
 );
 
+  if (input.parsedLog.unavailableChannels?.length && quickVerdict.status === "healthy") {
+    quickVerdict.status = "caution";
+    quickVerdict.summary = "No issue established by available channels. Missing channels remain unavailable; this is not an all-systems health confirmation.";
+    quickVerdict.confidence = 0;
+  }
+  summary.diagnosticTimeline = events.map(event => ({ timestamp: input.parsedLog.timestamps[event.startIndex], event: event.type, severity: event.severity }));
   return {
+  inputQualification,
   quickVerdict,
   warnings,
   pipelineWarnings,

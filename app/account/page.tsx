@@ -1,6 +1,9 @@
+import LogoutControl from "@/components/LogoutControl";
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 
-export default function AccountPage() {
+export default async function AccountPage() {
+  await requireSubscriberPage();
   return (
     <main className="min-h-screen bg-black text-white px-6 py-16">
       <div className="max-w-5xl mx-auto">
@@ -9,15 +12,16 @@ export default function AccountPage() {
         </Link>
 
         <h1 className="text-5xl font-bold mt-8 mb-4">Account</h1>
+        <LogoutControl />
         <p className="text-zinc-400 mb-10">
-          Manage your TuneSight account, subscription, billing, and support options.
+          Manage your TuneSight account and controlled, unpaid beta access.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bmw-border rounded-2xl bg-zinc-900 p-8">
             <h2 className="text-2xl font-semibold mb-2">Email & Password</h2>
             <p className="text-zinc-400 mb-6">
-              Update your login email and password details.
+              View account support and password recovery options.
             </p>
 
             <Link
@@ -31,7 +35,7 @@ export default function AccountPage() {
           <div className="bmw-border rounded-2xl bg-zinc-900 p-8">
             <h2 className="text-2xl font-semibold mb-2">Subscription</h2>
             <p className="text-zinc-400 mb-6">
-              View your current plan, upgrade, downgrade, or cancel.
+              Paid subscriptions are unavailable during the unpaid beta.
             </p>
 
             <Link
@@ -45,7 +49,7 @@ export default function AccountPage() {
           <div className="bmw-border rounded-2xl bg-zinc-900 p-8">
             <h2 className="text-2xl font-semibold mb-2">Billing</h2>
             <p className="text-zinc-400 mb-6">
-              View invoices, payment details, and billing history.
+              No payment processing or billing history is available.
             </p>
 
             <Link

@@ -7,6 +7,8 @@ export type Severity = "low" | "medium" | "high" | "critical";
 export type QuickVerdictStatus = "healthy" | "caution" | "critical";
 
 export type ParsedLog = {
+  unavailableChannels?: string[];
+  evidenceTelemetry?: Record<string, (number | null)[]>;
   sampleCount: number;
   durationSec: number;
   timestamps: number[];
@@ -38,26 +40,27 @@ export type LogSummary = {
   minLpfp: number | null;
   maxWgdc: number | null;
   ethanolContent: number | null;
-  throttleClosureDetected: boolean;
+  throttleClosureDetected: boolean | null;
   telemetry?: {
-  rpm?: number[];
-  boost: number[];
-  boostTarget: number[];
-  iat: number[];
-  afr: number[];
-  rail: number[];
-  railPressure?: number[];
-  rail_pressure?: number[];
-  lpfp: number[];
-  wgdc: number[];
-  ethanol: number[];
-  throttle: number[];
-  timing_correction_cyl_1?: number[];
-  timing_correction_cyl_2?: number[];
-  timing_correction_cyl_3?: number[];
-  timing_correction_cyl_4?: number[];
-  timing_correction_cyl_5?: number[];
-  timing_correction_cyl_6?: number[];
+  timestamps?: number[];
+  rpm?: (number | null)[];
+  boost: (number | null)[];
+  boostTarget: (number | null)[];
+  iat: (number | null)[];
+  afr: (number | null)[];
+  rail: (number | null)[];
+  railPressure?: (number | null)[];
+  rail_pressure?: (number | null)[];
+  lpfp: (number | null)[];
+  wgdc: (number | null)[];
+  ethanol: (number | null)[];
+  throttle: (number | null)[];
+  timing_correction_cyl_1?: (number | null)[];
+  timing_correction_cyl_2?: (number | null)[];
+  timing_correction_cyl_3?: (number | null)[];
+  timing_correction_cyl_4?: (number | null)[];
+  timing_correction_cyl_5?: (number | null)[];
+  timing_correction_cyl_6?: (number | null)[];
 };
   cylTimingCorrections: Record<string, number | null>;
   worstCylinder: string | null;
@@ -157,8 +160,8 @@ export type RootCause = {
   confidence: number;
   evidence: RootCauseEvidence[];
 
-  candidateCauses?: any[];
-  confidenceBreakdown?: any[];
+  candidateCauses?: import("./rootCauseEngine").CandidateCause[];
+  confidenceBreakdown?: import("./rootCauseEngine").ConfidenceFactor[];
   reasoningNarrative?: string;
 
   relatedTables?: string[];
@@ -262,6 +265,7 @@ export type QuickVerdict = {
 };
 
 export type AnalysisResult = {
+  inputQualification?: { contract: "qualified-source-v1"; platform: "n54" | "unknown"; missingChannels: readonly string[] };
   quickVerdict: QuickVerdict;
   warnings: WarningCard[];
   pipelineWarnings: AnalysisWarning[];
@@ -276,8 +280,8 @@ export type AnalysisResult = {
 }[];
   summary: LogSummary;
   fuelValidation: {
-  status: "pass" | "warning" | "fail";
-  detectedFuel: "pump" | "ethanol_blend" | "full_ethanol";
+  status: "pass" | "warning" | "fail" | "unavailable";
+  detectedFuel: "pump" | "ethanol_blend" | "full_ethanol" | "unavailable";
   message: string;
 };
 fuelPressureThresholds: {
@@ -285,7 +289,7 @@ fuelPressureThresholds: {
   minLpfpPressure: number;
   railWarningLabel: string;
   lpfpWarningLabel: string;
-};
+} | null;
   events: DetectedEvent[];
 routedEvents: RoutedEvent[];
 pullWindows: PullWindow[];

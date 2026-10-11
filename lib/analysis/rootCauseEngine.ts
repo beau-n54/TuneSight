@@ -88,11 +88,6 @@ function calculateBoostErrorContribution(actualBoost: number, targetBoost?: numb
   return clampContribution(error * 1.5, 30);
 }
 
-function calculateWgdcContribution(wgdc: number): number {
-  if (!wgdc || wgdc < 70) return 0;
-
-  return clampContribution((wgdc - 70) * 0.6, 25);
-}
 
 function calculateThrottleContribution(throttle: number): number {
   if (!throttle) return 0;
@@ -102,17 +97,7 @@ function calculateThrottleContribution(throttle: number): number {
   return clampContribution(closure * 0.4, 25);
 }
 
-function calculateIatContribution(iat: number): number {
-  if (!iat || iat < 45) return 0;
 
-  return clampContribution((iat - 45) * 0.6, 20);
-}
-
-function calculateFuelStabilityContribution(variance: number): number {
-  if (!variance) return 0;
-
-  return clampContribution(variance * 2, 20);
-}
 
 function clampConfidence(value: number): number {
   if (value < 0) return 0;

@@ -1,41 +1,11 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
-export default function StarterCheckout() {
-  const router = useRouter();
-
-  function handleCheckout() {
-    // Stripe will replace this later.
-    // For the beta, continue through the onboarding flow.
-    router.push("/legal-acceptance");
-  }
-
-  return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="max-w-md w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
-
-        <h1 className="text-3xl font-bold mb-4">
-          Starter Plan
-        </h1>
-
-        <p className="text-zinc-400 mb-6">
-          Perfect for individual enthusiasts getting started with TuneSight.
-        </p>
-
-        <div className="text-4xl font-bold mb-8">
-          $19
-          <span className="text-lg text-zinc-400 font-normal"> / month</span>
-        </div>
-
-        <button
-          onClick={handleCheckout}
-          className="w-full rounded-xl bg-white py-4 font-semibold text-black transition hover:opacity-90"
-        >
-          Continue to Legal Review
-        </button>
-
-      </div>
-    </main>
-  );
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
+import Link from "next/link";
+export default async function CheckoutPage() {
+  await requireSubscriberPage();
+  return <main className="min-h-screen bg-black px-6 py-16 text-white"><section className="bmw-border mx-auto max-w-xl rounded-2xl bg-zinc-900 p-8">
+    <h1 className="mb-4 text-3xl font-bold">Checkout unavailable</h1>
+    <p>TuneSight is a controlled, unpaid beta. No payment is collected and no paid plan is activated.</p>
+    <button disabled className="my-6 rounded-xl bg-zinc-800 px-5 py-3 text-zinc-400">Payments unavailable</button>
+    <Link href="/beta-access" className="block text-blue-300">View beta access</Link>
+  </section></main>;
 }

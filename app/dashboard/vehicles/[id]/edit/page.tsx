@@ -1,3 +1,4 @@
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -9,6 +10,7 @@ type PageProps = {
 };
 
 export default async function EditVehiclePage({ params }: PageProps) {
+  await requireSubscriberPage();
   const { id } = await params;
   const supabase = await createClient();
 

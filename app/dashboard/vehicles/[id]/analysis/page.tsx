@@ -1,11 +1,10 @@
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { validateBoostAgainstTune } from "@/lib/analysis/boostValidation";
 import { loadEvidenceReloadWithProvenance } from "@/lib/analysis/evidenceProvenance";
 import type { AnalysisWarning } from "@/lib/analysis/core/analysisWarning";
-import type { EnginePlatform } from "@/lib/analysis/core/analysisContext";
 import type { RootCauseEvidence } from "@/lib/analysis/rootCauseEngine";
 import type { RoutedEvent } from "@/lib/analysis/types";
 import {
@@ -114,32 +113,7 @@ type EventDescriptor = EngineEvent & {
 
 type XdfCrossReference = PresentationXdfReference;
 
-type LegacySummary = {
-  max_boost?: unknown;
-  max_boost_target?: unknown;
-  max_iat?: unknown;
-  min_afr?: unknown;
-  min_rail_pressure?: unknown;
-  min_lpfp?: unknown;
-  max_wgdc?: unknown;
-  ethanol_content?: unknown;
-  max_timing_correction?: unknown;
-  throttle_closure_detected?: unknown;
-  cyl2_max_timing_correction?: unknown;
-  cyl3_max_timing_correction?: unknown;
-  maxBoost?: unknown;
-  maxBoostTarget?: unknown;
-  maxWgdc?: unknown;
-};
 
-type VehicleContext = {
-  engine_code?: string | null;
-  platform?: string | null;
-  fuel_type?: string | null;
-  fueling_setup?: string | null;
-  turbo_setup?: string | null;
-  horsepower_goal?: unknown;
-};
 
 type EnginePullWindow = {
   id?: string;
@@ -165,6 +139,7 @@ type EngineCrossReference = PresentationCrossReference & {
 };
 
 type EngineV2 = {
+  inputQualification?: { contract?: string; platform?: string; missingChannels?: readonly string[] };
   quickVerdict?: EngineQuickVerdict;
   warnings?: EngineWarning[];
   pipelineWarnings?: AnalysisWarning[];
@@ -202,6 +177,7 @@ type TuneProfileRow = {
 };
 
 export default async function AnalysisPage({ params }: PageProps) {
+  await requireSubscriberPage();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -338,19 +314,10 @@ export default async function AnalysisPage({ params }: PageProps) {
   );
   const historicalSummaries = historicalAuthorityIds.flatMap((summaryId) => {
     const summary = historicalRowsById.get(summaryId);
-    return summary ? [summary] : [];
+    return summary && getEngineV2(summary)?.inputQualification?.contract === "qualified-source-v1" && getEngineV2(summary)?.inputQualification?.platform === "n54" ? [summary] : [];
   });
 
-  const effectiveTuneProfile =
-  latestTuneProfile &&
-  Number(latestSummary?.ethanol_content ?? 0) >= 50 &&
-  latestTuneProfile.fueling_intent === "pump"
-    ? {
-        ...latestTuneProfile,
-        fuelingIntent: "full_ethanol",
-        fueling_intent: "full_ethanol",
-      }
-    : latestTuneProfile;
+  const effectiveTuneProfile = latestTuneProfile;
 
   const throttleClosureText =
     latestSummary?.throttle_closure_detected === true
@@ -365,9 +332,12 @@ export default async function AnalysisPage({ params }: PageProps) {
   );
 
   const engineV2 = getEngineV2(latestSummary);
+  if (latestLog && (engineV2?.inputQualification?.contract !== "qualified-source-v1" || engineV2.inputQualification.platform !== "n54" || vehicle.engine_code?.trim().toUpperCase() !== "N54")) {
+    return <main className="min-h-screen bg-black px-6 py-10 text-white"><section className="bmw-border mx-auto max-w-5xl space-y-4 rounded-2xl bg-zinc-900 p-6"><Link href={`/dashboard/vehicles/${id}`} className="underline">Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis qualification unavailable</h1><p>{engineV2?.inputQualification?.contract === "qualified-source-v1" ? "This vehicle has no qualified Analysis rule contract. N54 rules and thresholds have not been applied." : "This stored result predates source, units and platform qualification. It is preserved, but its diagnostic conclusions are not presented as verified. Upload the original source again for qualified processing."}</p><p>No source, Working Calibration or stored evidence was changed by this page.</p><Link href={`/dashboard/vehicles/${id}/logs`} className="underline">Review owned source logs</Link></section></main>;
+  }
 
-  const fallbackWarnings = buildWarnings(latestSummary, boostError, vehicle);
-  const fallbackFlags = buildAnalysisFlags(latestSummary, boostError, vehicle);
+
+  const fallbackFlags: AnalysisFlag[] = [];
 
 const legacyPipelineWarnings: EngineWarning[] =
   (engineV2?.pipelineWarnings ?? []).map((warning) => ({
@@ -384,24 +354,7 @@ const legacyPipelineWarnings: EngineWarning[] =
 
   const routedEvents = engineV2?.routedEvents ?? [];
 
-const renderedWarnings =
-  engineV2?.warnings?.length || legacyPipelineWarnings.length
-    ? [
-        ...(engineV2?.warnings ?? []),
-        ...legacyPipelineWarnings,
-      ]
-        .filter(
-          (warning, index, array) =>
-            index ===
-            array.findIndex(
-              (item) =>
-                item.title === warning.title &&
-                (item.summary ?? "") === (warning.summary ?? "")
-            )
-        )
-        .sort(sortWarnings)
-        .map(mapLegacyWarningToFlag)
-    : fallbackWarnings;
+
 
   const renderedVerdictFlags = engineV2?.quickVerdict
     ? buildVerdictFlagsFromEngine(engineV2.quickVerdict)
@@ -518,12 +471,7 @@ const xdfCrossReferences = Array.isArray(engineV2?.xdfCrossReferences)
     ];
 const tuneProfile = effectiveTuneProfile;
 
-const tuneReasoningFlags = buildTuneReasoningFlags(
-  tuneProfile,
-  latestSummary,
-  vehicle,
-  engineEvents
-);
+const tuneReasoningFlags: AnalysisFlag[] = (engineV2?.warnings ?? []).map(mapLegacyWarningToFlag);
 
 const historicalDiagnosticEvents =
   buildHistoricalDiagnosticEvents(
@@ -1420,221 +1368,6 @@ function getEngineV2(summaryRow: unknown): EngineV2 | null {
   return raw as EngineV2;
 }
 
-function buildTuneReasoningFlags(
-  tuneProfile: TuneProfileRow | null,
-  summary: LegacySummary | null,
-  vehicle: VehicleContext,
-  engineEvents: EventDescriptor[] = []
-): AnalysisFlag[] {
-  const flags: AnalysisFlag[] = [];
-
-  if (!tuneProfile) return flags;
-
-  const detectedPlatform = tuneProfile?.detected_platform ?? "Unknown platform";
- if (false) {
-  flags.push({
-    title: "Tune platform detected",
-    message: `Tune profile is active and the latest tune was identified as ${detectedPlatform}.`,
-    tone: "info",
-  });
-}
-
-   const boostValidation = validateBoostAgainstTune({
-  platform: toEnginePlatform(
-    vehicle?.engine_code ||
-    vehicle?.platform
-  ),
-
-  fuelType:
-    vehicle?.fuel_type ||
-    "Unknown",
-
-  maxBoost: finiteNumberOrNullish(
-    summary?.max_boost ??
-    summary?.maxBoost
-  ),
-
-  maxBoostTarget: finiteNumberOrNullish(
-    summary?.max_boost_target ??
-    summary?.maxBoostTarget
-  ),
-
-  maxWgdc: finiteNumberOrNullish(
-    summary?.max_wgdc ??
-    summary?.maxWgdc
-  ),
-
-  boostIntent: null,
-})
-
-  flags.push({
-    title: "Boost Tune Validation",
-    message: boostValidation.message,
-    tone:
-      boostValidation.status === "fail"
-        ? "bad"
-        : boostValidation.status === "warning"
-        ? "warn"
-        : "good",
-  });
-
-  const hpfpCapacityEvent = engineEvents.find((x) => {
-  const eventType = x.eventType ?? x.event_type ?? x.type;
-
-  return eventType === "hpfp_capacity_limit";
-});
-
-if (hpfpCapacityEvent) {
-  flags.push({
-    title: "HPFP Capacity Warning",
-    message:
-      "Fuel rail pressure indicates the high-pressure fuel pump is reaching its support limit under load. Tune demand, ethanol blend, or airflow may exceed current HPFP capacity.",
-    tone: "bad",
-  });
-}
-
-const lpfpSupplyEvent = engineEvents.find((x) => {
-  const eventType = x.eventType ?? x.event_type ?? x.type;
-
-  return eventType === "lpfp_supply_limit" || eventType === "lpfp_drop";
-});
-
-if (lpfpSupplyEvent) {
-  flags.push({
-    title: "LPFP Supply Warning",
-    message:
-      "Low-pressure fuel supply is dropping under load. The in-tank pump, fuel lines, filter/regulator, wiring, or ethanol demand may be limiting fuel delivery before the HPFP.",
-    tone: "bad",
-  });
-}
-  if (tuneProfile.fueling_intent === "pump") {
-    flags.push({
-      title: "Ethanol-based fueling strategy detected",
-      message:
-        "This calibration appears designed for ethanol content. Because ethanol requires significantly more fuel volume, HPFP/LPFP performance and injector headroom should be judged more critically under load.",
-      tone: "info",
-    });
-  }
-
-  if (
-    tuneProfile.fueling_intent &&
-    (tuneProfile.fueling_intent === "ethanol_blend" ||
-      tuneProfile.fueling_intent === "full_ethanol")
-  ) {
-    flags.push({
-      title: "Ethanol fueling strategy detected",
-      message:
-        "The tune profile suggests ethanol-based fueling. Fuel pressure, injector headroom, and lambda control should be evaluated more critically under load because ethanol demand is substantially higher than pump fuel.",
-      tone: "info",
-    });
-  }
-
-  if (tuneProfile.boost_intent === "aggressive") {
-    flags.push({
-      title: "Aggressive boost intent detected",
-      message:
-        "The uploaded tune profile suggests a more aggressive boost strategy. If the log shows boost taper or WGDC saturation, the tune may be asking more than the setup can comfortably deliver.",
-      tone: "warn",
-    });
-  }
-
-  if (tuneProfile.boost_intent === "low") {
-    flags.push({
-      title: "Low boost calibration detected",
-      message:
-        "The tune appears to target a modest boost level. If the vehicle still shows elevated fuel stress, timing correction, or thermal load at this boost target, that suggests an efficiency or hardware issue rather than simple overboost.",
-      tone: "info",
-    });
-  }
-
-  if (tuneProfile.ignition_intent === "conservative") {
-    flags.push({
-      title: "Conservative ignition strategy detected",
-      message:
-        "This calibration appears to use a safer ignition strategy. If meaningful timing correction is still present, the issue is more likely related to fuel quality, intake temperature, ignition hardware, or transient load rather than excessive ignition advance.",
-      tone: "info",
-    });
-  }
-
-  const ethanolContent = toNumber(summary?.ethanol_content);
-  if (
-    tuneProfile.fueling_intent === "pump" &&
-    ethanolContent !== null &&
-    ethanolContent >= 20
-  ) {
-    flags.push({
-      title: "Fuel mismatch detected",
-      message:
-        "The tune profile looks pump-based, but the log shows meaningful ethanol content. That can distort how the tune behaves versus what the profile suggests.",
-      tone: "bad",
-    });
-  }
-
-  const minRailPressure = toNumber(summary?.min_rail_pressure);
-  if (
-    tuneProfile.fueling_intent === "pump" &&
-    minRailPressure !== null &&
-    minRailPressure < 1500
-  ) {
-    flags.push({
-      title: "Unexpected rail pressure weakness",
-      message:
-        "Rail pressure is weaker than expected for a pump-oriented tune profile. That points more toward fuel system stress or real fuel mismatch.",
-      tone: "warn",
-    });
-  }
-
-  const minLpfp = toNumber(summary?.min_lpfp);
-  if (
-    tuneProfile.fueling_intent === "pump" &&
-    minLpfp !== null &&
-    minLpfp < 50
-  ) {
-    flags.push({
-      title: "Unexpected LPFP weakness",
-      message:
-        "The tune profile looks pump-oriented, but low-pressure fuel is dropping harder than expected.",
-      tone: "warn",
-    });
-  }
-
-  const cyl2 = toNumber(summary?.cyl2_max_timing_correction);
-  const cyl3 = toNumber(summary?.cyl3_max_timing_correction);
-  const worstTiming = Math.min(
-    ...( [cyl2, cyl3].filter((v): v is number => v !== null) )
-  );
-
-  if (
-  tuneProfile.ignition_intent === "conservative" &&
-  Number.isFinite(worstTiming)
-  )
-   
-   if (worstTiming <= -6) {
-  flags.push({
-    title: "Severe knock despite conservative timing profile",
-    message:
-      "The tune profile suggests conservative ignition timing, yet the log shows severe timing correction. This points strongly toward fuel quality limitations, ignition system weakness, excessive intake temperature, or unstable combustion under load.",
-    tone: "bad",
-  });
-} else if (worstTiming <= -3) {
-  flags.push({
-    title: "Knock despite conservative timing profile",
-    message:
-      "The tune profile suggests conservative ignition timing, but the log still shows meaningful timing correction. That points more toward fuel quality, heat, plug/coil health, or load conditions rather than an overly aggressive timing map.",
-    tone: "bad",
-  });
-} else if (worstTiming <= -1.5) {
-  flags.push({
-    title: "Minor correction under conservative ignition strategy",
-    message:
-      "Small timing corrections were observed despite the tune using a conservative ignition strategy. Mild correction can occur during transient load or heat soak, but repeated activity may still justify reviewing fuel quality or ignition components.",
-    tone: "warn",
-  });
-}
-
-  return sortFlags(flags);
-}
-
 function buildVerdictFlagsFromEngine(
   quickVerdict: EngineQuickVerdict
 ): AnalysisFlag[] {
@@ -1727,20 +1460,6 @@ function sortFlags(flags: AnalysisFlag[]): AnalysisFlag[] {
   return [...flags].sort((a, b) => severityWeight(b.tone) - severityWeight(a.tone));
 }
 
-function sortWarnings(a: EngineWarning, b: EngineWarning): number {
-  const rank = (severity?: string) => {
-    if (severity === "critical") return 4;
-    if (severity === "high") return 3;
-    if (severity === "medium") return 2;
-    return 1;
-  };
-
-  const severityDiff = rank(b.severity) - rank(a.severity);
-  if (severityDiff !== 0) return severityDiff;
-
-  return (b.confidence || 0) - (a.confidence || 0);
-}
-
 function sortEvents(a: EngineEvent, b: EngineEvent): number {
   const rank = (severity?: string) => {
     if (severity === "critical") return 4;
@@ -1786,376 +1505,6 @@ function calculateBoostError(
   return target - boost;
 }
 
-function buildWarnings(
-  summary: LegacySummary | null,
-  boostError: number | null,
-  vehicle: VehicleContext
-): AnalysisFlag[] {
-  if (!summary) return [];
-
-  const warnings: AnalysisFlag[] = [];
-
-  const minAfr = toNumber(summary.min_afr);
-  const minRailPressure = toNumber(summary.min_rail_pressure);
-  const minLpfp = toNumber(summary.min_lpfp);
-  const maxTimingCorrection = toNumber(summary.max_timing_correction);
-  const maxIat = toNumber(summary.max_iat);
-  const maxWgdc = toNumber(summary.max_wgdc);
-  const throttleDetected = summary.throttle_closure_detected;
-  const ethanolContent = toNumber(summary.ethanol_content);
-
-  const fuelType = String(vehicle?.fuel_type || "").toLowerCase();
-
-  if (maxTimingCorrection !== null && maxTimingCorrection <= -3) {
-    warnings.push({
-      title: "Knock-related timing correction",
-      message:
-        "One or more cylinders showed meaningful timing correction. Review fuel quality, IAT, and ignition advance.",
-      tone: "bad",
-    });
-  }
-
-  if (minAfr !== null && minAfr > 13) {
-    warnings.push({
-      title: "Lean AFR warning",
-      message:
-        "AFR did not drop as expected under load. This can point to fueling or tune calibration issues.",
-      tone: "bad",
-    });
-  }
-
-  if (minRailPressure !== null && minRailPressure < 1500) {
-    warnings.push({
-      title: "Fuel rail pressure drop",
-      message:
-        "Rail pressure dropped to a level that suggests the high-pressure side may be struggling.",
-      tone: "bad",
-    });
-  }
-
-  if (minLpfp !== null && minLpfp < 45) {
-    warnings.push({
-      title: "Low-pressure fuel drop",
-      message:
-        "Low-pressure fuel reading dropped hard. This can indicate LPFP limitation or supply weakness.",
-      tone: "bad",
-    });
-  }
-
-  if (
-    fuelType.includes("e") &&
-    ethanolContent !== null &&
-    ethanolContent >= 30 &&
-    minLpfp !== null &&
-    minLpfp < 55
-  ) {
-    warnings.push({
-      title: "LPFP low for ethanol blend",
-      message:
-        "The car is on ethanol content high enough to demand more fuel supply, but LPFP is dipping lower than ideal.",
-      tone: "warn",
-    });
-  }
-
-  if (throttleDetected === true) {
-    warnings.push({
-      title: "Throttle closure event",
-      message:
-        "The log suggests throttle is closing during the pull. That can indicate torque intervention or a control limit being hit.",
-      tone: "warn",
-    });
-  }
-
-  if (boostError !== null && boostError > 2 && maxWgdc !== null && maxWgdc > 75) {
-    warnings.push({
-      title: "High WGDC with boost shortfall",
-      message:
-        "The system is commanding strong wastegate duty but still missing boost target. Check for boost leak or turbo efficiency issues.",
-      tone: "bad",
-    });
-  }
-
-  if (maxIat !== null && maxIat > 50) {
-    warnings.push({
-      title: "High intake air temperature",
-      message:
-        "IAT is elevated enough to hurt consistency and increase knock sensitivity.",
-      tone: "warn",
-    });
-  }
-
-  return sortFlags(warnings);
-}
-
-function buildAnalysisFlags(
-  summary: LegacySummary | null,
-  boostError: number | null,
-  vehicle: VehicleContext
-): AnalysisFlag[] {
-  if (!summary) return [];
-
-  const flags: AnalysisFlag[] = [];
-
-  const maxBoost = toNumber(summary.max_boost);
-  const maxBoostTarget = toNumber(summary.max_boost_target);
-  const maxIat = toNumber(summary.max_iat);
-  const minAfr = toNumber(summary.min_afr);
-  const maxTimingCorrection = toNumber(summary.max_timing_correction);
-  const minRailPressure = toNumber(summary.min_rail_pressure);
-  const minLpfp = toNumber(summary.min_lpfp);
-  const maxWgdc = toNumber(summary.max_wgdc);
-  const ethanolContent = toNumber(summary.ethanol_content);
-  const throttleDetected = summary.throttle_closure_detected;
-
-  const fuelType = String(vehicle?.fuel_type || "").toLowerCase();
-  const fuelingSetup = String(vehicle?.fueling_setup || "").toLowerCase();
-  const turboSetup = String(vehicle?.turbo_setup || "").toLowerCase();
-  const horsepowerGoal = toNumber(vehicle?.horsepower_goal);
-
-  if (boostError !== null && maxBoostTarget !== null) {
-    if (boostError > 3) {
-      flags.push({
-        title: "Boost significantly below target",
-        message: `Boost is ${formatValue(
-          boostError,
-          1
-        )} psi under target. Possible causes: boost leak, WGDC ceiling, turbo inefficiency, or throttle intervention.`,
-        tone: "bad",
-      });
-    } else if (boostError > 1.5) {
-      flags.push({
-        title: "Boost under target",
-        message: `Boost is slightly under target. Check WGDC, throttle closure, and turbo response.`,
-        tone: "warn",
-      });
-    } else {
-      flags.push({
-        title: "Boost tracking well",
-        message: "Boost is closely matching target.",
-        tone: "good",
-      });
-    }
-  }
-
-  if (throttleDetected === true) {
-    flags.push({
-      title: "Throttle closure detected",
-      message:
-        "The DME is likely intervening. Possible causes include torque limits, boost control issues, or safety logic.",
-      tone: "warn",
-    });
-  }
-
-  if (maxTimingCorrection !== null) {
-    if (maxTimingCorrection <= -3) {
-      flags.push({
-        title: "Timing correction detected",
-        message:
-          "Knock correction is present. Possible causes: fuel quality, timing too aggressive, high IAT, or cylinder imbalance.",
-        tone: "warn",
-      });
-    } else if (maxTimingCorrection < 0) {
-      flags.push({
-        title: "Minor timing correction",
-        message: `Some correction is present, with a worst value of ${formatValue(
-          maxTimingCorrection,
-          1
-        )}.`,
-        tone: "info",
-      });
-    } else {
-      flags.push({
-        title: "Timing correction looks clean",
-        message: "No negative timing correction was detected in the tracked channels.",
-        tone: "good",
-      });
-    }
-  }
-
-  if (minRailPressure !== null) {
-    if (fuelType.includes("e") && minRailPressure < 1700) {
-      flags.push({
-        title: "Rail pressure low for ethanol",
-        message:
-          "On ethanol, rail pressure should stay stronger. This suggests the HPFP may be near its limit.",
-        tone: "bad",
-      });
-    } else if (minRailPressure < 1500) {
-      flags.push({
-        title: "Rail pressure low",
-        message:
-          "Fuel system may be struggling. Possible HPFP limitation or fuel demand exceeding supply.",
-        tone: "bad",
-      });
-    } else if (minRailPressure < 2000) {
-      flags.push({
-        title: "Rail pressure soft",
-        message:
-          "Rail pressure is holding, but softer than ideal. Keep an eye on HPFP performance.",
-        tone: "warn",
-      });
-    } else {
-      flags.push({
-        title: "Rail pressure stable",
-        message: `Rail pressure held to a minimum of ${formatValue(
-          minRailPressure,
-          0
-        )} psi.`,
-        tone: "good",
-      });
-    }
-  }
-
-  if (minLpfp !== null) {
-    if (fuelType.includes("e") && minLpfp < 55) {
-      flags.push({
-        title: "LPFP low for ethanol",
-        message:
-          "Low pressure fuel is dropping too much for ethanol content. LPFP may be insufficient.",
-        tone: "bad",
-      });
-    } else if (minLpfp < 45) {
-      flags.push({
-        title: "LPFP low",
-        message: "Low pressure fuel is weaker than ideal under load.",
-        tone: "bad",
-      });
-    } else if (minLpfp < 55) {
-      flags.push({
-        title: "LPFP worth watching",
-        message:
-          "Low pressure fuel is acceptable but worth monitoring, especially on higher ethanol blends.",
-        tone: "warn",
-      });
-    } else {
-      flags.push({
-        title: "LPFP looks healthy",
-        message: `Minimum LPFP was ${formatValue(minLpfp, 1)} psi.`,
-        tone: "good",
-      });
-    }
-  }
-
-  if (maxWgdc !== null && boostError !== null && boostError > 2) {
-    if (maxWgdc > 75) {
-      flags.push({
-        title: "High WGDC but low boost",
-        message:
-          "Turbo system is working hard but not achieving target. Possible boost leak, restriction, or turbo inefficiency.",
-        tone: "bad",
-      });
-    }
-  }
-
-  if (turboSetup.includes("19t") && maxBoost !== null && maxBoost < 18) {
-    flags.push({
-      title: "Boost low for turbo setup",
-      message:
-        "Given upgraded turbos, boost appears lower than expected. Check tune targets or boost control.",
-        tone: "warn",
-      });
-  }
-
-  if (maxIat !== null) {
-    if (maxIat > 50) {
-      flags.push({
-        title: "High intake temps",
-        message:
-          "High IAT reduces power and increases knock risk. Consider intercooler efficiency or heat soak.",
-        tone: "warn",
-      });
-    } else if (maxIat > 40) {
-      flags.push({
-        title: "IAT elevated",
-        message:
-          "Charge air temperature is acceptable but getting warm. Keep an eye on repeated pulls.",
-        tone: "info",
-      });
-    } else {
-      flags.push({
-        title: "IAT looks reasonable",
-        message: `Peak IAT was ${formatValue(maxIat, 0)}°C.`,
-        tone: "good",
-      });
-    }
-  }
-
-  if (minAfr !== null) {
-    if (minAfr > 13) {
-      flags.push({
-        title: "AFR potentially lean",
-        message:
-          "AFR did not drop as expected under load. Review fueling and tune calibration carefully.",
-        tone: "bad",
-      });
-    } else if (minAfr < 10.5) {
-      flags.push({
-        title: "AFR very rich",
-        message:
-          "AFR is richer than expected. This may be conservative or may need cleanup in the tune.",
-        tone: "info",
-      });
-    } else {
-      flags.push({
-        title: "AFR in expected range",
-        message: `Minimum AFR reached ${formatValue(minAfr, 2)}.`,
-        tone: "good",
-      });
-    }
-  }
-
-  if (ethanolContent !== null) {
-    if (fuelType.includes("98") && ethanolContent > 10) {
-      flags.push({
-        title: "Fuel type mismatch",
-        message:
-          "Vehicle setup says pump fuel, but the log is showing meaningful ethanol content.",
-        tone: "warn",
-      });
-    } else {
-      flags.push({
-        title: "Fuel content detected",
-        message: `Logged ethanol content averaged ${formatValue(
-          ethanolContent,
-          0
-        )}%.`,
-        tone: "info",
-      });
-    }
-  }
-
-  if (fuelingSetup.includes("stock") && fuelType.includes("e")) {
-    flags.push({
-      title: "Fueling setup vs ethanol",
-      message:
-        "Vehicle setup suggests stock fueling while running ethanol. Cross-check whether the setup data is complete.",
-      tone: "warn",
-    });
-  }
-
-  if (horsepowerGoal !== null && horsepowerGoal >= 650 && minRailPressure !== null) {
-    if (minRailPressure < 1800) {
-      flags.push({
-        title: "Fuel pressure soft for power goal",
-        message:
-          "For a high horsepower target, the observed rail pressure looks softer than ideal.",
-        tone: "warn",
-      });
-    }
-  }
-
-  if (flags.length === 0) {
-    flags.push({
-      title: "No major issues detected",
-      message:
-        "Initial cross-reference checks did not detect major issues based on the current data.",
-      tone: "good",
-    });
-  }
-
-  return sortFlags(flags);
-}
-
 function toNumber(value: unknown): number | null {
   if (typeof value === "number" && !Number.isNaN(value)) {
     return value;
@@ -2175,34 +1524,6 @@ function humanizeEngineeringIdentifier(value: string) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function finiteNumberOrNullish(
-  value: unknown
-): number | null | undefined {
-  if (value === null || value === undefined) {
-    return value;
-  }
-
-  return typeof value === "number" && Number.isFinite(value)
-    ? value
-    : undefined;
-}
-
-function toEnginePlatform(value: string | null | undefined): EnginePlatform {
-  const normalized = value?.trim().toLowerCase();
-
-  if (
-    normalized === "n54" ||
-    normalized === "n55" ||
-    normalized === "s55" ||
-    normalized === "b58" ||
-    normalized === "s58"
-  ) {
-    return normalized;
-  }
-
-  return "unknown";
 }
 
 function formatValue(

@@ -1,5 +1,7 @@
 import type { RoutedEvent } from "@/lib/analysis/types";
 
+type FixSummary = Record<string, unknown> & { rpm_start?: number | null; rpm_end?: number | null };
+
 type FlagTone = "good" | "warn" | "bad" | "info";
 
 type AnalysisFlag = {
@@ -34,11 +36,11 @@ export type ActionableFix = {
 };
 
 function toNumber(value: unknown): number | null {
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
 
   if (typeof value === "string" && value.trim() !== "") {
     const parsed = Number(value);
-    return Number.isNaN(parsed) ? null : parsed;
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   return null;
@@ -55,7 +57,7 @@ function calculateBoostError(
   return target - boost;
 }
 
-function rpmTargetHint(summary: any): string {
+function rpmTargetHint(summary: FixSummary): string {
   const start = summary?.rpm_start ?? null;
   const end = summary?.rpm_end ?? null;
 
@@ -80,7 +82,7 @@ function rpmTargetHint(summary: any): string {
   return "Focus on top-end airflow and fuel demand.";
 }
 
-function rpmBand(summary: any): string {
+function rpmBand(summary: FixSummary): string {
   const rpm =
     Number(summary?.peak_issue_rpm) ||
     Number(summary?.peak_boost_rpm) ||
@@ -97,7 +99,7 @@ function rpmBand(summary: any): string {
   return `${low}-${high} RPM`;
 }
 
-function loadBand(summary: any): string {
+function loadBand(summary: FixSummary): string {
   const load =
     Number(summary?.peak_issue_load) ||
     Number(summary?.peak_boost_load) ||
@@ -113,7 +115,7 @@ function loadBand(summary: any): string {
   return `${low}-${high} load`;
 }
 
-function tableTargetHints(summary: any): string[] {
+function tableTargetHints(summary: FixSummary): string[] {
   const hints: string[] = [];
 
   const maxWgdc = Number(summary?.max_wgdc ?? NaN);
@@ -147,7 +149,7 @@ function tableTargetHints(summary: any): string[] {
 
 function causeSpecificTableHints(
   title: string,
-  summary: any
+  summary: FixSummary
 ): string[] {
   const t = title.toLowerCase();
 
@@ -205,7 +207,7 @@ function causeSpecificTableHints(
 }
 
 function correlationFixes(args: {
-  summary: any;
+  summary: FixSummary;
   tuneProfile: TuneProfileLike | null;
   rpmHint: string;
 }): ActionableFix[] {
@@ -351,12 +353,12 @@ return [...groupedFixes, ...fixes];
 
 export function buildActionableFixes(args: {
   tuneProfile: TuneProfileLike | null;
-  summary: any;
+  summary: FixSummary;
   tuneReasoningFlags: AnalysisFlag[];
   warnings: AnalysisFlag[];
   routedEvents?: RoutedEvent[];
   engineFixes?: EngineFix[];
-  historicalSummaries?: any[];
+  historicalSummaries?: (FixSummary & { summary?: FixSummary })[];
 }): ActionableFix[] {
 
   const {
@@ -374,7 +376,6 @@ export function buildActionableFixes(args: {
   const fixes: ActionableFix[] = [];
 
   const rpmHint = rpmTargetHint(summary);
-  const tableHints = tableTargetHints(summary);
   const repeatRailCount = historicalSummaries.filter((item) => {
   const row = item?.summary || item;
   return toNumber(row?.min_rail_pressure) !== null && toNumber(row?.min_rail_pressure)! < 1500;

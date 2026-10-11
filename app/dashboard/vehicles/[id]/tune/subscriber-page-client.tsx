@@ -1,0 +1,476 @@
+"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any -- legacy Tune record shape is outside this bounded role-assignment slice */
+
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { validTuneUpload } from "@/lib/security/uploadPolicy";
+import { createClient } from "@/lib/supabase/client";
+import RomIdentityCard from "@/lib/components/RomIdentityCard";
+import { buildRomIdentityFromTuneProfile } from "@/lib/intelligence/romIdentityAdapter";
+
+export default function TunePage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const vehicleId = params.id;
+
+  const supabase = useMemo(() => createClient(), []);
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [tunes, setTunes] = useState<any[]>([]);
+  const [tuneProfiles, setTuneProfiles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [currentCalibrationTuneId, setCurrentCalibrationTuneId] = useState<string | null>(null);
+  const [assigningCurrent, setAssigningCurrent] = useState<string | null>(null);
+  const [containerResult, setContainerResult] = useState<{
+    title: string;
+    status: string;
+    message: string;
+  } | null>(null);
+
+  const [tuneFile, setTuneFile] = useState<File | null>(null);
+  const [tuneName, setTuneName] = useState("");
+  const [isStockReference, setIsStockReference] = useState(false);
+  const [referenceTuneId, setReferenceTuneId] = useState("");
+
+  useEffect(() => {
+    async function loadPage() {
+      setLoading(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      setUserId(user.id);
+
+      const { data: vehicleData } = await supabase
+        .from("vehicles")
+        .select("*")
+        .eq("id", vehicleId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!vehicleData) {
+        router.push("/dashboard");
+        return;
+      }
+
+      const { data: tunesData } = await supabase
+        .from("tunes")
+        .select("*")
+        .eq("vehicle_id", vehicleId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }).order("id").range(page*50,(page+1)*50);
+
+      setTunes(tunesData?.slice(0,50) ?? []);
+      setHasMore((tunesData?.length ?? 0)>50);
+
+      const roles = await fetch(`/api/vehicles/calibration-role?vehicleId=${encodeURIComponent(vehicleId)}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : null).catch(() => null);
+      setCurrentCalibrationTuneId(roles?.currentTuneId ?? null);
+
+      const tuneIds = tunesData?.slice(0,50).map((t: { id: string }) => t.id) ?? [];
+
+      if (tuneIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("tune_profiles")
+          .select("*")
+          .in("tune_id", tuneIds).eq("user_id",user.id).eq("vehicle_id",vehicleId).order("created_at",{ascending:false}).limit(100);
+
+        setTuneProfiles(profilesData ?? []);
+      }
+
+      setLoading(false);
+    }
+
+    loadPage();
+  }, [router, supabase, vehicleId, page]);
+
+  async function setAsCurrentCalibration(tuneId: string) {
+    setAssigningCurrent(tuneId);
+    try {
+      const response = await fetch(`/api/vehicles/calibration-role?vehicleId=${encodeURIComponent(vehicleId)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "current", tuneId }) });
+      const result = await response.json();
+      if (!response.ok || result.outcome !== "current_assigned") throw new Error(result.error ?? "Current Calibration could not be assigned.");
+      setCurrentCalibrationTuneId(tuneId);
+      setContainerResult({ title: "Current Calibration assigned", status: "success", message: "The existing private Tune artifact is now the vehicle Current Calibration. Calibration Workshop can recover it without re-upload." });
+    } catch (error) { setContainerResult({ title: "Current Calibration unavailable", status: "error", message: error instanceof Error ? error.message : "Current Calibration could not be assigned." }); }
+    finally { setAssigningCurrent(null); }
+  }
+
+  const tunesWithProfiles = tunes.map((tune) => {
+    const profile = tuneProfiles.find((p) => p.tune_id === tune.id);
+
+    return {
+      ...tune,
+      rom_platform: profile?.rom_platform ?? null,
+      ecu_family: profile?.ecu_family ?? null,
+      rom_family: profile?.rom_family ?? null,
+      xdf_suggested: profile?.xdf_suggested ?? null,
+      rom_confidence: profile?.rom_confidence ?? null,
+    };
+  });
+
+  const latestTune = tunes[0];
+
+  const latestTuneProfile = latestTune
+    ? tuneProfiles.find((profile) => profile.tune_id === latestTune.id)
+    : null;
+
+    const romIdentity =
+      buildRomIdentityFromTuneProfile(latestTuneProfile);
+
+  const stockTunes = tunes.filter((t) => t.is_stock_reference);
+
+  async function handleSaveTune(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!userId || !vehicleId || !tuneFile) {
+      alert("Please select a tune file first.");
+      return;
+    }
+
+    setSaving(true);
+    setContainerResult(null);
+
+    try {
+      if (!validTuneUpload(tuneFile)) throw new Error("Choose a BIN or DTF file up to 32 MiB.");
+      const digest = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await tuneFile.arrayBuffer())), b => b.toString(16).padStart(2, "0")).join("");
+      const prepared = await fetch("/api/vehicles/prepare-tune", { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(30000), body: JSON.stringify({ vehicleId, fileName: tuneFile.name, fileSize: tuneFile.size, fileType: tuneFile.type || "application/octet-stream", digest }) });
+      const preparation = await prepared.json();
+      if (!prepared.ok) throw new Error(preparation.error || "Upload preparation unavailable.");
+      if (preparation.attempt.outcome === "completed") { window.location.reload(); return; }
+      const { storagePath, attempt } = preparation;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tunes")
+        .upload(storagePath, tuneFile, {
+          cacheControl: "0, no-store",
+          upsert: false,
+          contentType: "application/octet-stream",
+        });
+
+      if (uploadError && !/already exists|duplicate/i.test(uploadError.message)) {
+        throw new Error("Source upload was interrupted. Retry the same file after its lease expires; no new evidence was established.");
+      }
+
+      const response = await fetch("/api/vehicles/update-tune", {
+        method: "POST",
+        signal: AbortSignal.timeout(65000),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          vehicleId,
+          tuneName,
+          fileName: tuneFile.name,
+          fileSize: tuneFile.size,
+          fileType: tuneFile.type || "application/octet-stream",
+          storageBucket: "tunes",
+          storagePath,
+          attemptId: attempt.id, attemptToken: attempt.token,
+          isStockReference,
+          referenceTuneId: referenceTuneId || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const failure =
+          await response
+            .json()
+            .catch(() => null);
+
+        if (
+          failure?.code ===
+          "dtf_extraction_unavailable"
+        ) {
+          setContainerResult({
+            title:
+              "DTF Container Recognised",
+            status:
+              "Extraction unavailable",
+            message:
+              failure.error ||
+              "TuneSight recognised this DTF container but could not verify a safe Engineering Binary extraction method for this DTF variant. The file was not analysed or persisted.",
+          });
+          return;
+        }
+
+        throw new Error(
+          failure?.error ||
+            "Tune save failed."
+        );
+      }
+
+      router.refresh();
+      window.location.reload();
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Tune upload failed."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-black px-6 py-10 text-white">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-zinc-400">Loading tune page...</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-black px-6 py-10 text-white">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Link
+          href={`/dashboard/vehicles/${vehicleId}`}
+          className="inline-flex items-center text-zinc-400 transition hover:text-white"
+        >
+          ← Back to Vehicle
+        </Link>
+
+        <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
+          <h1 className="mb-2 text-3xl font-bold">Tune</h1>
+          <p className="text-zinc-400">
+            Upload and manage the tune file for this vehicle.
+          </p>
+        </div>
+
+        <form onSubmit={handleSaveTune} className="space-y-6">
+          <div className="bmw-border rounded-2xl bg-zinc-900 p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Upload Tune File</h2>
+
+            <div className="space-y-2">
+              <label className="text-sm text-zinc-400">Tune File</label>
+              <input
+                type="file"
+                onChange={(event) => {
+                  setTuneFile(event.target.files?.[0] ?? null);
+                  setContainerResult(null);
+                }}
+                className="cursor-pointer block w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white file:cursor-pointer file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-4 file:py-2 file:text-white hover:file:bg-zinc-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-zinc-400">Tune Name</label>
+              <input
+                type="text"
+                value={tuneName}
+                onChange={(event) => setTuneName(event.target.value)}
+                placeholder="Tune name (e.g. Stage 2 E50)"
+                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none transition focus:border-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is_stock_reference"
+                checked={isStockReference}
+                onChange={(event) =>
+                  setIsStockReference(event.target.checked)
+                }
+                className="h-4 w-4"
+              />
+
+              <label htmlFor="is_stock_reference" className="text-sm text-zinc-300">
+                Use as Stock Reference Tune
+              </label>
+            </div>
+
+            {stockTunes.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm text-zinc-400">
+                  Compare Against Stock Reference
+                </label>
+
+                <select
+                  value={referenceTuneId}
+                  onChange={(event) => setReferenceTuneId(event.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white"
+                >
+                  <option value="">No comparison reference selected</option>
+
+                  {stockTunes.map((stockTune) => (
+                    <option key={stockTune.id} value={stockTune.id}>
+                      {stockTune.tune_name ||
+                        stockTune.file_name ||
+                        "Unnamed Stock Tune"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="bmw-border cursor-pointer rounded-xl bg-zinc-900 px-6 py-3 text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? "Uploading Tune..." : "Save Tune"}
+          </button>
+
+          {containerResult && (
+            <section
+              role="status"
+              className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5"
+            >
+              <h2 className="text-lg font-semibold text-amber-100">
+                {containerResult.title}
+              </h2>
+
+              <p className="mt-2 text-sm font-medium text-amber-200">
+                {containerResult.status}
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                {containerResult.message}
+              </p>
+            </section>
+          )}
+        </form>
+
+        <RomIdentityCard identity={romIdentity} />
+
+        <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
+          <h2 className="mb-4 text-xl font-semibold">Tune History</h2>
+          <nav aria-label="Tune history pages" className="my-4 flex items-center gap-4 text-sm">
+            <button disabled={page===0} onClick={()=>setPage(value=>value-1)} className="underline disabled:opacity-40">Previous</button>
+            <span>Page {page+1} · up to 50 tunes</span>
+            <button disabled={!hasMore || page>=999} onClick={()=>setPage(value=>value+1)} className="underline disabled:opacity-40">Next</button>
+          </nav>
+
+          {tunesWithProfiles.length > 0 ? (
+            <div className="space-y-3">
+              {tunesWithProfiles.map((tune) => (
+                <div
+                  key={tune.id}
+                  className="rounded-xl border border-white/10 bg-black/40 p-4"
+                >
+                  <p className="text-lg font-semibold text-white">
+                    {tune.tune_name || tune.file_name || "Unnamed Tune"}
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    {tune.rom_platform && (
+                      <span className="rounded-full bg-cyan-500/20 border border-cyan-400/40 px-3 py-1 text-cyan-300">
+                        Platform: {tune.rom_platform}
+                      </span>
+                    )}
+
+                    {tune.ecu_family && (
+                      <span className="rounded-full bg-purple-500/20 border border-purple-400/40 px-3 py-1 text-purple-300">
+                        ECU: {tune.ecu_family}
+                      </span>
+                    )}
+
+                    {tune.rom_family && (
+                      <span className="rounded-full bg-green-500/20 border border-green-400/40 px-3 py-1 text-green-300">
+                        ROM: {tune.rom_family}
+                      </span>
+                    )}
+
+                    {tune.xdf_suggested && (
+                      <span className="rounded-full bg-yellow-500/20 border border-yellow-400/40 px-3 py-1 text-yellow-300">
+                        XDF: {tune.xdf_suggested}
+                      </span>
+                    )}
+
+                    {tune.rom_confidence && (
+                      <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-white">
+                        Confidence: {(tune.rom_confidence * 100).toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
+
+                  {tune.binary_changed_bytes > 0 && (
+                    <div className="mt-3 rounded-lg border border-orange-500/30 bg-orange-500/10 p-3">
+                      <p className="text-sm font-semibold text-orange-300">
+                        Binary Comparison Detected
+                      </p>
+
+                      <div className="mt-2 space-y-1 text-xs text-zinc-300">
+                        <p>
+                          Changed Bytes:{" "}
+                          <span className="text-white">
+                            {tune.binary_changed_bytes.toLocaleString()}
+                          </span>
+                        </p>
+
+                        <p>
+                          Modified Regions:{" "}
+                          <span className="text-white">
+                            {tune.binary_changed_regions?.length || 0}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {tune.is_stock_reference && (
+                    <div className="mt-2 inline-flex rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs text-green-300">
+                      Stock Reference Tune
+                    </div>
+                  )}
+
+                  {tune.comparison_ready && (
+                    <div className="mt-2 inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
+                      Comparison Ready
+                    </div>
+                  )}
+
+                  {!tune.is_stock_reference && tune.storage_path && (
+                    <button type="button" onClick={() => setAsCurrentCalibration(tune.id)} disabled={assigningCurrent !== null || currentCalibrationTuneId === tune.id} className="mt-3 rounded-lg border border-blue-400/40 px-3 py-2 text-sm font-semibold text-blue-200 transition hover:bg-blue-400/10 disabled:cursor-not-allowed disabled:opacity-60">
+                      {currentCalibrationTuneId === tune.id ? "Current Calibration" : assigningCurrent === tune.id ? "Qualifying…" : "Set as Current Calibration"}
+                    </button>
+                  )}
+
+                  {tune.file_name && (
+                    <p className="mt-1 text-sm text-zinc-400">
+                      File: {tune.file_name}
+                    </p>
+                  )}
+
+                  {tune.created_at && (
+                    <p className="mt-1 text-sm text-zinc-500">
+                      Uploaded: {new Date(tune.created_at).toLocaleString()}
+                    </p>
+                  )}
+
+                  {(tune.storage_path || tune.file_url) && (
+                    <a
+                      href={`/api/vehicles/source-download?kind=tune&id=${encodeURIComponent(tune.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex text-sm text-blue-400 transition hover:text-blue-300"
+                    >
+                      Open Tune File
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-zinc-400">No tunes uploaded yet.</p>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}

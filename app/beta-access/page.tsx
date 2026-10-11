@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+import { betaAccessDecision } from "@/lib/security/accessPolicy";
+
 type BetaStatus = "approved" | "awaiting" | "suspended" | string;
 
 type Profile = {
@@ -58,13 +60,14 @@ export default function BetaAccessPage() {
       setIsLoading(false);
     }
 
-    loadProfile();
+    void loadProfile().catch(() => { setError("Access status temporarily unavailable. Please retry."); setIsLoading(false); });
   }, [router, supabase]);
 
   const isApproved =
-    profile?.beta_access === true && profile?.beta_status !== "suspended";
+    betaAccessDecision(profile) === "allowed";
 
   const isSuspended = profile?.beta_status === "suspended";
+  const expired = betaAccessDecision(profile) === "expired";
   const isAwaiting = !isApproved && !isSuspended;
 
   return (
@@ -93,6 +96,7 @@ export default function BetaAccessPage() {
           </div>
         )}
 
+        {expired && <p role="status" className="mb-4 text-amber-300">Beta access has expired. Approval must be renewed before entering subscriber pages.</p>}
         {!isLoading && !error && profile && (
           <>
             {isApproved && (

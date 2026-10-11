@@ -314,7 +314,6 @@ export function buildReasoningForEvent(args: {
 
   const profile = setupProfile(vehicle, tune);
 
-  const avgBoost = metric(event, "avgBoost");
   const maxBoost = metric(event, "maxBoost");
   const avgBoostError = metric(event, "avgBoostError");
   const lateBoostError = metric(event, "lateBoostError");
@@ -342,14 +341,6 @@ export function buildReasoningForEvent(args: {
     : undefined;
 };
 
-const rootCauseBoostError =
-  metricNumber("maxBoostError") ??
-  metricNumber("boostError") ??
-  metricNumber("avgBoostError") ??
-  metricNumber("lateBoostError") ??
-  avgBoostError ??
-  lateBoostError ??
-  undefined;
 
 const rootCauseWgdc =
   metricNumber("avgWgdc") ??

@@ -1,7 +1,7 @@
-import { n54Thresholds } from "../config/thresholds";
+import { n54Thresholds } from "../config/thresholds/n54.ts";
 
 export type BoostValidationResult = {
-  status: "pass" | "warning" | "fail";
+  status: "pass" | "warning" | "fail" | "unavailable";
   boostIntent: string;
   boostErrorPsi: number | null;
   message: string;
@@ -15,10 +15,13 @@ export function validateBoostAgainstTune(
   }
 )
 : BoostValidationResult {
-  const maxBoost = Number(context.maxBoost ?? 0);
-  const maxBoostTarget = Number(context.maxBoostTarget ?? 0);
-  const maxWgdc = Number(context.maxWgdc ?? 0);
   const boostIntent = context.boostIntent ?? "unknown";
+  if (context.platform !== "n54" || typeof context.maxBoost !== "number" || !Number.isFinite(context.maxBoost) || typeof context.maxBoostTarget !== "number" || !Number.isFinite(context.maxBoostTarget)) {
+    return { status: "unavailable", boostIntent, boostErrorPsi: null, message: "Boost validation requires measured relative pressure in PSI and qualified N54 context." };
+  }
+  const maxBoost = context.maxBoost;
+  const maxBoostTarget = context.maxBoostTarget;
+  const maxWgdc = context.maxWgdc;
 
   const boostThresholds = n54Thresholds.boost;
 
@@ -27,12 +30,12 @@ export function validateBoostAgainstTune(
   const underboostErrorPsi = Math.abs(boostThresholds.underboostErrorPsi);
   const highWgdcPercent = boostThresholds.highWgdcPercent;
 
-  if (!maxBoost || !maxBoostTarget) {
+  if (typeof maxWgdc !== "number" || !Number.isFinite(maxWgdc)) {
     return {
-      status: "warning",
+      status: "unavailable",
       boostIntent,
       boostErrorPsi: null,
-      message: "Boost target or actual boost data is missing.",
+      message: "Measured wastegate duty is unavailable; boost-control classification is withheld.",
     };
   }
 

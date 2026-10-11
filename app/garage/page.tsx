@@ -1,8 +1,16 @@
+import { requireSubscriberAction, requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { deleteOwnedVehicle } from "@/lib/security/vehicleDeletion.server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { listPage, LIST_PAGE_SIZE } from "@/lib/security/listBounds";
+import ListPagination from "@/components/ListPagination";
 
-export default async function GaragePage() {
+export default async function GaragePage({ searchParams }: { searchParams: Promise<{ deletion?: string; page?: string }> }) {
+  const query = await searchParams;
+  const page = listPage(query.page);
+  await requireSubscriberPage();
   const supabase = await createClient();
 
   const {
@@ -11,6 +19,8 @@ export default async function GaragePage() {
 
   async function deleteVehicle(formData: FormData) {
     "use server";
+
+    await requireSubscriberAction();
 
     const supabase = await createClient();
 
@@ -24,25 +34,18 @@ export default async function GaragePage() {
 
     if (!vehicleId || typeof vehicleId !== "string") return;
 
-    const { error } = await supabase
-      .from("vehicles")
-      .delete()
-      .eq("id", vehicleId)
-      .eq("user_id", user.id);
-
-    if (error) {
-      console.error("Error deleting vehicle:", error.message);
-      return;
-    }
-
+    let failed = false;
+    try { await deleteOwnedVehicle(supabase, user.id, vehicleId); } catch { failed = true; }
+    if (failed) redirect("/garage?deletion=incomplete");
     revalidatePath("/garage");
   }
 
-  const { data: vehicles, error } = await supabase
+  const { data: vehicleRows, error } = await supabase
     .from("vehicles")
     .select("*")
     .eq("user_id", user?.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).order("id").range(page*LIST_PAGE_SIZE, (page+1)*LIST_PAGE_SIZE);
+  const vehicles = vehicleRows?.slice(0,LIST_PAGE_SIZE);
 
   return (
     <main className="min-h-screen bg-black text-white px-6 py-16">
@@ -55,6 +58,7 @@ export default async function GaragePage() {
         </Link>
 
         <h1 className="text-5xl font-bold mt-8 mb-4">Garage</h1>
+        {query.deletion === "incomplete" && <p role="alert" className="mb-6 text-amber-300">Deletion is not complete. The recovery inventory is retained. Retry Delete Vehicle; the owning record is removed only after object cleanup is confirmed.</p>}
         <p className="text-zinc-400 mb-10">
           Your Garage is where all your vehicles live. Click a vehicle to open
           its own workspace.
@@ -63,16 +67,17 @@ export default async function GaragePage() {
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6 mb-8">
           <h2 className="text-2xl font-semibold mb-2">Your Vehicles</h2>
           <p className="text-zinc-400">
-            Total vehicles in garage: {vehicles?.length ?? 0}
+            Vehicles on this page: {vehicles?.length ?? 0}
           </p>
 
           {error && (
             <p className="text-red-400 mt-4">
-              Error loading vehicles: {error.message}
+              Vehicle list is temporarily unavailable. Please retry.
             </p>
           )}
         </div>
 
+        <ListPagination path="/garage" page={page} hasMore={(vehicleRows?.length ?? 0)>LIST_PAGE_SIZE}/>
         <div className="space-y-4 mb-10">
           {vehicles && vehicles.length > 0 ? (
             vehicles.map((vehicle) => (

@@ -1,6 +1,10 @@
+import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/server";
+import { createTrustedServerClient } from "@/lib/supabase/trustedServer";
+import { createHash } from "node:crypto";
+import { finishUpload, resumeUpload } from "@/lib/security/uploadAttempts.server";
+import { ownedStoragePath, TUNE_MAX_BYTES, UUID_PATTERN, validTuneUpload } from "@/lib/security/uploadPolicy";
 import { buildTuneProfile } from "@/lib/analysis/tuneProfile";
 import { parseEngineeringBinary } from "@/lib/tunes/parseBinaryTune";
 import { detectBinaryDifferences } from "@/lib/tunes/detectBinaryDifferences";
@@ -66,26 +70,8 @@ type TuneProfileInsertPayload =
     binary_signature: string | null;
   };
 
-async function getSupabase() {
-  const cookieStore = await cookies();
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set() {},
-        remove() {},
-      },
-    }
-  );
-}
-
-export async function POST(request: Request) {
-  const supabase = await getSupabase();
+async function handlePOST(request: Request) {
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -108,9 +94,16 @@ export async function POST(request: Request) {
     storagePath,
     isStockReference,
     referenceTuneId,
+    attemptId,
+    attemptToken,
   } = body;
 
-  if (!vehicleId || !storagePath || !fileName) {
+  if (typeof vehicleId !== "string" || !UUID_PATTERN.test(vehicleId) || !ownedStoragePath(storagePath, user.id, vehicleId)
+    || storageBucket !== "tunes" || typeof fileName !== "string" || fileName.length > 255 || typeof fileType !== "string" || typeof fileSize !== "number"
+    || !validTuneUpload({ name: fileName, type: fileType, size: fileSize }) || typeof isStockReference !== "boolean"
+    || (tuneName != null && (typeof tuneName !== "string" || tuneName.length > 256))
+    || (referenceTuneId != null && (typeof referenceTuneId !== "string" || !UUID_PATTERN.test(referenceTuneId)))
+    || typeof attemptId !== "string" || !UUID_PATTERN.test(attemptId) || typeof attemptToken !== "string" || !UUID_PATTERN.test(attemptToken)) {
     return NextResponse.json(
       { error: "Missing tune upload metadata" },
       { status: 400 }
@@ -128,12 +121,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
   }
 
-  const { data: currentFile, error: downloadError } = await supabase.storage
+  const { data: mutationLease, error: mutationError } = await supabase.rpc("claim_calibration_repair_v1", { p_vehicle_id: vehicleId });
+  if (mutationError) return NextResponse.json({ error: "Tune operation could not be reserved. Retry later." }, { status: 503 });
+  if (!mutationLease) return NextResponse.json({ error: "Another operation is in progress for this vehicle. Retry shortly." }, { status: 409 });
+  try {
+  // Re-read the upload lease only after obtaining the cross-process vehicle lock.
+  const attempt = await resumeUpload(supabase, user.id, vehicleId, attemptId, attemptToken);
+  if (storagePath !== `${user.id}/${vehicleId}/${attempt.resource_id}.${fileName.toLowerCase().endsWith(".dtf") ? "dtf" : "bin"}`) return NextResponse.json({ error: "Upload path does not match its reservation." }, { status: 400 });
+  const trustedClient = createTrustedServerClient();
+  let completed = false;
+  try {
+  // A response or reservation acknowledgement can be lost after both records
+  // commit. Resolve that stable identity before reprocessing or cleanup.
+  const { data: existingTune, error: existingTuneError } = await supabase.from("tunes")
+    .select("id,storage_path").eq("id", attempt.resource_id).eq("user_id", user.id).eq("vehicle_id", vehicleId).maybeSingle();
+  if (existingTuneError) throw new Error("Existing Tune state could not be verified.");
+  if (existingTune) {
+    if (existingTune.storage_path !== storagePath) throw new Error("Existing Tune source does not match its reservation.");
+    const { data: savedProfile, error: savedProfileError } = await supabase.from("tune_profiles")
+      .select("id").eq("tune_id", existingTune.id).eq("user_id", user.id).eq("vehicle_id", vehicleId).limit(1).maybeSingle();
+    if (savedProfileError) throw new Error("Existing Tune profile could not be verified.");
+    if (savedProfile) {
+      completed = true;
+      return NextResponse.json({ success: true, tuneId: existingTune.id, tuneProfileId: savedProfile.id });
+    }
+  }
+  const { data: sourceInfo, error: infoError } = await trustedClient.storage.from("tunes").info(storagePath);
+  if (infoError || !sourceInfo || sourceInfo.size !== fileSize || sourceInfo.size > TUNE_MAX_BYTES) return NextResponse.json({ error: "Stored file size is unavailable or does not match. Select the same file to retry." }, { status: 422 });
+
+  const { data: currentFile, error: downloadError } = await trustedClient.storage
     .from(storageBucket || "tunes")
     .download(storagePath);
 
   if (downloadError || !currentFile) {
-    console.error("CURRENT TUNE DOWNLOAD ERROR:", downloadError?.message);
 
     return NextResponse.json(
       { error: "Could not download uploaded tune file" },
@@ -143,17 +163,17 @@ export async function POST(request: Request) {
 
   const arrayBuffer = await currentFile.arrayBuffer();
   const currentBuffer = Buffer.from(arrayBuffer);
+  if (currentBuffer.byteLength !== fileSize || createHash("sha256").update(currentBuffer).digest("hex") !== attempt.digest) return NextResponse.json({ error: "Uploaded content does not match its reservation." }, { status: 422 });
 
   async function cleanupUploadedStorageObject() {
-    const { error: storageCleanupError } = await supabase.storage
+    // Earlier committed evidence is preserved when retry processing fails.
+    if (existingTune) return;
+    const { error: storageCleanupError } = await createTrustedServerClient().storage
       .from(storageBucket || "tunes")
       .remove([storagePath]);
 
     if (storageCleanupError) {
-      console.error("PARTIAL TUNE CLEANUP FAILED", {
-        stage: "storage_object",
-        message: storageCleanupError.message,
-      });
+      throw new Error("Temporary source cleanup is incomplete. Retry the same file.");
     }
   }
 
@@ -275,7 +295,7 @@ export async function POST(request: Request) {
 
     const referencePath = referenceTune.storage_path;
 
-    if (!referencePath) {
+    if (!ownedStoragePath(referencePath, user.id, vehicleId)) {
       await cleanupUploadedStorageObject();
 
       return NextResponse.json(
@@ -288,18 +308,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const { data: referenceInfo } = await trustedClient.storage.from("tunes").info(referencePath);
+    if (!referenceInfo || typeof referenceInfo.size !== "number" || referenceInfo.size <= 0 || referenceInfo.size > TUNE_MAX_BYTES) return NextResponse.json({ error: "Comparison source exceeds the supported limit or is unavailable." }, { status: 422 });
+
     const {
       data: referenceFile,
       error: referenceDownloadError,
-    } = await supabase.storage
+    } = await trustedClient.storage
       .from("tunes")
       .download(referencePath);
 
     if (referenceDownloadError || !referenceFile) {
-      console.error("REFERENCE TUNE DOWNLOAD FAILED", {
-        code: referenceDownloadError?.name ?? null,
-        message: referenceDownloadError?.message ?? "Reference file unavailable",
-      });
 
       await cleanupUploadedStorageObject();
 
@@ -368,13 +387,7 @@ export async function POST(request: Request) {
         currentEngineeringBinary,
         referenceEngineeringBinary
       );
-    } catch (comparisonError) {
-      console.error("BINARY COMPARISON FAILED", {
-        message:
-          comparisonError instanceof Error
-            ? comparisonError.message
-            : "Unknown binary comparison error",
-      });
+    } catch {
 
       await cleanupUploadedStorageObject();
 
@@ -408,22 +421,15 @@ export async function POST(request: Request) {
 
   const initialTuneName = tuneName || fileName || "Unnamed Tune";
 
-  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from(storageBucket || "tunes")
-    .createSignedUrl(storagePath, 60 * 60 * 24 * 365);
-
-  if (signedUrlError) {
-    console.error("SIGNED URL ERROR:", signedUrlError.message);
-  }
-
-  const { data: insertedTune, error: tuneInsertError } = await supabase
+  const { error: tuneInsertError } = await trustedClient
     .from("tunes")
-    .insert({
+    .upsert({
+      id: attempt.resource_id,
       vehicle_id: vehicleId,
       user_id: user.id,
       tune_name: initialTuneName,
       file_name: fileName,
-      file_url: signedUrlData?.signedUrl || null,
+      file_url: null,
       storage_path: storagePath,
       reference_tune_id: activeReferenceTuneId,
       is_stock_reference: !!isStockReference,
@@ -431,19 +437,14 @@ export async function POST(request: Request) {
       binary_diff_summary: binaryDiffSummary,
       binary_changed_bytes: binaryChangedBytes,
       binary_changed_regions: binaryChangedRegions,
-    })
-    .select()
-    .single();
+    }, { onConflict: "id", ignoreDuplicates: true });
+  const { data: insertedTune } = await supabase.from("tunes").select("id").eq("id", attempt.resource_id).eq("user_id", user.id).eq("vehicle_id", vehicleId).single();
 
   if (tuneInsertError || !insertedTune) {
-  console.error("TUNE INSERT ERROR:", tuneInsertError?.message);
 
   return NextResponse.json(
     {
       error: "Tune database insert failed",
-      details: tuneInsertError?.message ?? null,
-      hint: tuneInsertError?.hint ?? null,
-      code: tuneInsertError?.code ?? null,
     },
     { status: 500 }
   );
@@ -452,7 +453,8 @@ export async function POST(request: Request) {
   const authenticatedUserId = user.id;
 
   async function cleanupPartialTune(tuneId: string) {
-    const { error: tuneCleanupError } = await supabase
+    if (existingTune) return;
+    const { error: tuneCleanupError } = await trustedClient
       .from("tunes")
       .delete()
       .eq("id", tuneId)
@@ -460,11 +462,7 @@ export async function POST(request: Request) {
       .eq("user_id", authenticatedUserId);
 
     if (tuneCleanupError) {
-      console.error("PARTIAL TUNE CLEANUP FAILED", {
-        stage: "tune_row",
-        code: tuneCleanupError.code ?? null,
-        message: tuneCleanupError.message,
-      });
+      throw new Error("Partial tune registration remains available for retry.");
     }
 
     await cleanupUploadedStorageObject();
@@ -480,13 +478,7 @@ export async function POST(request: Request) {
       fileBuffer:
         currentEngineeringBinary.bytes,
     });
-  } catch (profileBuildError) {
-    console.error("PROFILE BUILD FAILED", {
-      message:
-        profileBuildError instanceof Error
-          ? profileBuildError.message
-          : "Unknown profile construction error",
-    });
+  } catch {
 
     await cleanupPartialTune(insertedTune.id);
 
@@ -625,22 +617,18 @@ export async function POST(request: Request) {
           null,
   };
 
+  const { data: existingProfile } = await supabase.from("tune_profiles").select("id").eq("tune_id", insertedTune.id).eq("user_id", user.id).eq("vehicle_id", vehicleId).limit(1).maybeSingle();
+  if (existingProfile) { completed = true; return NextResponse.json({ success: true, tuneId: insertedTune.id, tuneProfileId: existingProfile.id }); }
   const {
     data: insertedProfile,
     error: profileInsertError,
-  } = await supabase
+  } = await trustedClient
     .from("tune_profiles")
     .insert(profilePayload)
     .select("*")
     .single();
 
   if (profileInsertError || !insertedProfile) {
-    console.error("TUNE PROFILE INSERT FAILED", {
-      code: profileInsertError?.code ?? null,
-      message:
-        profileInsertError?.message ??
-        "No tune profile row returned",
-    });
 
     await cleanupPartialTune(insertedTune.id);
 
@@ -653,9 +641,14 @@ export async function POST(request: Request) {
     );
   }
 
+  completed = true;
   return NextResponse.json({
     success: true,
     tuneId: insertedTune.id,
     tuneProfileId: insertedProfile.id,
   });
+  } finally { await finishUpload(supabase, attempt, completed); }
+  } finally { await supabase.rpc("release_calibration_repair_v1", { p_vehicle_id: vehicleId, p_token: mutationLease }); }
 }
+
+export const POST = protectSubscriberRequest(handlePOST, 131072);

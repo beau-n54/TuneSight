@@ -38,14 +38,14 @@ const mhdRows = () => [
     RPM: 3000,
     "Boost (PSI)": 12,
     "Boost target (PSI)": 13,
-    "Throttle Position": 100,
+    "Throttle Position (%)": 100,
   },
   {
     Time: 1,
     RPM: 4000,
     "Boost (PSI)": 15,
     "Boost target (PSI)": 16,
-    "Throttle Position": 100,
+    "Throttle Position (%)": 100,
   },
 ];
 
@@ -194,7 +194,7 @@ test("invalid source becomes a durable invalid_or_incomplete terminal", async ()
             RPM: "not-numeric",
             "Boost (PSI)": "not-numeric",
             "Boost target (PSI)": "not-numeric",
-            "Throttle Position": "not-numeric",
+            "Throttle Position (%)": "not-numeric",
           },
         ],
         qualificationContext()

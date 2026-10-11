@@ -6,7 +6,7 @@ const storage = fs.readFileSync(new URL("./vehicleCalibrationRoleStorage.ts", im
 const materialization = fs.readFileSync(new URL("./vehicleOwnedTuneMaterialization.server.ts", import.meta.url), "utf8");
 const route = fs.readFileSync(new URL("../../app/api/vehicles/calibration-role/route.ts", import.meta.url), "utf8");
 const page = fs.readFileSync(new URL("../../app/dashboard/vehicles/[id]/calibration/page.tsx", import.meta.url), "utf8");
-const tune = fs.readFileSync(new URL("../../app/dashboard/vehicles/[id]/tune/page.tsx", import.meta.url), "utf8");
+const tune = fs.readFileSync(new URL("../../app/dashboard/vehicles/[id]/tune/subscriber-page-client.tsx", import.meta.url), "utf8");
 
 test("vehicle-level roles are private, opaque, explicit, owner-and-vehicle scoped", () => {
   assert.match(storage, /createHmac\("sha256"/);
@@ -32,11 +32,14 @@ test("Current assignment is explicit and contains no newest-file or filename heu
   for (const source of [route, materialization, storage]) assert.doesNotMatch(source, /created_at|order\(|file_name.*includes|tune_name.*includes/i);
 });
 
-test("Calibration entry uses session first, then vehicle role recovery, then neutral state", () => {
+test("Calibration GET reads the scoped session; persistent role recovery requires the explicit leased POST", () => {
   const session = page.indexOf("readLatestSubscriberWorkshopSession");
-  const role = page.indexOf("recoverVehicleOwnedTuneCalibration");
   const empty = page.indexOf('entry.mode === "empty"');
-  assert.ok(session >= 0 && role > session && empty > role);
-  assert.match(page, /recoverVehicle: recoverVehicleOwnedTuneCalibration/);
+  assert.ok(session >= 0 && empty > session);
+  assert.doesNotMatch(page, /recoverVehicleOwnedTuneCalibration|createSubscriberWorkshopSession/);
+  assert.match(page, /recoverVehicle: async \(\) => null/);
+  assert.match(route, /body\?\.action === "repair_session"/);
+  assert.match(route, /claim_calibration_repair_v1[\s\S]*readLatestSubscriberWorkshopSession[\s\S]*recoverVehicleOwnedTuneCalibration/);
+  assert.match(route, /finally[\s\S]*release_calibration_repair_v1/);
   assert.match(page, /resolveVehicleOwnedCalibrationEvidence\(\{ ownerId: user\.id, vehicleId: vehicle\.id, result: subscriberResult \}/);
 });

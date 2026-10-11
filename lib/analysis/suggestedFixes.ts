@@ -1,5 +1,6 @@
-export function buildSuggestedFixes(signals: any[], profile: any) {
-  const fixes: any[] = [];
+export function buildSuggestedFixes(signals: { title: string }[], profile: unknown) {
+  void profile;
+  const fixes: { title: string; priority: string; actions: string[]; reason: string }[] = [];
 
   const hasSignal = (keyword: string) =>
     signals.some(s => s.title.toLowerCase().includes(keyword));

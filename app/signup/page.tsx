@@ -12,17 +12,19 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [plan, setPlan] = useState("starter");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   async function handleSignup() {
+    if (loading) return;
     setLoading(true);
     setMessage("");
 
+    try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: { data: { full_name: fullName } },
     });
 
     if (error) {
@@ -39,29 +41,13 @@ export default function SignupPage() {
       return;
     }
 
-    const { error: profileError } = await supabase.from("profiles").upsert({
-      id: user.id,
-      full_name: fullName,
-      plan,
-      subscription_status: "inactive",
-      legal_accepted: false,
-      legal_version: null,
-      accepted_at: null,
-      beta_access: false,
-      beta_status: "awaiting",
-      beta_plan: plan,
-      beta_expires_at: null,
-    });
-
-    if (profileError) {
-      setMessage(profileError.message);
-      setLoading(false);
-      return;
-    }
-
-    localStorage.setItem("ts_plan", plan);
-
+    // Profile authority is created by the database trigger. Clients cannot
+    // choose beta, role, plan or administrator fields, including on signup.
+    setLoading(false);
+    if (!data.session) { setMessage("Check your registered email to confirm your account, then sign in. Beta access requires approval."); return; }
     router.push("/legal-acceptance");
+    } catch { setMessage("Account creation could not be confirmed. Check your connection and retry."); }
+    finally { setLoading(false); }
   }
 
   return (
@@ -101,15 +87,7 @@ export default function SignupPage() {
           className="w-full mb-4 p-4 rounded-xl bg-black border border-zinc-700"
         />
 
-        <select
-          value={plan}
-          onChange={(event) => setPlan(event.target.value)}
-          className="w-full mb-6 p-4 rounded-xl bg-black border border-zinc-700"
-        >
-          <option value="starter">Starter</option>
-          <option value="pro">Pro</option>
-          <option value="workshop">Workshop</option>
-        </select>
+        <p className="mb-6 text-zinc-400">Controlled, unpaid beta. Account creation does not grant access or activate a paid plan.</p>
 
         <button
           type="button"

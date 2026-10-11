@@ -10,7 +10,7 @@ export type GraphChannel = {
 };
 
 export type GraphSeries = GraphChannel & {
-  values: readonly number[];
+  values: readonly (number | null)[];
 };
 
 export type GraphPoint = {
@@ -157,7 +157,7 @@ export function toNumberArray(value: unknown): number[] {
     return [];
   }
 
-  const samples = value.map(Number);
+  const samples = value.map(sample => sample === null || sample === undefined || typeof sample === "boolean" || (typeof sample === "string" && !sample.trim()) ? NaN : Number(sample));
 
   return samples.every((sample) => Number.isFinite(sample))
     ? samples
@@ -167,7 +167,7 @@ export function toNumberArray(value: unknown): number[] {
 export function getSeries(
   telemetry: unknown,
   aliases: readonly string[]
-): number[] {
+): (number | null)[] {
   if (!telemetry || typeof telemetry !== "object") {
     return [];
   }
@@ -175,9 +175,9 @@ export function getSeries(
   const record = telemetry as TelemetryRecord;
 
   for (const alias of aliases) {
-    const values = toNumberArray(record[alias]);
-    if (values.length > 0) {
-      return values;
+    const source = record[alias];
+    if (Array.isArray(source) && source.length > 0) {
+      return source.map(value => typeof value === "number" && Number.isFinite(value) ? value : null);
     }
   }
 
@@ -327,9 +327,9 @@ export function getHorizontalAxisPresentation(input: {
 }
 
 export function hasRecordedTelemetry(
-  values: readonly number[]
+  values: readonly (number | null)[]
 ): boolean {
-  return values.length > 0;
+  return values.some(value => typeof value === "number" && Number.isFinite(value));
 }
 
 export function resolveRegionCoordinates(

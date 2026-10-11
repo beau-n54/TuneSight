@@ -2,16 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-type Profile = {
-  plan: string | null;
-  subscription_status: string | null;
-  legal_accepted: boolean | null;
-  beta_access: boolean | null;
-  beta_status: string | null;
-};
+import { safeReturnPath } from "@/lib/security/accessPolicy";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,68 +15,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const pending = useRef(false);
 
   function getPasswordResetRedirectUrl() {
     return `${window.location.origin}/auth/callback?next=/reset-password`;
   }
 
   async function handleLogin() {
+    if (pending.current) return;
+    pending.current = true;
     setLoading(true);
     setMessage("");
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
-      return;
-    }
-
-    const user = data.user;
-
-    if (!user) {
-      setMessage("Login failed. No user returned.");
-      setLoading(false);
-      return;
-    }
-
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select(
-        "plan, subscription_status, legal_accepted, beta_access, beta_status"
-      )
-      .eq("id", user.id)
-      .single();
-
-    const profile = profileData as Profile | null;
-
-    if (profileError || !profile) {
-      setMessage(profileError?.message || "Profile not found.");
-      setLoading(false);
-      return;
-    }
-
-    localStorage.setItem("ts_plan", profile.plan || "starter");
-
-    router.refresh();
-
-    if (!profile.legal_accepted) {
-      router.push("/legal-acceptance");
-      return;
-    }
-
-    if (!profile.beta_access || profile.beta_status === "suspended") {
-      router.push("/beta-access");
-      return;
-    }
-
-    router.push("/dashboard");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error || !data.user) { setMessage("Sign in failed. Check your registered email, password and connection, then retry."); return; }
+      // A fresh server request checks legal acceptance, suspension and beta expiry.
+      const next = safeReturnPath(new URLSearchParams(window.location.search).get("next"));
+      router.replace(next);
+      router.refresh();
+    } catch { setMessage("Sign in could not complete. Check your connection and retry."); }
+    finally { pending.current = false; setLoading(false); }
   }
 
   async function handleForgotPassword() {
+    if (pending.current) return;
     setMessage("");
 
     if (!email) {
@@ -92,19 +47,12 @@ export default function LoginPage() {
     }
 
     setResetLoading(true);
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getPasswordResetRedirectUrl(),
-    });
-
-    if (error) {
-      setMessage(error.message);
-      setResetLoading(false);
-      return;
-    }
-
-    setMessage("Password reset email sent. Check your inbox.");
-    setResetLoading(false);
+    pending.current = true;
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: getPasswordResetRedirectUrl() });
+      setMessage(error ? "Reset request could not complete. Check your connection and retry." : "If this is your registered address, check your inbox for the password reset link.");
+    } catch { setMessage("Reset request could not complete. Check your connection and retry."); }
+    finally { pending.current = false; setResetLoading(false); }
   }
 
   return (
@@ -119,6 +67,10 @@ export default function LoginPage() {
         <p className="mb-8 text-zinc-400">Login with your TuneSight account.</p>
 
         <input
+          id="login-email"
+          name="email"
+          aria-label="Registered email"
+          autoComplete="email"
           type="email"
           placeholder="Email"
           value={email}
@@ -127,6 +79,10 @@ export default function LoginPage() {
         />
 
         <input
+          id="login-password"
+          name="password"
+          aria-label="Password"
+          autoComplete="current-password"
           type="password"
           placeholder="Password"
           value={password}

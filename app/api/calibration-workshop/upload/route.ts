@@ -1,3 +1,4 @@
+import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
 import { createClient } from "@/lib/supabase/server";
 import { loadSubscriberCalibration, SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES } from "@/lib/calibration-workshop/subscriberCalibrationProvider";
 import { createSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
@@ -9,7 +10,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const json = (body: object, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
   try {
     const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
       catch { return json({ outcome: "storage_failure", code: "TRANSIENT_PREPARATION", error: "Private calibration upload could not be prepared." }, 503); }
     }
     if (body.action !== "process" || !body.lease) return json({ outcome: "invalid_upload", error: "A valid processing lease is required." }, 400);
+    const { data: mutationLease, error: mutationError } = await supabase.rpc("claim_calibration_repair_v1", { p_vehicle_id: vehicleId });
+    if (mutationError) return json({ outcome: "storage_failure", error: "Calibration operation could not be reserved. Retry later." }, 503);
+    if (!mutationLease) return json({ outcome: "storage_failure", error: "Another Calibration operation is in progress. Retry shortly." }, 409);
     let upload: Awaited<ReturnType<typeof consumeSubscriberCalibrationUpload>> | null = null;
     try {
       upload = await consumeSubscriberCalibrationUpload(body.lease, user.id, vehicleId);
@@ -45,6 +49,9 @@ export async function POST(request: Request) {
     } finally {
       try { if (upload) await upload.cleanup(); else await discardSubscriberCalibrationUpload(body.lease, user.id, vehicleId); }
       catch { return json({ outcome: "storage_failure", code: "TRANSIENT_CLEANUP", error: "Private calibration upload cleanup failed." }, 503); }
+      finally { await supabase.rpc("release_calibration_repair_v1", { p_vehicle_id: vehicleId, p_token: mutationLease }); }
     }
   } catch { return json({ outcome: "infrastructure_failure", error: "Calibration service is temporarily unavailable." }, 503); }
 }
+
+export const POST = protectSubscriberRequest(handlePOST, 32768);

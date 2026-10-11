@@ -17,7 +17,7 @@ type WorkshopDiagnosticCardProps = {
     label: string;
     value: string | number;
   }[];
-  relatedXdfTables?: any[];
+  relatedXdfTables?: { tableName?: string; name?: string; category?: string; matchReason?: string }[];
 };
 
 export function WorkshopDiagnosticCard({

@@ -17,7 +17,7 @@ const mhdRows = () => [
     Time: 0,
     RPM: 3000,
     "Boost Mean PSI": 15,
-    "Boost Target": 17,
+    "Boost Target PSI": 17,
     WGDC: 70,
     "Accel. Pedal[%]": 100,
   },
@@ -25,7 +25,7 @@ const mhdRows = () => [
     Time: 0.1,
     RPM: 3200,
     "Boost Mean PSI": 16,
-    "Boost Target": 18,
+    "Boost Target PSI": 18,
     WGDC: 72,
     "Accel. Pedal[%]": 100,
   },
@@ -36,17 +36,17 @@ const bm3Rows = () => [
     Time: 0,
     RPM: 3000,
     "Load Actual": 120,
-    "Boost Pressure": 15,
-    "Target Boost": 17,
-    "Pedal Position": 100,
+    "Boost Pressure (psi)": 15,
+    "Target Boost (psi)": 17,
+    "Pedal Position (%)": 100,
   },
   {
     Time: 0.1,
     RPM: 3200,
     "Load Actual": 125,
-    "Boost Pressure": 16,
-    "Target Boost": 18,
-    "Pedal Position": 100,
+    "Boost Pressure (psi)": 16,
+    "Target Boost (psi)": 18,
+    "Pedal Position (%)": 100,
   },
 ];
 
@@ -139,7 +139,7 @@ test("supported headers with no usable numeric observations remain invalid, not 
   const qualification = qualifyEvidenceSource(
     [{}],
     context,
-    ["RPM", "Boost Mean PSI", "Boost Target", "Accel. Pedal[%]"]
+    ["RPM", "Boost Mean PSI", "Boost Target PSI", "Accel. Pedal[%]"]
   );
   assert.equal(qualification.kind, "invalid_or_incomplete_source");
   if (qualification.kind !== "invalid_or_incomplete_source") return;
@@ -151,7 +151,7 @@ test("supported header-only source remains invalid rather than unknown", () => {
   const qualification = qualifyEvidenceSource(
     [],
     context,
-    ["RPM", "Boost Pressure", "Target Boost", "Pedal Position"]
+    ["RPM", "Boost Pressure (psi)", "Target Boost (psi)", "Pedal Position (%)"]
   );
   assert.equal(qualification.kind, "invalid_or_incomplete_source");
   if (qualification.kind !== "invalid_or_incomplete_source") return;
@@ -167,7 +167,7 @@ test("missing governed core channels preserves exact diagnostic identities", () 
       {
         RPM: 3000,
         "Boost Mean PSI": 15,
-        "Boost Target": 17,
+        "Boost Target PSI": 17,
       },
     ],
     context
@@ -178,7 +178,7 @@ test("missing governed core channels preserves exact diagnostic identities", () 
     qualification.outcome.reasonCode,
     "missing_required_core_channels"
   );
-  assert.deepEqual(qualification.missingRequiredCoreChannels, ["throttle"]);
+  assert.deepEqual(qualification.missingRequiredCoreChannels, ["throttle", "time"]);
 });
 
 test("non-finite core observations and row misalignment are structurally invalid", () => {
@@ -194,7 +194,7 @@ test("non-finite core observations and row misalignment are structurally invalid
         throttle: Number.POSITIVE_INFINITY,
       },
     ],
-    detectedHeaders: ["RPM", "Boost Pressure", "Boost Target", "Pedal Position"],
+    detectedHeaders: ["RPM", "Boost Pressure (psi)", "Boost Target PSI", "Pedal Position (%)"],
     missingCoreChannels: [],
   };
   const nonFinite = qualifyTranslatedEvidenceSource(base, context);

@@ -1,12 +1,13 @@
 export type SubscriberProcessingFailure = Readonly<{
   outcome: "invalid_upload" | "storage_failure" | "provider_rejection";
-  code: "UPLOAD_LEASE_INVALID" | "TRANSIENT_OBJECT_RETRIEVAL" | "SOURCE_BINDING" | "SOURCE_OBJECT_WRITE" | "SOURCE_LEASE_WRITE" | "SOURCE_POINTER_WRITE" | "SOURCE_REPLACEMENT_CLEANUP" | "PROVIDER_REJECTION";
+  code: "UPLOAD_LEASE_INVALID" | "TRANSIENT_OBJECT_RETRIEVAL" | "PRIVATE_STORAGE_UNAVAILABLE" | "SOURCE_BINDING" | "SOURCE_OBJECT_WRITE" | "SOURCE_LEASE_WRITE" | "SOURCE_POINTER_WRITE" | "SOURCE_REPLACEMENT_CLEANUP" | "PROVIDER_REJECTION";
   error: string;
   status: 400 | 422 | 503;
 }>;
 
 export function classifySubscriberProcessingFailure(error: unknown): SubscriberProcessingFailure {
   const internal = error instanceof Error ? error.message : "";
+  if (["PRIVATE_OBJECT_INVENTORY_UNAVAILABLE", "PRIVATE_UPLOAD_SIZE_INVALID", "PRIVATE_UPLOAD_DELETE_FAILED", "SOURCE_BINARY_STORAGE_TEMPORARILY_UNAVAILABLE", "SUBSCRIBER_POINTER_TEMPORARILY_UNAVAILABLE", "SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE", "SUBSCRIBER_SESSION_WRITE_FAILED", "SUBSCRIBER_SESSION_POINTER_WRITE_FAILED"].includes(internal)) return Object.freeze({ outcome: "storage_failure", code: "PRIVATE_STORAGE_UNAVAILABLE", error: "Private Calibration storage could not be verified or updated. Retry later.", status: 503 });
   if (internal === "PRIVATE_UPLOAD_LEASE_INVALID") return Object.freeze({ outcome: "invalid_upload", code: "UPLOAD_LEASE_INVALID", error: "Calibration upload lease is invalid or expired.", status: 400 });
   if (internal === "PRIVATE_UPLOAD_READ_FAILED") return Object.freeze({ outcome: "storage_failure", code: "TRANSIENT_OBJECT_RETRIEVAL", error: "Private calibration upload could not be retrieved for processing.", status: 503 });
   if (internal === "SOURCE_BINARY_BINDING_MISMATCH") return Object.freeze({ outcome: "storage_failure", code: "SOURCE_BINDING", error: "Source calibration evidence did not match its exact processing binding.", status: 503 });

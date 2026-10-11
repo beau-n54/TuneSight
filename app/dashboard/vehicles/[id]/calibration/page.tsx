@@ -1,3 +1,4 @@
+import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +19,7 @@ import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
 import { createHash } from "node:crypto";
 import { resolveSubscriberWorkshopSession, selectSubscriberWorkshopEntry } from "@/lib/calibration-workshop/subscriberWorkshopEntry";
 import { resolveVehicleOwnedCalibrationEvidence } from "@/lib/calibration-workshop/vehicleOwnedCalibrationEvidence";
-import { recoverVehicleOwnedTuneCalibration } from "@/lib/calibration-workshop/vehicleOwnedTuneMaterialization.server";
+import RestoreCalibrationSession from "./restore-calibration-session";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -32,6 +33,7 @@ export const maxDuration = 60;
 function isCurrentOnlyWorkshop(workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel): workshop is CurrentOnlyWorkshopViewModel { return "mode" in workshop && workshop.mode === "current_only"; }
 
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
+  await requireSubscriberPage();
   const { id } = await params;
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
@@ -52,7 +54,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const session = await resolveSubscriberWorkshopSession({ requestedSession: query.session, ownerId: user.id, vehicleId: vehicle.id }, {
     readSession: readSubscriberWorkshopSession,
     readLatest: readLatestSubscriberWorkshopSession,
-    recoverVehicle: recoverVehicleOwnedTuneCalibration,
+    recoverVehicle: async () => null,
   });
   const activeSubscriberSession = session.sessionId;
   const subscriberResult = session.result;
@@ -67,7 +69,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const presentation = subscriberWorkspacePresentation();
   const sharedContext = { ownerId: createHash("sha256").update(user.id).digest("hex").slice(0, 24), vehicleId: vehicle.id, sessionId: activeSubscriberSession ?? null, sourceMode: "subscriber" as const };
   if (entry.mode === "empty") {
-    if (presentation === "shared") return <EmptySharedWorkspace upload={<UploadCalibration vehicleId={vehicle.id}/>} vehicle={vehicle} context={sharedContext} reason={subscriberResult && subscriberResult.status !== "workshop_ready" ? subscriberResult.message : "Open Calibration File to begin."}/>;
+    if (presentation === "shared") return <EmptySharedWorkspace upload={<><UploadCalibration vehicleId={vehicle.id}/><RestoreCalibrationSession vehicleId={vehicle.id}/></>} vehicle={vehicle} context={sharedContext} reason={subscriberResult && subscriberResult.status !== "workshop_ready" ? subscriberResult.message : "Open Calibration File to begin."}/>;
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><header className="bmw-border rounded-2xl bg-zinc-900 p-6"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Calibration Workshop</p><h1 className="mt-2 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1><p className="mt-2 text-zinc-400">{vehicle.year || "Unknown Year"} {vehicle.make || "Unknown Make"} {vehicle.model || "Unknown Model"}<span className="text-zinc-600"> · </span>{vehicle.engine_code || "Engine unknown"}</p><div className="mt-5"><UploadCalibration vehicleId={vehicle.id}/></div></header><section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6" role="status"><h2 className="text-xl font-bold">No Current Calibration loaded</h2><p className="mt-2 text-sm text-zinc-400">Open Calibration File to begin.</p><p className="mt-3 text-xs text-zinc-500">No Calibration evidence, addresses, Definitions or values have been substituted.</p></section></div></main>;
   }
 
@@ -106,7 +108,7 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6"><Link href={`/dashboard/vehicles/${vehicle.id}`} className="inline-flex text-sm text-zinc-400 hover:text-white">← Back to Vehicle</Link><section className="rounded-2xl border border-red-400/30 bg-zinc-900 p-6" role="alert"><h1 className="text-xl font-bold">Calibration Evidence unavailable</h1><p className="mt-2 text-sm text-zinc-400">The controlled Workshop Evidence could not be loaded. No calibration values have been substituted.</p><dl className="mt-5 grid gap-2 text-sm sm:grid-cols-2"><dt className="text-zinc-500">Diagnostic ID</dt><dd className="font-mono">{diagnostic.errorId}</dd><dt className="text-zinc-500">Failure stage</dt><dd>{diagnostic.stage}</dd><dt className="text-zinc-500">Elapsed</dt><dd>{diagnostic.elapsedMs} ms</dd></dl>{Object.entries(diagnostic.completedStageTimings).length > 0 && <p className="mt-4 font-mono text-xs text-zinc-500">Completed: {Object.entries(diagnostic.completedStageTimings).map(([stage, elapsed]) => `${stage} ${elapsed} ms`).join(" · ")}</p>}<p className="mt-4 text-sm text-zinc-400">No file paths, binary data, identities, tokens or resource names are included in this diagnostic.</p></section></div></main>;
   }
   if (sharedPayload && presentation === "shared") {
-    return <SharedWorkspaceClient upload={<UploadCalibration vehicleId={vehicle.id}/>} key={JSON.stringify([sharedWorkspaceContextKey(sharedContext, workshop), definition ?? null])} workshop={workshop} evidence={sharedPayload} context={sharedContext} vehicle={vehicle} requestedKey={definition}/>;
+    return <SharedWorkspaceClient upload={<><UploadCalibration vehicleId={vehicle.id}/><RestoreCalibrationSession vehicleId={vehicle.id}/></>} key={JSON.stringify([sharedWorkspaceContextKey(sharedContext, workshop), definition ?? null])} workshop={workshop} evidence={sharedPayload} context={sharedContext} vehicle={vehicle} requestedKey={definition}/>;
   }
   const currentOnlyWorkshop = isCurrentOnlyWorkshop(workshop) ? workshop : null;
   const comparisonWorkshop = isCurrentOnlyWorkshop(workshop) ? null : workshop;

@@ -23,10 +23,11 @@ async function enter(requestedSession: string | string[] | undefined, options: {
   bytes?: Uint8Array; readAt?: number; owner?: string; vehicle?: string;
   unavailable?: boolean; latestUnavailable?: boolean; roleUnavailable?: boolean;
   result?: SubscriberCalibrationResult;
+  allowRecovery?: boolean;
 } = {}) {
   const calls: string[] = [];
   const owner = options.owner ?? ownerId, vehicle = options.vehicle ?? vehicleId;
-  const session = await resolveSubscriberWorkshopSession({ requestedSession, ownerId: owner, vehicleId: vehicle }, {
+  const session = await resolveSubscriberWorkshopSession({ requestedSession, ownerId: owner, vehicleId: vehicle, allowRecovery: options.allowRecovery }, {
     readSession: async (id, actualOwner, actualVehicle) => {
       calls.push("explicit");
       assert.equal(id, requestedId);
@@ -54,12 +55,18 @@ test("absent token recovers latest scoped session, then explicit vehicle role on
   assert.deepEqual(latest.calls, ["latest"]);
   assert.equal(latest.session.sessionId, latestId);
   assert.equal(latest.entry.mode, "subscriber");
-  const role = await enter(undefined, { latestUnavailable: true });
+  const role = await enter(undefined, { latestUnavailable: true, allowRecovery: true });
   assert.deepEqual(role.calls, ["latest", "vehicle"]);
   assert.equal(role.session.sessionId, roleId);
   assert.equal(role.entry.mode, "subscriber");
-  const preview = await enter(undefined, { latestUnavailable: true, roleUnavailable: true });
+  const preview = await enter(undefined, { latestUnavailable: true, roleUnavailable: true, allowRecovery: true });
   assert.equal(preview.entry.mode, "development_preview");
+});
+
+test("ordinary page entry reads only and never invokes persistent recovery", async () => {
+  const result = await enter(undefined, { latestUnavailable: true });
+  assert.deepEqual(result.calls, ["latest"]);
+  assert.equal(result.session.result, null);
 });
 
 test("valid explicit token opens exactly the requested persisted Reference and Current evidence", async () => {

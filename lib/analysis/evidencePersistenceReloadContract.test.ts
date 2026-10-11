@@ -211,8 +211,8 @@ const context = (
 });
 
 const supportedRows = [
-  { Time: 0, RPM: 3000, "Boost (PSI)": 12, "Boost target (PSI)": 13, "Throttle Position": 100 },
-  { Time: 1, RPM: 4000, "Boost (PSI)": 15, "Boost target (PSI)": 16, "Throttle Position": 100 },
+  { Time: 0, RPM: 3000, "Boost (PSI)": 12, "Boost target (PSI)": 13, "Throttle Position (%)": 100 },
+  { Time: 1, RPM: 4000, "Boost (PSI)": 15, "Boost target (PSI)": 16, "Throttle Position (%)": 100 },
 ];
 
 function candidateInput(marker: string): CandidateEvidenceSummaryInput {

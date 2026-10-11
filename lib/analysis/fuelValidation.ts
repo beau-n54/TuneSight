@@ -1,9 +1,9 @@
-import { n54Thresholds } from "../config/thresholds";
+import { n54Thresholds } from "../config/thresholds/n54.ts";
 import type { AnalysisContext } from "./core/analysisContext";
 
 export type FuelValidationResult = {
-  status: "pass" | "warning" | "fail";
-  detectedFuel: "pump" | "ethanol_blend" | "full_ethanol";
+  status: "pass" | "warning" | "fail" | "unavailable";
+  detectedFuel: "pump" | "ethanol_blend" | "full_ethanol" | "unavailable";
   message: string;
 };
 
@@ -13,9 +13,10 @@ export function validateFuelAgainstTune(
   }
 )
 : FuelValidationResult {
-  const ethanolContent = Number(
-  context.ethanolContent ?? 0
-);
+  if (context.platform !== "n54" || typeof context.ethanolContent !== "number" || !Number.isFinite(context.ethanolContent) || context.ethanolContent < 0 || context.ethanolContent > 100) {
+    return { status: "unavailable", detectedFuel: "unavailable", message: "Fuel classification requires measured ethanol content and qualified N54 context." };
+  }
+  const ethanolContent = context.ethanolContent;
 
 const fuelingIntent = context.fuelingIntent;
 

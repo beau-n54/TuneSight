@@ -49,7 +49,7 @@ export async function runLocalBridgePairingUiTests(container: HTMLElement, repor
     root?.unmount(); await until(() => active === 0);
     mode = nextMode; maximum = 0; pairs = 0; connects = 0;
     root = createRoot(container);
-    root.render(<StrictMode><LiveTelemetryWorkspace vehicle={{ id: "test-only", name: "Controlled pairing UI", description: "No subscriber data or vehicle", engineCode: "unqualified fixture" }} /></StrictMode>);
+    root.render(<StrictMode><LiveTelemetryWorkspace ownerId="controlled-owner" vehicle={{ id: "test-only", name: "Controlled pairing UI", description: "No subscriber data or vehicle", engineCode: "unqualified fixture" }} /></StrictMode>);
     await until(() => Boolean(button("Connect BMW")));
   };
   try {

@@ -1,4 +1,6 @@
 "use client";
+
+import { hasUnpersistedWorking, persistWorkingRevision, type WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   filterWorkshopDefinitions,
@@ -151,7 +153,7 @@ export default function WorkshopClient({
     [focus, setFocus] = useState(false),
     [working, setWorking] = useState<WorkingCalibration | null>(null),
     [displayMode, setDisplayMode] = useState<CalibrationDisplayMode>("current"),
-    [saveStatus, setSaveStatus] = useState<"loading" | "saved" | "not-created">(
+    [saveStatus, setSaveStatus] = useState<WorkingSaveStatus>(
       "loading",
     );
   const [terminologyMode, setTerminologyMode] = useCalibrationTerminologyMode();
@@ -204,23 +206,42 @@ export default function WorkshopClient({
         }),
       [ownerScope, vehicleId, workshop.source],
     );
+  const [persistedRevision, setPersistedRevision] = useState<string | null>(null);
+  const [saveAttempt, setSaveAttempt] = useState(0);
+  const visibleSaveStatus: WorkingSaveStatus = hasUnpersistedWorking(working, persistedRevision) ? (saveStatus === "failed" ? "failed" : "unsaved") : saveStatus;
+  const retryLocalSave = () => { if (!working) { window.location.reload(); return; } setSaveAttempt(attempt => attempt + 1); };
   useEffect(() => {
-    const seed = newWorking("2000-01-01T00:00:00.000Z"),
-      restored = createBrowserWorkingCalibrationStore(window.localStorage).load(
-        scope,
-        seed,
-        resolveWorkingDefinition,
-      );
-    setWorking(restored);
-    setDisplayMode(restored ? "working" : "current");
-    setSaveStatus(restored ? "saved" : "not-created");
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      try {
+        const current = newWorking("2000-01-01T00:00:00.000Z");
+        const restored = createBrowserWorkingCalibrationStore(window.localStorage, true).load(scope, current, resolveWorkingDefinition);
+        setPersistedRevision(restored?.workingCalibrationRevision ?? null);
+        setWorking(restored);
+        setDisplayMode(restored ? "working" : "current");
+        setSaveStatus(restored ? "saved" : "not-created");
+      } catch { setSaveStatus("failed"); }
+    });
+    return () => { active = false; };
   }, [scope, newWorking, resolveWorkingDefinition]);
   useEffect(() => {
-    if (working) {
-      createBrowserWorkingCalibrationStore(window.localStorage).save(working);
-      setSaveStatus("saved");
-    }
-  }, [working]);
+    if (!working || working.workingCalibrationRevision === persistedRevision) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const result = persistWorkingRevision(working, value => createBrowserWorkingCalibrationStore(window.localStorage, true).save(value));
+      if (result.status === "saved") setPersistedRevision(result.revision);
+      setSaveStatus(result.status);
+    });
+    return () => { active = false; };
+  }, [working, persistedRevision, saveAttempt]);
+  useEffect(() => {
+    if (!hasUnpersistedWorking(working, persistedRevision)) return;
+    const protect = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", protect);
+    return () => window.removeEventListener("beforeunload", protect);
+  }, [working, persistedRevision]);
   const navigation = useMemo(
       () =>
         buildEngineeringNavigationIndex(
@@ -654,7 +675,8 @@ export default function WorkshopClient({
               onMode={setDisplayMode}
               working={working}
               onCreate={() => {
-                setWorking(newWorking());
+                if (saveStatus === "failed" || saveStatus === "loading") return;
+    setWorking(newWorking());
                 setDisplayMode("working");
               }}
               onUndo={() =>
@@ -687,7 +709,7 @@ export default function WorkshopClient({
                 ]
               }
               warnings={detail.summary.editCapability?.warnings ?? []}
-              saveStatus={saveStatus}
+              saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}
             />
           )}
           {!detail.summary.available ? (

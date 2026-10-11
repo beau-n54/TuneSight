@@ -1,18 +1,26 @@
 import type { TranslatedLogRow } from "./types";
 
 export function toNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === "") return null;
+  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "") || (typeof value !== "string" && typeof value !== "number")) return null;
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function read(row: Record<string, unknown>, aliases: string[]): number | null {
-  for (const alias of aliases) {
-    if (alias in row) return toNumber(row[alias]);
-  }
+  const matches = aliases.filter(alias => Object.hasOwn(row, alias));
+  // Do not silently pick the first of conflicting source columns.
+  if (matches.length !== 1) return null;
+  return toNumber(row[matches[0]]);
+}
 
-  return null;
+export function readTemperatureC(row: Record<string, unknown>): number | null {
+  const celsius = ["IAT (*C)", "IAT (C)", "IAT[°C]", "IAT[C]", "Intake Air Temperature (C)"];
+  const fahrenheit = ["IAT[F]", "IAT[°F]", "IAT (F)", "IAT (*F)", "Intake Air Temperature (F)"];
+  const matches = [...celsius, ...fahrenheit].filter(name => Object.hasOwn(row, name));
+  if (matches.length !== 1) return null;
+  const value = toNumber(row[matches[0]]);
+  return value === null ? null : fahrenheit.includes(matches[0]) ? (value - 32) * 5 / 9 : value;
 }
 
 export function getMissingCoreChannels(rows: TranslatedLogRow[]): string[] {
@@ -21,6 +29,7 @@ export function getMissingCoreChannels(rows: TranslatedLogRow[]): string[] {
 
   const missing: string[] = [];
 
+  if (!hasAnyValue("time")) missing.push("time");
   if (!hasAnyValue("rpm")) missing.push("rpm");
   if (!hasAnyValue("boostPsi")) missing.push("boostPsi");
   if (!hasAnyValue("boostTargetPsi")) missing.push("boostTargetPsi");

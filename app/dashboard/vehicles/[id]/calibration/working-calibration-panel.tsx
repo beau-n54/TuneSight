@@ -2,10 +2,11 @@
 
 import type { WorkingCalibration, WorkingEditOperation, WorkingEditPreview } from "@/lib/calibration-workshop/workingCalibration";
 import { validationExplanation, workingOperationLabel } from "@/lib/calibration-workshop/manualEditorUx";
+import type { WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 
 export type CalibrationDisplayMode = "current" | "working";
 
-export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, interactionAllowed = true, createAllowed = true }: {
+export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, onRetrySave, interactionAllowed = true, createAllowed = true }: {
   interactionAllowed?: boolean;
   createAllowed?: boolean;
   mode: CalibrationDisplayMode;
@@ -25,7 +26,8 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
   editQualified: boolean;
   blockers: readonly string[];
   warnings: readonly string[];
-  saveStatus: "loading" | "saved" | "not-created";
+  saveStatus: WorkingSaveStatus;
+  onRetrySave?: () => void;
 }) {
   const activeHistory = working?.mutations.slice(0, working.cursor) ?? [];
   return <section className="mt-4 space-y-4 rounded-xl border border-zinc-700 bg-zinc-900 p-4" aria-label="Working Calibration controls">
@@ -34,7 +36,8 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
         <button type="button" aria-pressed={mode === "current"} onClick={() => onMode("current")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "current" ? "bg-blue-500/20 text-blue-200" : "text-zinc-400"}`}>CURRENT</button>
         <button type="button" aria-pressed={mode === "working"} disabled={!working} onClick={() => onMode("working")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "working" ? "bg-emerald-500/20 text-emerald-200" : "text-zinc-400 disabled:text-zinc-700"}`}>WORKING</button>
       </div>
-      <p className="text-xs text-zinc-400" role="status">{saveStatus === "saved" ? "Saved in this subscriber Workshop" : saveStatus === "loading" ? "Restoring saved Working Calibration…" : "Working Calibration not created"}</p>
+      <p className="text-xs text-zinc-400" role="status">{saveStatus === "saved" ? "Saved in this browser only" : saveStatus === "failed" ? (working ? "Save failed — changes are not safely stored. Keep this page open and retry." : "Restore failed. Existing browser history is preserved; retry restoration before editing.") : saveStatus === "unsaved" ? "Unsaved Working changes — keep this page open." : saveStatus === "loading" ? "Restoring saved Working Calibration…" : "Working Calibration not created"}</p>
+      {(saveStatus === "failed" || saveStatus === "unsaved") && onRetrySave && <button type="button" onClick={onRetrySave} className="rounded-lg border border-amber-400 px-3 py-2 text-xs text-amber-200">{working ? "Retry local save" : "Retry restoration"}</button>}
     </div>
 
     {!working ? <div><p className="text-sm text-zinc-300">Current Calibration is immutable. Create one separate Working Calibration from this exact Current Dataset to begin editing.</p><button type="button" disabled={!interactionAllowed || !createAllowed} onClick={onCreate} className="mt-3 rounded-lg border border-blue-400 bg-blue-400/10 px-4 py-2 text-sm font-semibold text-blue-100">Create Working Calibration</button></div> : <>
