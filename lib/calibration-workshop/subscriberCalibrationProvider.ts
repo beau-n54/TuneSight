@@ -6,15 +6,17 @@ import { defineEcuIdentityObservation } from "../vehicle-interface/nativeVehicle
 import { compareQualifiedCalibrationDatasets, constructQualifiedCalibrationDatasetComparisonRequest, type QualifiedCalibrationComparisonEvidence } from "../xdf/qualifiedCalibrationComparison.ts";
 import { constructQualifiedCalibrationDatasetRequest, materializeQualifiedCalibrationDataset, type QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDataset.ts";
 import { resolveBinaryContainer } from "../tunes/binaryContainer.ts";
-import { buildWorkshopViewModel, type WorkshopViewModel } from "./viewModel.ts";
+import type { WorkshopViewModel } from "./viewModel.ts";
 import { resolveGovernedRomIdentity, type GovernedRomMarkerProfile } from "../xdf/governedRomIdentityResolution.ts";
-import { buildCurrentOnlyWorkshopViewModel, type CurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
+import type { CurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
 import { deriveWorkshopCapabilities, resolveMasterCalibration } from "./masterCalibrationResolver.ts";
 import { RepositoryDefinitionCatalog } from "./repositoryDefinitionCatalog.ts";
 import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
 import { classifyEntryEditCapabilities, type CalibrationEditCapability } from "./editAuthority.ts";
 import type { SourceBinaryLeaseReceipt } from "./sourceBinaryReconstructionLease.ts";
-import { calibrationKnowledgeForRelationship } from "../knowledge/publishedCalibrationSemantics.ts";
+import { buildSubscriberWorkshop } from "./subscriberWorkshopView.ts";
+// Existing provider callers retain the same builder; restoration imports it directly.
+export { buildSubscriberWorkshop } from "./subscriberWorkshopView.ts";
 
 export const SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
 export type SubscriberCalibrationFailure = Readonly<{ status: "coverage_unavailable" | "invalid_upload"; title: string; message: string; identity: string | null; digest: string | null; container: string | null; byteLength: number | null; coverage: DefinitionCoverageResolution | null; timings: Readonly<Record<string, number>> }>;
@@ -62,10 +64,4 @@ export async function loadSubscriberCalibration(input: Readonly<{ bytes: Uint8Ar
   const successBase = { status: "workshop_ready" as const, material, identity, digest, containerDigest, container: binary.source.containerType, byteLength: binary.byteLength, coverage, quarantines, editCapabilities };
   const workshop = buildSubscriberWorkshop(successBase, input.selectedDefinition); record("viewModelMs");
   return Object.freeze({ ...successBase, workshop, timings: Object.freeze(timings) });
-}
-
-export function buildSubscriberWorkshop(result: Pick<SubscriberCalibrationSuccess, "material" | "identity" | "digest" | "quarantines" | "editCapabilities">, selectedDefinition?: string | null): WorkshopViewModel | CurrentOnlyWorkshopViewModel {
-  const knowledgeRecords = calibrationKnowledgeForRelationship(result.material.current.relationshipRevision);
-  if (result.material.reference === null || result.material.comparison === null) return buildCurrentOnlyWorkshopViewModel({ current: result.material.current, quarantines: result.quarantines, editCapabilities: result.editCapabilities, knowledgeRecords, selectedKey: selectedDefinition });
-  return buildWorkshopViewModel({ reference: result.material.reference, current: result.material.current, comparison: result.material.comparison, editCapabilities: result.editCapabilities, knowledgeRecords, source: { kind: "subscriber_upload", label: `${result.identity} governed Reference → subscriber Current`, fixtureIdentity: `subscriber-upload:${result.digest}` }, selectedKey: selectedDefinition });
 }

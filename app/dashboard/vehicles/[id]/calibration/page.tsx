@@ -3,7 +3,7 @@ import Link from "next/link";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { developmentCalibrationWorkshopProvider, readDevelopmentWorkspaceEvidence, selectN54PreviewRom } from "@/lib/calibration-workshop/developmentFixtureProvider.server";
+import { selectN54PreviewRom } from "@/lib/calibration-workshop/developmentPreviewSelection";
 import SharedWorkspaceClient, { EmptySharedWorkspace } from "./shared-workspace-client";
 import { workspaceCatalogue, buildSharedWorkspacePayload, compactWorkspaceProjection, exactWorkspaceDefinition, projectWorkspaceTable, sharedWorkspaceContextKey, type SharedWorkspacePayload } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
 import { maskRetainedWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceDispatch";
@@ -88,11 +88,13 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   let workshop: WorkshopViewModel | CurrentOnlyWorkshopViewModel;
   let sharedPayload: SharedWorkspacePayload | null = null;
   try {
-    workshop = subscriberSuccess ? selectRestoredSubscriberWorkshop(subscriberSuccess, definition) : await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
     if (subscriberSuccess) {
+      workshop = selectRestoredSubscriberWorkshop(subscriberSuccess, definition);
       workshop = maskRetainedWorkspace(workshop, subscriberSuccess);
       sharedPayload = buildSharedWorkspacePayload(workshop, subscriberSuccess, sharedContext, definition);
     } else {
+      const { developmentCalibrationWorkshopProvider, readDevelopmentWorkspaceEvidence } = await import("@/lib/calibration-workshop/developmentFixtureProvider.server");
+      workshop = await developmentCalibrationWorkshopProvider.loadVehicleWorkshop(vehicle.id, user.id, definition, previewRom);
       const evidence = await readDevelopmentWorkspaceEvidence(previewRom);
       const selected = exactWorkspaceDefinition(workshop, definition);
       sharedPayload = { identity: evidence.identity, container: evidence.container, byteLength: evidence.byteLength, referenceAvailable: true,

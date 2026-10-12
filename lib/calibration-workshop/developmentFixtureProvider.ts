@@ -1,3 +1,5 @@
+import { N54_PREVIEW_VOCABULARY as VOCABULARY, DEFAULT_N54_PREVIEW_ROM, type N54PreviewRom } from "./developmentPreviewSelection.ts";
+export { selectN54PreviewRom, DEFAULT_N54_PREVIEW_ROM, type N54PreviewRom, type N54PreviewSelection } from "./developmentPreviewSelection.ts";
 import fs from "node:fs";
 import path from "node:path";
 import { collectInternalIdentityObservations, type InternalIdentityObservation } from "../xdf/applicabilityEvidenceProposal.ts";
@@ -37,10 +39,6 @@ export interface CalibrationWorkshopProvider {
 }
 
 const ROOT = path.resolve("BMW-XDFs-master/N54");
-const VOCABULARY = ["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const;
-export type N54PreviewRom = (typeof VOCABULARY)[number];
-export const DEFAULT_N54_PREVIEW_ROM: N54PreviewRom = "IJE0S";
-
 type N54PreviewFixtureConfiguration = Readonly<{
   identity: N54PreviewRom;
   xdfFile: string;
@@ -59,15 +57,6 @@ const CONFIGURATIONS: Readonly<Record<N54PreviewRom, N54PreviewFixtureConfigurat
   IKM0S: Object.freeze({ identity: "IKM0S", xdfFile: "IKM0S.xdf", referenceFile: "IKM0S_original.bin", modifiedFile: "IKM0S_MapSwitchBase.bin", referenceRole: "stock_candidate", modifiedRole: "mapswitch", fixtureIdentity: "n54-ikm0s-original-mapswitch-v1", provenance: Object.freeze(["Controlled IKM0S Workshop development fixture"]), limitations: Object.freeze(["This controlled fixture is not derived from the selected vehicle.", "Original is a Stock Candidate, not Verified Stock."]) }),
   INA0S: Object.freeze({ identity: "INA0S", xdfFile: "INA0S.xdf", referenceFile: "INA0S_original.bin", modifiedFile: "INA0S_MapSwitchBase.bin", referenceRole: "stock_candidate", modifiedRole: "mapswitch", fixtureIdentity: "n54-ina0s-original-mapswitch-v1", provenance: Object.freeze(["Controlled INA0S Workshop development fixture"]), limitations: Object.freeze(["This controlled fixture is not derived from the selected vehicle.", "Original is a Stock Candidate, not Verified Stock."]) }),
 });
-
-export type N54PreviewSelection = Readonly<{ status: "valid"; rom: N54PreviewRom }> | Readonly<{ status: "invalid"; requested: string }>;
-
-export function selectN54PreviewRom(value?: string | null): N54PreviewSelection {
-  if (value === undefined || value === null || value === "") return Object.freeze({ status: "valid", rom: DEFAULT_N54_PREVIEW_ROM });
-  return (VOCABULARY as readonly string[]).includes(value)
-    ? Object.freeze({ status: "valid", rom: value as N54PreviewRom })
-    : Object.freeze({ status: "invalid", requested: value });
-}
 
 function parseSource(configuration: N54PreviewFixtureConfiguration): Readonly<{ definitions: readonly XdfDefinitionRevision[]; set: DefinitionSetRevision }> {
   const filename = configuration.xdfFile;

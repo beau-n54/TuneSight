@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { deserialize, serialize } from "node:v8";
-import { buildSubscriberWorkshop, type SubscriberCalibrationResult, type SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
+import type { SubscriberCalibrationResult, SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
+import { buildSubscriberWorkshop } from "./subscriberWorkshopView.ts";
 
 export type ContainerExtension = "bin" | "dtf";
 type CompactSubscriberSuccess = Omit<SubscriberCalibrationSuccess, "workshop">;

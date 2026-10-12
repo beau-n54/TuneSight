@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import * as nodeModule from "node:module";
 import path from "node:path";
@@ -20,7 +21,7 @@ const { registerHooks } = nodeModule as typeof nodeModule & { registerHooks(hook
   load(url: string, context: object, next: (url: string, context: object) => object): object;
 }): { deregister(): void } };
 const hook = registerHooks({ load(url, context, next) {
-  if (!url.endsWith("/subscriberCalibrationProvider.ts")) return next(url, context);
+  if (!url.endsWith("/subscriberWorkshopView.ts")) return next(url, context);
   const source = fs.readFileSync(fileURLToPath(url), "utf8");
   const marker = "  const knowledgeRecords = calibrationKnowledgeForRelationship";
   assert.equal(source.split(marker).length, 2);
@@ -40,6 +41,22 @@ const pagePattern = "app/dashboard/vehicles/[[]id[]]/calibration/page.tsx";
 const vercelConfig = JSON.parse(fs.readFileSync("vercel.json", "utf8"));
 const context = { ownerId: "phase-one-owner", vehicleId: "phase-one-vehicle", sessionId: "a".repeat(32), sourceMode: "subscriber" as const };
 const anchors: SubscriberCalibrationSuccess[] = [];
+test("R03 admitted session restoration does not initialize upload qualification or development fixtures", () => {
+  // A fresh process avoids a previously populated ESM cache masking a heavy import.
+  const result = spawnSync(process.execPath, ["--experimental-strip-types", "--input-type=module", "-e", String.raw`
+    import { registerHooks } from 'node:module';
+    registerHooks({ load(url, context, next) {
+      if (/\/(subscriberCalibrationProvider|repositoryDefinitionCatalog|developmentFixtureProvider)(?:\.server)?\.ts$/.test(url)) {
+        throw new Error('Restoration loaded an unrelated admission/fixture module');
+      }
+      return next(url, context);
+    } });
+    await import(${JSON.stringify(new URL("./subscriberCalibrationPersistence.ts", import.meta.url).href)});
+    const selection = await import(${JSON.stringify(new URL("./developmentPreviewSelection.ts", import.meta.url).href)});
+    if (selection.selectN54PreviewRom('unknown').status !== 'invalid') throw new Error('Selection must fail closed');
+  `], { encoding: "utf8", windowsHide: true });
+  assert.equal(result.status, 0, result.stderr);
+});
 before(async () => {
   // Controlled provider vectors, not physical-car or authenticated browser evidence.
   const b58 = new Uint8Array(7_864_320);
@@ -97,7 +114,8 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   const regions = appFiles.filter(file => /export const preferredRegion\s*=/.test(fs.readFileSync(file, "utf8")));
   assert.deepEqual(regions, []);
   const page = fs.readFileSync(pagePath, "utf8"), route = fs.readFileSync(routePath, "utf8");
-  assert.match(page, /subscriberSuccess \? selectRestoredSubscriberWorkshop\(subscriberSuccess, definition\) : await developmentCalibrationWorkshopProvider\.loadVehicleWorkshop/);
+  assert.match(page, /if \(subscriberSuccess\) \{\s+workshop = selectRestoredSubscriberWorkshop\(subscriberSuccess, definition\)/);
+  assert.match(page, /else \{\s+const \{ developmentCalibrationWorkshopProvider, readDevelopmentWorkspaceEvidence \} = await import/);
   assert.doesNotMatch(page, /buildSubscriberWorkshop/);
   assert.match(page, /maskRetainedWorkspace\(workshop, subscriberSuccess\)/);
   assert.match(page, /return <SharedWorkspaceClient/);
