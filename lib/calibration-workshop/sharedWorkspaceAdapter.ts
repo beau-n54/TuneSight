@@ -2,15 +2,36 @@ import type { SubscriberCalibrationResult } from "./subscriberCalibrationProvide
 import { calibrationSourceIdentity } from "../identity/calibrationIdentity.ts";
 import type { CalibrationSourceIdentity } from "../identity/identityOwners.ts";
 import type { CurrentOnlyDefinition, CurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
-import { materializeWorkshopDefinition, workingDefinitionFromWorkshop, type WorkshopViewModel } from "./viewModel.ts";
+import type { WorkshopViewModel } from "./viewModel.ts";
 import { projectSharedTable, type ProjectionContext, type SharedTableProjection, type WorkingProjectionIdentity } from "./sharedTableProjection.ts";
 import type { WorkingDefinitionSeed } from "./workingCalibration.ts";
 
 type Ready = Extract<SubscriberCalibrationResult, { status: "workshop_ready" }>;
 export type SharedWorkspaceWorkshop = WorkshopViewModel | CurrentOnlyWorkshopViewModel;
+export type WorkspaceCatalogue = Readonly<{
+  source: Pick<SharedWorkspaceWorkshop["source"], "currentDatasetId" | "currentDatasetRevision" | "romLayoutId" | "relationshipRevision" | "definitionSetRevision" | "referenceDatasetId" | "comparisonId">;
+  selectedDefinitionKey: string;
+  definitions: readonly (Pick<CurrentOnlyDefinition, "key" | "title" | "definitionRevision" | "occurrence" | "semantic" | "shape" | "units" | "editCapability" | "rows" | "columns"> & { readonly available: boolean; readonly changedCellCount: number })[];
+  provenance: readonly string[]; limitations: readonly string[];
+}>;
+type WorkspaceSelectionSource = SharedWorkspaceWorkshop | WorkspaceCatalogue;
+/** Metadata only. All numeric cell and axis evidence belongs to one selected projection. */
+export function workspaceCatalogue(workshop: SharedWorkspaceWorkshop): WorkspaceCatalogue {
+  const { currentDatasetId, currentDatasetRevision, romLayoutId, relationshipRevision, definitionSetRevision, referenceDatasetId, comparisonId } = workshop.source;
+  const materials = new Map("tableMaterials" in workshop ? workshop.tableMaterials.map(item => [item.key, item]) : []);
+  return { source: { currentDatasetId, currentDatasetRevision, romLayoutId, relationshipRevision, definitionSetRevision, referenceDatasetId, comparisonId },
+    selectedDefinitionKey: "mode" in workshop ? workshop.selectedDefinition.key : workshop.selectedDefinition.summary.key,
+    definitions: workshop.definitions.map(item => ({ key: item.key, title: item.title, definitionRevision: item.definitionRevision,
+      occurrence: item.occurrence, semantic: item.semantic, shape: item.shape, units: item.units,
+      editCapability: item.editCapability ?? { state: "VIEW_ONLY", revision: null, inverse: null, engineeringMinimum: null, engineeringMaximum: null, warnings: [], blockers: ["EDIT authority unavailable."] },
+      rows: "rows" in item ? item.rows : materials.get(item.key)?.rows ?? 0, columns: "columns" in item ? item.columns : materials.get(item.key)?.columns ?? 0,
+      available: "available" in item ? item.available : item.availability === "current_available", changedCellCount: "changedCellCount" in item ? item.changedCellCount : 0 })),
+    provenance: workshop.provenance, limitations: workshop.limitations };
+}
 /** Only owner outputs cross this adapter; no source lease or source binary is copied. */
 export type SharedWorkspaceEvidence = Pick<Ready, "material" | "quarantines" | "editCapabilities" | "identity" | "container" | "byteLength">;
 type ProjectedLayer = Omit<SharedTableProjection["slots"]["current"], "rawEvidence" | "sourceAxes" | "axes" | "quarantine"> & {
+  readonly rawRepresentation?: Pick<NonNullable<SharedTableProjection["slots"]["current"]["rawEvidence"]>, "datatype" | "widthBits" | "signed" | "endianness" | "evidenceId" | "evidenceRevision" | "inertEquationSources"> | null;
   readonly axes: readonly Omit<SharedTableProjection["slots"]["current"]["axes"][number], "evidence">[];
   readonly quarantine: (Pick<NonNullable<SharedTableProjection["slots"]["current"]["quarantine"]>, "quarantineId" | "quarantineRevision" | "failureClass" | "state"> & {
     readonly failureEvidence: { readonly finding: string };
@@ -25,7 +46,9 @@ export type WorkspaceTableProjection = Omit<SharedTableProjection, "slots" | "co
 export function compactWorkspaceProjection(projection: SharedTableProjection): WorkspaceTableProjection {
   const compact = ({ rawEvidence: _raw, sourceAxes: _source, axes, quarantine, ...layer }: SharedTableProjection["slots"]["current"]): ProjectedLayer => {
     void _raw; void _source;
-    return { ...layer, quarantine: quarantine ? { quarantineId: quarantine.quarantineId, quarantineRevision: quarantine.quarantineRevision,
+    return { ...layer, rawRepresentation: _raw ? { datatype: _raw.datatype, widthBits: _raw.widthBits, signed: _raw.signed,
+      endianness: _raw.endianness, evidenceId: _raw.evidenceId, evidenceRevision: _raw.evidenceRevision, inertEquationSources: _raw.inertEquationSources } : null,
+      quarantine: quarantine ? { quarantineId: quarantine.quarantineId, quarantineRevision: quarantine.quarantineRevision,
       failureClass: quarantine.failureClass, state: quarantine.state, failureEvidence: { finding: quarantine.failureEvidence.finding } } : null,
       axes: axes.map(({ evidence: _evidence, ...axis }) => { void _evidence; return axis; }) };
   };
@@ -58,14 +81,14 @@ export function buildSharedWorkspacePayload(workshop: SharedWorkspaceWorkshop, r
 export function isCurrentOnly(workshop: SharedWorkspaceWorkshop): workshop is CurrentOnlyWorkshopViewModel {
   return "mode" in workshop && workshop.mode === "current_only";
 }
-export function sharedWorkspaceContextKey(context: ProjectionContext, workshop: SharedWorkspaceWorkshop): string {
+export function sharedWorkspaceContextKey(context: ProjectionContext, workshop: Pick<WorkspaceCatalogue, "source">): string {
   const source = workshop.source;
   return JSON.stringify([context.ownerId, context.vehicleId, context.sessionId, context.sourceMode,
     source.currentDatasetId, source.currentDatasetRevision, source.romLayoutId, source.relationshipRevision, source.definitionSetRevision, source.referenceDatasetId, source.comparisonId]);
 }
-export function exactWorkspaceDefinition(workshop: SharedWorkspaceWorkshop, requestedKey?: string) {
+export function exactWorkspaceDefinition(workshop: WorkspaceSelectionSource, requestedKey?: string) {
   const key = requestedKey === undefined
-    ? isCurrentOnly(workshop) ? workshop.selectedDefinition.key : workshop.selectedDefinition.summary.key
+    ? "selectedDefinitionKey" in workshop ? workshop.selectedDefinitionKey : isCurrentOnly(workshop) ? workshop.selectedDefinition.key : workshop.selectedDefinition.summary.key
     : requestedKey;
   const matches = workshop.definitions.filter(item => item.key === key);
   return matches.length === 1 ? matches[0] : null;
@@ -91,8 +114,8 @@ export function projectWorkspaceTable(workshop: SharedWorkspaceWorkshop, evidenc
   });
 }
 
-/** Adapts qualified Current cells to the accepted Current-only renderer, including optional Reference cases. */
-export function currentRendererDefinition(workshop: SharedWorkspaceWorkshop, projection: WorkspaceTableProjection): CurrentOnlyDefinition {
+/** Adapts qualified Current projection cells to the existing Working engine seed shape. */
+export function currentRendererDefinition(workshop: WorkspaceSelectionSource, projection: WorkspaceTableProjection): CurrentOnlyDefinition {
   const selected = exactWorkspaceDefinition(workshop, projection.selection.key);
   if (!selected) throw new Error("Renderer selection is unresolved.");
   const layer = projection.slots.current;
@@ -112,12 +135,6 @@ export function currentRendererDefinition(workshop: SharedWorkspaceWorkshop, pro
     provenance: workshop.provenance, limitations: layer.limitations };
 }
 
-export function comparisonRendererDefinition(workshop: SharedWorkspaceWorkshop, projection: WorkspaceTableProjection) {
-  if (isCurrentOnly(workshop) || projection.slots.current.state !== "available" || projection.slots.reference.state !== "available") return null;
-  const detail = materializeWorkshopDefinition(workshop, projection.selection.key);
-  return detail.summary.available && detail.cells.length > 0 ? detail : null;
-}
-
 /** Reuse the existing owner seed shapes and mutation engine. Evidence gates also apply during restoration. */
 export function resolveSharedWorkingDefinition(workshop: SharedWorkspaceWorkshop, evidence: SharedWorkspaceEvidence,
   context: ProjectionContext, definitionRevision: string, occurrence: number): WorkingDefinitionSeed | undefined {
@@ -126,21 +143,10 @@ export function resolveSharedWorkingDefinition(workshop: SharedWorkspaceWorkshop
   const projection = projectWorkspaceTable(workshop, evidence, context, selected.key);
   return resolveProjectedWorkingDefinition(workshop, projection);
 }
-export function resolveProjectedWorkingDefinition(workshop: SharedWorkspaceWorkshop, projection: WorkspaceTableProjection): WorkingDefinitionSeed {
+export function resolveProjectedWorkingDefinition(workshop: WorkspaceSelectionSource, projection: WorkspaceTableProjection): WorkingDefinitionSeed {
   const { definitionRevision, occurrence } = projection.selection;
-  if (!isCurrentOnly(workshop) && comparisonRendererDefinition(workshop, projection)) return workingDefinitionFromWorkshop(workshop, definitionRevision, occurrence)!;
   const detail = currentRendererDefinition(workshop, projection);
   return { definitionRevision, occurrence, rows: detail.rows, columns: detail.columns,
     availability: detail.availability === "current_available" ? "available" : detail.availability === "unavailable_quarantined" ? "quarantined" : "unavailable",
     capability: detail.editCapability, cells: detail.cells.map(cell => ({ ...cell, definitionRevision, occurrence })) };
-}
-
-/** Restoration uses the already admitted, server-masked retained model; it never prefetches closed tables. */
-export function resolveRetainedWorkingDefinition(workshop: SharedWorkspaceWorkshop, revision: string, occurrence: number): WorkingDefinitionSeed | undefined {
-  if (!isCurrentOnly(workshop)) return workingDefinitionFromWorkshop(workshop, revision, occurrence);
-  const detail = workshop.definitions.find(item => item.definitionRevision === revision && item.occurrence === occurrence);
-  if (!detail) return undefined;
-  return { definitionRevision: revision, occurrence, rows: detail.rows, columns: detail.columns,
-    availability: detail.availability === "current_available" ? "available" : detail.availability === "unavailable_quarantined" ? "quarantined" : "unavailable",
-    capability: detail.editCapability, cells: detail.cells.map(cell => ({ ...cell, definitionRevision: revision, occurrence })) };
 }

@@ -1,8 +1,8 @@
-export type PlotPresentation = "reference-current" | "reference-working" | "current" | "working";
+export type PlotPresentation = "reference-current" | "reference-working" | "reference" | "current" | "working";
 export type SurfacePresentation = "reference" | "current" | "working";
 export function plotPresentationLabels(presentation: PlotPresentation) {
   const reference = presentation === "reference-current" || presentation === "reference-working";
-  const value = presentation === "working" || presentation === "reference-working" ? "Working" : "Current";
+  const value = presentation === "reference" ? "Reference" : presentation === "working" || presentation === "reference-working" ? "Working" : "Current";
   return { reference, value, description: reference ? `Reference and ${value}` : value };
 }
 export const DIRECT_DRAFT_CANCELLED = "The cell draft was cancelled because the workspace entered review-only mode.";

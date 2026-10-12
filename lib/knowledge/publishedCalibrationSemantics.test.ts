@@ -97,9 +97,9 @@ test("exact subscriber Workshops publish only current-ROM semantics into navigat
 });
 
 test("subscriber clients present qualified English primary names and retain original source language", () => {
-  for (const file of ["app/dashboard/vehicles/[id]/calibration/workshop-client.tsx", "app/dashboard/vehicles/[id]/calibration/current-only-workshop-client.tsx"]) {
+  for (const file of ["app/dashboard/vehicles/[id]/calibration/shared-workspace-client.tsx"]) {
     const source = fs.readFileSync(file, "utf8");
-    assert.match(source, /semanticTitle/);
-    assert.match(source, /primary\s*!==\s*(?:definition|item)\.title/);
+    assert.match(source, /calibrationTableLabel\(mode, definition.title, definition.semantic\)/);
+    assert.match(source, /<span className="block text-xs text-zinc-400">\{definition.title\}/);
   }
 });

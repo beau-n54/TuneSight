@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel } from "./visualizationModel.ts";
+import { buildCalibrationSlice, buildCalibrationSurfaceMesh } from "./visualizationModel.ts";
+import { buildCalibrationVisualizationModel } from "./comparisonVisualization.fixtures.ts";
 import { buildSubscriberWorkshop, loadSubscriberCalibration, SUBSCRIBER_CALIBRATION_MAX_UPLOAD_BYTES } from "./subscriberCalibrationProvider.ts";
 import { buildEngineeringNavigationIndex, engineeringNavigationEmptyState } from "./engineeringNavigation.ts";
 import { TUNING_ESSENTIAL_SYSTEMS } from "./tuningEssentials.ts";

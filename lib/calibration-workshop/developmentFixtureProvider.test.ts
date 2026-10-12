@@ -3,7 +3,8 @@ import test from "node:test";
 import { assertN54PreviewFixtureDescriptor, clearDevelopmentFixtureCacheForTests, constructN54PreviewFixtureDescriptor, constructWorkshopDiscoveryRegistry, developmentCalibrationWorkshopProvider, selectN54PreviewRom, type N54PreviewRom } from "./developmentFixtureProvider.ts";
 import { publicWorkshopFailureDiagnostic, WorkshopDiagnosticTrace } from "./workshopFailureDiagnostic.ts";
 import { filterWorkshopDefinitions } from "./viewModel.ts";
-import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel, moveSelectedCell } from "./visualizationModel.ts";
+import { buildCalibrationSlice, buildCalibrationSurfaceMesh, moveSelectedCell } from "./visualizationModel.ts";
+import { buildCalibrationVisualizationModel } from "./comparisonVisualization.fixtures.ts";
 
 const ROMS = ["I8A0S", "IJE0S", "IKM0S", "INA0S"] as const;
 const COUNTS: Readonly<Record<N54PreviewRom, number>> = { I8A0S: 721, IJE0S: 739, IKM0S: 707, INA0S: 717 };

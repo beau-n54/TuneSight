@@ -7,7 +7,7 @@ import type { ExportCapability } from "./calibrationReconstruction.ts";
 import type { WorkshopSemanticBinding } from "./definitionKnowledgeBinding.ts";
 import type { WorkingCalibration } from "./workingCalibration.ts";
 
-/** U0 only: an unused, read-only consumer of already authorised owner outputs.
+/** Read-only consumer of already authorised owner outputs, shared by workspace presentations.
  * This module performs no qualification, conversion, mutation, loading or storage.
  * Geometry describes presentation support, never VIEW/EDIT/Export authority.
  */
@@ -167,7 +167,7 @@ function projectLayer(slot: DatasetSlot, selection: ExactTableSelection, context
     state: quarantine ? "quarantined" as const : evidence ? "available" as const : "unavailable" as const,
     dataset: binding, identity: layerIdentity,
     definition: { identity: definition.definitionIdentity, revision: definition.definitionRevisionId,
-      occurrence: selection.occurrence, title: definition.title, dimensions: definition.dimensions,
+      occurrence: selection.occurrence, title: definition.title, description: definition.description, dimensions: definition.dimensions,
       state: definition.state, unavailableStage: definition.unavailableStage,
       sourceBindingDigest: definition.sourceBindingDigest, sourceArtifactDigest: definition.sourceArtifactDigest,
       sourceUnits: definition.units, displayUnits: evidence?.units ?? null },

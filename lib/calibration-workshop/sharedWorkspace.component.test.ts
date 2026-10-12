@@ -1,4 +1,5 @@
-import { buildCalibrationVisualizationModel } from "./visualizationModel.ts";
+import { materializeWorkshopDefinition } from "./viewModel.ts";
+import { buildCalibrationVisualizationModel } from "./comparisonVisualization.fixtures.ts";
 import { buildCalibrationTerminology } from "./calibrationTerminology.ts";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -11,9 +12,11 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 import { loadSubscriberCalibration, type SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
-import { comparisonRendererDefinition, buildSharedWorkspacePayload, sharedWorkspaceEvidence, projectWorkspaceTable } from "./sharedWorkspaceAdapter.ts";
+import { workspaceCatalogue, buildSharedWorkspacePayload, sharedWorkspaceEvidence, projectWorkspaceTable } from "./sharedWorkspaceAdapter.ts";
 import { buildCurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
 import { projectSharedTable } from "./sharedTableProjection.ts";
+import { buildSharedTablePresentation } from "./sharedTablePresentation.ts";
+import { createWorkingCalibration } from "./workingCalibration.ts";
 import { subscriberProjectionInput } from "./sharedTableProjection.fixtures.ts";
 
 // Test-only TSX loader uses the existing TypeScript/React dependencies. No production loader/config changes.
@@ -122,13 +125,13 @@ test("U1 C S01/S03/S05: real shared controller renders retained grids, missing C
   const workshop = buildCurrentOnlyWorkshopViewModel({ current: n54.material.current, quarantines: [], editCapabilities: n54.editCapabilities });
   const currentResult = { ...n54, workshop, material: { current: n54.material.current, reference: null, comparison: null } };
   for (const props of [{ workshop: n54.workshop, evidence: payload }, { workshop, evidence: buildSharedWorkspacePayload(workshop, currentResult, context) }]) {
-    const html = render(React.createElement(Workspace, { ...props, context, vehicle, upload }));
+    const html = render(React.createElement(Workspace, { ...props, workshop: workspaceCatalogue(props.workshop), context, vehicle, upload }));
     for (const landmark of landmarks) assert.ok(html.includes(`aria-label="${landmark}"`));
     assert.match(html, /data-working-cell="0"/);
     assert.match(html, /Exact Table selection/);
     assert.match(html, /Raw Representation/);
   }
-  const unresolved = render(React.createElement(Workspace, { workshop: n54.workshop, context, vehicle, upload, requestedKey: "unresolved-key", evidence: buildSharedWorkspacePayload(n54.workshop, n54, context, "unresolved-key") }));
+  const unresolved = render(React.createElement(Workspace, { workshop: workspaceCatalogue(n54.workshop), context, vehicle, upload, requestedKey: "unresolved-key", evidence: buildSharedWorkspacePayload(n54.workshop, n54, context, "unresolved-key") }));
   assert.match(unresolved, /exact requested Table is unresolved/);
   assert.ok(!unresolved.includes('data-working-cell="'));
   const empty = render(React.createElement(EmptySharedWorkspace, { vehicle, context, upload, reason: "Owner: Current absent" }));
@@ -167,7 +170,7 @@ test("U1 shared structural panels retain BMW borders without making evidence slo
 });
 test("U1 rendered Explorer retains selected treatment and literal authoritative title", () => {
   const payload = buildSharedWorkspacePayload(n54.workshop, n54, context);
-  const html = renderToStaticMarkup(React.createElement(Workspace, { workshop: n54.workshop, evidence: payload, context,
+  const html = renderToStaticMarkup(React.createElement(Workspace, { workshop: workspaceCatalogue(n54.workshop), evidence: payload, context,
     vehicle: { id: context.vehicleId, nickname: null, year: null, make: null, model: null, engine_code: null }, upload: null }));
   assert.match(html, /aria-current="true" class="[^"]*border-blue-400\/60/);
   assert.ok(html.includes('aria-label="Table workspace" class="bmw-border'));
@@ -175,7 +178,7 @@ test("U1 rendered Explorer retains selected treatment and literal authoritative 
 for (const presentation of ["reference-current", "reference-working", "current", "working"] as const) {
   test(`U1 rendered 2D legend and accessibility truth: ${presentation}`, () => {
     const projection = buildSharedWorkspacePayload(n54.workshop, n54, context).projection!;
-    const detail = comparisonRendererDefinition(n54.workshop, projection)!;
+    const detail = materializeWorkshopDefinition(n54.workshop as import("./viewModel.ts").WorkshopViewModel, projection.selection.key);
     const original = JSON.stringify(detail.cells);
     const model = buildCalibrationVisualizationModel(detail);
     const terminology = buildCalibrationTerminology({ mode: "engineer", sourceTitle: detail.summary.title, shape: detail.summary.shape,
@@ -191,13 +194,15 @@ for (const presentation of ["reference-current", "reference-working", "current",
 }
 for (const state of ["reference", "current", "working"] as const) {
   test(`U1 rendered 3D state/accessibility truth: ${state}`, () => {
-    const projection = buildSharedWorkspacePayload(n54.workshop, n54, context).projection!;
-    const detail = comparisonRendererDefinition(n54.workshop, projection)!;
-    const terminology = buildCalibrationTerminology({ mode: "engineer", sourceTitle: detail.summary.title, shape: detail.summary.shape,
-      rows: detail.rows, columns: detail.columns, axes: detail.axes, semantic: detail.summary.semantic, outputUnits: detail.summary.units });
-    const html = renderToStaticMarkup(React.createElement(Surface3D, { model: buildCalibrationVisualizationModel(detail), detail, state,
-      terminology, selectedCell: 0, onSelect: () => {} }));
+    const projection = n54.workshop.definitions.filter(item => item.shape === "2D").map(item => buildSharedWorkspacePayload(n54.workshop, n54, context, item.key).projection!)
+      .find(item => item.slots.current.geometry.surface.supported && item.slots.reference.geometry.surface.supported)!;
+    assert.ok(projection, "A genuine supported two-axis projection is required");
+    const working = createWorkingCalibration({ ownerScope: context.ownerId, vehicleId: context.vehicleId, ...n54.workshop.source, createdAt: "2026-10-12T00:00:00.000Z" });
+    const model = buildSharedTablePresentation(projection, working, state, "engineer");
+    const html = renderToStaticMarkup(React.createElement(Surface3D, { model: model.visual, detail: model, state,
+      terminology: model.terminology, selectedCell: 0, onSelect: () => {} }));
     assert.ok(html.includes(`aria-label="Interactive ${state} Calibration surface`));
+    assert.deepEqual(model.visual.surface.map(point => point.currentValue), model.cells.map(cell => cell.value));
   });
 }
 test("U1 review-only direct cell renders selection but no edit input or edit affordance", () => {
@@ -209,7 +214,7 @@ test("U1 review-only direct cell renders selection but no edit input or edit aff
 
 test("U1 Explorer fills desktop row height with a scrolling flex list and remains bounded when stacked", () => {
   const payload = buildSharedWorkspacePayload(n54.workshop, n54, context);
-  const html = renderToStaticMarkup(React.createElement(Workspace, { workshop: n54.workshop, evidence: payload, context,
+  const html = renderToStaticMarkup(React.createElement(Workspace, { workshop: workspaceCatalogue(n54.workshop), evidence: payload, context,
     vehicle: { id: context.vehicleId, nickname: null, year: null, make: null, model: null, engine_code: null }, upload: null }));
   const panel = html.match(/<aside aria-label="Table Explorer" class="([^"]+)"/)![1];
   for (const token of ["bmw-border", "flex", "flex-col", "min-h-0", "xl:[contain:size]"]) assert.ok(panel.split(" ").includes(token), token);

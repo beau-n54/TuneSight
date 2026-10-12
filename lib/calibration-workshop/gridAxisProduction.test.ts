@@ -4,7 +4,7 @@ import test from "node:test";
 import { currentOnlyVisualization } from "./currentOnlyViewModel.ts";
 import { buildGridAxisPresentation } from "./gridAxisPresentation.ts";
 import { loadSubscriberCalibration } from "./subscriberCalibrationProvider.ts";
-import { buildCalibrationVisualizationModel, capabilitiesForDefinition } from "./visualizationModel.ts";
+import { buildCalibrationVisualizationModel, capabilitiesForDefinition } from "./comparisonVisualization.fixtures.ts";
 import { materializeWorkshopDefinition } from "./viewModel.ts";
 
 const observedAt = "2026-09-17T00:00:00.000Z";

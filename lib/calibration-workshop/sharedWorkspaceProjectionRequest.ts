@@ -1,5 +1,5 @@
 import type { ProjectionContext, ExactTableSelection } from "./sharedTableProjection.ts";
-import type { SharedWorkspaceWorkshop, WorkspaceTableProjection } from "./sharedWorkspaceAdapter.ts";
+import type { WorkspaceCatalogue, WorkspaceTableProjection } from "./sharedWorkspaceAdapter.ts";
 
 export type ProjectionRequest = Readonly<{
   context: ProjectionContext;
@@ -10,7 +10,7 @@ export type ProjectionRequest = Readonly<{
 export type ProjectionResponse = { status: "ready"; projection: WorkspaceTableProjection } |
   { status: "unavailable"; code: string; finding: string };
 export const unavailableProjection = (code: string, finding: string): ProjectionResponse => ({ status: "unavailable", code, finding });
-export function projectionRequest(context: ProjectionContext, workshop: SharedWorkspaceWorkshop, selection: ExactTableSelection): ProjectionRequest {
+export function projectionRequest(context: ProjectionContext, workshop: Pick<WorkspaceCatalogue, "source">, selection: ExactTableSelection): ProjectionRequest {
   const { currentDatasetId, currentDatasetRevision, romLayoutId, relationshipRevision, definitionSetRevision } = workshop.source;
   return { context, currentDatasetId, currentDatasetRevision, romLayoutId, relationshipRevision, definitionSetRevision,
     selection: { key: selection.key, definitionRevision: selection.definitionRevision, occurrence: selection.occurrence } };

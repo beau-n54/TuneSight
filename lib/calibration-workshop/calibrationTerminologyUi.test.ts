@@ -1,13 +1,27 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-
-const control=fs.readFileSync("app/dashboard/vehicles/[id]/calibration/calibration-terminology-control.tsx","utf8");
-const current=fs.readFileSync("app/dashboard/vehicles/[id]/calibration/current-only-workshop-client.tsx","utf8");
-const comparison=fs.readFileSync("app/dashboard/vehicles/[id]/calibration/workshop-client.tsx","utf8");
-
-test("Standard is the default and preference remains browser-local",()=>{assert.match(control,/useState<CalibrationTerminologyMode>\("standard"\)/);assert.match(control,/window\.localStorage/);assert.doesNotMatch(control,/fetch\(|router\.|subscriberSession/)});
-test("both Workshop variants switch terminology without recreating evidence or Working state",()=>{for(const source of [current,comparison]){assert.match(source,/CalibrationTerminologyControl/);assert.match(source,/useCalibrationTerminologyMode/);assert.doesNotMatch(control,/createWorkingCalibration|materializeWorkshopDefinition|loadSubscriberCalibration/)}});
-test("Grid, 2D and 3D consume selected-Table terminology in Current-only Workshop",()=>{assert.match(current,/terminology=\{terminology\}/);assert.match(current,/CurrentPlot/);assert.match(current,/terminologyMode=\{terminologyMode\}/);assert.match(current,/CurrentInspector/)});
-test("Explorer, tabs, Workspace, Grid, plots and Inspector share the selected terminology scope",()=>{for(const source of [current,comparison]){assert.match(source,/CalibrationTerminologyScope/);assert.match(source,/tabs=\{displayTabs\}/);assert.match(source,/terminology\.tableName/);assert.match(source,/terminology\??\.(?:x|y)\?\.label/)}const plot=fs.readFileSync("app/dashboard/vehicles/[id]/calibration/CalibrationPlot2D.tsx","utf8"),surface=fs.readFileSync("app/dashboard/vehicles/[id]/calibration/CalibrationSurface3D.tsx","utf8");assert.match(plot,/labels\.output\.label/);assert.match(surface,/labels\.output\.label/)});
-test("both Workshop variants present qualified Standard purpose and consistent cell terminology",()=>{for(const source of [current,comparison]){assert.match(source,/What it controls/);assert.match(source,/Why it matters/);assert.match(source,/Cells ·/);assert.match(source,/calibrationTermLabel/)}});
+const read = (name: string) => fs.readFileSync("app/dashboard/vehicles/[id]/calibration/" + name, "utf8");
+const control = read("calibration-terminology-control.tsx"), controller = read("shared-workspace-client.tsx"), renderer = read("workshop-client.tsx");
+test("Standard defaults and owner-scoped browser preference never reload evidence", () => {
+  assert.match(control, /useState<CalibrationTerminologyMode>\("standard"\)/); assert.match(control, /ownerScope/);
+  assert.match(control, /window\.localStorage/); assert.doesNotMatch(control, /fetch\(|router\.|subscriberSession|createWorkingCalibration|materializeWorkshopDefinition/);
+});
+test("comparison and Current-only share the same terminology controller", () => {
+  assert.match(controller, /CalibrationTerminologyControl/); assert.match(controller, /useCalibrationTerminologyMode\(context.ownerId\)/);
+  assert.doesNotMatch(controller, /CurrentOnlyWorkshopClient|CurrentInspector|CurrentGrid/);
+});
+test("Grid, Inspector, 2D and 3D consume one selected projection model", () => {
+  assert.match(controller, /buildSharedTablePresentation\(projection, working, displayMode, mode\)/);
+  for (const tag of ["Grid", "Inspector"]) assert.match(controller, new RegExp("<" + tag + "[\\s\\S]*?model=\\{tableModel\\}"));
+  assert.match(controller, /CalibrationPlot2D/); assert.match(controller, /CalibrationSurface3D/);
+});
+test("Explorer, tabs and renderers retain literal source identity and shared terminology", () => {
+  assert.match(controller, /CalibrationTerminologyScope/); assert.match(controller, /WorkspaceTabs/); assert.match(controller, /definition.title/);
+  assert.match(renderer, /model.terminology.sourceTitle/);
+  for (const file of ["CalibrationPlot2D.tsx", "CalibrationSurface3D.tsx"]) assert.match(read(file), /labels.output.label/);
+});
+test("shared disclosures consume qualified purpose and axis terms without title inference", () => {
+  assert.match(renderer, /What this Table does/); assert.match(renderer, /Why it matters/); assert.match(renderer, /tableGuidanceInput/);
+  assert.match(read("calibration-axis-grid.tsx"), /Cells ·/); assert.match(read("calibration-axis-grid.tsx"), /calibrationTermLabel/);
+});

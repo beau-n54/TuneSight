@@ -7,10 +7,11 @@ const KEY = "tunesight.calibration.terminology-mode";
 const CalibrationTerminologyContext = createContext<CalibrationTerminology | null>(null);
 export const useCalibrationTerminologyScope = () => useContext(CalibrationTerminologyContext);
 export function CalibrationTerminologyScope({ terminology, children }: { terminology: CalibrationTerminology; children: ReactNode }) { return <CalibrationTerminologyContext.Provider value={terminology}>{children}</CalibrationTerminologyContext.Provider>; }
-export function useCalibrationTerminologyMode() {
+export function useCalibrationTerminologyMode(ownerScope = "legacy") {
   const [mode, setMode] = useState<CalibrationTerminologyMode>("standard");
-  useEffect(() => { const stored = window.localStorage.getItem(KEY); if (stored === "engineer") queueMicrotask(() => setMode("engineer")); }, []);
-  const select = (next: CalibrationTerminologyMode) => { setMode(next); window.localStorage.setItem(KEY, next); };
+  const scopedKey = KEY + ":" + ownerScope;
+  useEffect(() => { try { const stored = window.localStorage.getItem(scopedKey); queueMicrotask(() => setMode(stored === "engineer" ? "engineer" : "standard")); } catch { /* The in-memory mode remains usable. */ } }, [scopedKey]);
+  const select = (next: CalibrationTerminologyMode) => { setMode(next); try { window.localStorage.setItem(scopedKey, next); } catch { /* Working persistence reports its own failure independently. */ } };
   return [mode, select] as const;
 }
 

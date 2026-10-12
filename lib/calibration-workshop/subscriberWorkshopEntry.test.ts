@@ -136,7 +136,8 @@ test("a ready subscriber session always takes precedence over preview state", ()
 test("the subscriber page presents a neutral empty state and retains safe upload failures", () => {
   const page = fs.readFileSync("app/dashboard/vehicles/[id]/calibration/page.tsx", "utf8");
   const upload = fs.readFileSync("app/dashboard/vehicles/[id]/calibration/upload-calibration.tsx", "utf8");
-  assert.match(page, /No Current Calibration loaded/);
+  assert.match(page, /<EmptySharedWorkspace/);
+  assert.match(fs.readFileSync("app/dashboard/vehicles/[id]/calibration/shared-workspace-client.tsx", "utf8"), /No Current Calibration loaded/);
   assert.match(page, /Open Calibration File to begin/);
   assert.match(page, /entry\.mode === "empty"/);
   assert.match(upload, /setError\(value instanceof Error \? value\.message/);

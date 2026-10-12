@@ -49,8 +49,8 @@ test("direct edit history persists and reloads without changing governed Working
 });
 
 test("Grid interaction remains WORKING-only, deliberate and selection-keyed", () => {
-  const root = path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration"), cell = fs.readFileSync(path.join(root, "direct-grid-cell.tsx"), "utf8"), currentOnly = fs.readFileSync(path.join(root, "current-only-workshop-client.tsx"), "utf8"), comparison = fs.readFileSync(path.join(root, "workshop-client.tsx"), "utf8"), panel = fs.readFileSync(path.join(root, "working-calibration-panel.tsx"), "utf8");
-  for (const source of [currentOnly, comparison]) { assert.match(source, /displayMode\s*===?\s*"working"/); assert.match(source, /source:\s*"direct"/); assert.match(source, /EDIT_QUALIFIED/); assert.match(source, /data-selection=/); }
+  const root = path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration"), cell = fs.readFileSync(path.join(root, "direct-grid-cell.tsx"), "utf8"), currentOnly = fs.readFileSync(path.join(root, "shared-workspace-client.tsx"), "utf8"), comparison = fs.readFileSync(path.join(root, "workshop-client.tsx"), "utf8"), panel = fs.readFileSync(path.join(root, "working-calibration-panel.tsx"), "utf8");
+  for (const source of [currentOnly + comparison]) { assert.match(source, /displayMode\s*===?\s*"working"/); assert.match(source, /source:\s*"direct"/); assert.match(source, /EDIT_QUALIFIED/); assert.match(source, /data-selection=/); }
   for (const gesture of ["onDoubleClick", 'event.key === "Enter"', 'event.key === "Escape"', 'event.key === "Tab"', "event.shiftKey", "ArrowUp", "ArrowDown"]) assert.match(cell, new RegExp(gesture.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.match(cell, /draft\.trim\(\)/); assert.match(cell, /validationExplanation/); assert.match(panel, /Engineering Detail/); assert.doesNotMatch(panel, /placeholder=\{operation === "assign" \? "18\.5"/);
 });

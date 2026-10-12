@@ -67,15 +67,15 @@ test("both subscriber Workshop variants integrate navigation without replacing p
   const shared = fs.readFileSync(path.join(root, "engineering-navigation-control.tsx"), "utf8");
   for (const label of ["All Tables", "Tuning Essentials", "Systems", "Changed / Evidence"]) assert.match(shared, new RegExp(label));
   assert.match(shared, /Calibration Workspace engineering navigation/);
-  for (const file of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
+  for (const file of ["shared-workspace-client.tsx"]) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     assert.match(source, /import EngineeringNavigationControl/);
-    assert.equal(source.match(/<EngineeringNavigationControl(?=\s|\/?>)/g)?.length, 1);
+    assert.equal(source.match(/<EngineeringNavigationControl(?=\s|\/?>)/g)?.length, 2);
     assert.doesNotMatch(source, /Table Explorer navigation/);
     assert.match(source, /WorkspaceTabs/);
-    assert.match(source, /openWorkspaceTab/);
+    assert.match(source, /requestWorkspaceTab/);
     assert.match(source, /knowledge_empty/);
-    assert.match(source, /No qualified/);
+    assert.match(source, /Qualified engineering navigation/);
     assert.doesNotMatch(source, /buildWorkshopDeepLink|from "next\/link"/);
   }
 });

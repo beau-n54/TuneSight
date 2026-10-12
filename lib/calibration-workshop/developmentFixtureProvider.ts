@@ -289,6 +289,15 @@ function loadFixtureMaterial(previewRom: N54PreviewRom, diagnosticTrace: Worksho
 
 export function clearDevelopmentFixtureCacheForTests(): void { fixtureMaterialCache.clear(); fixtureDescriptorCache.clear(); }
 
+/** Read-only owner evidence for the shared renderer; never an alternative subscriber session. */
+export async function readDevelopmentWorkspaceEvidence(previewRom: N54PreviewRom = DEFAULT_N54_PREVIEW_ROM) {
+  const material = await loadFixtureMaterial(previewRom, new WorkshopDiagnosticTrace());
+  if (material.comparison.status === "rejected") throw new Error(material.comparison.finding);
+  return { material: { current: material.current, reference: material.reference, comparison: material.comparison.evidence },
+    quarantines: [], editCapabilities: [], identity: previewRom, container: "bin" as const,
+    byteLength: material.descriptor.modifiedBinary.identity.byteLength };
+}
+
 export const developmentCalibrationWorkshopProvider: CalibrationWorkshopProvider = Object.freeze({
   async loadVehicleWorkshop(vehicleId: string, userId: string, selectedDefinition?: string | null, previewRom: N54PreviewRom = DEFAULT_N54_PREVIEW_ROM) {
     if (!vehicleId.trim() || !userId.trim()) throw new Error("Vehicle and user identity are required.");

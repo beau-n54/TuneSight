@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
 import { buildCalibrationSurfaceMesh, moveSelectedCell, type CalibrationVisualizationModel } from "@/lib/calibration-workshop/visualizationModel";
-import type { WorkshopDefinitionDetail } from "@/lib/calibration-workshop/viewModel";
 import type { CalibrationTerminology } from "@/lib/calibration-workshop/calibrationTerminology";
 import { useCalibrationTerminologyScope } from "./calibration-terminology-control";
 
@@ -10,9 +9,11 @@ import type { SurfacePresentation } from "@/lib/calibration-workshop/sharedWorks
 
 type Projected = { cellIndex: number; x: number; y: number; depth: number; height: number; changed: boolean; row: number; column: number };
 
-export default function CalibrationSurface3D({ model, detail, state, terminology, selectedCell, onSelect }: {
+export default function CalibrationSurface3D({ model, detail, state, terminology, selectedCell, onSelect, camera, onCamera }: {
+  camera?: Readonly<{ rotation: number; tilt: number; zoom: number }>;
+  onCamera?(camera: Readonly<{ rotation: number; tilt: number; zoom: number }>): void;
   model: CalibrationVisualizationModel;
-  detail: WorkshopDefinitionDetail;
+  detail: Parameters<typeof moveSelectedCell>[0];
   state: SurfacePresentation;
   terminology?: CalibrationTerminology;
   selectedCell: number;
@@ -20,17 +21,19 @@ export default function CalibrationSurface3D({ model, detail, state, terminology
 }) {
   const scopedTerminology = useCalibrationTerminologyScope(), labels = (terminology ?? scopedTerminology)!;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [rotation, setRotation] = useState(-0.65);
-  const [tilt, setTilt] = useState(0.72);
-  const [zoom, setZoom] = useState(1);
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  const [localCamera, setLocalCamera] = useState({ rotation: -.65, tilt: .72, zoom: 1 });
+  const view = camera ?? localCamera, { rotation, tilt, zoom } = view;
+  const updateCamera = (next: typeof view) => { if (onCamera) onCamera(next); else setLocalCamera(next); };
+  const drag = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
   const projectedRef = useRef<Projected[]>([]);
-  const values = useMemo(() => model.surface.map((point) => state === "reference" ? point.referenceValue : point.currentValue), [model, state]);
+  const values = useMemo(() => model.surface.map((point) => point.currentValue), [model]);
   const mesh = useMemo(() => buildCalibrationSurfaceMesh(model), [model]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const draw = () => {
+    if (!mesh.available || !model.columnAxis.values.every(value => typeof value === "number" && Number.isFinite(value)) || !model.rowAxis.values.every(value => typeof value === "number" && Number.isFinite(value))) { projectedRef.current = []; return; }
     const rect = canvas.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.max(1, Math.round(rect.width * dpr)); canvas.height = Math.max(1, Math.round(rect.height * dpr));
@@ -39,17 +42,14 @@ export default function CalibrationSurface3D({ model, detail, state, terminology
     const minimum = Math.min(...values), maximum = Math.max(...values), range = maximum - minimum || 1;
     const cos = Math.cos(rotation), sin = Math.sin(rotation), centerX = rect.width / 2, centerY = rect.height * 0.55;
     const scale = Math.min(rect.width / Math.max(detail.columns, 2), rect.height / Math.max(detail.rows, 2)) * 0.72 * zoom;
-    const numericX = model.columnAxis.values.every((value) => typeof value === "number" && Number.isFinite(value));
-    const numericY = model.rowAxis.values.every((value) => typeof value === "number" && Number.isFinite(value));
-    const xValues = numericX ? model.columnAxis.values as readonly number[] : model.columnAxis.values.map((_, index) => index);
-    const yValues = numericY ? model.rowAxis.values as readonly number[] : model.rowAxis.values.map((_, index) => index);
+    const xValues = model.columnAxis.values as readonly number[], yValues = model.rowAxis.values as readonly number[];
     const xMinimum = Math.min(...xValues), xRange = Math.max(...xValues) - xMinimum || 1;
     const yMinimum = Math.min(...yValues), yRange = Math.max(...yValues) - yMinimum || 1;
     const projected = model.surface.map((point) => {
       const gx = ((xValues[point.column]! - xMinimum) / xRange - .5) * Math.max(detail.columns - 1, 1);
       const gy = ((yValues[point.row]! - yMinimum) / yRange - .5) * Math.max(detail.rows - 1, 1);
       const rx = gx * cos - gy * sin, depth = gx * sin + gy * cos;
-      const value = state === "reference" ? point.referenceValue : point.currentValue;
+      const value = point.currentValue;
       const height = (value - minimum) / range;
       const elevation = height * Math.min(rect.height * 0.38, 190);
       return { cellIndex: point.cellIndex, x: centerX + rx * scale, y: centerY + depth * scale * Math.sin(tilt) - elevation * Math.cos(tilt), depth, height, changed: point.changed, row: point.row, column: point.column };
@@ -79,14 +79,18 @@ export default function CalibrationSurface3D({ model, detail, state, terminology
     context.fillText(`${labels.x?.label ?? model.columnAxis.id}${labels.x?.units ? ` (${labels.x.units})` : ""}`, 16, rect.height - 18);
     context.fillText(`${labels.y?.label ?? model.rowAxis.id}${labels.y?.units ? ` (${labels.y.units})` : ""}`, 16, 24);
     context.fillText(`${labels.output.label}${labels.output.units ? ` (${labels.output.units})` : ""}`, Math.max(16, rect.width - 220), 24);
-    if (!mesh.available) { context.fillStyle = "#fbbf24"; context.fillText(`Wireframe fallback: ${mesh.reason}`, 16, rect.height - 42); }
+    };
+    draw();
+    const observer = new ResizeObserver(draw); observer.observe(canvas);
+    return () => observer.disconnect();
   }, [model, detail, state, labels, selectedCell, values, mesh, rotation, tilt, zoom]);
 
-  const pointerDown = (event: PointerEvent<HTMLCanvasElement>) => { drag.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); };
-  const pointerMove = (event: PointerEvent<HTMLCanvasElement>) => { if (!drag.current) return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; drag.current={x:event.clientX,y:event.clientY}; setRotation((value)=>value+dx*0.008); setTilt((value)=>Math.max(0.25,Math.min(1.25,value+dy*0.006))); };
-  const pointerUp = (event: PointerEvent<HTMLCanvasElement>) => { const start = drag.current; drag.current = null; if (!start || Math.hypot(event.clientX-start.x,event.clientY-start.y)>8) return; const rect=event.currentTarget.getBoundingClientRect(); const x=event.clientX-rect.left,y=event.clientY-rect.top; const nearest=[...projectedRef.current].sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0]; if(nearest&&Math.hypot(nearest.x-x,nearest.y-y)<24)onSelect(nearest.cellIndex); };
+  const pointerDown = (event: PointerEvent<HTMLCanvasElement>) => { if (event.pointerType === "touch") return; drag.current = { x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); };
+  const pointerMove = (event: PointerEvent<HTMLCanvasElement>) => { if (!drag.current) return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; drag.current={...drag.current,x:event.clientX,y:event.clientY}; updateCamera({ ...view, rotation: Math.max(-1000, Math.min(1000, rotation + dx*.008)), tilt: Math.max(.25, Math.min(1.25, tilt + dy*.006)) }); };
+  const pointerUp = (event: PointerEvent<HTMLCanvasElement>) => { const start = drag.current; drag.current = null; if (!start || Math.hypot(event.clientX-start.startX,event.clientY-start.startY)>8) return; const rect=event.currentTarget.getBoundingClientRect(); const x=event.clientX-rect.left,y=event.clientY-rect.top; const nearest=[...projectedRef.current].sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0]; if(nearest&&Math.hypot(nearest.x-x,nearest.y-y)<24)onSelect(nearest.cellIndex); };
   const keyDown = (event: KeyboardEvent<HTMLCanvasElement>) => { const movement: Record<string,[number,number]>={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0]}; const delta=movement[event.key]; if(delta){event.preventDefault();onSelect(moveSelectedCell(detail,selectedCell,...delta));} };
-  const wheel = (event: WheelEvent<HTMLCanvasElement>) => { event.preventDefault(); setZoom((value)=>Math.max(.65,Math.min(1.8,value-event.deltaY*.001))); };
+  const wheel = (event: WheelEvent<HTMLCanvasElement>) => { if (!event.ctrlKey) return; event.preventDefault(); updateCamera({ ...view, zoom: Math.max(.65,Math.min(1.8,zoom-event.deltaY*.001)) }); };
 
-  return <div><canvas ref={canvasRef} className="h-[520px] w-full touch-none rounded-xl border border-zinc-800 bg-black outline-none focus-visible:ring-2 focus-visible:ring-blue-400" tabIndex={0} aria-label={`Interactive ${state} Calibration surface. Arrow keys select cells; drag rotates; wheel zooms.`} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onKeyDown={keyDown} onWheel={wheel}/><div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500"><span>{state === "working" ? "Working" : state === "reference" ? "Reference" : "Current"} surface · Drag to rotate · wheel to zoom · arrows to select · neutral shading represents numerical height only</span><button type="button" className="rounded border border-zinc-700 px-3 py-1 text-zinc-300" onClick={()=>{setRotation(-.65);setTilt(.72);setZoom(1);}}>Reset view</button></div></div>;
+  if (!mesh.available) return <p role="status">3D unavailable: {mesh.reason}</p>;
+  return <div><canvas ref={canvasRef} className="h-[520px] w-full touch-pan-y rounded-xl border border-zinc-800 bg-black outline-none focus-visible:ring-2 focus-visible:ring-blue-400" tabIndex={0} aria-label={`Interactive ${state} Calibration surface. Arrow keys select cells; drag rotates; Control + wheel zooms; touch scrolls the page.`} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onKeyDown={keyDown} onWheel={wheel}/><div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500"><span>{state === "working" ? "Working" : state === "reference" ? "Reference" : "Current"} surface · Drag to rotate · Control + wheel to zoom · arrows to select · neutral shading represents numerical height only</span><button type="button" className="rounded border border-zinc-700 px-3 py-1 text-zinc-300" onClick={()=>{updateCamera({ rotation: -.65, tilt: .72, zoom: 1 });}}>Reset view</button></div></div>;
 }

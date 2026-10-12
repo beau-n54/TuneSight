@@ -19,11 +19,11 @@ test("2D Grid preserves governed X/Y values, units, source terms and qualified n
 });
 
 test("unknown semantics remain Source Axis while structural evidence remains visible", () => {
-  const model = buildGridAxisPresentation({ shape: "2D", rows: 2, columns: 2, axes: [{ id: "BMW source X", units: "hPa", values: [1000, 1200] }, { id: "BMW source Y", units: null, values: [1, 2] }], semantic: semantic(), outputUnits: null });
+  const model = buildGridAxisPresentation({ shape: "2D", rows: 2, columns: 2, axes: [{ id: "x", units: "hPa", values: [1000, 1200] }, { id: "y", units: null, values: [1, 2] }], semantic: semantic(), outputUnits: null });
   assert.equal(gridAxisLabel(model.x!), "X · Source Axis [hPa]");
-  assert.equal(model.x?.sourceName, "BMW source X");
+  assert.equal(model.x?.sourceName, "x");
   assert.equal(gridAxisLabel(model.y!), "Y · Source Axis");
-  assert.equal(model.y?.sourceName, "BMW source Y");
+  assert.equal(model.y?.sourceName, "y");
 });
 
 test("1D and scalar presentations do not fabricate a Y axis", () => {
@@ -62,7 +62,7 @@ test("shared Grid source provides sticky headers, frozen Y context and responsiv
   assert.match(grid, /overflow-auto/);
   assert.match(grid, /terminology\?\.y\?\.label/);
   assert.match(grid, /terminology\?\.x\?\.label/);
-  for (const client of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
+  for (const client of ["workshop-client.tsx"]) {
     const source = fs.readFileSync(`app/dashboard/vehicles/[id]/calibration/${client}`, "utf8");
     assert.match(source, /CalibrationAxisGrid/);
     assert.match(source, /DirectGridCell/);

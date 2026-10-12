@@ -63,9 +63,9 @@ test("derived table cache is bounded LRU and never contains Working overlays", (
 
 test("both Workshop variants select tables inside a persistent shell without Next route navigation", () => {
   const root = path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration");
-  for (const file of ["workshop-client.tsx", "current-only-workshop-client.tsx"]) {
+  for (const file of ["shared-workspace-client.tsx"]) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
-    assert.match(source, /openWorkspaceTab/);
+    assert.match(source, /requestWorkspaceTab/);
     assert.match(source, /WorkspaceTabs/);
     assert.match(source, /window\.history\.replaceState/);
     assert.match(source, /closeOtherWorkspaceTabs/);
@@ -87,21 +87,14 @@ test("tab operations preserve the single external Working Calibration identity a
   assert.deepEqual(working.mutations, ["first", "second"]);
 });
 
-test("workspace source preserves independent panels, structural borders, changed tabs and direct-edit remount semantics", () => {
+test("shared workspace preserves panels, borders, changed tabs and exact cell remount identities", () => {
   const root = path.join(process.cwd(), "app", "dashboard", "vehicles", "[id]", "calibration");
-  const comparison = fs.readFileSync(path.join(root, "workshop-client.tsx"), "utf8");
-  const currentOnly = fs.readFileSync(path.join(root, "current-only-workshop-client.tsx"), "utf8");
+  const controller = fs.readFileSync(path.join(root, "shared-workspace-client.tsx"), "utf8");
+  const renderer = fs.readFileSync(path.join(root, "workshop-client.tsx"), "utf8");
+  const shell = fs.readFileSync(path.join(root, "shared-calibration-shell.tsx"), "utf8");
   const tabs = fs.readFileSync(path.join(root, "workspace-tabs.tsx"), "utf8");
-  const layout = fs.readFileSync(path.join(process.cwd(), "lib", "calibration-workshop", "workspaceLayout.ts"), "utf8");
-  for (const source of [comparison, currentOnly]) {
-    assert.match(source, /explorerCollapsed/);
-    assert.match(source, /inspectorCollapsed/);
-    assert.ok((source.match(/bmw-border/g) ?? []).length >= 3);
-    assert.match(source, /DirectGridCell/);
-    assert.match(source, /workingChangedDefinitionKeys/);
-  }
-  assert.match(tabs, /Working changes/);
-  assert.match(tabs, /onCloseOthers/);
-  assert.match(layout, /xl:grid-cols-1/);
-  assert.match(comparison, /key\s*=\s*`\$\{detail\.summary\.definitionRevision\}:\$\{detail\.summary\.occurrence\}:\$\{i\}`/);
+  for (const token of ["explorerCollapsed", "inspectorCollapsed", "workingChangedDefinitionKeys"]) assert.ok(controller.includes(token));
+  assert.ok((shell.match(/bmw-border/g) ?? []).length >= 3);
+  assert.match(renderer, /DirectGridCell/); assert.match(renderer, /model.projection.tableIdentity/);
+  assert.match(tabs, /Working changes/); assert.match(tabs, /onCloseOthers/);
 });

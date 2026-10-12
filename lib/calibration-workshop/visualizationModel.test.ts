@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { WorkshopDefinitionDetail } from "./viewModel.ts";
-import { buildCalibrationSlice, buildCalibrationSurfaceMesh, buildCalibrationVisualizationModel, capabilitiesForDefinition, moveSelectedCell } from "./visualizationModel.ts";
+import { buildCalibrationSlice, buildCalibrationSurfaceMesh, moveSelectedCell } from "./visualizationModel.ts";
+import { buildCalibrationVisualizationModel, capabilitiesForDefinition } from "./comparisonVisualization.fixtures.ts";
 import { deriveWorkshopLayout } from "./workspaceLayout.ts";
 import { bindDefinitionKnowledge } from "./definitionKnowledgeBinding.ts";
 

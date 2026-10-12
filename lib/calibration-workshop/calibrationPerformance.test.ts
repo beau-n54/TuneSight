@@ -8,7 +8,7 @@ import test, { before } from "node:test";
 import ts from "typescript";
 import type { SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
 import { selectRestoredSubscriberWorkshop } from "./selectRestoredSubscriberWorkshop.ts";
-import { buildSharedWorkspacePayload } from "./sharedWorkspaceAdapter.ts";
+import { buildSharedWorkspacePayload, workspaceCatalogue } from "./sharedWorkspaceAdapter.ts";
 import { maskRetainedWorkspace } from "./sharedWorkspaceDispatch.ts";
 import { resolveSubscriberWorkshopSession } from "./subscriberWorkshopEntry.ts";
 
@@ -100,7 +100,8 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   assert.match(page, /subscriberSuccess \? selectRestoredSubscriberWorkshop\(subscriberSuccess, definition\) : await developmentCalibrationWorkshopProvider\.loadVehicleWorkshop/);
   assert.doesNotMatch(page, /buildSubscriberWorkshop/);
   assert.match(page, /maskRetainedWorkspace\(workshop, subscriberSuccess\)/);
-  assert.match(page, /dispatchWorkspace<SharedWorkspacePayload \| null>\(presentation/);
+  assert.match(page, /return <SharedWorkspaceClient/);
+  assert.doesNotMatch(page, /dispatchWorkspace|CurrentOnlyWorkshopClient|resolveWorkspacePresentation/);
   assert.match(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /private, no-store/);
   assert.match(route, /readSession: readSubscriberWorkshopSession/);
@@ -119,6 +120,33 @@ function parity(result: SubscriberCalibrationSuccess, key?: string) {
   assert.deepEqual(newMasked, oldMasked);
   assert.deepEqual(buildSharedWorkspacePayload(newMasked, result, context, key), buildSharedWorkspacePayload(oldMasked, result, context, key));
 }
+test("R02 all three provider anchors send a metadata catalogue and exactly one selected projection", t => {
+  for (const anchor of anchors) {
+    const catalogue = workspaceCatalogue(maskRetainedWorkspace(anchor.workshop, anchor));
+    const payload = buildSharedWorkspacePayload(anchor.workshop, anchor, context);
+    assert.ok(payload.projection); assert.equal(catalogue.definitions.length, anchor.workshop.definitions.length);
+    assert.ok(!("tableMaterials" in catalogue)); assert.ok(!("selectedDefinition" in catalogue));
+    for (const definition of catalogue.definitions) {
+      assert.ok(!("cells" in definition)); assert.ok(!("axes" in definition));
+      const original = anchor.workshop.definitions.find(item => item.key === definition.key)!;
+      assert.equal(definition.title, original.title); assert.equal(definition.definitionRevision, original.definitionRevision);
+      assert.equal(definition.occurrence, original.occurrence); assert.deepEqual(definition.semantic, original.semantic);
+    }
+    const text = JSON.stringify({ catalogue, payload });
+    assert.equal((text.match(/"tableIdentity":/g) ?? []).length, 1);
+    assert.ok(!text.includes('"rawEvidence":')); assert.ok(!text.includes('"sourceLease":'));
+    t.diagnostic(JSON.stringify({ identity: anchor.identity, tableCount: catalogue.definitions.length, catalogueBytes: Buffer.byteLength(JSON.stringify(catalogue)), selectedProjectionBytes: Buffer.byteLength(JSON.stringify(payload)) }));
+  }
+});
+test("R02 accepted E90 I8A0S family reconstructs the shared comparison contract independently of IJE0S coverage", async () => {
+  const result = await loadSubscriberCalibration({ bytes: fs.readFileSync("BMW-XDFs-master/N54/I8A0S_MapSwitchBase.bin"), fileName: "controlled-e90.bin", mimeType: null, observedAt: "2026-10-12T00:00:00.000Z" });
+  assert.equal(result.status, "workshop_ready"); if (result.status !== "workshop_ready") return;
+  const payload = buildSharedWorkspacePayload(result.workshop, result, context);
+  assert.equal(payload.identity, "I8A0S"); assert.equal(payload.referenceAvailable, true);
+  assert.equal(workspaceCatalogue(result.workshop).definitions.length, 721);
+  assert.equal(payload.projection?.slots.current.state, "available");
+  assert.equal(payload.projection?.slots.reference.state, "available");
+});
 for (const [index, label] of ["N54 comparison", "B58 Gen1 Current-only", "Supra-source DTF Current-only"].entries()) {
   test(`Phase 1: ${label} decoded reuse, exact selection, unavailable/quarantine and initial U0 parity`, () => {
     const bytes = encodeSubscriberSession(context.ownerId, context.vehicleId, 2000, anchors[index]);

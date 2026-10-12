@@ -14,6 +14,9 @@ export type WorkspaceTabState = Readonly<{
   sliceIndex: number;
   operation: WorkingEditOperation;
   operand: string;
+  camera?: Readonly<{ rotation: number; tilt: number; zoom: number }>;
+  plotView?: Readonly<{ zoom: number; pan: number }>;
+  gridZoom?: number;
 }>;
 export type WorkspaceTabsState = Readonly<{ tabs: readonly WorkspaceTabState[]; activeId: string }>;
 export const MAX_OPEN_WORKSPACE_TABS = 12;
@@ -23,7 +26,8 @@ export function workspaceTabId(input: Pick<WorkspaceTabState, "datasetRevision" 
   return [input.datasetRevision, input.definitionRevision, input.occurrence].map(value => encodeURIComponent(String(value))).join("::");
 }
 export function createWorkspaceTab(input: Pick<WorkspaceTabState, "definitionKey" | "definitionRevision" | "occurrence" | "datasetRevision" | "title">): WorkspaceTabState {
-  return Object.freeze({ ...input, id: workspaceTabId(input), view: "grid", selectedCells: Object.freeze([0]), sliceDirection: "row", sliceIndex: 0, operation: "assign", operand: "" });
+  return Object.freeze({ definitionKey: input.definitionKey, definitionRevision: input.definitionRevision, occurrence: input.occurrence,
+    datasetRevision: input.datasetRevision, title: input.title, id: workspaceTabId(input), view: "grid", selectedCells: Object.freeze([0]), sliceDirection: "row", sliceIndex: 0, operation: "assign", operand: "" });
 }
 export function openWorkspaceTab(state: WorkspaceTabsState, tab: WorkspaceTabState, maximum = MAX_OPEN_WORKSPACE_TABS): WorkspaceTabsState {
   if (state.tabs.some(item => item.id === tab.id)) return Object.freeze({ tabs: state.tabs, activeId: tab.id });

@@ -62,7 +62,7 @@ export default function DirectGridCell({ cellKey, index, row, column, columnCoun
   return <div><button type="button" data-working-cell={index} data-cell-key={cellKey} aria-label={`Cell row ${row} column ${column}${changed ? ", changed" : ""}${canEdit ? ", double-click to edit" : ""}`} onDoubleClick={begin} onPointerDown={event => onSelect(index, event.shiftKey)} onPointerEnter={event => { if (event.buttons === 1) onSelect(index, true); }} onKeyDown={event => {
     if ((event.key === "Enter" || event.key === "F2") && canEdit) { event.preventDefault(); begin(); return; }
     const step = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : event.key === "ArrowUp" ? -columnCount : event.key === "ArrowDown" ? columnCount : 0;
-    if (step) { event.preventDefault(); onNavigate(index + step); }
+    if (step) { event.preventDefault(); if (event.key === "ArrowLeft" && column === 0 || event.key === "ArrowRight" && column === columnCount - 1 || event.key === "ArrowUp" && row === 0) return; onNavigate(index + step); }
   }} className={`w-full min-w-28 rounded-lg border p-2 text-left font-mono ${selected ? "border-blue-300 ring-1 ring-blue-300/40" : changed ? "border-emerald-400/35 bg-emerald-400/10" : "border-zinc-800 bg-zinc-900"}`}>
     {referenceValue !== undefined && <span className="block text-[10px] text-zinc-500">REF {format(referenceValue)}</span>}
     <span className="block">{format(value)}</span>

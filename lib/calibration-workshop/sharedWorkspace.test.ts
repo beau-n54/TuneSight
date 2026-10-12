@@ -7,15 +7,15 @@ import fs from "node:fs";
 import test, { before } from "node:test";
 import { loadSubscriberCalibration, type SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
 import { buildCurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
-import { comparisonRendererDefinition, currentRendererDefinition, exactWorkspaceDefinition, projectWorkspaceTable,
+import { currentRendererDefinition, exactWorkspaceDefinition, projectWorkspaceTable,
   resolveSharedWorkingDefinition, sharedWorkspaceContextKey, sharedWorkspaceEvidence } from "./sharedWorkspaceAdapter.ts";
-import { dispatchWorkspace, resolveWorkspacePresentation, maskRetainedWorkspace } from "./sharedWorkspaceDispatch.ts";
-import { pendingTransitionAllowed, recognizedReviewDevice, existingRendererViews, requestWorkspaceTab, workspaceInteractionPolicy } from "./sharedWorkspacePolicy.ts";
+import { maskRetainedWorkspace } from "./sharedWorkspaceDispatch.ts";
+import { pendingTransitionAllowed, recognizedReviewDevice, requestWorkspaceTab, workspaceInteractionPolicy } from "./sharedWorkspacePolicy.ts";
 import { activateWorkspaceTab, closeOtherWorkspaceTabs, closeWorkspaceTab, createWorkspaceTab, updateActiveWorkspaceTab, type WorkspaceTabsState } from "./workspaceTabs.ts";
 import { applyWorkingEdit, createWorkingCalibration, redoWorkingEdit, undoWorkingEdit, workingCellValue } from "./workingCalibration.ts";
 import { createBrowserWorkingCalibrationStore } from "./workingCalibrationPersistence.ts";
 import { deriveWorkshopLayout } from "./workspaceLayout.ts";
-import { buildCalibrationVisualizationModel } from "./visualizationModel.ts";
+import { buildSharedTablePresentation } from "./sharedTablePresentation.ts";
 import type { TableQuarantineRecord } from "../xdf/tableQuarantine.ts";
 
 let n54: SubscriberCalibrationSuccess;
@@ -50,9 +50,8 @@ test("U1 S02: absent Reference preserves Current and the exact owner reason", ()
   assert.equal(result.slots.reference.state, "missing");
   assert.deepEqual(result.slots.reference.findings, [workshop.states[0].message]);
   assert.deepEqual(currentRendererDefinition(workshop, result).cells, definition.cells);
-  assert.equal(comparisonRendererDefinition(workshop, result), null);
-  assert.equal(existingRendererViews(result, null).line, false);
-  assert.equal(existingRendererViews(result, null).surface, false);
+  assert.equal(buildSharedTablePresentation(result, null, "current", "standard").comparison, false);
+  assert.equal(buildSharedTablePresentation(result, null, "current", "standard").views.line, result.slots.current.geometry.line.supported);
 });
 test("U1 S02: unresolved Reference occurrence cannot hide Current or select a comparison renderer", () => {
   assert.ok(n54.material.reference);
@@ -61,7 +60,7 @@ test("U1 S02: unresolved Reference occurrence cannot hide Current or select a co
   const result = projectWorkspaceTable(n54.workshop, modified, context, selected().key);
   assert.equal(result.slots.reference.state, "unresolved");
   assert.deepEqual(result.slots.current, projection().slots.current);
-  assert.equal(comparisonRendererDefinition(n54.workshop, result), null);
+  assert.equal(buildSharedTablePresentation(result, null, "current", "standard").comparison, false);
   assert.ok(currentRendererDefinition(n54.workshop, result).cells.length > 0);
 });
 test("U1 S03: quarantine suppresses renderer values, raw cells and mutation restoration for the exact occurrence", () => {
@@ -79,7 +78,7 @@ test("U1 S03: quarantine suppresses renderer values, raw cells and mutation rest
   assert.equal(result.slots.current.state, "quarantined");
   assert.deepEqual(currentRendererDefinition(n54.workshop, result).cells, []);
   assert.deepEqual(currentRendererDefinition(n54.workshop, result).axes, []);
-  assert.equal(comparisonRendererDefinition(n54.workshop, result), null);
+  assert.equal(buildSharedTablePresentation(result, null, "current", "standard").comparison, false);
   assert.equal(resolveSharedWorkingDefinition(n54.workshop, supplied, context, chosen.definitionRevision, chosen.occurrence)?.availability, "quarantined");
   const legacy = maskRetainedWorkspace(n54.workshop, { ...n54, quarantines: [quarantine] });
   assert.ok("tableMaterials" in legacy);
@@ -159,11 +158,9 @@ for (const [label, width, fine, expected] of [["desktop", 1440, true, true], ["l
     assert.deepEqual(projection().capabilities, before.capabilities);
   });
 }
-test("U1 renderer adapter never accepts mismatched axes or unlocks Export", () => {
-  const projected = projection(), detail = comparisonRendererDefinition(n54.workshop, projected)!;
-  const model = buildCalibrationVisualizationModel(detail);
-  const mismatched = { ...model, columnAxis: { ...model.columnAxis, id: "fabricated-axis" }, rowAxis: { ...model.rowAxis, id: "fabricated-axis" } };
-  assert.equal(existingRendererViews(projected, mismatched).surface, false);
+test("R02 shared renderer accepts only projection geometry and never unlocks Export", () => {
+  const projected = projection(), model = buildSharedTablePresentation(projected, null, "current", "standard");
+  assert.equal(model.views.surface, projected.slots.current.geometry.surface.supported);
   assert.equal(projected.capabilities.export, null); assert.equal(projected.capabilities.flash, null);
 });
 
@@ -253,13 +250,12 @@ test("U1 cache cannot admit a response for a different exact table or context", 
   const cache = createProjectionCache(async () => ({ status: "ready", projection }));
   const result = await cache.request(requestFor()); assert.equal(result.status, "unavailable"); assert.equal(cache.get(requestFor()), undefined);
 });
-test("U1 server dispatch defaults shared, explicitly rolls back and never invokes failing U0 on legacy", () => {
-  assert.equal(resolveWorkspacePresentation(undefined), "shared"); assert.equal(resolveWorkspacePresentation("shared"), "shared");
-  for (const value of ["legacy", "", "invalid", "SHARED"]) assert.equal(resolveWorkspacePresentation(value), "legacy");
-  let called = 0;
-  const failing = () => { called++; throw new Error("deliberate U0 failure"); };
-  assert.equal(dispatchWorkspace("legacy", () => "retained client", failing), "retained client"); assert.equal(called, 0);
-  assert.throws(() => dispatchWorkspace("shared", () => "retained client", failing), /deliberate/); assert.equal(called, 1);
+test("R02 U6 retires route-specific controllers and rollback dispatch", () => {
+  const page = fs.readFileSync("app/dashboard/vehicles/[id]/calibration/page.tsx", "utf8");
+  assert.match(page, /<SharedWorkspaceClient/);
+  assert.doesNotMatch(page, /CurrentOnlyWorkshopClient|<WorkshopClient|dispatchWorkspace|subscriberWorkspacePresentation/);
+  assert.equal(fs.existsSync("app/dashboard/vehicles/[id]/calibration/current-only-workshop-client.tsx"), false);
+  assert.equal(fs.existsSync("lib/calibration-workshop/sharedWorkspacePresentation.server.ts"), false);
 });
 for (const [label, width, fine, device] of [["fine to coarse", 1440, false, false], ["tablet attached pointer", 1366, true, true], ["phone", 390, false, true], ["width below threshold", 899, true, false]] as const) {
   test(`U1 active draft cancellation policy: ${label}`, () => {
@@ -308,7 +304,7 @@ test("U1 device classification treats Android/iOS and touch-enabled MacIntel as 
 });
 test("U1 imports keep tests/fixtures out of new production paths and the environment selector server-only", () => {
   const paths = ["app/api/calibration-workshop/projection/route.ts", ...[
-    "sharedWorkspaceAdapter.ts", "sharedWorkspaceDispatch.ts", "sharedWorkspacePolicy.ts", "sharedWorkspacePresentation.server.ts",
+    "sharedWorkspaceAdapter.ts", "sharedWorkspaceDispatch.ts", "sharedWorkspacePolicy.ts",
     "sharedWorkspacePresentationState.ts", "sharedWorkspaceProjectionLoader.ts", "sharedWorkspaceProjectionRequest.ts",
   ].map(name => `lib/calibration-workshop/${name}`), ...["shared-calibration-shell.tsx", "shared-evidence-strip.tsx", "shared-workspace-client.tsx"].map(name => `app/dashboard/vehicles/[id]/calibration/${name}`)];
   for (const path of paths) {
@@ -317,5 +313,5 @@ test("U1 imports keep tests/fixtures out of new production paths and the environ
     for (const imported of imports) assert.doesNotMatch(imported, /\.(?:test|fixtures)(?:\.|["'])/, path);
     if (!path.endsWith("sharedWorkspacePresentation.server.ts")) assert.ok(!source.includes("process.env.TUNESIGHT_CALIBRATION_PRESENTATION"), path);
   }
-  assert.match(fs.readFileSync("lib/calibration-workshop/sharedWorkspacePresentation.server.ts", "utf8"), /import "server-only"/);
+
 });

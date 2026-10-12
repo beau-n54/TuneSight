@@ -1,16 +1,6 @@
 import type { SubscriberCalibrationSuccess } from "./subscriberCalibrationProvider.ts";
 import type { SharedWorkspaceWorkshop } from "./sharedWorkspaceAdapter.ts";
 
-/** Temporary migration policy. Missing configuration selects shared; invalid configuration selects the retained safe fallback. */
-export function resolveWorkspacePresentation(value: string | undefined): "shared" | "legacy" {
-  return value === undefined || value === "shared" ? "shared" : "legacy";
-}
-
-/** This boundary deliberately has no runtime import of U0 or the projection adapter. */
-export function dispatchWorkspace<T>(presentation: "shared" | "legacy", legacy: () => T, shared: () => T): T {
-  return presentation === "legacy" ? legacy() : shared();
-}
-
 /** Mask retained renderer material from the admitted owner evidence, independently of U0. */
 export function maskRetainedWorkspace(workshop: SharedWorkspaceWorkshop,
   result: Pick<SubscriberCalibrationSuccess, "material" | "quarantines">): SharedWorkspaceWorkshop {

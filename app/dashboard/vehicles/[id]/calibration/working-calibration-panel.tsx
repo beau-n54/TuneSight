@@ -6,9 +6,10 @@ import type { WorkingCalibration, WorkingEditOperation, WorkingEditPreview } fro
 import { validationExplanation, workingOperationLabel } from "@/lib/calibration-workshop/manualEditorUx";
 import type { WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 
-export type CalibrationDisplayMode = "current" | "working";
+export type CalibrationDisplayMode = "reference" | "current" | "working";
 
-export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, onRetrySave, interactionAllowed = true, createAllowed = true }: {
+export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, onRetrySave, interactionAllowed = true, createAllowed = true, referenceAvailable = false }: {
+  referenceAvailable?: boolean;
   interactionAllowed?: boolean;
   createAllowed?: boolean;
   mode: CalibrationDisplayMode;
@@ -38,6 +39,7 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
   return <section className="mt-4 space-y-4 rounded-xl border border-zinc-700 bg-zinc-900 p-4" aria-label="Working Calibration controls">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex rounded-lg border border-zinc-700 bg-black p-1" aria-label="Calibration state">
+        <button type="button" aria-pressed={mode === "reference"} disabled={!referenceAvailable} onClick={() => onMode("reference")} className="rounded-md px-4 py-2 text-xs font-bold text-zinc-300 disabled:text-zinc-700">REFERENCE</button>
         <button type="button" aria-pressed={mode === "current"} onClick={() => onMode("current")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "current" ? "bg-blue-500/20 text-blue-200" : "text-zinc-400"}`}>CURRENT</button>
         <button type="button" aria-pressed={mode === "working"} disabled={!working} onClick={() => onMode("working")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "working" ? "bg-emerald-500/20 text-emerald-200" : "text-zinc-400 disabled:text-zinc-700"}`}>WORKING</button>
       </div>
