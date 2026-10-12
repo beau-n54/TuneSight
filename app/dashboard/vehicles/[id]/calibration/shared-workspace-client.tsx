@@ -3,6 +3,8 @@
 import { hasUnpersistedWorking, hasUnsavedDurableWorking, persistWorkingRevision, type WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 import { createDurableWorkingClient } from "@/lib/calibration-workshop/durableWorkingClient";
 import type { DurableWorkingSnapshot } from "@/lib/calibration-workshop/durableWorking";
+import { planWorkingToolbar, selectedRectangle, MAX_MATRIX_CHARACTERS } from "@/lib/calibration-workshop/qualifiedEditing";
+import { workingCellValue, type WorkingEditInput, type WorkingEditPreview } from "@/lib/calibration-workshop/workingCalibration";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { currentRendererDefinition, exactWorkspaceDefinition,
@@ -302,9 +304,9 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
     updateTab({ selectedCells: region && first ? tableModel.cells.filter(cell => cell.row >= Math.min(first.row, last.row) && cell.row <= Math.max(first.row, last.row)
       && cell.column >= Math.min(first.column, last.column) && cell.column <= Math.max(first.column, last.column)).map(cell => cell.index) : [index] });
   }
-  function navigateCell(index: number) {
+  function navigateCell(index: number, region = false) {
     if (!tableModel?.cells.some(cell => cell.index === index)) return;
-    select(index);
+    select(index, region);
     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('[data-working-cell="' + index + '"]')?.focus({ preventScroll: true }));
   }
   const activeSeed = useMemo(() => projection ? resolveProjectedWorkingDefinition(workshop, projection) : undefined, [workshop, projection]);
@@ -312,11 +314,41 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
     index, row: currentDetail.cells[index].row, column: currentDetail.cells[index].column }] : []) : [];
   const editQualified = projection?.slots.current.state === "available" && projection.capabilities.edit?.state === "EDIT_QUALIFIED";
   const canMutate = interaction.editing && editQualified && !saving && !durable?.uncertain && saveStatus !== "loading" && !(saveStatus === "failed" && !working);
-  const preview = working && active?.operand.trim() && activeSeed ? previewWorkingEdit(working, { operation: active.operation, operand: Number(active.operand), targets, definitions: [activeSeed] }) : null;
+  let plan: WorkingEditInput | null = null, preview: WorkingEditPreview | null = null;
+  if (working && active && activeSeed && (active.operand.trim() || active.operation === "revert" || active.operation.startsWith("interpolate-"))) {
+    try { plan = planWorkingToolbar(active.operation, active.operand, targets, activeSeed); preview = previewWorkingEdit(working, plan); }
+    catch (error) { preview = { validation: "BLOCKED", before: [], after: [], findings: [(error as Error).message] }; }
+  }
+  function applyToolbar() {
+    if (!canMutate || !working || !plan || displayMode !== "working" || !guardPending()) return;
+    const result = applyWorkingEdit(working, { ...plan, updatedAt: new Date().toISOString() });
+    if (result.status === "applied") { setWorking(result.calibration); updateTab({ operand: "" }); } else setNotice(result.findings.join(" "));
+  }
+  async function copyMatrix() {
+    if (!activeSeed || !guardPending()) return;
+    try {
+      const rectangle = selectedRectangle(targets), values = rectangle.ordered.map(t => {
+        const current = activeSeed.cells.find(c => c.index === t.index)!.currentValue;
+        return displayMode === "working" && working ? workingCellValue(working,t,current)! : current;
+      });
+      if (displayMode === "reference") throw Error("Switch to Current or Working before copying a matrix; Reference is never substituted.");
+      const rows = Array.from({ length: rectangle.rows }, (_,r) => values.slice(r*rectangle.columns,(r+1)*rectangle.columns).join("\t"));
+      const text=rows.join("\n"); if(text.length>MAX_MATRIX_CHARACTERS) throw Error("Selected matrix exceeds the clipboard limit.");
+      await navigator.clipboard.writeText(text); setNotice("Exact selected values copied as a tab-separated matrix. No axes or units were substituted.");
+    } catch (error) { setNotice((error as Error).message); }
+  }
+  function revertTable() {
+    if (!working || !activeSeed || !canMutate || displayMode !== "working" || !guardPending() ||
+      !window.confirm("Revert this exact Table to Current in Working? This adds an undoable operation; saved revisions remain unchanged.")) return;
+    const result=applyWorkingEdit(working,{operation:"revert",operand:0,recordExactRaw:true,
+      targets:activeSeed.cells.map(({definitionRevision,occurrence,index,row,column})=>({definitionRevision,occurrence,index,row,column})),
+      definitions:[activeSeed],updatedAt:new Date().toISOString()});
+    if(result.status==="applied")setWorking(result.calibration);else setNotice(result.findings.join(" "));
+  }
   function commitCell(index: number, value: number) {
     if (!canMutate || !working || !activeSeed || !active || displayMode !== "working" || !currentDetail?.cells[index]) return { status: "blocked" as const, findings: ["Editing is unavailable in this context."] };
     const cell = currentDetail.cells[index];
-    const result = applyWorkingEdit(working, { operation: "assign", source: "direct", operand: value, targets: [{ definitionRevision: active.definitionRevision, occurrence: active.occurrence, index, row: cell.row, column: cell.column }], definitions: [activeSeed], updatedAt: new Date().toISOString() });
+    const result = applyWorkingEdit(working, { operation: "assign", source: "direct", recordExactRaw: true, operand: value, targets: [{ definitionRevision: active.definitionRevision, occurrence: active.occurrence, index, row: cell.row, column: cell.column }], definitions: [activeSeed], updatedAt: new Date().toISOString() });
     if (result.status === "blocked") return result;
     setWorking(result.calibration);
     return { status: "applied" as const, validation: result.calibration.validation, findings: result.calibration.mutations.at(-1)?.findings ?? [] };
@@ -356,10 +388,14 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
     working={<><WorkingCalibrationPanel durable={Boolean(durable)} referenceAvailable={projection?.slots.reference.state === "available"} mode={displayMode} onMode={next => { if (guardPending()) setDisplayMode(next); }} working={working}
       onCreate={() => { if (canMutate) { setWorking(seed()); setDisplayMode("working"); } }}
       onUndo={() => { if (canMutate && working && guardPending()) setWorking(undoWorkingEdit(working, new Date().toISOString())); }} onRedo={() => { if (canMutate && working && guardPending()) setWorking(redoWorkingEdit(working, new Date().toISOString())); }}
-      operation={active?.operation ?? "assign"} onOperation={operation => updateTab({ operation })} operand={active?.operand ?? ""} onOperand={operand => updateTab({ operand })} preview={preview}
-      onApply={() => { if (!canMutate || !working || !active || !activeSeed || displayMode !== "working" || !guardPending()) return; const result = applyWorkingEdit(working, { operation: active.operation, source: "toolbar", operand: Number(active.operand), targets, definitions: [activeSeed], updatedAt: new Date().toISOString() }); if (result.status === "applied") { setWorking(result.calibration); updateTab({ operand: "" }); } else setNotice(result.findings.join(" ")); }}
-      selectedCount={targets.length} definitionTitles={Object.fromEntries(workshop.definitions.map(item => [`${item.definitionRevision}:${item.occurrence}`, item.title]))}
-      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && !saving && !durable?.uncertain && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}/>
+      operation={active?.operation ?? "assign"} onOperation={operation => updateTab({ operation })} operand={active?.operand ?? ""} onOperand={operand => { if (operand.length <= MAX_MATRIX_CHARACTERS) updateTab({ operand }); else setNotice("Matrix exceeds 128 KiB; pending input was preserved."); }} preview={preview}
+      onApply={applyToolbar}
+      selectedCount={plan?.targets.length ?? targets.length} definitionTitles={Object.fromEntries(workshop.definitions.map(item => [`${item.definitionRevision}:${item.occurrence}`, item.title]))}
+      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && !saving && !durable?.uncertain && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} onCopy={() => void copyMatrix()} onRevertTable={revertTable} onRevertAll={() => {
+        if (!working || !canMutate || !guardPending()) return;
+        if (unsaved || workspace.tabs.some(t=>t.operand.trim())) { setNotice("Save existing Working and apply or cancel pending input before reverting the complete Calibration. History must be preserved."); return; }
+        if (window.confirm("Create a new zero-change Working from exact Current? All saved revisions remain available; explicitly Save to move the durable head.")) { setWorking(seed()); setDisplayMode("working"); }
+      }} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}/>
       {durable && <section aria-label="Durable Working revisions" className="bmw-border mt-3 rounded-xl p-4 text-sm">
         <p>Saved revisions are immutable and available on your authenticated devices. Save is explicit. Build, Export and Direct Flash remain locked.</p>
         <button className={button} disabled={!working || saving || !interaction.editing} onClick={() => void saveDurable()}>{saving ? "Saving revision…" : "Save durable revision"}</button>

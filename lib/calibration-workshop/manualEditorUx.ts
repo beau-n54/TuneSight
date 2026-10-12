@@ -5,7 +5,13 @@ export type WorkingEditSource = "direct" | "toolbar";
 export function workingOperationLabel(operation: WorkingEditOperation, source: WorkingEditSource = "toolbar"): string {
   if (source === "direct") return "Direct value edit";
   if (operation === "assign") return "Set value";
+  if (operation === "raw") return "Set raw integer";
   if (operation === "delta") return "Add/Subtract";
+  if (operation === "multiply") return "Multiply";
+  if (operation === "matrix") return "Matrix paste";
+  if (operation === "revert") return "Revert to exact Current";
+  if (operation === "interpolate-horizontal") return "Interpolate structural columns";
+  if (operation === "interpolate-vertical") return "Interpolate structural rows";
   return "Percentage change";
 }
 

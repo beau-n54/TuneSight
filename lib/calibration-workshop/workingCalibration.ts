@@ -1,10 +1,11 @@
+import { exactRawChange, exactWorkingValue, MAX_EDIT_CELLS, selectedRectangle, type ExactRawChange, type WorkingStorageLayout } from "./qualifiedEditing.ts";
 export const WORKING_CALIBRATION_CONTRACT = "tunesight.working-calibration.v1" as const;
 
 export type WorkingValidationState = "VALID" | "WARNING" | "BLOCKED";
-export type WorkingEditOperation = "assign" | "delta" | "percentage";
+export type WorkingEditOperation = "assign" | "raw" | "delta" | "percentage" | "multiply" | "matrix" | "revert" | "interpolate-horizontal" | "interpolate-vertical";
 export type WorkingEditSource = "direct" | "toolbar";
 export type WorkingCellAddress = Readonly<{ definitionRevision: string; occurrence: number; index: number; row: number; column: number }>;
-export type WorkingCellSeed = WorkingCellAddress & Readonly<{ currentValue: number; units: string | null }>;
+export type WorkingCellSeed = WorkingCellAddress & Readonly<{ currentValue: number; units: string | null; currentRawValue?: number; currentRawOffset?: number }>;
 export type WorkingEditCapability = Readonly<{
   state: "EDIT_QUALIFIED" | "VIEW_ONLY";
   revision: string | null;
@@ -22,6 +23,7 @@ export type WorkingDefinitionSeed = Readonly<{
   availability: "available" | "unavailable" | "quarantined";
   capability: WorkingEditCapability;
   cells: readonly WorkingCellSeed[];
+  storage?: WorkingStorageLayout;
 }>;
 export type WorkingMutation = Readonly<{
   sequence: number;
@@ -33,6 +35,8 @@ export type WorkingMutation = Readonly<{
   after: readonly number[];
   validation: WorkingValidationState;
   findings: readonly string[];
+  values?: readonly number[];
+  exactRaw?: readonly ExactRawChange[];
 }>;
 export type WorkingCalibration = Readonly<{
   contractVersion: typeof WORKING_CALIBRATION_CONTRACT;
@@ -66,7 +70,7 @@ function identity(input: Pick<WorkingCalibration, "ownerScope" | "vehicleId" | "
   return { ownerScope: input.ownerScope, vehicleId: input.vehicleId, currentDatasetId: input.currentDatasetId, currentDatasetRevision: input.currentDatasetRevision, romLayoutId: input.romLayoutId, relationshipRevision: input.relationshipRevision, definitionSetRevision: input.definitionSetRevision };
 }
 function revise(calibration: Omit<WorkingCalibration, "workingCalibrationRevision" | "state" | "validation">, definitions = definitionSeeds.get(calibration as object)): WorkingCalibration {
-  const applied = calibration.mutations.slice(0, calibration.cursor), material = { identity: identity(calibration), mutations: applied.map(({ sequence, operation, operand, targets, before, after, validation, findings }) => ({ sequence, operation, operand, targets, before, after, validation, findings })), cursor: calibration.cursor };
+  const applied = calibration.mutations.slice(0, calibration.cursor), material = { identity: identity(calibration), mutations: applied.map(({ sequence, operation, operand, targets, before, after, validation, findings, values, exactRaw }) => ({ sequence, operation, operand, targets, before, after, validation, findings, ...(values ? { values } : {}), ...(exactRaw ? { exactRaw } : {}) })), cursor: calibration.cursor };
   const revised: WorkingCalibration = freeze({ ...calibration, workingCalibrationRevision: `working-calibration-revision:${hash(material)}`, state: applied.length ? "dirty" as const : "unchanged" as const, validation: severity(applied.map((item) => item.validation)) });
   if (definitions) definitionSeeds.set(revised, definitions);
   return revised;
@@ -105,16 +109,82 @@ function validate(definition: WorkingDefinitionSeed | undefined, value: number):
   return freeze({ state: findings.length ? "BLOCKED" : definition?.capability.warnings.length ? "WARNING" : "VALID", findings: findings.length ? findings : [...(definition?.capability.warnings ?? [])] });
 }
 
-export function applyWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; source?: WorkingEditSource; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[]; updatedAt: string }>): WorkingEditResult {
-  if (!input.targets.length) return freeze({ status: "blocked", calibration, findings: ["At least one cell must be selected."] });
-  if (!Number.isFinite(input.operand) || !Number.isFinite(Date.parse(input.updatedAt))) return freeze({ status: "blocked", calibration, findings: ["Edit operand and timestamp must be valid."] });
-  const definitions = input.definitions ?? definitionSeeds.get(calibration) ?? [], unique = [...new Map(input.targets.map((item) => [addressKey(item), item])).values()].sort((a, b) => addressKey(a).localeCompare(addressKey(b))), before: number[] = [], after: number[] = [], findings: string[] = [], states: WorkingValidationState[] = [];
-  for (const target of unique) { const definition = definitions.find((item) => item.definitionRevision === target.definitionRevision && item.occurrence === target.occurrence), cell = currentCell(definitions, target); if (!cell || !definition || target.index < 0 || target.index >= definition.rows * definition.columns || target.row !== Math.floor(target.index / definition.columns) || target.column !== target.index % definition.columns) { findings.push("Cell coordinates are outside the bound Table dimensions."); continue; } const prior = workingCellValue(calibration, target, cell.currentValue)!, next = input.operation === "assign" ? input.operand : input.operation === "delta" ? prior + input.operand : prior * (1 + input.operand / 100); const result = validate(definition, next); before.push(prior); after.push(next); states.push(result.state); findings.push(...result.findings); }
-  if (findings.length && (states.includes("BLOCKED") || before.length !== unique.length)) return freeze({ status: "blocked", calibration, findings: [...new Set(findings)] });
-  const history = calibration.mutations.slice(0, calibration.cursor), mutation = freeze({ sequence: history.length + 1, operation: input.operation, source: input.source ?? "toolbar", operand: input.operand, targets: unique, before, after, validation: severity(states), findings: [...new Set(findings)] });
-  return Object.freeze({ status: "applied" as const, calibration: revise({ ...calibration, mutations: [...history, mutation], cursor: history.length + 1, updatedAt: input.updatedAt }, definitions) });
+export type WorkingEditInput = Readonly<{ operation: WorkingEditOperation; source?: WorkingEditSource; operand: number;
+  targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[]; values?: readonly number[]; recordExactRaw?: boolean }>;
+export function applyWorkingEdit(calibration: WorkingCalibration, input: WorkingEditInput & { updatedAt: string }): WorkingEditResult {
+  const blocked = (finding: string): WorkingEditResult => Object.freeze({ status: "blocked", calibration, findings: [finding] });
+  if (!["assign", "raw", "delta", "percentage", "multiply", "matrix", "revert", "interpolate-horizontal", "interpolate-vertical"].includes(input.operation)) return blocked("Unsupported edit operation.");
+  if (!input.targets.length || input.targets.length > (input.recordExactRaw ? MAX_EDIT_CELLS : 16384)) return blocked("Select between 1 and 4096 cells for a new edit.");
+  if (!Number.isFinite(input.operand) || !Number.isFinite(Date.parse(input.updatedAt))) return blocked("Edit operand and timestamp must be valid.");
+  if (calibration.cursor >= 4096 || calibration.mutations.slice(0,calibration.cursor).reduce((n,m) => n+m.targets.length,0)+input.targets.length > 16384)
+    return blocked("Working history reached its bounded mutation limit. Save or restore an earlier durable revision; history was preserved.");
+  const definitions = input.definitions ?? definitionSeeds.get(calibration) ?? [];
+  const unique = [...new Map(input.targets.map(item => [addressKey(item),item])).values()].sort((a,b) => addressKey(a).localeCompare(addressKey(b)));
+  if (unique.length !== input.targets.length) return blocked("Repeated cell addresses are not permitted.");
+  const requested = new Map(input.targets.map((t,i) => [addressKey(t),input.values?.[i]]));
+  if (input.operation === "matrix" && (!input.values || input.values.length !== input.targets.length || input.values.some(v => !Number.isFinite(v)))) return blocked("Matrix values must exactly match the selected cells.");
+  const before: number[] = [], after: number[] = [], raw: ExactRawChange[] = [], findings: string[] = [], states: WorkingValidationState[] = [];
+  let rectangle: ReturnType<typeof selectedRectangle> | null = null;
+  if (input.operation.startsWith("interpolate-")) {
+    try { rectangle = selectedRectangle(input.targets); } catch (error) { return blocked((error as Error).message); }
+    if (input.operation === "interpolate-horizontal" ? rectangle.columns < 2 : rectangle.rows < 2) return blocked("Interpolation needs two endpoints on the selected structural direction.");
+  }
+  for (const target of unique) {
+    const definition = definitions.find(item => item.definitionRevision === target.definitionRevision && item.occurrence === target.occurrence), cell = currentCell(definitions,target);
+    if (!cell || !definition || !Number.isSafeInteger(target.index) || target.index < 0 || target.index >= definition.rows*definition.columns ||
+      target.row !== Math.floor(target.index/definition.columns) || target.column !== target.index%definition.columns) return blocked("Cell coordinates are outside the bound Table dimensions.");
+    const prior = workingCellValue(calibration,target,cell.currentValue)!;
+    let next: number;
+    switch(input.operation) {
+      case "assign": next=input.operand; break;
+      case "raw": { const inverse=definition.capability.inverse; if(!inverse || !Number.isSafeInteger(input.operand)) return blocked("Raw entry requires an exact integer and qualified conversion."); next=input.operand*inverse.scale+inverse.offset; break; }
+      case "delta": next=prior+input.operand; break;
+      case "percentage": next=prior*(1+input.operand/100); break;
+      case "multiply": next=prior*input.operand; break;
+      case "matrix": next=requested.get(addressKey(target))!; break;
+      case "revert": next=cell.currentValue; break;
+      default: {
+        const horizontal=input.operation === "interpolate-horizontal", r=rectangle!;
+        const endpoints=[0,(horizontal ? r.columns : r.rows)-1].map(step => {
+          const row=horizontal ? target.row : r.top+step, column=horizontal ? r.left+step : target.column;
+          const address={...target,row,column,index:row*definition.columns+column}, current=currentCell(definitions,address);
+          return current ? workingCellValue(calibration,address,current.currentValue) : null;
+        });
+        if (endpoints.some(v => v === null)) return blocked("Interpolation endpoints are unavailable.");
+        const fraction=(horizontal ? target.column-r.left : target.row-r.top)/((horizontal ? r.columns : r.rows)-1);
+        next=endpoints[0]!+(endpoints[1]!-endpoints[0]!)*fraction;
+      }
+    }
+    const result=validate(definition,next);
+    if(result.state === "BLOCKED") return blocked(result.findings.join(" "));
+    if(input.recordExactRaw) {
+      try { raw.push(exactRawChange(definition,target,prior,next)); next=exactWorkingValue(definition,next).engineering; }
+      catch(error) { return blocked((error as Error).message); }
+    }
+    before.push(prior); after.push(next); states.push(result.state); findings.push(...result.findings);
+  }
+  // A sparse edit cannot write two incompatible representations of a shared byte.
+  if (input.recordExactRaw) {
+    const locations=new Set<number>();
+    const previous=new Map<number,string>();
+    for(const m of calibration.mutations.slice(0,calibration.cursor)) m.exactRaw?.forEach((change,i)=> {
+      for(let b=0;b<change.afterBytes.length;b++) previous.set(change.offset+b,addressKey(m.targets[i]));
+    });
+    for(const [index,change] of raw.entries()) for(let i=0;i<change.afterBytes.length;i++) {
+      if(previous.has(change.offset+i) && previous.get(change.offset+i)!==addressKey(unique[index])) return blocked("Raw bytes overlap another edited Definition occurrence; no alias merge is qualified.");
+      if(locations.has(change.offset+i)) return blocked("Overlapping raw cells are mutation-prohibited."); locations.add(change.offset+i);
+    }
+  }
+  const history=calibration.mutations.slice(0,calibration.cursor);
+  const mutation=freeze({ sequence:history.length+1,operation:input.operation,source:input.source ?? "toolbar",operand:input.operand,
+    targets:unique,before,after,validation:severity(states),findings:[...new Set(findings)],
+    ...(input.operation === "matrix" ? {values:unique.map(t => requested.get(addressKey(t))!)} : {}), ...(input.recordExactRaw ? {exactRaw:raw} : {}) });
+  const revised=revise({...calibration,mutations:[...history,mutation],cursor:history.length+1,updatedAt:input.updatedAt},definitions);
+  if(input.recordExactRaw && new TextEncoder().encode(JSON.stringify(revised)).byteLength > 2*1024*1024)
+    return blocked("Working revision exceeds 2 MiB. No cells changed; existing history is preserved.");
+  return Object.freeze({status:"applied",calibration:revised});
 }
-export function previewWorkingEdit(calibration: WorkingCalibration, input: Readonly<{ operation: WorkingEditOperation; source?: WorkingEditSource; operand: number; targets: readonly WorkingCellAddress[]; definitions?: readonly WorkingDefinitionSeed[] }>): WorkingEditPreview {
+export function previewWorkingEdit(calibration: WorkingCalibration, input: WorkingEditInput): WorkingEditPreview {
   const result = applyWorkingEdit(calibration, { ...input, updatedAt: calibration.updatedAt });
   if (result.status === "blocked") return freeze({ validation: "BLOCKED", findings: result.findings, before: [], after: [] });
   const mutation = result.calibration.mutations[result.calibration.cursor - 1]!;
@@ -123,5 +193,14 @@ export function previewWorkingEdit(calibration: WorkingCalibration, input: Reado
 export function undoWorkingEdit(calibration: WorkingCalibration, updatedAt: string): WorkingCalibration { return calibration.cursor === 0 ? calibration : revise({ ...calibration, cursor: calibration.cursor - 1, updatedAt }, definitionSeeds.get(calibration)); }
 export function redoWorkingEdit(calibration: WorkingCalibration, updatedAt: string): WorkingCalibration { return calibration.cursor >= calibration.mutations.length ? calibration : revise({ ...calibration, cursor: calibration.cursor + 1, updatedAt }, definitionSeeds.get(calibration)); }
 export function listWorkingChanges(calibration: WorkingCalibration, definitions: readonly WorkingDefinitionSeed[] = definitionSeeds.get(calibration) ?? []) { const addresses = [...new Map(calibration.mutations.slice(0, calibration.cursor).flatMap((mutation) => mutation.targets).map((address) => [addressKey(address), address])).values()]; return freeze(addresses.flatMap((address) => { const cell = currentCell(definitions, address); if (!cell) return []; const delta = workingCellDelta(calibration, address, cell.currentValue)!; return delta.delta === 0 ? [] : [{ ...delta, address }]; })); }
-export function workingDefinitionHasChanges(calibration: WorkingCalibration, definitionRevision: string, occurrence: number): boolean { return calibration.mutations.slice(0, calibration.cursor).some((mutation) => mutation.targets.some((target) => target.definitionRevision === definitionRevision && target.occurrence === occurrence)); }
-export function workingChangedDefinitionKeys(calibration: WorkingCalibration): readonly string[] { return freeze([...new Set(calibration.mutations.slice(0, calibration.cursor).flatMap((mutation) => mutation.targets.map((target) => `${target.definitionRevision}:${target.occurrence}`)))].sort()); }
+export function workingDefinitionHasChanges(calibration: WorkingCalibration, definitionRevision: string, occurrence: number): boolean {
+  return workingChangedDefinitionKeys(calibration).includes(`${definitionRevision}:${occurrence}`);
+}
+export function workingChangedDefinitionKeys(calibration: WorkingCalibration): readonly string[] {
+  const values=new Map<string,{definition:string;current:number;working:number}>();
+  for(const mutation of calibration.mutations.slice(0,calibration.cursor)) mutation.targets.forEach((target,i)=> {
+    const key=addressKey(target), prior=values.get(key);
+    values.set(key,{definition: `${target.definitionRevision}:${target.occurrence}`,current:prior?.current ?? mutation.before[i],working:mutation.after[i]});
+  });
+  return freeze([...new Set([...values.values()].filter(v=>v.current!==v.working).map(v=>v.definition))].sort());
+}

@@ -4,7 +4,9 @@ import fs from "node:fs";
 const read = (name: string) => fs.readFileSync("app/dashboard/vehicles/[id]/calibration/" + name, "utf8");
 const controller = read("shared-workspace-client.tsx"), renderer = read("workshop-client.tsx"), panel = read("working-calibration-panel.tsx");
 test("one shared workspace exposes governed Working controls for both evidence states", () => {
-  for (const label of ["Create Working Calibration", "Set value", "Add / subtract", "Percentage change", "Undo", "Redo"]) assert.ok(panel.includes(label));
+  for (const label of ["Create Working Calibration", "Set engineering value", "Set raw integer", "Add / subtract", "Percentage increase / decrease",
+    "Multiply by factor", "Paste matrix", "Revert selected to Current", "Interpolate columns (structural)", "Interpolate rows (structural)", "Undo", "Redo"]) assert.ok(panel.includes(label), label);
+  for (const label of ["Save durable revision", "Reload durable head", "Restore revision"]) assert.ok(controller.includes(label), label);
   assert.match(controller, /displayMode !== "working"/); assert.match(controller, /applyWorkingEdit/); assert.match(controller, /EDIT_QUALIFIED/);
   assert.doesNotMatch(controller, /if\s*\([^)]*(?:N54|B58|S58|I8A0S|00003076501103)/);
 });

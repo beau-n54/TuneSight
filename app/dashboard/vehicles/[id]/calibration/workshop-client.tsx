@@ -26,7 +26,7 @@ export function TableEvidenceFilter({ search, onSearch, filter, onFilter, refere
 export function Grid({ model, zoom = 1, onZoom, selected, onSelect, canEdit, onNavigate, onCommit, onEditingChange, onDraftCancelled }: {
   zoom?: number; onZoom?(zoom: number): void;
   model: SharedTablePresentation; selected: readonly number[]; onSelect(index: number, region?: boolean): void; canEdit: boolean;
-  onNavigate(index: number): void; onCommit(index: number, value: number): ReturnType<Parameters<typeof DirectGridCell>[0]["onCommit"]>;
+  onNavigate(index: number, region?: boolean): void; onCommit(index: number, value: number): ReturnType<Parameters<typeof DirectGridCell>[0]["onCommit"]>;
   onEditingChange?(index: number, editing: boolean): void; onDraftCancelled?(): void;
 }) {
   const byCoordinate = new Map(model.cells.map(cell => [cell.row + ":" + cell.column, cell]));

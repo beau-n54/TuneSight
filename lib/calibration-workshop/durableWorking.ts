@@ -46,7 +46,8 @@ export function replayDurableWorking(value: unknown, seed: WorkingCalibration,
     !Number.isFinite(Date.parse(proposed.updatedAt))) throw Error("WORKING_INVALID_PAYLOAD");
   let cells = 0;
   for (const mutation of proposed.mutations) {
-    if (!mutation || !["assign", "delta", "percentage"].includes(mutation.operation) ||
+    if (mutation && !["assign", "delta", "percentage"].includes(mutation.operation) && !mutation.exactRaw) throw Error("WORKING_INVALID_MUTATION");
+    if (!mutation || !["assign", "raw", "delta", "percentage", "multiply", "matrix", "revert", "interpolate-horizontal", "interpolate-vertical"].includes(mutation.operation) ||
       !Array.isArray(mutation.targets) || !mutation.targets.length || (cells += mutation.targets.length) > 16384 ||
       mutation.targets.some((t: WorkingCellAddress) => !t || typeof t.definitionRevision !== "string" ||
         ![t.occurrence, t.index, t.row, t.column].every(n => Number.isSafeInteger(n) && n >= 0))) throw Error("WORKING_INVALID_MUTATION");

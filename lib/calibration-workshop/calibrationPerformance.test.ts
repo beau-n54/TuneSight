@@ -38,6 +38,7 @@ hook.deregister();
 
 const pagePath = "app/dashboard/vehicles/[id]/calibration/page.tsx";
 const routePath = "app/api/calibration-workshop/projection/route.ts";
+const workingRoutePath = "app/api/calibration-workshop/working/route.ts";
 // Escape the literal App Router brackets rather than matching directories named i or d.
 const pagePattern = "app/dashboard/vehicles/[[]id[]]/calibration/page.tsx";
 const vercelConfig = JSON.parse(fs.readFileSync("vercel.json", "utf8"));
@@ -80,8 +81,8 @@ before(async () => {
 
 // These are configuration guards. Region assignment also requires inspection of
 // the real Vercel builder output; Next static analysis alone is not deployment proof.
-for (const entry of [pagePath, routePath]) test(`Phase 1: Vercel Sydney target preserves Node/duration for ${entry}`, () => {
-  const pattern = entry === pagePath ? pagePattern : routePath;
+for (const entry of [pagePath, routePath, workingRoutePath]) test(`Calibration: Vercel Sydney target preserves Node/duration for ${entry}`, () => {
+  const pattern = entry === pagePath ? pagePattern : entry;
   assert.equal(path.posix.matchesGlob(entry, pattern), true);
   assert.deepEqual(vercelConfig.functions[pattern], { regions: ["syd1"] });
   const source = ts.createSourceFile(entry, fs.readFileSync(entry, "utf8"), ts.ScriptTarget.Latest, true);
@@ -100,7 +101,7 @@ for (const entry of [pagePath, routePath]) test(`Phase 1: Vercel Sydney target p
 test("Phase 1: region scope, existing page dispatch and projection authentication stay bounded", () => {
   assert.deepEqual(vercelConfig, {
     $schema: "https://openapi.vercel.sh/vercel.json",
-    functions: { [routePath]: { regions: ["syd1"] }, [pagePattern]: { regions: ["syd1"] } },
+    functions: { [routePath]: { regions: ["syd1"] }, [workingRoutePath]: { regions: ["syd1"] }, [pagePattern]: { regions: ["syd1"] } },
   });
   const files = (root: string): string[] => fs.readdirSync(root, { withFileTypes: true }).flatMap(entry => {
     const path = root + "/" + entry.name;
@@ -109,7 +110,7 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   const appFiles = files("app");
   const patterns = Object.keys(vercelConfig.functions);
   const matched = appFiles.filter(file => patterns.some(pattern => path.posix.matchesGlob(file, pattern)));
-  assert.deepEqual(matched.sort(), [pagePath, routePath].sort());
+  assert.deepEqual(matched.sort(), [pagePath, routePath, workingRoutePath].sort());
   for (const other of ["i", "d", "another-id", "[vehicleId]"]) {
     assert.equal(path.posix.matchesGlob(pagePath.replace("[id]", other), pagePattern), false);
   }

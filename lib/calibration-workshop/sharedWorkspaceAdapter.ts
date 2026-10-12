@@ -146,7 +146,12 @@ export function resolveSharedWorkingDefinition(workshop: SharedWorkspaceWorkshop
 export function resolveProjectedWorkingDefinition(workshop: WorkspaceSelectionSource, projection: WorkspaceTableProjection): WorkingDefinitionSeed {
   const { definitionRevision, occurrence } = projection.selection;
   const detail = currentRendererDefinition(workshop, projection);
+  const layer = projection.slots.current;
+  const raw = layer.rawRepresentation ?? ("rawEvidence" in layer ? layer.rawEvidence as SharedTableProjection["slots"]["current"]["rawEvidence"] : null);
+  const storage = raw?.datatype === "integer" && raw.widthBits && raw.signed !== null && raw.endianness
+    ? { widthBits: raw.widthBits, signed: raw.signed, endianness: raw.endianness } : undefined;
   return { definitionRevision, occurrence, rows: detail.rows, columns: detail.columns,
+    ...(storage ? { storage } : {}),
     availability: detail.availability === "current_available" ? "available" : detail.availability === "unavailable_quarantined" ? "quarantined" : "unavailable",
     capability: detail.editCapability, cells: detail.cells.map(cell => ({ ...cell, definitionRevision, occurrence })) };
 }
