@@ -6,6 +6,14 @@
 
 Part of the [ratified programme](README.md). Slice labels below are planning references, not final WP or TS-RAT allocations. No slice is authorised by this document. Future packages must satisfy the [Work Package framework](../../08-engineering-work-packages/README.md): objective, scope, owners, contracts, dependencies, implementation/validation/regression requirements, acceptance, exclusions and completion definition.
 
+## Current completion disposition — 12 October 2026
+
+[TS-RAT-028](../../07-engineering-governance-records/engineering-ratification-register.md#ts-rat-028) records R02 U2–U6 functional closure and separately bounded R03 performance closure after authenticated N54, B58 Gen1 and Supra Production gates passed. U0/U1 remain accepted predecessors. Shared Grid/Inspector, genuine linked 2D/3D, Standard/Engineer and governed guidance, exact UI restoration, on-demand payloads and retirement of duplicate production presentation are complete within this sequence. The three original U4 assertions pass unchanged; the final reconciled suite is 1,493 cases, 1,491 passing and two authorised optional fixture skips, with zero unresolved failures.
+
+Final first/restored interactive times are 4.510/2.193/1.805 seconds; retained-byte warm medians 1.199/1.175/1.162 seconds; new Table medians 695/819/847 ms; cached medians 60/61/69 ms with no extra request. N54 first page/API are prewarmed, not a claimed genuine cold start. Exact application lineage, timing methods, private one-projection payload, production verification and limitations are recorded in TS-RAT-028 and the [living Project Status](../../07-engineering-governance-records/engineering-project-status.md).
+
+The ratified sequence, original checkpoint requirements and September authorisation statements below remain historical architecture evidence. In particular, the former “current three presentation failures” are now satisfied by unchanged passing assertions; no normative contract is weakened. Existing Working storage remains intact, subscriber data was not changed, and browser-only Working does not satisfy the separate professional server-revision/collaboration gate. Export/checksum, Flash, Suggested generation, DTC, dyno and all R04/later implementation remain outside this closure and unauthorised.
+
 ## Common execution and rollback rules
 
 Every slice reuses the accepted vehicle-owned evidence, exact identity, Working mutation engine and persistence validation. It must not simultaneously change qualification, provider materialisation and presentation. Retain the last Founder-accepted runtime as a rollback point; use a bounded presentation dispatch/feature switch only if explicitly authorised, never a platform-specific product fork. No simultaneous old/new writer to Working storage.

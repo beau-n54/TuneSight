@@ -1620,6 +1620,79 @@ The [living project status](engineering-project-status.md) and [audit reconcilia
 ---
 
 
+### TS-RAT-028
+
+| Field | Record |
+|---|---|
+| Date | 12 October 2026 |
+| Artefact Type | Bounded Implementation, Performance and Production Closure |
+| Artefact Name | R02 Calibration Workspace Closure and R03 Calibration Performance Closure |
+| Authority | Founder's explicit R02–R03 programme and continuation instructions; conditional implementation, validation, normal push and governance authority exercised after the stated Production gates passed |
+| Disposition | R02 and R03 are separately bounded, jointly released stages. U2–U6 functional migration and the R03 first/restored-navigation gates are complete within this scope |
+| Final Application | `28ee54edc7c0cf95f8773d04b7c83e644a451870` — Build compact Calibration material without temporary grids |
+| Production | Automatic Vercel Ready, canonical alias verified against this exact source commit; no manual deployment |
+| Historical Effect | TS-RAT-001 through TS-RAT-027 and the historical WP-003 Engineering Hold text are preserved byte-for-byte |
+| Further Authority | R04 and later stages remain unauthorised; the wider project audit and professional/output/hardware/launch gates remain open |
+
+**Release lineage**
+
+| Application commit | Subject / bounded purpose | Parent |
+|---|---|---|
+| `285f339d88aae80c0f66e8a7eea2898b44642dd7` | Complete Calibration workspace migration | `9b94c16130b4b820e61a56b214396a9430fed727` |
+| `49b729a154bfa46378d35040c911e3588f85c67b` | Optimise Calibration workspace performance | `285f339d88aae80c0f66e8a7eea2898b44642dd7` |
+| `97023eff7fdf3146c983abfce209edc9e586b45a` | Isolate Calibration restoration from upload qualification | `49b729a154bfa46378d35040c911e3588f85c67b` |
+| `bc0f6dbf87509c224f06fdae8b2344f826013416` | Restore exact Calibration selection in one session read | `97023eff7fdf3146c983abfce209edc9e586b45a` |
+| `19d98f51ad092cde4b8b30430ac27a2f3c77a0df` | Overlap scoped Calibration discovery and workspace loading | `bc0f6dbf87509c224f06fdae8b2344f826013416` |
+| `a66868ebab3fd2563b8fd2825b20511505f774e3` | Keep Calibration bootstrap independent of workspace rendering | `19d98f51ad092cde4b8b30430ac27a2f3c77a0df` |
+| `46ea23f04394d98e51e6290a88ac46f47bff1c54` | Overlap version-verified Calibration session reads | `a66868ebab3fd2563b8fd2825b20511505f774e3` |
+| `5ea498318504f7a481b52f9dd1a70c1fd7fd8478` | Avoid repeated Calibration reconstruction and authentication | `46ea23f04394d98e51e6290a88ac46f47bff1c54` |
+| `28ee54edc7c0cf95f8773d04b7c83e644a451870` | Build compact Calibration material without temporary grids | `5ea498318504f7a481b52f9dd1a70c1fd7fd8478` |
+
+The first navigation correction is a direct child of the accepted `97023eff7fdf3146c983abfce209edc9e586b45a` checkpoint. Subsequent narrow follow-ups resolve observed Production misses under the continuation authority; none rewrites the accepted history. Earlier correction results (N54 6.09, 5.92, 5.37, 5.09 and 5.11 seconds) were retained as failed gates, not declared closed. Only the final release below satisfies closure.
+
+**R02 migration and R03 boundaries**
+
+The shared production Grid, Cell Inspector, genuine linked 2D/3D, Standard/Engineer modes, governed Understand/Engineering Detail/Related Tables and versioned UI restoration replace the legacy production presentation paths. Existing Working mutation/replay and persistence owners remain authoritative. Exact Dataset, Definition revision and occurrence selection, immutable Reference/Current, separate Working, explicit unavailability, BMW borders, Explorer sizing and independent scrolling remain intact. The [ratified migration sequence](<../05 engineering-architecture-bible/11-universal-product-experience-and-calibration-workspace/06-migration-work-packages.md>) is complete only within U0–U6; professional server revisions/collaboration are outside that sequence and remain unfinished.
+
+An authenticated thin manifest now lets the browser submit bounded identifier-only restoration hints before a default Table is projected. The read-only guarded API validates owner, vehicle, actual fresh session pointer, Dataset and exact Definition occurrence; hints convey no authority. Workspace code loads alongside that request. One session decode/reconstruction and one exact selected projection replace duplicate page/API session work and a discarded default. The initial browser payload contains a metadata catalogue plus one projection, never all Table cell/axis arrays. The full stored session remains approximately 20–30 MiB; no persisted format migration, source rewrite or database change was made.
+
+Retained session bytes are bounded to four entries, 96 MiB and 120 seconds with exact owner/vehicle/session/version scope and fresh metadata validation on every read. Concurrent first reads are bounded and require matching strong download ETag, complete metadata stamp, post-download version verification and exact byte length. Missing/mismatched/weak version proof fails closed. Every decode gets independent bytes. Completed freezer subtrees use weak membership without retaining evidence; caller-owned copies and shallow-frozen input counterexamples pass. N54 compact material is built directly without temporary full Grid/Inspector cell objects, with byte-identical full model output. No new cross-owner decoded cache or persistent derivative is introduced. Request authority is reused only inside its freshly authenticated invocation; ownership, entitlement and storage validation remain mandatory.
+
+**Final validation**
+
+Reconciled Node regression: **1,493 cases; 1,491 pass; zero unresolved failures; two authorised optional skips**. The final import-closure rerun covers 308 passing cases; other applicable results are reused only for byte-identical source/input dependencies. The 40 unchanged exhaustive BMW/XDF files contribute 213 cases. Eleven restricted-environment synthetic bridge failures are resolved by the permitted-loopback 29/29 rerun and are not treated as application failures or physical vehicle evidence. Four duplicate test names retain their distinct case counts. Type-check (no emit, incremental disabled), whole-repository lint, isolated network-enabled Production build, UTF-8 and tracked/untracked whitespace checks pass. The existing Next middleware deprecation notice remains a separate follow-up, not a build failure.
+
+The two skips are `optional private ROM library metadata remains internally consistent` (ROM_LIBRARY_ROOT not configured) and `Founder physical MapSwitch creates one immutable unavailable quarantine and an exact Source Authority candidate` (physical fixture unavailable on this host). Neither is represented as passing. The three former U4 tests in [tablePresentation.test.ts](../../lib/calibration-workshop/tablePresentation.test.ts) pass with their original file/expectations unchanged: Table terminology with authoritative Map titles, governed beginner/engineering fields, and explicit unavailability without generated education.
+
+The six real-controller browser scenarios retain passing evidence for exact restoration, one Strict Mode request, failure/retry and stale/aborted response rejection; the client implementation bytes remain unchanged by the final server-only optimisations. Accepted dependency evidence remains applicable to the unchanged lockfile: zero Production vulnerabilities; the five development High entries from the single contained braces advisory remain explicitly recorded under TS-RAT-026. This is not a fresh dependency audit or a clean development-tree claim.
+
+**Production timing and verification**
+
+| Workflow | Accepted pre-continuation first/restored | Final first/restored | Warm navigation median | New Table median | Cached reopening median |
+|---|---:|---:|---:|---:|---:|
+| N54 comparison | 9.871 s | 4.510 s | 1.199 s | 695 ms | 60 ms |
+| B58 Gen1 Current-only | 5.392 s | 2.193 s | 1.175 s | 819 ms | 61 ms |
+| Supra DTF Current-only | 2.612 s | 1.805 s | 1.162 s | 847 ms | 69 ms |
+
+Earlier first/restored figures are accepted browser-tool wall measurements; final first/restored and warm figures use in-page navigation-to-interactive instrumentation after exact restoration, actual selected-surface/Inspector readiness and two animation frames. Final first tool wall times are 4.530/2.212/1.828 seconds; warm retained-byte wall medians are 1.222/1.204/1.188 seconds. New Table and cached figures retain the same tool-wall method as the accepted baseline. The baseline warm/new/cached medians are respectively N54 2.236 s/787 ms/67 ms, B58 2.206 s/968 ms/66 ms and Supra 1.615 s/953 ms/68 ms. No measured median regression exceeds 10%; all stated gates pass. These are bounded observations, not a universal latency SLA.
+
+Three retained-byte warm navigation samples per anchor are N54 1199/1495/1147 ms, B58 1175/1134/1367 ms and Supra 1243/1162/1140 ms. Separate subsequent-navigation storage-miss observations are 2984/1533/1541 ms; they are not counted as retained-cache hits. New Table samples are N54 786/695/660 ms, B58 831/819/777 ms and Supra 842/847/882 ms. Cached samples are N54 60/60/59 ms, B58 106/58/61 ms and Supra 69/75/65 ms. The request sequence during nine measured navigations, nine new Table opens and nine cached opens contains exactly nine bootstrap and nine new-Table POSTs, all 200, with no extra cached-opening request.
+
+The final first N54 page and API are **Hot (prewarmed)** in Vercel, not genuine cold starts. No final genuine-cold sample was forced or claimed; the earlier genuine-cold observation remains separate historical evidence. N54's final manifest effect is 2140 ms; API headers 2166 ms, body 57 ms, parse 2 ms, workspace-ready 141 ms. Server phases include entitlement 148 ms, ownership 33 ms, discovery 311 ms (overlapped), metadata 167 ms (overlapped), download 788 ms, post-read version 77 ms, decode 310 ms, reconstruction 96 ms and selected projection 8 ms. Numeric-only timings reveal no private paths/tokens/values. Controlled alternating reconstruction improved N54 29.38 to 17.65 ms in a local process; that computation benchmark is distinct from Production browser timing and full-model byte parity passed all three admitted anchors.
+
+First document encoded sizes are 4206/4194/4191 bytes. API encoded sizes are 87783/129697/135357 bytes and decoded sizes 1330196/1749019/1788256 bytes (N54/B58/Supra). All responses remain private, no-store. Metadata still has a material cost, explicitly measured rather than presented as zero.
+
+Authenticated read-only verification passed Beau's E90 N54, Beau's F30 B58 Gen1 and Christos's Supra DTF on [canonical Production](https://tunesight-beta.vercel.app). Saved labels remain N54b30, B58 Gen 1 and B58 Gen 2; exact uploaded software remains I8A0S, 00003076501103 and 00005D553C8C05. Dataset IDs/revisions, container and Definition-source identities match the accepted baseline. Qualified connected controller identity remains absent, never substituted from offline software. Exact restoration, shell, borders, scrolling Explorer, Grid, Inspector, linked 2D/3D, layer labels, both modes, qualified N54 guidance and honest missing-guidance/Related-Table states pass. N54 Injector Scalar remains explicitly unavailable with no substituted cells. No captured console warning/error occurred. Production evidence is at the supported stacked viewport; this is not new desktop, all-device or physical-car certification.
+
+Working remains not created for all three anchors; no subscriber value, source, vehicle, Working record or database was changed. Browser-only presentation selection/mode preferences changed during read-only testing. Export stays checksum/integrity locked; Flash, Suggested generation, DTC and dyno remain unavailable. Both Calibration functions retain Sydney (syd1), Node.js 24.x and 60-second limits; unrelated placement and configuration are unchanged. [Exact application deployment](https://vercel.com/beau-n54s-projects/tunesight/C7wXqeDT8m26meg9PdVv494S1Jfb) and [immutable application URL](https://tunesight-4e1u2vxmq-beau-n54s-projects.vercel.app) were Ready with the canonical alias assigned to the final application SHA.
+
+**Closure limits**
+
+This entry records satisfaction of the existing conditional Founder authority, not a newly invented post-release Founder observation. The separate governance commit and its automatic Ready deployment are recorded in the final release receipt, avoiding a self-referential future SHA here. Earlier Register entries and the historical WP-003 Hold remain unchanged. The wider audit, server revision/collaboration, complete editing/output, Analysis/Explanation handoffs, hardware distribution and commercial/launch gates remain open. R04 and later work did not begin and gain no authority from this closure.
+
+---
+
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
