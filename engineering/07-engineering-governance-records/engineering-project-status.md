@@ -64,13 +64,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** Security and Trust Production baseline closed under TS-RAT-026; the wider project audit remains open. Accepted Shared Shell, Live Telemetry and Calibration performance releases predate this bounded security package.
+**Current Engineering Phase:** Accepted releases and the complete original project audit reconciled on 12 October 2026. Security and Trust remains closed under TS-RAT-026; unfinished capability, acceptance holds and operational readiness remain explicitly open.
 
-**Current Active Work Package:** Security and Trust Production Closure completed; separate governance release records the matching live acceptance. No next implementation package is activated.
+**Current Active Work Package:** Audit Reconciliation and Existing Release Closure, authorised as governance and evidence only. Documentation release and Founder/Bob review conclude this package; no next implementation package is activated.
 
-**Current Objective:** Preserve the verified Production security posture, source recovery copies, subscriber evidence and independent capability boundaries; record the remaining non-security audit queue truthfully.
+**Current Objective:** Preserve accepted Production scope and ratification history while distinguishing completed bounded releases, internal foundations, partial programmes, unimplemented capability and remaining acceptance/operational gates.
 
-**Next Authorised Objective:** Return the completed closure evidence for Founder and Bob. Accepted-release/remaining-audit reconciliation (audit Proposal A) is proposed next and needs a separate bounded instruction.
+**Next Authorised Objective:** Return the reconciled audit and documentation-release evidence for Founder and Bob. Identity-owner and held-guidance contract rectification is recommended next, but remains proposed and requires a separate bounded instruction.
 
 **Next Subsystem Definition:** No subsystem is newly authorised. U2–U6, broader Analysis/Explanation, professional server revisions, physical bridge/mobile qualification, commercial and launch work retain separate gates.
 
@@ -151,6 +151,27 @@ Standards define stable, assessable and implementation-independent obligations. 
 
 ---
 
+## Audit Reconciliation and Existing Release Closure — 12 October 2026
+
+The [canonical audit-reconciliation report](audits/2026-10-12-audit-reconciliation.html) reconciles the original audit at `cb43823990cb421bd7e8242c01964f7f341804db` with repository and Ready/Current Production checkpoint `25948f2641f4f3c39b8f5c106bd8a1b4a7728b8e`, whose application parent is `65b0652227595547196ae339b9508772ebe255c8`. These are the audited baseline SHAs, not a claim that this later documentation release has the same SHA. The final release receipt records the documentation commit, remote and automatic deployment.
+
+Exactly two commits followed the original audit before this reconciliation: the Security application and governance releases. Earlier U1, telemetry, pairing, installer and Phase 1 releases were already in the original audit and are now reconciled into current governance. No new TS-RAT entry is needed merely to produce this report; TS-RAT-001 through TS-RAT-026 remain byte-for-byte unchanged.
+
+| Status dimension | Current bounded position |
+|---|---|
+| Accepted file-backed identity | WP-003 supported identity interpretation and the WP-004.2 Knowledge/container integration have accepted Founder evidence. Formal WP-003 Engineering Hold disposition and completion ratification remain Founder decisions; this report does not lift the hold. |
+| Accepted Calibration releases | Explicit-session fail-closed recovery, U0 projection and U1 Shared Shell are deployed. The shell consumes U0; BMW borders and the desktop Explorer height correction are Founder accepted. Existing Grid/Inspector/plot adapters remain; U2–U6 are not complete. |
+| Performance | Phase 1 and the corrected Sydney deployment are accepted. Both Calibration functions retain Node.js 24.x, 60-second limits and `syd1`; unrelated functions remain in `iad1`. Navigation improved from about 9.5–14.6 to 2.38–5.11 seconds, and new-table projection from about 6.7–8.2 to 4.59–4.92 seconds. The release is complete; the performance objective is only partially achieved. |
+| Telemetry | Founder physically accepted the F30/B58 Gen1 Windows ENET/local-page path and BMW-coloured gauges. Cadence/gloss comparisons are controlled evidence, not new vehicle-rate qualification. Automatic pairing is deployed and controlled-tested; hosted-to-car/LNA/renewal acceptance remains separate. The Windows installer is an unsigned controlled beta with public `latest:null`, not subscriber-ready distribution. |
+| Security and Analysis truth | TS-RAT-026 closes bounded Auth, server beta entitlement, input/owner/Storage/RLS, source protection, local durability and Analysis truth corrections. It does not implement full Explanation, paid plans, professional server history or launch operations. |
+| Subscriber workflows | Fresh read-only Production checks load N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only. Working remains uncreated in the observed sessions, Current immutable, Export locked and Flash unavailable. The supported browser is 784 × 668 stacked; no new desktop or physical-car qualification is claimed. |
+| Current validation baseline | Accepted Security evidence: 1,378 Node tests, 1,373 passing, three unchanged U4 holds and two named optional skips; type-check, whole-repository lint and builds passed. Historical U0/U1 counts below remain historical. Fresh authorised npm audits still report zero Production vulnerabilities and five development High entries from the one contained `braces` advisory. |
+| Required unfinished work | Three U4 holds; duplicate Working detail keys; identity/source-family and provider provenance; residual latency; U2–U6; server Working revisions and complete editing; checksum/output; Explanation; wider hardware distribution; commercial, recovery and launch work. The report gives every original finding a current disposition and dependency. |
+
+The seven outside-U0 observations are preserved historically. Login timeout/recovery, form metadata and the legacy ROM-library test runner received bounded Security repairs. Supra vehicle-generation/source-family and `observedDmeFamily` semantics remain open. The older dashboard Development Preview sentence remains stale application copy; current-only narrow-column/full device acceptance remains separate from the accepted Explorer height fix. This governance task makes no application repair.
+
+The recommended next package prepares owner contracts and addresses existing presentation defects. It cannot declare full U4 complete ahead of the ratified U2/U3 dependencies. The report's R00–R16 labels are planning references, not allocated Work Packages or implementation authority. Recovery/monitoring is a parallel prerequisite for future data migrations and wider launch; Flash remains last behind independent safety qualification.
+
 ## Security and Trust Production Closure — 12 October 2026
 
 [TS-RAT-026](engineering-ratification-register.md#ts-rat-026) records completion of the explicitly authorised Security and Trust programme. Application `65b0652227595547196ae339b9508772ebe255c8` (parent `cb43823990cb421bd7e8242c01964f7f341804db`) is deployed at https://tunesight-beta.vercel.app with the three ordered security migrations. The managed canary, live owner-isolation/upload/Auth/Storage matrix and three read-only subscriber Calibration workflows passed. The temporary mutation freeze and managed branch have both been removed.
@@ -165,7 +186,7 @@ The real Shared Shell now consumes the U0 projection; older statements below des
 
 Both Calibration functions retain Sydney execution, Node.js 24.x and 60-second maxima. Residual 4–5-second table-projection latency remains accepted follow-up work. The three U4 holds — `Related Table`, `Understand`, `semantic.unavailableReason` — remain unchanged. A pre-existing duplicate React key for repeated Working detail findings was observed in controlled development rendering and remains a separate non-security presentation observation.
 
-Security and Trust is closed only within this scope; the complete project audit, broader beta/paid-product readiness, Explanation, U2–U6, exact connected identity, professional server revision/collaboration, installer/physical coverage and commercial/launch work remain open. No new Export, Flash, Suggested generation, DTC, dyno or vehicle-write capability is enabled. Next proposed work is audit Proposal A, accepted-release and remaining-audit governance reconciliation, followed by separately prioritised owner-contract work; no next implementation begins here.
+Security and Trust is closed only within this scope. The complete original audit is now reconciled in the current record above; broader beta/paid-product readiness, Explanation, U2–U6, exact connected identity, professional server revision/collaboration, installer/physical coverage and commercial/launch work remain open. No new Export, Flash, Suggested generation, DTC, dyno or vehicle-write capability is enabled. No next implementation begins in this reconciliation.
 
 ---
 
@@ -329,9 +350,9 @@ WP-004 Knowledge Implementation
             +-- FOUNDER RATIFIED
             +-- QUALIFIED CALIBRATION RUNTIME AND MANUAL EDITOR IMPLEMENTED
             +-- UNIVERSAL WORKSPACE ARCHITECTURE RATIFIED (TS-RAT-024)
-            +-- U0 INTERNAL PROJECTION COMPLETE, ACCEPTED AND DEPLOYED (TS-RAT-025)
-            +-- NO PRODUCTION UI CONSUMER / VISIBLE SHELL MIGRATION
-            +-- U1 SHARED SHELL PROPOSED, NOT AUTHORISED
+            +-- U0 COMPLETE, ACCEPTED AND DEPLOYED (TS-RAT-025); CONSUMED BY U1
+            +-- U1 SHARED SHELL / BMW BORDERS / EXPLORER ACCEPTED AND DEPLOYED
+            +-- U2-U6 INCOMPLETE; THREE U4 HOLDS RETAINED
             +-- NOT A WP-003 HOLD DEPENDENCY
 ```
 
@@ -392,8 +413,8 @@ Records the exact scope formally approved. Every use of Ratified shall specify w
 | WP-002 Repository Architecture Foundation | Not applicable as a domain architecture | REQUIRES VERIFICATION | REQUIRES VERIFICATION | REQUIRES VERIFICATION | Work Package specification is marked Ratified; completion requires verification |
 | WP-003 Vehicle Identity Implementation | Architecture Ratified | IMPLEMENTED; WP-004.2 Knowledge integration dependency satisfied | Founder production validation completed across the accepted WP-004.2 scope; formal WP-003 hold disposition remains pending | ENGINEERING HOLD pending Founder review | Not ratified as a completed Work Package |
 | WP-004 Knowledge Implementation | Architecture Ratified by Founder | IN PROGRESS; WP-004.1 ratified, WP-004.2 complete and WP-004.3 canonical Knowledge contracts complete | WP-004.2 Engineering Acceptance, Founder Validation and production validation passed; WP-004.3 deterministic contract and synthetic publication validation passed | IN PROGRESS | WP-004.1 and WP-004.2 implementation scopes, WP-004.3 architecture and the WP-004.3 contract reconciliation are ratified; parent Work Package completion has not been declared |
-| WP-004.3 Engineering Calibration Intelligence Architecture | Architecture ratified; universal workspace architecture TS-RAT-024 | Qualified Calibration runtime, Workshop/Manual Editor and bounded semantic groundwork implemented; U0 internal projection complete and deployed without production consumer; visible migration incomplete | Authenticated N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only accepted; U0 48/48 and identity/provider/session 40/40; regression 805 tests, 802 passing, same three held; type-check/lint passed | Broader programme incomplete; U0 accepted and released; U1 proposed but unauthorised | TS-RAT-009/021/022 historical scopes preserved; TS-RAT-023 capability independence; TS-RAT-024 architecture only; TS-RAT-025 bounded U0 implementation/validation/release acceptance |
-| WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | NOT STARTED | Founder Validation Complete | ARCHITECTURE COMPLETE; implementation not authorised | Founder Ratified under TS-RAT-005 |
+| WP-004.3 Engineering Calibration Intelligence Architecture | Architecture ratified; universal workspace TS-RAT-024 | Qualified runtime, Workshop/Manual Editor and bounded semantics exist; U0 consumed by deployed U1 Shared Shell; U2–U6 incomplete | Accepted N54/B58/Supra file workflows and U0/U1 validation; current Security baseline 1,378 tests, 1,373 passing, three U4 holds, two optional skips; current read-only Production smoke passed | Broader programme incomplete; U0/U1 accepted; no next implementation activated | TS-RAT-009/021/022 historical scopes; TS-RAT-023 independence; TS-RAT-024 architecture; TS-RAT-025 U0; later explicit Founder release acceptance does not create a new parent ratification |
+| WP-011.0 Engineering Presentation Intelligence Architecture | RATIFIED; governing architecture for WP-011 | Architecture-only artefact; child implementation statuses are recorded separately | Founder architectural validation complete | ARCHITECTURE COMPLETE; not parent WP-011 implementation completion | Founder Ratified under TS-RAT-005 |
 | WP-011.1 Engineering Graph Intelligence | Governed by ratified WP-011.0 | COMPLETE | Engineering validation and Founder Validation complete | COMPLETE | Founder Ratified under TS-RAT-006; authoritative and closed |
 | WP-011.2 Engineering Evidence Hierarchy | Governed by ratified WP-011.0 | PARTIALLY COMPLETE; accepted presentation-safe hierarchy retained | Founder Validation complete for implemented scope | ENGINEERING HOLD pending WP-007 Explanation coverage, beginning with Lean Under Load | Not Ratified |
 | WP-011.7 Engineering Workspace | ARCHITECTURE COMPLETE; capstone sibling governed by WP-011.0 | IN PROGRESS; Workspace Shell and current Telemetry Workspace presentation implemented | Founder visual and educational validation complete for WP-011.7.1 and the current WP-011.7.2 presentation milestone | IN PROGRESS; remaining slices require separate authority | Not Ratified as a completed Work Package |
@@ -610,19 +631,19 @@ Definition Authority
 
 A source XDF definition requires qualified applicability and semantic validity. Once sufficiently qualified and deterministically decoded, its values constitute authoritative Evidence of the instructions encoded in the exact Calibration revision. Those instructions do not prove actual runtime behaviour; Runtime Evidence establishes what occurred.
 
-The broader Calibration/XDF programme remains incomplete despite the existing Workshop, Manual Editor and qualified evidence paths. TS-RAT-024 now governs the universal workspace migration, preserving distinct Reference/Stock, Current, Suggested and Working states. U0 completion and release are recorded under TS-RAT-025 without changing visible product behavior. U1 and later implementation, server revision persistence and any future Export qualification require their separately bounded authority.
+The broader Calibration/XDF programme remains incomplete despite the existing Workshop, Manual Editor and qualified evidence paths. TS-RAT-024 governs the universal migration, preserving distinct Reference/Stock, Current, Suggested and Working states. TS-RAT-025 records U0 at its then-unconsumed checkpoint; the subsequently accepted U1 now consumes it in Production. U2–U6, server revision persistence and future Export qualification remain separately bounded unfinished work.
 
 ### Historical milestones and current continuation
 
 [TS-RAT-022](engineering-ratification-register.md#ts-rat-022) remains the permanent record of the earlier local XDF extraction and Native Vehicle Data foundation checkpoint. Its five-local-commit status, 99-file census, then-missing Workshop/Manual Editor and then-unstarted applicability statements describe that historical scope, not the current product. Historical work-package files and ratification entries are preserved unchanged.
 
-Current Calibration, U0 completion/release, session integrity, validation, testing and architecture status is recorded in [Current Reconciliation — 21 September 2026](#current-reconciliation--21-september-2026). Vehicle admission remains independent of exact-ROM Calibration coverage under TS-RAT-023. Exact qualified Calibration relationships exist; the universal architecture does not broaden their authority or declare complete platform coverage.
+Current status and all accepted releases are recorded in the [12 October audit reconciliation](audits/2026-10-12-audit-reconciliation.html). The [21 September reconciliation](#current-reconciliation--21-september-2026) remains an explicitly historical U0 checkpoint. Vehicle admission remains independent of exact-ROM coverage under TS-RAT-023; the universal architecture does not broaden qualification or establish complete platform coverage.
 
-THOR and MHD orange remain independent physical-validation targets. Live Telemetry is unfinished; MHD orange and physical live RPM/Boost proof remain outstanding. No synthetic validation or file-backed Calibration workflow is vehicle telemetry proof. Direct Logging, Diagnostics and exact Analysis-to-Calibration handoff remain unfinished separately bounded capabilities; no DTC execution or Flash is authorised here.
+THOR and MHD orange remain independent physical-validation targets. The Founder-accepted F30/B58 Gen1 Windows ENET/local-page telemetry path is real physical evidence; it does not qualify those adapters, all devices or exact connected ROM. Hosted pairing and the unsigned Windows installer retain their separate physical/distribution gates. Complete recording-to-Analysis and exact Analysis-to-Calibration handoff remain unfinished; no DTC execution or Flash is authorised here.
 
 ### Next Authorised Objective
 
-Security and Trust Production Closure is complete under TS-RAT-026. Return this evidence for Founder and Bob; the next audit or implementation work package requires a separately bounded instruction. The 21 September U0 continuation text remains historical, not current U1 authority.
+Security and Trust remains complete under TS-RAT-026. Return the authorised audit-reconciliation documentation release for Founder and Bob. The recommended next owner-contract package requires a new bounded instruction; no future implementation is authorised by this record.
 
 ---
 

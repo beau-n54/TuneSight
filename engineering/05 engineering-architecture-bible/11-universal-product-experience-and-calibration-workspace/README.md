@@ -6,6 +6,12 @@
 
 Ratified by Founder on 20 September 2026 under TS-RAT-024 following Founder and Bob’s final audit. Baseline: `840b75d444f67e22c6003202ebb39e7c17cb403d` — `Enforce fail-closed Calibration sessions`. This set establishes architecture and acceptance contracts only. It authorises no implementation and records no new engineering qualification. “Must” below describes the ratified contract; implementation requires separate Founder authority.
 
+## Current implementation interpretation — 12 October 2026
+
+This seven-document set preserves the architecture-ratification checkpoint of 20 September. Its separate-client, U0-not-yet-authorised and final-diff-review statements describe that historical checkpoint, not current release status. The later bounded U0 implementation was accepted and deployed under TS-RAT-025; U1 now consumes it in the accepted Shared Shell, with BMW borders and the Explorer height correction. U2–U6, broader professional persistence and output capability remain incomplete. The three U4 holds remain explicit. No normative architecture contract or historical ratification is amended by this clarification.
+
+Use the [current Project Status](../../07-engineering-governance-records/engineering-project-status.md) and [canonical audit reconciliation](../../07-engineering-governance-records/audits/2026-10-12-audit-reconciliation.html) for accepted commits, validation, Production evidence and remaining dependencies. This index grants no next implementation authority; full U4 acceptance still follows U2/U3 as specified by the ratified sequence.
+
 ## Universal Product Experience invariant
 
 **Controlling TuneSight-wide product rule:** Every admitted platform receives the same fundamental product-interface structure, navigation and interaction model across Vehicle Dashboard, Logs and Log History, Analysis, Calibration, Live Telemetry, future BMW Coding, future Diagnostics, and future professional and dyno evidence surfaces. Platform, engine, DME, ROM, chassis, source format and evidence availability may change data and capability states, but must not create unrelated versions of the TuneSight product.

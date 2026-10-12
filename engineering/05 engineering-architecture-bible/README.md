@@ -4,7 +4,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Purpose:** Defines the authoritative architectural structure and interpretation of the Engineering Architecture Bible.
 
-**Status:** Consolidated Draft for Founder Review
+**Status:** Founder-ratified architecture — TS-RAT-003; later amendments retain their own recorded authority
 
 # TuneSight
 
@@ -14,7 +14,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 The Engineering Blueprint defines TuneSight's organisation. The Engineering Architecture Bible is the authoritative architectural doctrine defining the enduring responsibilities, boundaries and relationships through which that organisation operates. The Production Contract is the downstream production instrument that implements and enforces this architecture. Engineering Governance controls authorised change.
 
-This consolidated draft preserves previously ratified architectural decisions. It does not supersede those decisions until Founder ratification is recorded through Governance.
+The consolidated Architecture Bible was Founder ratified under [TS-RAT-003](../07-engineering-governance-records/engineering-ratification-register.md#ts-rat-003). Older draft wording in preserved chapter headers is historical; the explicit Register governs architectural status. Ratification of architecture does not prove implementation completion. Current releases and unfinished work are recorded in [Project Status](../07-engineering-governance-records/engineering-project-status.md) and the [12 October audit reconciliation](../07-engineering-governance-records/audits/2026-10-12-audit-reconciliation.html).
 
 ## Engineering Philosophy
 
@@ -56,7 +56,7 @@ The eight Engineering Domains are:
 
 [Vehicle Admission and Capability Independence](10-vehicle-admission-independence.md) is the Founder-ratified prospective clarification that prevents exact-ROM Calibration coverage from becoming a whole-vehicle admission gate while preserving independent capability authority.
 
-[Universal Product Experience and Universal Calibration Workspace](11-universal-product-experience-and-calibration-workspace/README.md) is Founder-ratified architecture under [TS-RAT-024](../07-engineering-governance-records/engineering-ratification-register.md#ts-rat-024), dated 20 September 2026. Its Universal Product Experience invariant applies TuneSight-wide; Calibration is its first formally governed domain application. Vehicle Dashboard, Logs/Log History, Analysis, Live Telemetry, future Coding, Diagnostics and professional/dyno evidence surfaces require their own bounded architecture and migration programmes. This entry does not claim those migrations are complete. U0 is first in principle but remains unauthorised pending a separate Founder implementation instruction.
+[Universal Product Experience and Universal Calibration Workspace](11-universal-product-experience-and-calibration-workspace/README.md) is Founder-ratified architecture under [TS-RAT-024](../07-engineering-governance-records/engineering-ratification-register.md#ts-rat-024), dated 20 September 2026. Its Universal Product Experience invariant applies TuneSight-wide; Calibration is its first formally governed domain application. Vehicle Dashboard, Logs/Log History, Analysis, Live Telemetry, future Coding, Diagnostics and professional/dyno evidence surfaces require their own bounded architecture and migration programmes. This entry does not claim those migrations are complete. U0 is accepted and deployed under TS-RAT-025; the subsequently accepted U1 Shared Shell now consumes it, including the Founder-accepted BMW borders and Explorer correction. U2–U6 remain incomplete and require their separately bounded instructions. The programme’s 20 September baseline text is historical and does not negate later acceptance or grant future implementation authority.
 
 [Cross-Domain Engineering Contracts](00-cross-domain-engineering-contracts.md) are the universal architectural standard by which these owners and consumers exchange qualified engineering truth. They are not a domain, runtime layer, framework or implementation interface.
 
