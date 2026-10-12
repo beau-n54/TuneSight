@@ -28,6 +28,7 @@ import CalibrationTerminologyControl, { CalibrationTerminologyScope, useCalibrat
 import EngineeringNavigationControl from "./engineering-navigation-control";
 import WorkspaceTabs from "./workspace-tabs";
 import WorkingCalibrationPanel, { type CalibrationDisplayMode } from "./working-calibration-panel";
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 
 export type WorkspaceVehicle = Readonly<{ id: string; nickname: string | null; year: number | null; make: string | null; model: string | null; engine_code: string | null }>;
 const button = "rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40";
@@ -43,7 +44,8 @@ function Header({ vehicle, context, evidence, upload, onNavigate }: { onNavigate
   return <><a onClick={onNavigate} href={`/dashboard/vehicles/${vehicle.id}`} className="text-xs text-zinc-400">← Back to Vehicle</a>
     <div className="mt-3 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-widest text-blue-300">Calibration Workspace</p>
       <h1 className="mt-1 text-3xl font-bold">{vehicle.nickname || "Unnamed Vehicle"}</h1>
-      <p className="text-sm text-zinc-400">{vehicle.year} {vehicle.make} {vehicle.model} · {vehicle.engine_code || "Engine unknown"}</p></div>{upload}</div>
+      <p className="text-sm text-zinc-400">{vehicle.year} {vehicle.make} {vehicle.model} · {vehicle.engine_code || "Engine unknown"}</p>
+      <IdentityOwnerSummary vehicle={vehicle} calibration={evidence?.sourceIdentity}/></div>{upload}</div>
     <details className="mt-3 text-xs"><summary className="cursor-pointer">Exact workspace identity</summary><dl className="mt-2 space-y-2 break-all font-mono">
       {Object.entries({ "Owner scope": context.ownerId, Vehicle: context.vehicleId, Session: context.sessionId ?? "No active session", Source: context.sourceMode,
         "Current Dataset": evidence?.projection?.slots.current.dataset?.datasetId ?? "Not established", "Current Dataset revision": evidence?.projection?.slots.current.dataset?.datasetRevision ?? "Not established",

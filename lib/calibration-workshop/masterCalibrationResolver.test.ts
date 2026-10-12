@@ -17,7 +17,7 @@ function binary(name: string): EngineeringBinary {
 }
 
 function connected(identity: string, engineeringBinary: EngineeringBinary): ConnectedRomObservation {
-  const observation = defineEcuIdentityObservation({ sessionId: `resolver:${identity}`, endpointId: "resolver-test", protocol: "file-upload", observedDmeFamily: identity.length === 5 ? "N54" : "B58gen1", softwareIdentity: identity, calibrationIdentity: identity, vin: null, observedAt, capabilityObservations: [], qualification: "observed_unqualified", provenance: "Controlled resolver contract evidence" });
+  const observation = defineEcuIdentityObservation({ sessionId: `resolver:${identity}`, endpointId: "resolver-test", protocol: "file-upload", reportedDmeFamily: identity.length === 5 ? "N54" : "B58gen1", softwareIdentity: identity, calibrationIdentity: identity, vin: null, observedAt, capabilityObservations: [], qualification: "observed_unqualified", provenance: "Controlled resolver contract evidence" });
   return Object.freeze({ observation, trust: "qualified_supplied_evidence", ecuFamily: identity.length === 5 ? "MSD81" : "MG1", binary: Object.freeze({ digest: createHash("sha256").update(engineeringBinary.bytes).digest("hex"), byteLength: engineeringBinary.byteLength, container: engineeringBinary.source.containerType, markers: Object.freeze([]) }), provenance: Object.freeze(["Controlled resolver contract evidence"]), limitations: Object.freeze([]) });
 }
 

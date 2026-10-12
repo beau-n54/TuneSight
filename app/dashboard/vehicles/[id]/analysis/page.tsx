@@ -1,4 +1,6 @@
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
+import { declaredAnalysisPlatform } from "@/lib/identity/identityOwners";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -332,8 +334,8 @@ export default async function AnalysisPage({ params }: PageProps) {
   );
 
   const engineV2 = getEngineV2(latestSummary);
-  if (latestLog && (engineV2?.inputQualification?.contract !== "qualified-source-v1" || engineV2.inputQualification.platform !== "n54" || vehicle.engine_code?.trim().toUpperCase() !== "N54")) {
-    return <main className="min-h-screen bg-black px-6 py-10 text-white"><section className="bmw-border mx-auto max-w-5xl space-y-4 rounded-2xl bg-zinc-900 p-6"><Link href={`/dashboard/vehicles/${id}`} className="underline">Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis qualification unavailable</h1><p>{engineV2?.inputQualification?.contract === "qualified-source-v1" ? "This vehicle has no qualified Analysis rule contract. N54 rules and thresholds have not been applied." : "This stored result predates source, units and platform qualification. It is preserved, but its diagnostic conclusions are not presented as verified. Upload the original source again for qualified processing."}</p><p>No source, Working Calibration or stored evidence was changed by this page.</p><Link href={`/dashboard/vehicles/${id}/logs`} className="underline">Review owned source logs</Link></section></main>;
+  if (latestLog && (engineV2?.inputQualification?.contract !== "qualified-source-v1" || engineV2.inputQualification.platform !== "n54" || declaredAnalysisPlatform(vehicle) !== "n54")) {
+    return <main className="min-h-screen bg-black px-6 py-10 text-white"><section className="bmw-border mx-auto max-w-5xl space-y-4 rounded-2xl bg-zinc-900 p-6"><Link href={`/dashboard/vehicles/${id}`} className="underline">Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis qualification unavailable</h1><IdentityOwnerSummary vehicle={vehicle}/><p>{engineV2?.inputQualification?.contract === "qualified-source-v1" ? "This vehicle has no qualified Analysis rule contract. N54 rules and thresholds have not been applied." : "This stored result predates source, units and platform qualification. It is preserved, but its diagnostic conclusions are not presented as verified. Upload the original source again for qualified processing."}</p><p>No source, Working Calibration or stored evidence was changed by this page.</p><Link href={`/dashboard/vehicles/${id}/logs`} className="underline">Review owned source logs</Link></section></main>;
   }
 
 
@@ -615,6 +617,8 @@ const groupedDiagnosticEvents =
               <h1 className="text-3xl font-bold">
                 {vehicle.nickname || "Unnamed Vehicle"}
               </h1>
+              <IdentityOwnerSummary vehicle={vehicle}/>
+              <p className="mt-2 text-xs text-zinc-500">Analysis platform context is owner-declared; qualified source and rule contracts remain required. It is not an observed controller identity.</p>
               <p className="mt-2 text-zinc-400">
                 {engineV2
                   ? "Engine v2 analysis loaded from the latest uploaded log."
@@ -780,7 +784,7 @@ const groupedDiagnosticEvents =
             <>
               <div className="grid gap-4 md:grid-cols-3">
                 <InfoCard
-                  title="Detected Platform"
+                  title="File-profile platform candidate"
                   value={
                     tuneProfile.detected_platform
                       ? humanizeToken(tuneProfile.detected_platform)

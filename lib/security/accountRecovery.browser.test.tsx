@@ -35,6 +35,9 @@ export async function runAccountRecoveryBrowserTests(container: HTMLElement, rep
     button("Login").click();button("Login")?.click();await until(()=>Boolean(container.textContent?.includes("could not complete")));
     check(calls===1&&!button("Login").disabled,"Login exception restores state and blocks duplicate request");report("PASS login exception/finally and duplicate guard");
     mode="success";button("Login").click();await until(()=>navigations.length>0);check(navigations.at(-1)==="/dashboard","Login returns to safe server-checked destination");report("PASS login retry and return navigation");
+    // Mock navigation does not unmount Login. Wait for React to finish rendering
+    // the successful request before exercising this separate recovery action.
+    await until(()=>!button("Forgot Password?").disabled);
     button("Forgot Password?").click();await until(()=>Boolean(container.textContent?.includes("If this is your registered address")));report("PASS recovery request does not reveal account membership");
     mode="expired";await mount(<ResetPassword/>);await until(()=>Boolean(container.textContent?.includes("Recovery session missing")));check(button("Update Password").disabled,"Expired recovery must be disabled");report("PASS expired recovery session fails closed");
     mode="offline";await mount(<ResetPassword/>);await until(()=>!button("Update Password").disabled);type("new-password","test-only-unused");type("confirm-password","test-only-unused");await pause(20);button("Update Password").click();await until(()=>Boolean(container.textContent?.includes("could not be confirmed")));check(!button("Update Password").disabled,"Password retry remains possible");report("PASS password exception restores retry state");

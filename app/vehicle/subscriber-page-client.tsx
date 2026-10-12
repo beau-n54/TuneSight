@@ -215,13 +215,13 @@ function VehiclePageContent() {
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-8">
           <div className="mb-6">
-            <label className="block mb-2 text-sm text-zinc-400">
+            <label htmlFor="saved-vehicle-nickname" className="block mb-2 text-sm text-zinc-400">
               Nickname
             </label>
             <input
               type="text"
               placeholder="e.g. Street Build, Track Car, Daily"
-              value={nickname}
+              id="saved-vehicle-nickname" name="nickname" value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               className="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading || saving}
@@ -229,11 +229,11 @@ function VehiclePageContent() {
           </div>
 
           <div className="mb-6">
-            <label className="block mb-2 text-sm text-zinc-400">Make</label>
+            <label htmlFor="saved-vehicle-make" className="block mb-2 text-sm text-zinc-400">Make</label>
             <input
               type="text"
               placeholder="e.g. BMW"
-              value={make}
+              id="saved-vehicle-make" name="make" value={make}
               onChange={(e) => setMake(e.target.value)}
               className="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-blue-500"
               disabled={loading || saving}
@@ -241,11 +241,11 @@ function VehiclePageContent() {
           </div>
 
           <div className="mb-6">
-            <label className="block mb-2 text-sm text-zinc-400">Model</label>
+            <label htmlFor="saved-vehicle-model" className="block mb-2 text-sm text-zinc-400">Model</label>
             <input
               type="text"
               placeholder="e.g. 335i msport"
-              value={model}
+              id="saved-vehicle-model" name="model" value={model}
               onChange={(e) => setModel(e.target.value)}
               className="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading || saving}
@@ -253,11 +253,11 @@ function VehiclePageContent() {
           </div>
 
           <div className="mb-6">
-            <label className="block mb-2 text-sm text-zinc-400">Year</label>
+            <label htmlFor="saved-vehicle-year" className="block mb-2 text-sm text-zinc-400">Year</label>
             <input
               type="number"
               placeholder="e.g. 2007"
-              value={year}
+              id="saved-vehicle-year" name="year" value={year}
               onChange={(e) => setYear(e.target.value)}
               className="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading || saving}
@@ -265,11 +265,11 @@ function VehiclePageContent() {
           </div>
 
           <div className="mb-8">
-            <label className="block mb-2 text-sm text-zinc-400">
-              Engine Code
+            <label htmlFor="saved-vehicle-engine" className="block mb-2 text-sm text-zinc-400">
+              Owner-declared engine code / generation label
             </label>
             <select
-  value={engineCode}
+  id="saved-vehicle-engine" name="engine_code" value={engineCode}
   onChange={(e) => setEngineCode(e.target.value)}
   className="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
   disabled={loading || saving}

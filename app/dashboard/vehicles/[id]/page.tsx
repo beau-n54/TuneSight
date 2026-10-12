@@ -2,6 +2,7 @@ import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 
 type PageProps = {
   params: Promise<{
@@ -70,9 +71,7 @@ export default async function VehicleDashboardPage({ params }: PageProps) {
             {vehicle.year || "Unknown Year"} {vehicle.make || "Unknown Make"}{" "}
             {vehicle.model || "Unknown Model"}
           </p>
-          <p className="mt-2 text-sm text-zinc-500">
-            Engine Code: {vehicle.engine_code || "Unknown"}
-          </p>
+          <IdentityOwnerSummary vehicle={vehicle}/>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
@@ -132,10 +131,10 @@ export default async function VehicleDashboardPage({ params }: PageProps) {
               </p>
               <h2 className="mt-2 text-2xl font-bold">Open Calibration Workshop</h2>
               <p className="mt-2 text-sm text-zinc-400">
-                Explore qualified calibration evidence and reference/current differences.
+                Review this vehicle’s qualified Current Calibration evidence. Comparison requires a qualified Reference.
               </p>
               <p className="mt-2 text-xs text-amber-200/80">
-                Development Evidence preview; live vehicle Dataset integration is not yet active.
+                Current-only evidence remains available without Reference. Unavailable coverage is shown explicitly; Export and Flash remain locked.
               </p>
             </div>
             <span className="text-2xl text-blue-300 transition group-hover:translate-x-1" aria-hidden="true">→</span>

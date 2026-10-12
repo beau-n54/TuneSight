@@ -1,5 +1,6 @@
 import type { ParsedLog, VehicleSetup } from "./types.ts";
 import type { TranslatedLog, TranslatedLogRow } from "../logging/types.ts";
+import { declaredAnalysisPlatform } from "../identity/identityOwners.ts";
 
 const channelKeys = {
   boost: "boostPsi", boost_target: "boostTargetPsi", throttle: "throttlePlate", accelerator_pedal: "acceleratorPedal", iat: "iat", afr: "afr",
@@ -12,7 +13,7 @@ const channelKeys = {
 export function qualifiedAnalysisPlatform(vehicle: VehicleSetup | null): "n54" | "unknown" {
   // Only the existing N54 rule set is qualified. A model name, expected offline
   // ROM, source/logger family or a B58 label cannot grant N54 applicability.
-  return vehicle?.engineCode?.trim().toUpperCase() === "N54" ? "n54" : "unknown";
+  return declaredAnalysisPlatform(vehicle ? { engine_code: vehicle.engineCode } : null);
 }
 
 export function buildQualifiedParsedLog(log: TranslatedLog): ParsedLog {

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { listPage, LIST_PAGE_SIZE } from "@/lib/security/listBounds";
 import ListPagination from "@/components/ListPagination";
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 
 export default async function GaragePage({ searchParams }: { searchParams: Promise<{ deletion?: string; page?: string }> }) {
   const query = await searchParams;
@@ -99,10 +100,8 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
                     {vehicle.model || "Unknown Model"}
                   </p>
 
-                  <p className="text-zinc-500 text-sm mb-4">
-                    Engine Code: {vehicle.engine_code || "Unknown"}
-                  </p>
                 </Link>
+                <IdentityOwnerSummary vehicle={vehicle}/>
 
                 <div className="flex flex-wrap gap-3">
                   <Link

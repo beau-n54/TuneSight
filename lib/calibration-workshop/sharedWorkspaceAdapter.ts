@@ -1,4 +1,6 @@
 import type { SubscriberCalibrationResult } from "./subscriberCalibrationProvider.ts";
+import { calibrationSourceIdentity } from "../identity/calibrationIdentity.ts";
+import type { CalibrationSourceIdentity } from "../identity/identityOwners.ts";
 import type { CurrentOnlyDefinition, CurrentOnlyWorkshopViewModel } from "./currentOnlyViewModel.ts";
 import { materializeWorkshopDefinition, workingDefinitionFromWorkshop, type WorkshopViewModel } from "./viewModel.ts";
 import { projectSharedTable, type ProjectionContext, type SharedTableProjection, type WorkingProjectionIdentity } from "./sharedTableProjection.ts";
@@ -35,6 +37,7 @@ export function compactWorkspaceProjection(projection: SharedTableProjection): W
     slots: { ...projection.slots, current: compact(projection.slots.current), reference: compact(projection.slots.reference) } };
 }
 export type SharedWorkspacePayload = Pick<Ready, "identity" | "container" | "byteLength"> & {
+  readonly sourceIdentity?: CalibrationSourceIdentity;
   readonly referenceAvailable: boolean;
   readonly projection: WorkspaceTableProjection | null;
   readonly finding: string | null;
@@ -47,7 +50,7 @@ export function sharedWorkspaceEvidence(result: Ready): SharedWorkspaceEvidence 
 export function buildSharedWorkspacePayload(workshop: SharedWorkspaceWorkshop, result: Ready, context: ProjectionContext,
   requestedKey?: string): SharedWorkspacePayload {
   const selected = exactWorkspaceDefinition(workshop, requestedKey);
-  return { identity: result.identity, container: result.container, byteLength: result.byteLength,
+  return { identity: result.identity, container: result.container, byteLength: result.byteLength, sourceIdentity: calibrationSourceIdentity(result),
     referenceAvailable: result.material.reference !== null,
     projection: selected ? compactWorkspaceProjection(projectWorkspaceTable(workshop, sharedWorkspaceEvidence(result), context, selected.key)) : null,
     finding: selected ? null : "The exact requested Table is unresolved; no fallback was selected." };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 
 export default function LiveBridgeControls({ state, finding, manualToken, onManualToken, onConnect, onDisconnect }: {
@@ -9,6 +9,7 @@ export default function LiveBridgeControls({ state, finding, manualToken, onManu
   onConnect: () => void; onDisconnect: () => void;
 }) {
   const [advanced, setAdvanced] = useState(false);
+  const fieldId = useId();
   const busy = state === "connecting" || state === "disconnecting";
   return <div className="max-w-xl space-y-3">
     <p role="status" className="text-sm text-zinc-300">{finding}</p>
@@ -19,7 +20,7 @@ export default function LiveBridgeControls({ state, finding, manualToken, onManu
     </div>
     <Link href="/bridge" className="inline-block text-sm text-blue-300 underline">TuneSight Bridge for Windows: installation and status</Link>
     {advanced && <div className="rounded-xl border border-zinc-700 p-3">
-      <label className="text-xs text-zinc-400">Bridge token (manual fallback)<input aria-label="Bridge token" type="password" value={manualToken} onChange={event => onManualToken(event.target.value)} autoComplete="off" disabled={busy || state === "connected"} className="mt-1 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-white" /></label>
+      <label htmlFor={fieldId} className="text-xs text-zinc-400">Bridge token (manual fallback)<input id={fieldId} name="localBridgeToken" aria-label="Bridge token" type="password" value={manualToken} onChange={event => onManualToken(event.target.value)} autoComplete="off" disabled={busy || state === "connected"} className="mt-1 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-white" /></label>
       <p className="mt-2 text-xs text-zinc-400">For an older bridge with a locally supplied token. Leave blank for automatic pairing. Tokens stay in page memory only.</p>
     </div>}
   </div>;

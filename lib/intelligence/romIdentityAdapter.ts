@@ -184,7 +184,6 @@ export function buildRomIdentityFromTuneProfile(
 
   const romFamily =
     profile.rom_family ??
-    profile.detected_rom ??
     null;
 
   const rawRomSignature =
@@ -209,7 +208,7 @@ export function buildRomIdentityFromTuneProfile(
     rawRomSignature &&
     !invalidRomSignatures.includes(rawRomSignature.toUpperCase())
         ? rawRomSignature
-        : romFamily;
+        : null;
 
   const confidence =
     typeof profile.rom_confidence === "number"
@@ -261,7 +260,7 @@ export function buildRomIdentityFromTuneProfile(
     detectedEcu,
     dmeVariant:
       profile.dme_variant ??
-      detectedEcu,
+      null,
 
     romSignature,
     romFamily,

@@ -2,8 +2,10 @@
 
 import type { WorkspaceTableProjection } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
 import type { WorkingCalibration } from "@/lib/calibration-workshop/workingCalibration";
+import { identityOwners } from "@/lib/identity/identityOwners";
 
 export function SharedEvidenceStrip({ projection, working = null, reason = "No Current Calibration loaded." }: { projection: WorkspaceTableProjection | null; working?: WorkingCalibration | null; reason?: string }) {
+  const identity = identityOwners({ states: { current: projection?.slots.current.dataset ?? null, reference: projection?.slots.reference.dataset ?? null, working } });
   return <><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     {(["reference", "current", "working", "suggested"] as const).map(slot => {
       const layer = slot === "reference" || slot === "current" ? projection?.slots[slot] : null;
@@ -18,8 +20,12 @@ export function SharedEvidenceStrip({ projection, working = null, reason = "No C
         {findings.map((finding, i) => <p key={i} className="mt-1 text-xs text-zinc-400">{finding}</p>)}
         {!layer && <p className="mt-1 text-xs text-zinc-400">{slot === "suggested" ? "Suggested generation is unavailable." : slot === "working" ? "Separate reversible changes; Current remains immutable." : reason}</p>}
         {layer?.dataset && <details className="mt-2 text-xs"><summary>Dataset and binary identity</summary><dl className="mt-2 space-y-2 break-all font-mono">{Object.entries({ Dataset: layer.dataset.datasetId, Revision: layer.dataset.datasetRevision,
-          "Binary identity": layer.dataset.exactBinaryIdentity.identityId, Digest: layer.dataset.exactBinaryIdentity.digest, "ROM family": layer.dataset.exactBinaryIdentity.romFamily,
+          "Binary identity": layer.dataset.exactBinaryIdentity.identityId, Digest: layer.dataset.exactBinaryIdentity.digest, "Definition-source ROM family": layer.dataset.exactBinaryIdentity.romFamily,
           Layout: layer.dataset.romLayoutId, Relationship: layer.dataset.relationshipRevision, "Definition Set": layer.dataset.definitionSetRevision, Role: layer.dataset.sourceRole }).map(([label, value]) => <div key={label}><dt className="text-zinc-500">{label}</dt><dd>{value ?? "Not established"}</dd></div>)}</dl></details>}
+        {slot === "working" && working && <details className="mt-2 text-xs"><summary>Working identity and Current lineage</summary><dl className="mt-2 space-y-2 break-all font-mono">
+          {Object.entries({ "Working identity": identity.states.working?.workingCalibrationId, "Working revision": identity.states.working?.workingCalibrationRevision,
+            "Bound Current Dataset": identity.states.working?.currentDatasetId, "Bound Current revision": identity.states.working?.currentDatasetRevision }).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? "Not established for the selected Table"}</dd></div>)}
+        </dl>{identity.states.workingUnavailableReason && <p>{identity.states.workingUnavailableReason}</p>}</details>}
       </article>;
     })}
     </div><p className="mt-3 text-xs text-zinc-400">EDIT: {projection?.capabilities.edit?.state ?? "Not supplied"} · Reconstruction: no active capability supplied · Export: locked · Flash: unavailable</p></>;

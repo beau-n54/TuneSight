@@ -83,7 +83,7 @@ export default async function EditVehiclePage({ params }: PageProps) {
                 defaultValue={vehicle.model || ""}
               />
               <InputField
-                label="Engine Code"
+                label="Owner-declared engine code / generation label"
                 name="engine_code"
                 defaultValue={vehicle.engine_code || ""}
               />
@@ -185,9 +185,9 @@ export default async function EditVehiclePage({ params }: PageProps) {
             <h2 className="mb-4 text-xl font-semibold">Notes</h2>
 
             <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Notes</label>
+              <label htmlFor="vehicle-notes" className="text-sm text-zinc-400">Notes</label>
               <textarea
-                name="notes"
+                id="vehicle-notes" name="notes"
                 defaultValue={vehicle.notes || ""}
                 rows={6}
                 className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none transition focus:border-blue-500"
@@ -218,9 +218,9 @@ function InputField({
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-sm text-zinc-400">{label}</label>
+      <label htmlFor={`vehicle-${name}`} className="text-sm text-zinc-400">{label}</label>
       <input
-        name={name}
+        id={`vehicle-${name}`} name={name}
         defaultValue={defaultValue}
         className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none transition focus:border-blue-500"
       />

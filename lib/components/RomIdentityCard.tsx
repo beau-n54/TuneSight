@@ -1,3 +1,4 @@
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import type {
   RomIdentity,
   RomDetectionLevel,
@@ -28,16 +29,16 @@ function formatDetectionLevel(
 ): string {
   switch (level) {
     case "platform_detected":
-      return "Platform Detected";
+      return "File-profile platform candidate";
 
     case "ecu_detected":
-      return "ECU Detected";
+      return "File-profile ECU candidate";
 
     case "rom_family_detected":
-      return "ROM Family Detected";
+      return "File-profile family recorded";
 
     case "confirmed_rom_signature":
-      return "Confirmed ROM Signature";
+      return "File-profile ROM candidate";
 
     case "exact_binary_match":
       return "Exact Binary Match";
@@ -147,9 +148,9 @@ export default function RomIdentityCard({
         </h2>
 
         <p className="mt-1 text-sm text-zinc-400">
-          TuneSight has analysed the uploaded binary and identified its ROM,
-          ECU platform and supporting calibration evidence.
+          File-profile identity candidates and qualification evidence are shown below. They do not establish the connected controller or change the saved vehicle identity.
         </p>
+        <IdentityOwnerSummary/>
       </div>
 
       <section className="space-y-4">
@@ -159,27 +160,27 @@ export default function RomIdentityCard({
 
         <div className="grid gap-4 md:grid-cols-2">
           <IdentityRow
-            label="Detected Platform"
+            label="File-profile platform candidate"
             value={identity.detectedPlatform}
           />
 
           <IdentityRow
-            label="Detected ECU"
+            label="File-profile ECU candidate"
             value={identity.detectedEcu}
           />
 
           <IdentityRow
-            label="DME Variant"
+            label="File-profile DME variant candidate"
             value={identity.dmeVariant}
           />
 
           <IdentityRow
-            label="Confirmed ROM Signature"
+            label="File ROM identifier candidate"
             value={identity.romSignature}
           />
 
           <IdentityRow
-            label="ROM Family"
+            label="File-profile ROM family"
             value={identity.romFamily}
           />
 
@@ -215,7 +216,7 @@ export default function RomIdentityCard({
 
         <div className="grid gap-4 md:grid-cols-2">
           <IdentityRow
-            label="Matching XDF"
+            label="Profile-suggested XDF (not applicability authority)"
             value={identity.matchingXdf}
           />
 

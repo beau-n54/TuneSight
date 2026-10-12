@@ -255,9 +255,9 @@ export default function TunePage() {
             <h2 className="text-xl font-semibold">Upload Tune File</h2>
 
             <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Tune File</label>
+              <label htmlFor="tune-file" className="text-sm text-zinc-400">Tune File</label>
               <input
-                type="file"
+                type="file" id="tune-file" name="tuneFile"
                 onChange={(event) => {
                   setTuneFile(event.target.files?.[0] ?? null);
                   setContainerResult(null);
@@ -267,10 +267,10 @@ export default function TunePage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Tune Name</label>
+              <label htmlFor="tune-name" className="text-sm text-zinc-400">Tune Name</label>
               <input
                 type="text"
-                value={tuneName}
+                id="tune-name" name="tuneName" value={tuneName}
                 onChange={(event) => setTuneName(event.target.value)}
                 placeholder="Tune name (e.g. Stage 2 E50)"
                 className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none transition focus:border-blue-500"
@@ -280,7 +280,7 @@ export default function TunePage() {
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
-                id="is_stock_reference"
+                id="is_stock_reference" name="isStockReference"
                 checked={isStockReference}
                 onChange={(event) =>
                   setIsStockReference(event.target.checked)
@@ -295,12 +295,12 @@ export default function TunePage() {
 
             {stockTunes.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm text-zinc-400">
+                <label htmlFor="tune-reference" className="text-sm text-zinc-400">
                   Compare Against Stock Reference
                 </label>
 
                 <select
-                  value={referenceTuneId}
+                  id="tune-reference" name="referenceTuneId" value={referenceTuneId}
                   onChange={(event) => setReferenceTuneId(event.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white"
                 >
@@ -370,19 +370,19 @@ export default function TunePage() {
                   <div className="mt-2 flex flex-wrap gap-2 text-xs">
                     {tune.rom_platform && (
                       <span className="rounded-full bg-cyan-500/20 border border-cyan-400/40 px-3 py-1 text-cyan-300">
-                        Platform: {tune.rom_platform}
+                        File-profile platform: {tune.rom_platform}
                       </span>
                     )}
 
                     {tune.ecu_family && (
                       <span className="rounded-full bg-purple-500/20 border border-purple-400/40 px-3 py-1 text-purple-300">
-                        ECU: {tune.ecu_family}
+                        File-profile ECU candidate: {tune.ecu_family}
                       </span>
                     )}
 
                     {tune.rom_family && (
                       <span className="rounded-full bg-green-500/20 border border-green-400/40 px-3 py-1 text-green-300">
-                        ROM: {tune.rom_family}
+                        File-profile ROM family: {tune.rom_family}
                       </span>
                     )}
 

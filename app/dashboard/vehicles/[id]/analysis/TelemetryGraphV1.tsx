@@ -625,7 +625,7 @@ export default function TelemetryGraphV1({
           {authoritativePulls.length > 0 ? (
             <label className="text-xs text-zinc-400">
               Detected pull
-              <select className="mt-2 block min-h-10 w-full min-w-56 border border-zinc-700 bg-black px-3 text-sm text-zinc-100 sm:w-auto" disabled={mode !== "individual_pull"} onChange={(event) => setSelectedPullId(event.target.value)} value={selectedPull?.id ?? ""}>
+              <select id="analysis-detected-pull" name="detectedPull" className="mt-2 block min-h-10 w-full min-w-56 border border-zinc-700 bg-black px-3 text-sm text-zinc-100 sm:w-auto" disabled={mode !== "individual_pull"} onChange={(event) => setSelectedPullId(event.target.value)} value={selectedPull?.id ?? ""}>
                 {authoritativePulls.map((pull, index) => (
                   <option key={pull.id} value={pull.id}>Pull {index + 1} · {humanizeIdentifier(pull.quality ?? "quality unresolved")}</option>
                 ))}

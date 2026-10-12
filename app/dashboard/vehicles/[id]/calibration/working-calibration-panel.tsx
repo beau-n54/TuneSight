@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+import { presentationFindings } from "@/lib/calibration-workshop/presentationFindings";
 import type { WorkingCalibration, WorkingEditOperation, WorkingEditPreview } from "@/lib/calibration-workshop/workingCalibration";
 import { validationExplanation, workingOperationLabel } from "@/lib/calibration-workshop/manualEditorUx";
 import type { WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
@@ -29,6 +31,9 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
   saveStatus: WorkingSaveStatus;
   onRetrySave?: () => void;
 }) {
+  const fieldId = useId();
+  const findings = presentationFindings([{ sourceId: "editAuthority.blockers", findings: blockers },
+    { sourceId: "editAuthority.warnings", findings: warnings }, { sourceId: "workingEditPreview.findings", findings: preview?.findings ?? [] }]);
   const activeHistory = working?.mutations.slice(0, working.cursor) ?? [];
   return <section className="mt-4 space-y-4 rounded-xl border border-zinc-700 bg-zinc-900 p-4" aria-label="Working Calibration controls">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -47,15 +52,15 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
         <button type="button" disabled={!interactionAllowed || working.cursor >= working.mutations.length} onClick={onRedo} className="rounded border border-zinc-700 px-3 py-2 text-xs disabled:opacity-40">Redo</button>
       </div>
       <div className="grid gap-3 rounded-xl border border-zinc-800 bg-black/40 p-3 md:grid-cols-[minmax(150px,220px)_minmax(130px,1fr)_auto] md:items-end">
-        <label className="text-xs text-zinc-400">Operation<select disabled={!interactionAllowed} aria-label="Edit operation" value={operation} onChange={event => onOperation(event.target.value as WorkingEditOperation)} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"><option value="assign">Set value</option><option value="delta">Add / subtract</option><option value="percentage">Percentage change</option></select></label>
-        <label className="text-xs text-zinc-400">Engineering value<input disabled={!interactionAllowed} aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "Enter an exact value" : operation === "delta" ? "Enter an amount" : "Enter a percentage"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
+        <label htmlFor={`${fieldId}-operation`} className="text-xs text-zinc-400">Operation<select id={`${fieldId}-operation`} name="workingOperation" disabled={!interactionAllowed} aria-label="Edit operation" value={operation} onChange={event => onOperation(event.target.value as WorkingEditOperation)} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"><option value="assign">Set value</option><option value="delta">Add / subtract</option><option value="percentage">Percentage change</option></select></label>
+        <label htmlFor={`${fieldId}-operand`} className="text-xs text-zinc-400">Engineering value<input id={`${fieldId}-operand`} name="workingOperand" disabled={!interactionAllowed} aria-label="Edit value" value={operand} onChange={event => onOperand(event.target.value)} inputMode="decimal" placeholder={operation === "assign" ? "Enter an exact value" : operation === "delta" ? "Enter an amount" : "Enter a percentage"} className="mt-1 block w-full rounded border border-zinc-700 bg-black px-3 py-2 text-sm text-white"/></label>
         <button type="button" disabled={!interactionAllowed || !editQualified || preview?.validation === "BLOCKED" || !preview || mode !== "working"} onClick={onApply} className="rounded-lg border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-200 disabled:border-zinc-700 disabled:text-zinc-600">Apply to {selectedCount} cell{selectedCount === 1 ? "" : "s"}</button>
       </div>
       <div className={`rounded-lg border p-3 text-xs ${preview?.validation === "VALID" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100" : preview?.validation === "WARNING" ? "border-amber-400/40 bg-amber-400/10 text-amber-100" : "border-zinc-700 bg-black/30 text-zinc-400"}`} role="status">
         <strong>{preview?.validation ?? (editQualified ? "Enter a value to validate" : "BLOCKED")}</strong>
         <span className="ml-2">{preview ? validationExplanation(preview.validation, preview.findings) : "No valid edit is ready."}</span>
         <p className="mt-1">{selectedCount} governed coordinate{selectedCount === 1 ? "" : "s"} selected.</p>
-        <details className="mt-2"><summary className="cursor-pointer">Engineering Detail</summary>{[...blockers, ...warnings, ...(preview?.findings ?? [])].map(item => <p key={item} className="mt-1">{item}</p>)}</details>
+        <details className="mt-2"><summary className="cursor-pointer">Engineering Detail</summary>{findings.map(item => <p key={item.key} data-finding-source={item.sourceId} className="mt-1">{item.text}</p>)}</details>
       </div>
       <details className="rounded-lg border border-zinc-800 p-3" open={activeHistory.length > 0}>
         <summary className="cursor-pointer text-sm font-semibold">Change history · {activeHistory.length}</summary>

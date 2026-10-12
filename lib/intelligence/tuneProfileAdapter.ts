@@ -60,7 +60,6 @@ export function buildCalibrationIntelligenceFromTuneProfile(
   const ecuFamily = tuneProfile.ecu_family ?? "unknown";
   const romFamily =
     tuneProfile.rom_family ??
-    tuneProfile.detected_rom ??
     "unknown";
 
   const suggestedXdf = tuneProfile.xdf_suggested ?? "unknown";
@@ -90,10 +89,10 @@ export function buildCalibrationIntelligenceFromTuneProfile(
     loggerConfidence: 0,
 
     platform,
-    engine: platform,
+    engine: "unknown", // A file-profile platform is not a saved or observed engine.
     ecuFamily,
     romFamily,
-    romFingerprint: tuneProfile.binary_signature ?? romFamily,
+    romFingerprint: tuneProfile.binary_signature ?? "unknown",
 
     suggestedXdf,
     xdfConfidence: suggestedXdf !== "unknown" ? confidenceScore : 0,

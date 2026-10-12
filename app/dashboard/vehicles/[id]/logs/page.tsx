@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listPage, LIST_PAGE_SIZE } from "@/lib/security/listBounds";
 import ListPagination from "@/components/ListPagination";
+import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import LogFileInput from "@/components/LogFileInput";
 
 type PageProps = {
@@ -61,6 +62,7 @@ export default async function LogsPage({ params, searchParams }: PageProps) {
           <p className="text-zinc-400">
             Upload and manage log files for this vehicle.
           </p>
+          <IdentityOwnerSummary vehicle={vehicle}/>
         </div>
 
         <ListPagination path={`/dashboard/vehicles/${id}/logs`} page={page} hasMore={(logRows?.length ?? 0)>LIST_PAGE_SIZE}/>
@@ -78,10 +80,10 @@ export default async function LogsPage({ params, searchParams }: PageProps) {
             <LogFileInput />
 
             <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Log Name</label>
+              <label htmlFor="vehicle-log-name" className="text-sm text-zinc-400">Log Name</label>
               <input
                 type="text"
-                name="log_name"
+                id="vehicle-log-name" name="log_name"
                 placeholder="Log name (e.g. 3rd gear pull E50)"
                 className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none transition focus:border-blue-500"
               />

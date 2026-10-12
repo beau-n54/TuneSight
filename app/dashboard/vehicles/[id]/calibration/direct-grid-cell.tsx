@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { presentationFindings } from "@/lib/calibration-workshop/presentationFindings";
 import { validationExplanation } from "@/lib/calibration-workshop/manualEditorUx";
 import type { WorkingValidationState } from "@/lib/calibration-workshop/workingCalibration";
 
@@ -28,6 +29,8 @@ export default function DirectGridCell({ cellKey, index, row, column, columnCoun
   onDraftCancelled?: () => void;
 }) {
   const [editing, setEditing] = useState(false), [draft, setDraft] = useState(""), [feedback, setFeedback] = useState<Readonly<{ state: WorkingValidationState; findings: readonly string[] }> | null>(null);
+  const fieldId = useId();
+  const detailFindings = presentationFindings([{ sourceId: `directCell:${cellKey}`, findings: feedback?.findings ?? [] }]);
   const policy = directDraftPolicy(editing, canEdit);
   useEffect(() => {
     if (!policy.cancel) return;
@@ -48,12 +51,13 @@ export default function DirectGridCell({ cellKey, index, row, column, columnCoun
     setFeedback({ state: result.validation, findings: result.findings }); setEditing(false); setDraft(""); onEditingChange?.(false); return true;
   };
   if (policy.showInput) return <div className="min-w-28 rounded-lg border border-blue-300 bg-black p-1">
-    <input autoFocus aria-label={`Edit cell row ${row} column ${column}`} value={draft} onChange={event => setDraft(event.target.value)} inputMode="decimal" onKeyDown={event => {
+    <label htmlFor={fieldId} className="sr-only">Edit cell row {row} column {column}</label>
+    <input id={fieldId} name="workingCellValue" autoFocus aria-label={`Edit cell row ${row} column ${column}`} value={draft} onChange={event => setDraft(event.target.value)} inputMode="decimal" onKeyDown={event => {
       if (event.key === "Escape") { event.preventDefault(); cancel(); }
       else if (event.key === "Enter") { event.preventDefault(); if (commit()) onNavigate(index); }
       else if (event.key === "Tab") { event.preventDefault(); if (commit()) onNavigate(index + (event.shiftKey ? -1 : 1)); }
     }} className="w-full rounded border border-blue-400 bg-zinc-950 px-2 py-1 text-right font-mono text-white outline-none" />
-    {feedback && <div role="alert" className="mt-1 max-w-64 whitespace-normal px-1 text-[10px] text-amber-200"><strong>{feedback.state}</strong><span className="block">{validationExplanation(feedback.state, feedback.findings)}</span><details><summary>Engineering Detail</summary>{feedback.findings.map(item => <p key={item}>{item}</p>)}</details></div>}
+    {feedback && <div role="alert" className="mt-1 max-w-64 whitespace-normal px-1 text-[10px] text-amber-200"><strong>{feedback.state}</strong><span className="block">{validationExplanation(feedback.state, feedback.findings)}</span><details><summary>Engineering Detail</summary>{detailFindings.map(item => <p key={item.key}>{item.text}</p>)}</details></div>}
   </div>;
   return <div><button type="button" data-working-cell={index} data-cell-key={cellKey} aria-label={`Cell row ${row} column ${column}${changed ? ", changed" : ""}${canEdit ? ", double-click to edit" : ""}`} onDoubleClick={begin} onPointerDown={event => onSelect(index, event.shiftKey)} onPointerEnter={event => { if (event.buttons === 1) onSelect(index, true); }} onKeyDown={event => {
     if ((event.key === "Enter" || event.key === "F2") && canEdit) { event.preventDefault(); begin(); return; }
@@ -63,5 +67,5 @@ export default function DirectGridCell({ cellKey, index, row, column, columnCoun
     {referenceValue !== undefined && <span className="block text-[10px] text-zinc-500">REF {format(referenceValue)}</span>}
     <span className="block">{format(value)}</span>
     {changed && <span className="block text-[9px] text-emerald-300">{value === currentValue ? "CHANGED" : `CURRENT ${format(currentValue)} · CHANGED`}</span>}
-  </button>{feedback && <div role="status" className={`mt-1 max-w-64 whitespace-normal text-[10px] ${feedback.state === "VALID" ? "text-emerald-300" : "text-amber-200"}`}><strong>{feedback.state}</strong><span className="ml-1">{validationExplanation(feedback.state, feedback.findings)}</span>{feedback.findings.length > 0 && <details><summary>Engineering Detail</summary>{feedback.findings.map(item => <p key={item}>{item}</p>)}</details>}</div>}</div>;
+  </button>{feedback && <div role="status" className={`mt-1 max-w-64 whitespace-normal text-[10px] ${feedback.state === "VALID" ? "text-emerald-300" : "text-amber-200"}`}><strong>{feedback.state}</strong><span className="ml-1">{validationExplanation(feedback.state, feedback.findings)}</span>{feedback.findings.length > 0 && <details><summary>Engineering Detail</summary>{detailFindings.map(item => <p key={item.key}>{item.text}</p>)}</details>}</div>}</div>;
 }
