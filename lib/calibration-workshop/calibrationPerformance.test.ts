@@ -128,6 +128,10 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   assert.match(page, /return <WorkspaceBootstrapClient/);
   assert.ok(page.indexOf("return <WorkspaceBootstrapClient") < page.indexOf("const session = await resolveSubscriberWorkshopSession"));
   assert.match(page, /const \{ supabase, user \} = await requireSubscriberPage\(\)/);
+  assert.doesNotMatch(page.slice(0, page.indexOf("return <WorkspaceBootstrapClient")), /import (?!type)[^\n]*(?:shared-workspace-client|sharedWorkspaceAdapter|developmentPreviewSelection)/);
+  const bootstrap = fs.readFileSync("app/dashboard/vehicles/[id]/calibration/workspace-bootstrap-client.tsx", "utf8");
+  assert.match(bootstrap, /const workspaceCode = import\("\.\/shared-workspace-client"\)/);
+  assert.ok(bootstrap.indexOf("const workspaceCode =") < bootstrap.indexOf("const response = await fetch"));
   const helper = fs.readFileSync("lib/calibration-workshop/selectRestoredSubscriberWorkshop.ts", "utf8");
   assert.doesNotMatch(helper, /(?:from|import)\s*["'][^"']*(?:test|fixtures)/);
   assert.doesNotMatch(helper, /buildSubscriberWorkshop|buildWorkshopViewModel|buildCurrentOnlyWorkshopViewModel|fetch\(|readSession|Storage|persist/);

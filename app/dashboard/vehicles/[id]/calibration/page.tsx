@@ -1,21 +1,11 @@
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
-import Link from "next/link";
-import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import { notFound } from "next/navigation";
-import { selectN54PreviewRom } from "@/lib/calibration-workshop/developmentPreviewSelection";
-import SharedWorkspaceClient, { EmptySharedWorkspace } from "./shared-workspace-client";
-import { workspaceCatalogue, buildSharedWorkspacePayload, compactWorkspaceProjection, exactWorkspaceDefinition, projectWorkspaceTable, sharedWorkspaceContextKey, type SharedWorkspacePayload } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
-import { maskRetainedWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceDispatch";
-import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
+import type { SharedWorkspacePayload } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
 import WorkspaceBootstrapClient from "./workspace-bootstrap-client";
 import UploadCalibration from "./upload-calibration";
-import { selectRestoredSubscriberWorkshop } from "@/lib/calibration-workshop/selectRestoredSubscriberWorkshop";
-import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
 import type { CurrentOnlyWorkshopViewModel } from "@/lib/calibration-workshop/currentOnlyViewModel";
 import type { WorkshopViewModel } from "@/lib/calibration-workshop/viewModel";
 import { createHash } from "node:crypto";
-import { resolveSubscriberWorkshopSession, selectSubscriberWorkshopEntry } from "@/lib/calibration-workshop/subscriberWorkshopEntry";
-import { resolveVehicleOwnedCalibrationEvidence } from "@/lib/calibration-workshop/vehicleOwnedCalibrationEvidence";
 import RestoreCalibrationSession from "./restore-calibration-session";
 
 type PageProps = {
@@ -34,7 +24,6 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
   const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
-  const previewSelection = selectN54PreviewRom(requestedPreviewRom);
 
   const { data: vehicle, error } = await supabase
     .from("vehicles")
@@ -51,6 +40,20 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
       vehicleId: vehicle.id, requestedSession: query.session, requestedKey: definition }}
       upload={<><UploadCalibration vehicleId={vehicle.id}/><RestoreCalibrationSession vehicleId={vehicle.id}/></>}/>;
   }
+  // Development-only rendering must not make the subscriber bootstrap wait for
+  // the full workspace client or controlled-preview module graph.
+  const { default: Link } = await import("next/link");
+  const { default: IdentityOwnerSummary } = await import("@/components/IdentityOwnerSummary");
+  const { selectN54PreviewRom } = await import("@/lib/calibration-workshop/developmentPreviewSelection");
+  const previewSelection = selectN54PreviewRom(requestedPreviewRom);
+  const { default: SharedWorkspaceClient, EmptySharedWorkspace } = await import("./shared-workspace-client");
+  const { workspaceCatalogue, buildSharedWorkspacePayload, compactWorkspaceProjection, exactWorkspaceDefinition, projectWorkspaceTable, sharedWorkspaceContextKey } = await import("@/lib/calibration-workshop/sharedWorkspaceAdapter");
+  const { maskRetainedWorkspace } = await import("@/lib/calibration-workshop/sharedWorkspaceDispatch");
+  const { buildWorkshopDeepLink } = await import("@/lib/calibration-workshop/workshopNavigation");
+  const { selectRestoredSubscriberWorkshop } = await import("@/lib/calibration-workshop/selectRestoredSubscriberWorkshop");
+  const { publicWorkshopFailureDiagnostic } = await import("@/lib/calibration-workshop/workshopFailureDiagnostic");
+  const { resolveSubscriberWorkshopSession, selectSubscriberWorkshopEntry } = await import("@/lib/calibration-workshop/subscriberWorkshopEntry");
+  const { resolveVehicleOwnedCalibrationEvidence } = await import("@/lib/calibration-workshop/vehicleOwnedCalibrationEvidence");
   const { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } = await import("@/lib/calibration-workshop/subscriberWorkshopSession.server");
   const session = await resolveSubscriberWorkshopSession({ requestedSession: query.session, ownerId: user.id, vehicleId: vehicle.id }, {
     readSession: readSubscriberWorkshopSession,
