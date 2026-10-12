@@ -64,17 +64,17 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** Accepted releases and the complete original project audit reconciled on 12 October 2026. Security and Trust remains closed under TS-RAT-026; unfinished capability, acceptance holds and operational readiness remain explicitly open.
+**Current Engineering Phase:** R01 Identity-Owner Contracts and Bounded Presentation Closure accepted and deployed on 12 October 2026 under TS-RAT-027. Security and Trust remains closed under TS-RAT-026; the wider project audit remains open.
 
-**Current Active Work Package:** Audit Reconciliation and Existing Release Closure, authorised as governance and evidence only. Documentation release and Founder/Bob review conclude this package; no next implementation package is activated.
+**Current Active Work Package:** R01 release and separate governance closure. Identity ownership and bounded presentation repairs are complete within this instruction; no follow-on implementation is activated.
 
-**Current Objective:** Preserve accepted Production scope and ratification history while distinguishing completed bounded releases, internal foundations, partial programmes, unimplemented capability and remaining acceptance/operational gates.
+**Current Objective:** Preserve the accepted identity-owner boundaries and Production evidence while keeping unfinished renderer, guidance, performance, durability, output, hardware and launch capability explicit.
 
-**Next Authorised Objective:** Return the reconciled audit and documentation-release evidence for Founder and Bob. Identity-owner and held-guidance contract rectification is recommended next, but remains proposed and requires a separate bounded instruction.
+**Next Authorised Objective:** Return the completed R01 application/governance release evidence to Founder and Bob. R02 is recommended next but requires a separate bounded instruction.
 
 **Next Subsystem Definition:** No subsystem is newly authorised. U2–U6, broader Analysis/Explanation, professional server revisions, physical bridge/mobile qualification, commercial and launch work retain separate gates.
 
-**Current Engineering Hold:** WP-003 - Vehicle Identity Implementation; Knowledge integration dependency satisfied, formal hold disposition pending Founder review
+**Current Engineering Hold:** The formal WP-003 Hold is satisfied and lifted for its accepted file-identity requirements by the additive R01 disposition below. The historical Hold record is preserved unchanged. Three U4 renderer assertions and unrelated capability gates remain held.
 
 TuneSight now resolves supported upload containers into immutable Engineering Binary evidence before any engineering analysis. BIN and the proven 8 MiB MG1/86T0 DTF variant enter one common EngineeringBinary pipeline:
 
@@ -151,7 +151,41 @@ Standards define stable, assessable and implementation-independent obligations. 
 
 ---
 
+## R01 Identity-Owner and Bounded Presentation Closure — 12 October 2026
+
+[TS-RAT-027](engineering-ratification-register.md#ts-rat-027) records the accepted bounded R01 release. Application `7c0d8ebd9f9019ceb6e37b07d832952e7229121e` (parent `194fd09be87e5ee6df346c7d41e75226927471b4`) reached automatic Vercel Ready Production with the canonical alias assigned to the exact source commit. The separate documentation release and final repository state are recorded in the final R01 receipt.
+
+The canonical `tunesight.identity-owners.v1` contract keeps saved vehicle facts/engine label/generation, qualified controller family/exact software and vehicle/adapter observation, admitted BIN/DTF container and digest, Definition family/revision/artifact, Dataset/revision and Reference/Current/Working identities separate. No chassis or generation is inferred from model, year, ROM or Definition family. A field not supplied by the saved record remains unavailable. Missing qualified controller evidence is `Not observed`; conflicts and wrong-vehicle evidence fail closed and remain reviewable. Legacy source sessions are read without rewriting their material or source bytes. Analysis retains the existing declared-N54 plus separately qualified source/unit/rule boundary.
+
+Provider Definition-family/ECU fallbacks into controller fields are removed; raw synthetic/unqualified reports are named `reportedDmeFamily`. Legacy ROM-family/signature, ECU-variant and platform/engine substitutions are removed. Shared identity labels preserve N54's literal `N54b30`, F30's `B58 Gen 1` and Supra's `B58 Gen 2`. Uploaded software remains `I8A0S`, `00003076501103` and `00005D553C8C05`; Supra's DTF/Definition-source family is separately labelled. Exact connected controller ROM remains unestablished.
+
+Repeated Working/direct-cell findings retain source/identity/occurrence keys instead of duplicate visible-text keys. Active subscriber dashboard Preview copy now distinguishes qualified Current-only/comparison and unavailable capabilities. Affected forms have IDs, names and labels; the Advanced bridge token stays masked. Shared Shell proportions, Explorer height/scrolling, selected rows, BMW borders, plots and editing policy remain unchanged.
+
+Final reconciled Node suite: 1,408 tests, 1,403 passing, exactly three unchanged U4 holds and two named optional fixture skips. All 30 new R01 deterministic tests pass. TypeScript --noEmit --incremental false, whole-repository ESLint with zero warnings, UTF-8/whitespace and network-enabled isolated Production build pass. All 29 controlled browser checks pass with no console warnings/errors (five R01, eleven bridge, thirteen Auth/native IndexedDB checks). The full 165-file run supplies all 39 XDF test files; the final 126-file application rerun replaces the earlier application results. Recursive TypeScript dependency resolution confirmed that all edits made after the full run began were outside the XDF dependency graph. Counts are combined once, without double-counting. All 165 final test-file hashes and 40 application/build-copy hashes match. The optional skips are the unconfigured private ROM_LIBRARY_ROOT metadata fixture and unavailable Founder physical MapSwitch artifact; neither is represented as passing. The Security browser test now waits for the real post-mock-navigation React readiness state, preserving its original assertions and Auth implementation.
+
+Fresh authenticated read-only N54, B58 Gen1 and Supra Production checks preserve exact Dataset IDs/revisions, selected-table values, saved labels and Working-not-created state. Current remains immutable, Export locked and Flash unavailable. No upload, restore, save, edit or vehicle connection occurred. Browser and accessibility checks found no new runtime, duplicate-key or field-metadata warnings in the tested surfaces. Fresh layout evidence is stacked because the supported viewport override did not establish a desktop test; desktop preservation relies on unchanged shell/layout source, focused regressions and existing Founder acceptance. Calibration remains `syd1`, Node.js 24.x, 60 seconds; other function placement/configuration remains unchanged.
+
+### WP-003 additive Hold disposition
+
+The [historical Hold section](#wp-003-engineering-hold) is preserved byte-for-byte. Knowledge integration and repeated Founder N54/F30/Supra stock/modified file acceptance and conservative unknown outcomes were already recorded satisfied. R01 supplies current source/legacy-session preservation, exact owner contracts, conflict/absence counterexamples and read-only Production preservation. Under the current explicit conditional Founder authority, the remaining formal disposition criterion is satisfied for those accepted file-identity requirements. That formal Hold is lifted in this bounded scope; no universal parent completion, exact connected-ROM discovery, U4 or unrelated capability is implied.
+
+### U4 and follow-on boundaries
+
+The unused producer input `tunesight.table-guidance-input.v1` prepares literal source titles, Table/Related Table/Understand terminology, exact qualified semantic assertions/provenance and explicit unavailable reasons. The unchanged `tablePresentation.test.ts` retains exactly:
+
+- `Workshop-owned terminology uses Tables while authoritative Map titles remain untouched`
+- `beginner and engineering detail layers consume governed semantic fields`
+- `unavailable Tables retain explicit absence without generated education`
+
+R02 must follow U2 → U3 → U4 → U5 → U6 and needs separate authority. The seven outside-U0 observations remain historically traceable: R01 closes owner/source-family semantics and stale subscriber Preview copy, completes the affected form metadata and duplicate finding-key repair; prior Security repairs to login recovery and the ROM-library runner remain accepted; broader Current-only/device acceptance remains separate. No new physical DME/ROM or hosted-to-car qualification is claimed.
+
+No subscriber record, source evidence, Calibration value, Working state, database, dependency, configuration, domain or vehicle-write capability changed. TS-RAT-001 through TS-RAT-026 remain byte-for-byte unchanged. Security/entitlement/Storage and Analysis boundaries remain intact. Performance, durable Working history, editing expansion, checksum/output, Export, Flash, Suggested generation, DTC, dyno and commercial/launch work are not authorised by this closure. The [audit disposition](audits/2026-10-12-audit-reconciliation.html#r01-closure) supersedes only R01-related current conclusions of the preserved reconciliation below.
+
+---
+
 ## Audit Reconciliation and Existing Release Closure — 12 October 2026
+
+*Historical reconciliation checkpoint. Its R01 recommendation, identity/presentation observations and formal WP-003 disposition are superseded only by the accepted R01 record above; other evidence and open gates remain unchanged.*
 
 The [canonical audit-reconciliation report](audits/2026-10-12-audit-reconciliation.html) reconciles the original audit at `cb43823990cb421bd7e8242c01964f7f341804db` with repository and Ready/Current Production checkpoint `25948f2641f4f3c39b8f5c106bd8a1b4a7728b8e`, whose application parent is `65b0652227595547196ae339b9508772ebe255c8`. These are the audited baseline SHAs, not a claim that this later documentation release has the same SHA. The final release receipt records the documentation commit, remote and automatic deployment.
 

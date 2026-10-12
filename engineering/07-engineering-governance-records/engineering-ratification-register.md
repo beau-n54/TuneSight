@@ -1564,6 +1564,62 @@ Detailed local evidence is retained in `TuneSight-Security-Trust-Managed-Closure
 
 ---
 
+### TS-RAT-027
+
+| Field | Recorded Value |
+|---|---|
+| Date | 12 October 2026 |
+| Artefact Type | Bounded Implementation Acceptance and Additive Engineering Hold Disposition |
+| Artefact Name | R01 Identity-Owner Contracts and Bounded Presentation Closure |
+| Authority | Founder's explicit end-to-end R01 implementation, validation, release and governance instruction; acceptance conditional on the stated evidence gates |
+| Application Commit | `7c0d8ebd9f9019ceb6e37b07d832952e7229121e` — Separate TuneSight identity evidence owners |
+| Parent / Baseline | `194fd09be87e5ee6df346c7d41e75226927471b4` — Reconcile TuneSight audit and accepted releases |
+| Contracts | `tunesight.identity-owners.v1`; `tunesight.table-guidance-input.v1` |
+| Implementation / Production | R01 complete within the bounded scope; automatic deployment Ready and canonical alias verified against the exact application commit |
+| Historical Effect | Additive: TS-RAT-001 through TS-RAT-026 and the historical WP-003 Engineering Hold record remain byte-for-byte unchanged |
+| Further Authority | R02 and every additional implementation remain proposed and separately authorised |
+
+**Identity ownership and qualification**
+
+The [canonical identity contract](../../lib/identity/identityOwners.ts) separates saved make/model/year/chassis, explicit saved generation and exact owner-declared engine label from qualified controller observations. A controller value requires a qualified observation, source and observation IDs, valid observation time and matching vehicle binding when a saved vehicle is supplied. Missing evidence remains `Not observed`; conflicting qualified observations or another vehicle binding fail closed without rewriting their original evidence. Connected endpoint, adapter and observed VIN are separately reviewable. No current Production consumer supplies qualified connected family/exact-ROM evidence; neither the offline ROM nor a logical DME response fills that absence.
+
+The [Calibration source adapter](../../lib/identity/calibrationIdentity.ts) reads the admitted container, exact software identity, Definition family/revision/artifact/digest, Dataset/revision and coverage. New uploads retain their exact container SHA-256. Existing BIN/raw MG1/86T0 DTF sessions derive the digest only where the container owner's resolution and matching type/length prove byte-identical container and EngineeringBinary; otherwise it is unavailable. It does not reload, requalify, rematerialize or persist an existing Dataset. Reference, immutable Current and separate Working ID/revision/Current lineage remain distinct; mismatched Working lineage is unavailable in presentation. Suggested remains unavailable.
+
+Definition catalog family/ECU metadata no longer populates provider controller fields. Raw synthetic or unqualified `observedDmeFamily` was renamed `reportedDmeFamily`; discovery and synthetic consumers retain their existing qualification boundaries. Legacy profile adapters no longer substitute ROM family for an exact signature/fingerprint, exact ROM for family, ECU family for DME variant, or profile platform for engine. Same-owner legacy profile precedence remains explicitly candidate evidence. Saved B58 Gen 1/B58 Gen 2 strings remain literal owner declarations with their source stated; model, year, chassis and Definition family infer no generation. The existing declared-N54 Analysis gate and independent source/unit/rule qualification remain intact; `N54b30` is preserved rather than silently normalised to N54.
+
+**Bounded presentation and U4 dependency**
+
+Shared identity labels now serve Garage, subscriber dashboard, Calibration, Analysis and evidence views. Active subscriber cards distinguish qualified Current-only/comparison evidence and unavailable capabilities; real development fixture paths remain labelled. Working/direct-cell findings use source, governed finding identity (or exact legacy owner text) and occurrence keys; repeated evidence is retained. Affected Working, upload, vehicle, log/tune, bridge-token and Analysis controls have unique IDs, meaningful names and associated labels. The token remains masked and page-memory-only. Shell proportions, Explorer sizing/scrolling, selected styling, BMW borders, plot geometry and editing policy were not redesigned.
+
+The [governed guidance input](../../lib/calibration-workshop/tableGuidanceContract.ts) carries literal source titles, Table/Related Table/Understand terminology, exact producer-qualified assertions with provenance, beginner/engineering fields and explicit per-section absence. It is preparation for U2/U3/U4, not renderer migration or invented education. The unchanged [held test file](../../lib/calibration-workshop/tablePresentation.test.ts) retains these exact three failures:
+
+- `Workshop-owned terminology uses Tables while authoritative Map titles remain untouched`
+- `beginner and engineering detail layers consume governed semantic fields`
+- `unavailable Tables retain explicit absence without generated education`
+
+**Validation and Production evidence**
+
+Final reconciled Node suite: 1,408 tests, 1,403 passing, exactly three unchanged U4 holds and two named optional fixture skips. All 30 new R01 deterministic tests pass. TypeScript --noEmit --incremental false, whole-repository ESLint with zero warnings, UTF-8/whitespace and network-enabled isolated Production build pass. All 29 controlled browser checks pass with no console warnings/errors (five R01, eleven bridge, thirteen Auth/native IndexedDB checks). The full 165-file run supplies all 39 XDF test files; the final 126-file application rerun replaces the earlier application results. Recursive TypeScript dependency resolution confirmed that all edits made after the full run began were outside the XDF dependency graph. Counts are combined once, without double-counting. All 165 final test-file hashes and 40 application/build-copy hashes match. The optional skips are the unconfigured private ROM_LIBRARY_ROOT metadata fixture and unavailable Founder physical MapSwitch artifact; neither is represented as passing. The Security browser test now waits for the real post-mock-navigation React readiness state, preserving its original assertions and Auth implementation.
+
+Authenticated read-only canonical Production passed N54 comparison, B58 Gen1 Current-only and Supra DTF Current-only. Exact saved labels remain `N54b30`, `B58 Gen 1` and `B58 Gen 2`; uploaded identifiers remain `I8A0S`, `00003076501103` and `00005D553C8C05`. Supra retains DTF source identity and separately labelled Definition-source family. Pre/post Dataset IDs/revisions, selected-table values and Working-not-created state agree. Current remains immutable; Export is locked and Flash unavailable. No subscriber upload, restore, save, edit or connection was performed. Automatic Ready deployment: [Vercel record](https://vercel.com/beau-n54s-projects/tunesight/7Z4vcbGYNsVd9JKGAo4zSu6cjyKE); [deployment URL](https://tunesight-2r6pddbvz-beau-n54s-projects.vercel.app); [canonical Production](https://tunesight-beta.vercel.app).
+
+Fresh browser evidence is at the supported stacked viewport; the viewport override did not establish a desktop test. Desktop preservation is supported by unchanged shell/layout source, existing Founder acceptance and focused layout regressions. No new physical car, exact connected ROM, all-device accessibility certification or latency improvement is claimed. Both Calibration functions retain `syd1`, Node.js 24.x and 60-second limits; unrelated placement/configuration is unchanged. TS-RAT-026 Security and Trust boundaries and its contained development dependency exception remain intact.
+
+**Additive WP-003 Hold disposition**
+
+The [historical WP-003 Engineering Hold](engineering-project-status.md#wp-003-engineering-hold) is preserved unchanged. Its Knowledge integration, repeated Founder file validation, N54 regression, F30 stock/modified and Supra stock/modified validation, and conservative unknown/non-authoritative outcomes were already recorded satisfied under WP-004.2 and subsequent Founder evidence. R01 adds current exact-owner contracts, legacy session/source preservation, unknown/conflict counterexamples and fresh read-only Production preservation for all three accepted file workflows. Under the explicit conditional Founder authority in this R01 instruction, the remaining formal disposition criterion is now satisfied for that accepted file-identity scope; the formal Engineering Hold is lifted for those requirements.
+
+This disposition does not grant parent-wide universal identity completion, connected ROM discovery, unrestricted Knowledge admission, U4 rendered acceptance or other product capability. The historical pending statement records its former checkpoint; this additive entry supersedes only its current hold disposition. Exact connected controller ROM remains unestablished and separately governed.
+
+**Continuing boundaries**
+
+No subscriber vehicle, source evidence, Calibration value, Working state, database, dependency, configuration, domain or vehicle-write capability changed. No Export, Flash, Suggested generation, DTC, dyno, durable Working history or editing expansion is enabled. The full project audit remains open. A separately authorised R02 following U2 → U3 → U4 → U5 → U6 is recommended; performance, output, professional durability, physical distribution and commercial/launch work remain distinct packages.
+
+The [living project status](engineering-project-status.md) and [audit reconciliation disposition](audits/2026-10-12-audit-reconciliation.html#r01-closure) record this accepted bounded release. The separate governance commit, final deployment and repository receipt are recorded in the final R01 report, avoiding a self-referential future commit SHA in this entry.
+
+---
+
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
