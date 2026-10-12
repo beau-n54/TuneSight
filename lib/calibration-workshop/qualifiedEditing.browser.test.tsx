@@ -69,6 +69,23 @@ export async function runQualifiedEditingBrowserTests(container:HTMLElement,fixt
       button("Revert complete Working to Current").click();await settle(()=>container.textContent?.includes("No Working changes")===true);
       check(snapshot.working!.mutations.length===4,"Complete revert is unsaved until explicit save; durable history survives");
       check(container.textContent?.includes("Axis editing, floating and masked values")&&container.textContent.includes("Export BIN · LOCKED"),"Unqualified structures and output remain disclosed/locked");
+      // Reproduce the production defect on actual 2D grid/controller/history components.
+      const dimensions=projection.slots.current.definition?.dimensions;
+      if(!dimensions || dimensions.rows<3 || dimensions.columns<3)throw Error("3x3 qualified fixture required");
+      const columns=dimensions.columns;
+      [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find(b=>b.textContent===definition.title)!.click();
+      await settle(()=>Boolean(container.querySelector(`[data-working-cell="${2*columns+2}"]`)));
+      cell().dispatchEvent(new PointerEvent("pointerdown",{bubbles:true}));
+      container.querySelector(`[data-working-cell="${2*columns+2}"]`)!.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,shiftKey:true}));
+      await settle(()=>Boolean(button("Apply to 9 cells")));
+      await operation("matrix");input(container.querySelector<HTMLTextAreaElement>('[name="workingOperand"]')!,Array(3).fill(Array(3).fill(String(expected)).join("\t")).join("\n"));
+      await settle(()=>!button("Apply to 9 cells").disabled);button("Apply to 9 cells").click();
+      await settle(()=>container.textContent?.includes("9 cells · R0 C0 → R2 C2")===true);
+      button("Save durable revision").click();await settle(()=>snapshot.working?.mutations.length===1&&container.textContent?.includes("Saved as a durable Working revision")===true);
+      check(snapshot.working!.mutations[0].targets.length===9&&snapshot.working!.mutations[0].exactRaw?.length===9,"All nine targets and byte traces survive UI save");
+      root.render(createElement(StrictMode,null,createElement(Workspace,{...fixture.props,key:"history-reload",upload:null,initialWorking:{status:"ready",snapshot}})));
+      await settle(()=>container.textContent?.includes("9 cells · R0 C0 → R2 C2")===true);
+      report("PASS R05 history "+fixture.label+": 3x3 numeric bounds, nine targets/raw traces and remounted durable history");
       report("PASS R05 controlled "+fixture.label+": exact scalar/1D/2D edits, malformed input, cancellation, keyboard rectangle, matrix paste, raw-byte trace, undo/redo, save and safe complete revert");
     } finally {root.unmount();clear();}
   }} finally {window.fetch=nativeFetch;window.confirm=confirm;}

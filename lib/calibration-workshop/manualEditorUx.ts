@@ -1,6 +1,28 @@
-import type { WorkingEditOperation, WorkingValidationState } from "./workingCalibration.ts";
+import type { WorkingCellAddress, WorkingEditOperation, WorkingValidationState } from "./workingCalibration.ts";
 
 export type WorkingEditSource = "direct" | "toolbar";
+
+/** Presentation only: never reorder mutation targets or their parallel value/byte arrays. */
+export function workingHistoryRange(targets: readonly WorkingCellAddress[]): string {
+  const first = targets[0];
+  if (!first) return "Coordinate range unavailable";
+  let top = Infinity, left = Infinity, bottom = -Infinity, right = -Infinity;
+  const coordinates = new Set<string>();
+  for (const target of targets) {
+    if (target.definitionRevision !== first.definitionRevision || target.occurrence !== first.occurrence ||
+      ![target.row, target.column].every(value => Number.isSafeInteger(value) && value >= 0))
+      return "Coordinate range unavailable";
+    const coordinate = `${target.row}:${target.column}`;
+    if (coordinates.has(coordinate)) return "Coordinate range unavailable";
+    coordinates.add(coordinate);
+    top = Math.min(top, target.row); bottom = Math.max(bottom, target.row);
+    left = Math.min(left, target.column); right = Math.max(right, target.column);
+  }
+  if (targets.length === 1) return `R${top} C${left}`;
+  const bounds = `R${top} C${left} → R${bottom} C${right}`;
+  return (bottom - top + 1) * (right - left + 1) === coordinates.size
+    ? bounds : `Sparse selection within ${bounds}`;
+}
 
 export function workingOperationLabel(operation: WorkingEditOperation, source: WorkingEditSource = "toolbar"): string {
   if (source === "direct") return "Direct value edit";

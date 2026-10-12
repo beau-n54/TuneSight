@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 const read = (name: string) => fs.readFileSync("app/dashboard/vehicles/[id]/calibration/" + name, "utf8");
 const controller = read("shared-workspace-client.tsx"), renderer = read("workshop-client.tsx"), panel = read("working-calibration-panel.tsx");
+test("history panel uses complete numeric bounds rather than first/last canonical target order", () => {
+  assert.match(panel, /workingHistoryRange\(mutation\.targets\)/);
+  assert.doesNotMatch(panel, /mutation\.targets\.at\(-1\)/);
+});
 test("one shared workspace exposes governed Working controls for both evidence states", () => {
   for (const label of ["Create Working Calibration", "Set engineering value", "Set raw integer", "Add / subtract", "Percentage increase / decrease",
     "Multiply by factor", "Paste matrix", "Revert selected to Current", "Interpolate columns (structural)", "Interpolate rows (structural)", "Undo", "Redo"]) assert.ok(panel.includes(label), label);

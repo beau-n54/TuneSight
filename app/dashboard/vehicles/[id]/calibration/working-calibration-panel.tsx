@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { presentationFindings } from "@/lib/calibration-workshop/presentationFindings";
 import type { WorkingCalibration, WorkingEditOperation, WorkingEditPreview } from "@/lib/calibration-workshop/workingCalibration";
-import { validationExplanation, workingOperationLabel } from "@/lib/calibration-workshop/manualEditorUx";
+import { validationExplanation, workingOperationLabel, workingHistoryRange } from "@/lib/calibration-workshop/manualEditorUx";
 import type { WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 
 export type CalibrationDisplayMode = "reference" | "current" | "working";
@@ -77,7 +77,7 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
       </div>
       <details className="rounded-lg border border-zinc-800 p-3" open={activeHistory.length > 0}>
         <summary className="cursor-pointer text-sm font-semibold">Change history · {activeHistory.length}</summary>
-        <ol className="mt-3 max-h-56 space-y-2 overflow-auto">{activeHistory.map(mutation => <li key={mutation.sequence} className="rounded-lg bg-black/40 p-3 text-xs"><div className="flex justify-between gap-3"><strong>#{mutation.sequence} · {definitionTitles[`${mutation.targets[0]!.definitionRevision}:${mutation.targets[0]!.occurrence}`] ?? "Governed Table"}</strong><span className={mutation.validation === "WARNING" ? "text-amber-200" : "text-emerald-200"}>{mutation.validation}</span></div><p className="mt-1 text-zinc-400">{workingOperationLabel(mutation.operation, mutation.source)} · {mutation.operand} · {mutation.targets.length} cell{mutation.targets.length === 1 ? "" : "s"} · R{mutation.targets[0]!.row} C{mutation.targets[0]!.column}{mutation.targets.length > 1 ? ` → R${mutation.targets.at(-1)!.row} C${mutation.targets.at(-1)!.column}` : ""}</p><p className="mt-1 text-zinc-500">{mutation.before.slice(0, 8).map((value, index) => `${value} → ${mutation.after[index]}`).join(" · ")}{mutation.before.length > 8 ? ` · +${mutation.before.length - 8} more` : ""}</p></li>)}</ol>
+        <ol className="mt-3 max-h-56 space-y-2 overflow-auto">{activeHistory.map(mutation => <li key={mutation.sequence} className="rounded-lg bg-black/40 p-3 text-xs"><div className="flex justify-between gap-3"><strong>#{mutation.sequence} · {definitionTitles[`${mutation.targets[0]!.definitionRevision}:${mutation.targets[0]!.occurrence}`] ?? "Governed Table"}</strong><span className={mutation.validation === "WARNING" ? "text-amber-200" : "text-emerald-200"}>{mutation.validation}</span></div><p className="mt-1 text-zinc-400">{workingOperationLabel(mutation.operation, mutation.source)} · {mutation.operand} · {mutation.targets.length} cell{mutation.targets.length === 1 ? "" : "s"} · {workingHistoryRange(mutation.targets)}</p><p className="mt-1 text-zinc-500">{mutation.before.slice(0, 8).map((value, index) => `${value} → ${mutation.after[index]}`).join(" · ")}{mutation.before.length > 8 ? ` · +${mutation.before.length - 8} more` : ""}</p></li>)}</ol>
       </details>
       {activeHistory.at(-1)?.exactRaw && <details className="rounded border border-zinc-800 p-3 text-xs"><summary>Exact raw mutation · most recent operation</summary>
         <p>Nearest integer only within 1e-7 arithmetic tolerance; otherwise rejected. No clamping.</p>
