@@ -4,7 +4,8 @@ import { createWorkspaceTab, MAX_OPEN_WORKSPACE_TABS, type WorkspaceTabsState, t
 import type { TableDisplayLayer } from "./sharedTablePresentation.ts";
 import type { EngineeringNavigationMode } from "./engineeringNavigation.ts";
 
-export const WORKSPACE_UI_VERSION = "tunesight.workspace-ui.v1";
+import { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
+export { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
 export type WorkspaceUiState = Readonly<{ workspace: WorkspaceTabsState; search: string; navigationMode: EngineeringNavigationMode;
   system: string | null; evidenceFilter: string; displayMode: TableDisplayLayer;
   panels: Readonly<{ explorerCollapsed: boolean; inspectorCollapsed: boolean; focusWorkspace: boolean }> }>;

@@ -6,12 +6,14 @@ import { selectRestoredSubscriberWorkshop } from "./selectRestoredSubscriberWork
 import { maskRetainedWorkspace } from "./sharedWorkspaceDispatch.ts";
 import { buildSharedWorkspacePayload, exactWorkspaceDefinition, workspaceCatalogue } from "./sharedWorkspaceAdapter.ts";
 import { workspaceUiKey } from "./workspaceRestoration.ts";
+import { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
+import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation.ts";
 
 export type WorkspaceBootstrapOwners = {
   authenticate(): Promise<{ id: string; scope: string } | null>;
   ownsVehicle(ownerId: string, vehicleId: string): Promise<boolean>;
   readSession(id: string, ownerId: string, vehicleId: string): Promise<SubscriberCalibrationResult | null>;
-  readLatest(ownerId: string, vehicleId: string): Promise<{ sessionId: string; result: SubscriberCalibrationResult } | null>;
+  readLatest(ownerId: string, vehicleId: string, hint?: string): Promise<{ sessionId: string; result: SubscriberCalibrationResult } | null>;
   onTiming?: (phase: string, durationMs: number) => void;
 };
 /** One admitted session read and one projection. Browser hints never choose a
@@ -30,8 +32,20 @@ export async function loadSubscriberWorkspace(input: unknown, owners: WorkspaceB
     if (!request) return failure("INVALID_REQUEST", "An exact workspace request is required.");
     if (request.ownerScope !== owner.scope) return failure("OWNER_MISMATCH", "The subscriber owner does not match this workspace.");
     if (!await timed("ownership", () => owners.ownsVehicle(owner.id, request.vehicleId))) return failure("VEHICLE_UNAVAILABLE", "Vehicle evidence is unavailable to this subscriber.");
+    const candidates = new Set<string>();
+    for (const hint of request.hints) {
+      const prefix = WORKSPACE_UI_VERSION + ":adaptive:";
+      if (!hint.scope.startsWith(prefix)) continue;
+      try {
+        const scope = JSON.parse(hint.scope.slice(prefix.length));
+        if (Array.isArray(scope) && scope[0] === owner.scope && scope[1] === request.vehicleId && scope[3] === "subscriber" &&
+          isSubscriberWorkshopSessionId(scope[2])) candidates.add(scope[2]);
+      } catch { /* Malformed identity cannot start a candidate read. */ }
+    }
+    const hintedSession = candidates.size === 1 ? [...candidates][0] : undefined;
     const session = await timed("session", () => resolveSubscriberWorkshopSession({ requestedSession: request.requestedSession,
-      ownerId: owner.id, vehicleId: request.vehicleId }, { readSession: owners.readSession, readLatest: owners.readLatest, recoverVehicle: async () => null }));
+      ownerId: owner.id, vehicleId: request.vehicleId }, { readSession: owners.readSession,
+      readLatest: (ownerId, vehicleId) => owners.readLatest(ownerId, vehicleId, hintedSession), recoverVehicle: async () => null }));
     const context = { ownerId: owner.scope, vehicleId: request.vehicleId, sessionId: session.sessionId ?? null, sourceMode: "subscriber" as const };
     const success = resolveVehicleOwnedCalibrationEvidence({ ownerId: owner.id, vehicleId: request.vehicleId, result: session.result }).workshop;
     if (!success) return { status: session.explicit ? "session_unavailable" : "empty", context,

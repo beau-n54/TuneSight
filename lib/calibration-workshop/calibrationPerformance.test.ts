@@ -143,7 +143,7 @@ for (const [index, label] of ["N54", "B58 Gen1", "Supra DTF"].entries()) test(`R
     hints: [{ scope: workspaceUiKey(context, catalogue, "adaptive"), selection }] }, {
     authenticate: async () => ({ id: context.ownerId, scope: context.ownerId }), ownsVehicle: async () => true,
     readSession: async () => assert.fail("Latest discovery uses exactly one decode"),
-    readLatest: async () => { reads++; return { sessionId: context.sessionId, result: decodeSubscriberSession(bytes, context.ownerId, context.vehicleId)! }; },
+    readLatest: async (_owner, _vehicle, hint) => { assert.equal(hint, context.sessionId); reads++; return { sessionId: context.sessionId, result: decodeSubscriberSession(bytes, context.ownerId, context.vehicleId)! }; },
   });
   assert.equal(reads, 1); assert.equal(counts.phaseOneWorkshopBuilds - before, 1);
   assert.equal(result.status, "ready"); if (result.status !== "ready") return;
@@ -155,9 +155,9 @@ for (const [index, label] of ["N54", "B58 Gen1", "Supra DTF"].entries()) test(`R
 });
 
 test("R03 bootstrap rejects crossed owner/vehicle, ambiguous explicit session and exact-scope forged occurrence before projection", async () => {
-  const anchor = anchors[0]; let reads = 0;
+  const anchor = anchors[0]; let reads = 0, lastHint: string | undefined;
   const owners = { authenticate: async () => ({ id: context.ownerId, scope: context.ownerId }), ownsVehicle: async () => true,
-    readSession: async () => { reads++; return anchor; }, readLatest: async () => { reads++; return { sessionId: context.sessionId, result: anchor }; } };
+    readSession: async () => { reads++; return anchor; }, readLatest: async (_owner: string, _vehicle: string, hint?: string) => { reads++; lastHint = hint; return { sessionId: context.sessionId, result: anchor }; } };
   const request = { kind: "workspace", ownerScope: context.ownerId, vehicleId: context.vehicleId, hints: [] };
   assert.equal((await loadSubscriberWorkspace({ ...request, ownerScope: "other" }, owners)).status, "unavailable");
   assert.equal((await loadSubscriberWorkspace(request, { ...owners, ownsVehicle: async () => false })).status, "unavailable");
@@ -169,7 +169,14 @@ test("R03 bootstrap rejects crossed owner/vehicle, ambiguous explicit session an
   const forged = await loadSubscriberWorkspace({ ...request, hints }, owners);
   assert.equal(forged.status, "unavailable"); if (forged.status === "unavailable") assert.equal(forged.code, "RESTORATION_UNAVAILABLE");
   const stale = await loadSubscriberWorkspace({ ...request, hints: [{ ...hints[0], scope: hints[0].scope + "old" }] }, owners);
+  assert.equal(lastHint, undefined);
   assert.equal(stale.status, "ready"); if (stale.status === "ready") assert.equal(stale.evidence.projection?.selection.key, workspaceCatalogue(anchor.workshop).selectedDefinitionKey);
+  for (const otherContext of [{ ...context, ownerId: "other" }, { ...context, vehicleId: "other" }]) {
+    await loadSubscriberWorkspace({ ...request, hints: [{ ...hints[0], scope: workspaceUiKey(otherContext, anchor.workshop, "adaptive") }] }, owners);
+    assert.equal(lastHint, undefined);
+  }
+  await loadSubscriberWorkspace({ ...request, hints: [hints[0], { ...hints[0], scope: workspaceUiKey({ ...context, sessionId: "b".repeat(32) }, anchor.workshop, "adaptive") }] }, owners);
+  assert.equal(lastHint, undefined, "Multiple saved sessions cannot start speculative reads");
   const explicit = await loadSubscriberWorkspace({ ...request, requestedKey: selected.key, hints }, owners);
   assert.equal(explicit.status, "ready"); if (explicit.status === "ready") assert.equal(explicit.evidence.projection?.selection.key, selected.key);
 });

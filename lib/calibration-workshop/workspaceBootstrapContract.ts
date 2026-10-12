@@ -1,6 +1,6 @@
 import type { ProjectionContext, ExactTableSelection } from "./sharedTableProjection.ts";
 import type { SharedWorkspacePayload, WorkspaceCatalogue } from "./sharedWorkspaceAdapter.ts";
-import { WORKSPACE_UI_VERSION } from "./workspaceRestoration.ts";
+import { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
 
 export type WorkspaceManifest = Readonly<{
   ownerScope: string; vehicleId: string; requestedSession?: string | string[]; requestedKey?: string;

@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { readWorkspaceSelectionHints, type WorkspaceManifest, type WorkspaceBootstrapResponse } from "@/lib/calibration-workshop/workspaceBootstrapContract";
-import SharedWorkspaceClient, { EmptySharedWorkspace, type WorkspaceVehicle } from "./shared-workspace-client";
+import dynamic from "next/dynamic";
+import type { WorkspaceVehicle } from "./shared-workspace-client";
+
+const SharedWorkspaceClient = dynamic(() => import("./shared-workspace-client"), { ssr: false });
+const EmptySharedWorkspace = dynamic(() => import("./shared-workspace-client").then(module => module.EmptySharedWorkspace), { ssr: false });
 
 /** The page supplies authenticated owner/vehicle identifiers, not Calibration
  * evidence. The existing guarded Sydney route admits any saved-selection hint.
@@ -35,6 +39,9 @@ export default function WorkspaceBootstrapClient({ manifest, vehicle, upload }: 
       try { hints = readWorkspaceSelectionHints(window.localStorage, request); } catch { /* Existing restoration reports storage denial. */ }
       const hintsMs = performance.now() - hintsStart;
       try {
+        // Fetch and workspace-code loading overlap; the loader has no runtime
+        // dependency on the Grid, plots, Working engine or projection machinery.
+        const workspaceCode = import("./shared-workspace-client").then(() => null, () => new Error("Workspace code unavailable"));
         const fetchStart = performance.now();
         const response = await fetch("/api/calibration-workshop/projection", { method: "POST", cache: "no-store", credentials: "same-origin",
           headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...request, kind: "workspace", hints }), signal: controller.signal });
@@ -42,6 +49,8 @@ export default function WorkspaceBootstrapClient({ manifest, vehicle, upload }: 
         const bodyStart = performance.now(), text = await response.text(), bodyMs = performance.now() - bodyStart;
         const parseStart = performance.now(), value = JSON.parse(text) as WorkspaceBootstrapResponse, parseMs = performance.now() - parseStart;
         if ((!response.ok && value.status !== "unavailable") || !["ready", "empty", "session_unavailable", "unavailable"].includes(value.status)) throw Error("Workspace request failed");
+        const codeFailure = await workspaceCode;
+        if (codeFailure) throw codeFailure;
         if (value.status !== "unavailable" && (value.context.ownerId !== request.ownerScope || value.context.vehicleId !== request.vehicleId ||
           value.context.sourceMode !== "subscriber" || request.requestedSession !== undefined && value.status === "ready" && value.context.sessionId !== request.requestedSession))
           throw Error("Workspace response identity differs");

@@ -8,6 +8,7 @@ import { inspectSubscriberSession, encodeSubscriberSession, expiredObjectPaths, 
 import { activeSubscriberSessionObjectPath } from "./subscriberSessionPointer";
 import { createSubscriberSessionCache } from "./subscriberSessionCache";
 import { registerPrivateObjects } from "../security/privateObjectInventory.server";
+import { discoverSubscriberSession } from "./subscriberSessionDiscovery.ts";
 
 export const SUBSCRIBER_CALIBRATION_BUCKET = "subscriber-calibration-private";
 const BUCKET = SUBSCRIBER_CALIBRATION_BUCKET, RAW_PREFIX = "raw", SESSION_PREFIX = "sessions", CLEANUP_LIMIT = 24;
@@ -88,12 +89,13 @@ export async function readDurableSubscriberWorkshopSession(id: string, ownerId: 
     },
   }, timing);
 }
-export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string, timing?: SessionReadTiming): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
-  const started = performance.now(), sessionId = await readActiveSessionId(ownerId, vehicleId);
-  timing?.("discovery", performance.now() - started);
-  if (!sessionId) return null;
-  const result = await readDurableSubscriberWorkshopSession(sessionId, ownerId, vehicleId, timing);
-  if (result) return Object.freeze({ sessionId, result });
+export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string, timing?: SessionReadTiming, hint?: string): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
+  const found = await discoverSubscriberSession(async () => {
+    const started = performance.now(), sessionId = await readActiveSessionId(ownerId, vehicleId);
+    timing?.("discovery", performance.now() - started);
+    return sessionId;
+  }, id => readDurableSubscriberWorkshopSession(id, ownerId, vehicleId, timing), hint);
+  if (found) return Object.freeze(found);
   // Reads never clean up a pointer or evidence, including corrupt/expired data.
   // Only an explicit owner-authorised repair may replace this state.
   return null;

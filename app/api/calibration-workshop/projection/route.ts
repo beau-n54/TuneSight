@@ -22,7 +22,7 @@ async function handlePOST(request: Request) {
       authenticate: async () => { const { data: { user } } = await supabase.auth.getUser(); return user ? { id: user.id, scope: createHash("sha256").update(user.id).digest("hex").slice(0, 24) } : null; },
       ownsVehicle: async (ownerId: string, vehicleId: string) => { const { data, error } = await supabase.from("vehicles").select("id").eq("id", vehicleId).eq("user_id", ownerId).single(); return !error && Boolean(data); },
       readSession: (id: string, ownerId: string, vehicleId: string) => readSubscriberWorkshopSession(id, ownerId, vehicleId, record),
-      readLatest: (ownerId: string, vehicleId: string) => readLatestSubscriberWorkshopSession(ownerId, vehicleId, record),
+      readLatest: (ownerId: string, vehicleId: string, hint?: string) => readLatestSubscriberWorkshopSession(ownerId, vehicleId, record, hint),
       onTiming: record,
     };
     function record(phase: string, durationMs: number) { if (Number.isFinite(durationMs)) timings.push(`${phase};dur=${Math.max(0, durationMs).toFixed(1)}`); }
