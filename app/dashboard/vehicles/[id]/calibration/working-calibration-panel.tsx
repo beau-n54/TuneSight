@@ -8,7 +8,8 @@ import type { WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
 
 export type CalibrationDisplayMode = "reference" | "current" | "working";
 
-export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, onRetrySave, interactionAllowed = true, createAllowed = true, referenceAvailable = false }: {
+export default function WorkingCalibrationPanel({ mode, onMode, working, onCreate, onUndo, onRedo, operation, onOperation, operand, onOperand, preview, onApply, selectedCount, definitionTitles, editQualified, blockers, warnings, saveStatus, onRetrySave, interactionAllowed = true, createAllowed = true, referenceAvailable = false, durable = false }: {
+  durable?: boolean;
   referenceAvailable?: boolean;
   interactionAllowed?: boolean;
   createAllowed?: boolean;
@@ -43,8 +44,8 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
         <button type="button" aria-pressed={mode === "current"} onClick={() => onMode("current")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "current" ? "bg-blue-500/20 text-blue-200" : "text-zinc-400"}`}>CURRENT</button>
         <button type="button" aria-pressed={mode === "working"} disabled={!working} onClick={() => onMode("working")} className={`rounded-md px-4 py-2 text-xs font-bold ${mode === "working" ? "bg-emerald-500/20 text-emerald-200" : "text-zinc-400 disabled:text-zinc-700"}`}>WORKING</button>
       </div>
-      <p className="text-xs text-zinc-400" role="status">{saveStatus === "saved" ? "Saved in this browser only" : saveStatus === "failed" ? (working ? "Save failed — changes are not safely stored. Keep this page open and retry." : "Restore failed. Existing browser history is preserved; retry restoration before editing.") : saveStatus === "unsaved" ? "Unsaved Working changes — keep this page open." : saveStatus === "loading" ? "Restoring saved Working Calibration…" : "Working Calibration not created"}</p>
-      {(saveStatus === "failed" || saveStatus === "unsaved") && onRetrySave && <button type="button" onClick={onRetrySave} className="rounded-lg border border-amber-400 px-3 py-2 text-xs text-amber-200">{working ? "Retry local save" : "Retry restoration"}</button>}
+      <p className="text-xs text-zinc-400" role="status">{saveStatus === "saved" ? durable ? "Saved as a durable Working revision" : "Saved in this browser only" : saveStatus === "failed" ? (working ? "Save failed — changes are not safely stored. Keep this page open and retry." : "Restore failed. Existing history is preserved; retry restoration before editing.") : saveStatus === "unsaved" ? "Unsaved Working changes — keep this page open." : saveStatus === "loading" ? "Restoring saved Working Calibration…" : "Working Calibration not created"}</p>
+      {(saveStatus === "failed" || saveStatus === "unsaved") && onRetrySave && <button type="button" onClick={onRetrySave} className="rounded-lg border border-amber-400 px-3 py-2 text-xs text-amber-200">{working ? durable ? "Save / retry durable revision" : "Retry local save" : "Retry restoration"}</button>}
     </div>
 
     {!working ? <div><p className="text-sm text-zinc-300">Current Calibration is immutable. Create one separate Working Calibration from this exact Current Dataset to begin editing.</p><button type="button" disabled={!interactionAllowed || !createAllowed} onClick={onCreate} className="mt-3 rounded-lg border border-blue-400 bg-blue-400/10 px-4 py-2 text-sm font-semibold text-blue-100">Create Working Calibration</button></div> : <>
@@ -71,7 +72,7 @@ export default function WorkingCalibrationPanel({ mode, onMode, working, onCreat
     </>}
 
     <div className="grid gap-2 text-xs sm:grid-cols-2">
-      <div className="rounded-lg border border-blue-400/25 bg-blue-400/5 p-3"><strong className="text-blue-200">Build Calibration</strong><p className="mt-1 text-zinc-400">Available for valid Working changes when the exact source lease and reconstruction contract remain qualified.</p></div>
+      <div className="rounded-lg border border-blue-400/25 bg-blue-400/5 p-3"><strong className="text-blue-200">Build Calibration · LOCKED</strong><p className="mt-1 text-zinc-400">Durable editing does not qualify output. Exact checksum and integrity evidence is required before building an artifact.</p></div>
       <div className="rounded-lg border border-amber-400/25 bg-amber-400/5 p-3"><strong className="text-amber-200">Export BIN · LOCKED</strong><p className="mt-1 text-zinc-400">Checksum/integrity qualification required. No downloadable or flashable BIN is produced.</p></div>
     </div>
   </section>;

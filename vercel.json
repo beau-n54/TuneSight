@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
+    "app/api/calibration-workshop/working/route.ts": {
+      "regions": ["syd1"]
+    },
     "app/api/calibration-workshop/projection/route.ts": {
       "regions": ["syd1"]
     },

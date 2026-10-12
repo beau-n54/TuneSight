@@ -1,6 +1,8 @@
 "use client";
 
-import { hasUnpersistedWorking, persistWorkingRevision, type WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
+import { hasUnpersistedWorking, hasUnsavedDurableWorking, persistWorkingRevision, type WorkingSaveStatus } from "@/lib/calibration-workshop/workingSave";
+import { createDurableWorkingClient } from "@/lib/calibration-workshop/durableWorkingClient";
+import type { DurableWorkingSnapshot } from "@/lib/calibration-workshop/durableWorking";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { currentRendererDefinition, exactWorkspaceDefinition,
@@ -68,7 +70,8 @@ export function EmptySharedWorkspace({ vehicle, context, reason, upload }: { veh
     limitations="No evidence or numeric values have been substituted. Open Calibration File to begin."/>;
 }
 
-export default function SharedWorkspaceClient({ workshop, evidence, context, vehicle, requestedKey, upload, onInteractive }: {
+export default function SharedWorkspaceClient({ workshop, evidence, context, vehicle, requestedKey, upload, onInteractive, initialWorking }: {
+  initialWorking?: import("@/lib/calibration-workshop/workspaceBootstrapContract").InitialDurableWorking;
   workshop: WorkspaceCatalogue; evidence: SharedWorkspacePayload; context: ProjectionContext; vehicle: WorkspaceVehicle; requestedKey?: string; upload: ReactNode; onInteractive?: (workspaceMs: number) => void;
 }) {
   const [mountedAt] = useState(() => performance.now());
@@ -140,17 +143,43 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
     currentDatasetId: source.currentDatasetId, currentDatasetRevision: source.currentDatasetRevision, romLayoutId: source.romLayoutId,
     relationshipRevision: source.relationshipRevision, definitionSetRevision: source.definitionSetRevision, createdAt: new Date().toISOString() }), [context, source]);
   const [persistedRevision, setPersistedRevision] = useState<string | null>(null);
+  const durable = useMemo(() => context.sourceMode === "subscriber" && context.sessionId ? createDurableWorkingClient({
+    vehicleId: context.vehicleId, sessionId: context.sessionId, datasetId: source.currentDatasetId, datasetRevision: source.currentDatasetRevision,
+  }) : null, [context, source]);
+  const [savedHistory, setSavedHistory] = useState<DurableWorkingSnapshot>({ head: null, working: null, history: [] });
+  const [legacyWorking, setLegacyWorking] = useState<WorkingCalibration | null>(null);
+  const [saving, setSaving] = useState(false);
+  const savePending = useRef(false);
   const [saveAttempt, setSaveAttempt] = useState(0);
   const [uiRestored, setUiRestored] = useState(false);
   const uiScope = workspaceUiKey(context, workshop, "adaptive");
-  const visibleSaveStatus: WorkingSaveStatus = hasUnpersistedWorking(working, persistedRevision) ? (saveStatus === "failed" ? "failed" : "unsaved") : saveStatus;
-  const retryLocalSave = () => { if (!working) { window.location.reload(); return; } setSaveAttempt(attempt => attempt + 1); };
+  const unsaved = useMemo(() => durable ? hasUnsavedDurableWorking(working, savedHistory.working) : hasUnpersistedWorking(working, persistedRevision), [durable, working, savedHistory.working, persistedRevision]);
+  const visibleSaveStatus: WorkingSaveStatus = unsaved ? (saveStatus === "failed" ? "failed" : "unsaved") : saveStatus;
+  const acceptSnapshot = (snapshot: DurableWorkingSnapshot) => {
+    setSavedHistory(snapshot); setWorking(snapshot.working); setPersistedRevision(snapshot.working?.workingCalibrationRevision ?? null);
+    setSaveStatus(snapshot.working ? "saved" : "not-created"); setDisplayMode(snapshot.working ? "working" : "current");
+  };
+  const saveDurable = async (restoreId?: string) => {
+    if (!durable || !working || savePending.current || !guardPending()) return;
+    savePending.current = true; setSaving(true);
+    try {
+      const snapshot = await (durable.uncertain ? durable.retry() : durable.request(restoreId ? { action: "restore", restoreId, expectedHead: savedHistory.head?.id ?? null }
+        : { action: "save", working, expectedHead: savedHistory.head?.id ?? null }));
+      if (mounted.current) acceptSnapshot(snapshot);
+    } catch (error) { if (mounted.current) { setSaveStatus("failed"); setNotice(error instanceof Error ? error.message : "Working save failed; retry."); } }
+    finally { savePending.current = false; if (mounted.current) setSaving(false); }
+  };
+  const retryLocalSave = () => { if (durable) { if (working) void saveDurable(); else window.location.reload(); return; }
+    if (!working) { window.location.reload(); return; } setSaveAttempt(attempt => attempt + 1); };
   useEffect(() => {
     let active = true;
     queueMicrotask(async () => {
       if (!active) return;
       try {
         const current = seed();
+        if (initialWorking?.status === "unavailable") throw Error("Durable Working is unavailable; existing history is preserved.");
+        const server = initialWorking?.status === "ready" ? initialWorking.snapshot : durable ? await durable.request({ action: "read" }) : null;
+        if (!active) return;
         const resolved = new Map<string, WorkingDefinitionSeed>();
         for (const identity of workingRestoreDefinitions(window.localStorage, current)) {
           const matches = workshop.definitions.filter(item => item.definitionRevision === identity.definitionRevision && item.occurrence === identity.occurrence);
@@ -161,11 +190,15 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
           resolved.set(JSON.stringify([identity.definitionRevision, identity.occurrence]), resolveProjectedWorkingDefinition(workshop, response.projection));
         }
         const resolveDefinition = (revision: string, occurrence: number) => resolved.get(JSON.stringify([revision, occurrence]));
-        const restored = createBrowserWorkingCalibrationStore(window.localStorage, true).load(current, current, resolveDefinition);
-        setPersistedRevision(restored?.workingCalibrationRevision ?? null);
+        const legacy = createBrowserWorkingCalibrationStore(window.localStorage, true).load(current, current, resolveDefinition);
+        const restored = server?.working ?? legacy;
+        if (server) { setSavedHistory(server); setLegacyWorking(legacy); }
+        setPersistedRevision(server ? server.working?.workingCalibrationRevision ?? null : restored?.workingCalibrationRevision ?? null);
         setWorking(restored);
         setDisplayMode(restored ? "working" : "current");
-        setSaveStatus(restored ? "saved" : "not-created");
+        setSaveStatus(restored ? server && !server.working ? "unsaved" : "saved" : "not-created");
+        if (server && legacy && legacy.workingCalibrationRevision !== server.working?.workingCalibrationRevision)
+          setNotice("Existing browser Working is preserved. Save explicitly to import it; a different durable head is never overwritten automatically.");
         try {
         const ui = restoreWorkspaceUi(window.localStorage.getItem(uiScope), uiScope, workshop, requestedKey, Boolean(restored), evidence.referenceAvailable);
         if (ui.state) {
@@ -182,9 +215,9 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
       } catch { setSaveStatus("failed"); }
     });
     return () => { active = false; };
-  }, [seed, cache, context, uiScope, workshop, requestedKey, evidence, loadTable]);
+  }, [seed, cache, context, uiScope, workshop, requestedKey, evidence, loadTable, durable, initialWorking]);
   useEffect(() => {
-    if (!working || working.workingCalibrationRevision === persistedRevision) return;
+    if (durable || !working || working.workingCalibrationRevision === persistedRevision) return;
     let active = true;
     queueMicrotask(() => {
       if (!active) return;
@@ -198,13 +231,13 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
       else save();
     });
     return () => { active = false; };
-  }, [working, persistedRevision, saveAttempt]);
+  }, [working, persistedRevision, saveAttempt, durable]);
   useEffect(() => {
-    if (!hasUnpersistedWorking(working, persistedRevision) && !(pendingCells.size > 0 || workspace.tabs.some(tab => tab.operand.trim()))) return;
+    if (!unsaved && !(pendingCells.size > 0 || workspace.tabs.some(tab => tab.operand.trim()))) return;
     const protect = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", protect);
     return () => window.removeEventListener("beforeunload", protect);
-  }, [working, persistedRevision, pendingCells, workspace.tabs]);
+  }, [unsaved, pendingCells, workspace.tabs]);
   useEffect(() => {
     if (!uiRestored) return;
     try {
@@ -278,7 +311,7 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
   const targets = active && currentDetail ? active.selectedCells.flatMap(index => currentDetail.cells[index] ? [{ definitionRevision: active.definitionRevision, occurrence: active.occurrence,
     index, row: currentDetail.cells[index].row, column: currentDetail.cells[index].column }] : []) : [];
   const editQualified = projection?.slots.current.state === "available" && projection.capabilities.edit?.state === "EDIT_QUALIFIED";
-  const canMutate = interaction.editing && editQualified && saveStatus !== "loading" && !(saveStatus === "failed" && !working);
+  const canMutate = interaction.editing && editQualified && !saving && !durable?.uncertain && saveStatus !== "loading" && !(saveStatus === "failed" && !working);
   const preview = working && active?.operand.trim() && activeSeed ? previewWorkingEdit(working, { operation: active.operation, operand: Number(active.operand), targets, definitions: [activeSeed] }) : null;
   function commitCell(index: number, value: number) {
     if (!canMutate || !working || !activeSeed || !active || displayMode !== "working" || !currentDetail?.cells[index]) return { status: "blocked" as const, findings: ["Editing is unavailable in this context."] };
@@ -320,13 +353,35 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
     explorer={<><h2 className="mb-2 shrink-0 text-sm font-semibold">Explorer · {definitions.length} Tables</h2><div ref={explorerList} aria-label="Explorer table list" className="min-h-0 max-h-[65vh] flex-1 space-y-1 overflow-y-auto xl:max-h-none">{definitions.map(({ definition }) => <button type="button" key={definition.key} aria-current={definition.key === active?.definitionKey ? "true" : undefined} className={`block w-full rounded-lg border p-3 text-left text-sm ${definition.key === active?.definitionKey ? "border-blue-400/60 bg-blue-400/10" : changedKeys.has(`${definition.definitionRevision}:${definition.occurrence}`) ? "border-emerald-400/35 bg-emerald-400/10" : "border-zinc-800 hover:border-blue-400"}`} onClick={() => open(definition.key)} title={definition.title}><span className="block">{calibrationTableLabel(mode, definition.title, definition.semantic)}</span>{mode === "standard" && <span className="block text-xs text-zinc-400">{definition.title}</span>}<span className="text-zinc-500">{definition.shape} · occurrence {definition.occurrence} · {definition.available ? "available" : "unavailable"}</span></button>)}</div>{!definitions.length && <p className="text-xs text-zinc-500">{navigationEmpty === "knowledge_empty" ? "Qualified engineering navigation is not yet bound for this scope. All Tables remains available." : "No Tables match these filters."}</p>}</>}
     tabs={<WorkspaceTabs tabs={workspace.tabs} activeId={workspace.activeId} changedKeys={changedKeys} onActivate={id => { if (guardPending()) { setWorkspace(state => activateWorkspaceTab(state, id)); const tab = workspace.tabs.find(item => item.id === id); if (tab) loadTable(tab.definitionKey); } }} onClose={id => close(id)} onCloseOthers={id => close(id, true)}/>}
     table={table} inspector={inspector}
-    working={<WorkingCalibrationPanel referenceAvailable={projection?.slots.reference.state === "available"} mode={displayMode} onMode={next => { if (guardPending()) setDisplayMode(next); }} working={working}
+    working={<><WorkingCalibrationPanel durable={Boolean(durable)} referenceAvailable={projection?.slots.reference.state === "available"} mode={displayMode} onMode={next => { if (guardPending()) setDisplayMode(next); }} working={working}
       onCreate={() => { if (canMutate) { setWorking(seed()); setDisplayMode("working"); } }}
-      onUndo={() => { if (interaction.editing && working && guardPending()) setWorking(undoWorkingEdit(working, new Date().toISOString())); }} onRedo={() => { if (interaction.editing && working && guardPending()) setWorking(redoWorkingEdit(working, new Date().toISOString())); }}
+      onUndo={() => { if (canMutate && working && guardPending()) setWorking(undoWorkingEdit(working, new Date().toISOString())); }} onRedo={() => { if (canMutate && working && guardPending()) setWorking(redoWorkingEdit(working, new Date().toISOString())); }}
       operation={active?.operation ?? "assign"} onOperation={operation => updateTab({ operation })} operand={active?.operand ?? ""} onOperand={operand => updateTab({ operand })} preview={preview}
       onApply={() => { if (!canMutate || !working || !active || !activeSeed || displayMode !== "working" || !guardPending()) return; const result = applyWorkingEdit(working, { operation: active.operation, source: "toolbar", operand: Number(active.operand), targets, definitions: [activeSeed], updatedAt: new Date().toISOString() }); if (result.status === "applied") { setWorking(result.calibration); updateTab({ operand: "" }); } else setNotice(result.findings.join(" ")); }}
       selectedCount={targets.length} definitionTitles={Object.fromEntries(workshop.definitions.map(item => [`${item.definitionRevision}:${item.occurrence}`, item.title]))}
-      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}/>}
+      editQualified={Boolean(editQualified)} interactionAllowed={interaction.editing && !saving && !durable?.uncertain && saveStatus !== "loading"} createAllowed={Boolean(canMutate)} blockers={currentDetail?.editCapability.blockers ?? []} warnings={currentDetail?.editCapability.warnings ?? []} saveStatus={visibleSaveStatus} onRetrySave={retryLocalSave}/>
+      {durable && <section aria-label="Durable Working revisions" className="bmw-border mt-3 rounded-xl p-4 text-sm">
+        <p>Saved revisions are immutable and available on your authenticated devices. Save is explicit. Build, Export and Direct Flash remain locked.</p>
+        <button className={button} disabled={!working || saving || !interaction.editing} onClick={() => void saveDurable()}>{saving ? "Saving revision…" : "Save durable revision"}</button>
+        {legacyWorking && <button className={button} disabled={saving || Boolean(durable.uncertain)} onClick={() => {
+          if (guardPending() && window.confirm("Load the preserved browser Working into this tab? Durable history will remain unchanged until you explicitly save.")) {
+            setWorking(legacyWorking); setDisplayMode("working"); setSaveStatus("unsaved");
+          }
+        }}>Load preserved browser Working</button>}
+        <button className={button} disabled={saving} onClick={async () => {
+          if (savePending.current || !guardPending() || !window.confirm("Discard unsaved changes in this tab and load the current durable head? Saved history and legacy browser data are preserved.")) return;
+          savePending.current = true; setSaving(true);
+          try { durable.discardUncertain(); const snapshot = await durable.request({ action: "read" }); if (mounted.current) acceptSnapshot(snapshot); }
+          catch (error) { if (mounted.current) setNotice(error instanceof Error ? error.message : "Working restoration failed."); }
+          finally { savePending.current = false; if (mounted.current) setSaving(false); }
+        }}>Reload durable head</button>
+        <ol className="mt-3 max-h-56 overflow-y-auto">{savedHistory.history.map(revision => <li key={revision.id} className="mt-2">
+          Revision {revision.sequence} · {revision.created_at} {revision.id === savedHistory.head?.id ? "· Current head" : ""}
+          <button className={button} disabled={saving || !interaction.editing || Boolean(durable.uncertain)} onClick={() => {
+            if (!unsaved || window.confirm("Discard unsaved edits and restore this saved revision as a new durable revision?")) void saveDurable(revision.id);
+          }}>Restore revision {revision.sequence}</button>
+        </li>)}</ol>
+      </section>}</>}
     limitations={<><p>Current remains immutable. Working and history outlive Table tabs. The 12-tab capacity is a provisional migration limit.</p><p>Source lease and reconstruction owners remain authoritative; this shell does not request reconstruction, Export or Flash.</p>{workshop.limitations.map((item, index) => <p key={index} className="mt-1">{item}</p>)}</>}/>;
   return terminology ? <CalibrationTerminologyScope terminology={terminology}>{content}</CalibrationTerminologyScope> : content;
 }

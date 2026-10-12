@@ -10,6 +10,7 @@ import { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
 import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation.ts";
 
 export type WorkspaceBootstrapOwners = {
+  readWorking?(sessionId: string, result: SubscriberCalibrationResult): Promise<import("./workspaceBootstrapContract.ts").InitialDurableWorking>;
   authenticate(): Promise<{ id: string; scope: string } | null>;
   ownsVehicle(ownerId: string, vehicleId: string): Promise<boolean>;
   readSession(id: string, ownerId: string, vehicleId: string): Promise<SubscriberCalibrationResult | null>;
@@ -70,6 +71,7 @@ export async function loadSubscriberWorkspace(input: unknown, owners: WorkspaceB
     const workshop = await timed("selection", () => maskRetainedWorkspace(selected ? selectRestoredSubscriberWorkshop(success, key) : success.workshop, success));
     const evidence = await timed("projection", () => buildSharedWorkspacePayload(workshop, success, context, key));
     const catalogue = await timed("catalogue", () => workspaceCatalogue(workshop));
-    return { status: "ready", context, workshop: catalogue, evidence };
+    const durableWorking = owners.readWorking && session.sessionId ? await timed("working", () => owners.readWorking!(session.sessionId!, success)) : undefined;
+    return { status: "ready", context, workshop: catalogue, evidence, ...(durableWorking ? { durableWorking } : {}) };
   } catch { return failure("WORKSPACE_UNAVAILABLE", "Calibration evidence could not be restored. Retry; no values were substituted."); }
 }

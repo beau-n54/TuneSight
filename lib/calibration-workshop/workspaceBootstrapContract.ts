@@ -1,6 +1,8 @@
 import type { ProjectionContext, ExactTableSelection } from "./sharedTableProjection.ts";
 import type { SharedWorkspacePayload, WorkspaceCatalogue } from "./sharedWorkspaceAdapter.ts";
 import { WORKSPACE_UI_VERSION } from "./workspaceUiVersion.ts";
+import type { DurableWorkingSnapshot } from "./durableWorking.ts";
+export type InitialDurableWorking = { status: "ready"; snapshot: DurableWorkingSnapshot } | { status: "unavailable" };
 
 export type WorkspaceManifest = Readonly<{
   ownerScope: string; vehicleId: string; requestedSession?: string | string[]; requestedKey?: string;
@@ -8,7 +10,7 @@ export type WorkspaceManifest = Readonly<{
 export type WorkspaceSelectionHint = Readonly<{ scope: string; selection: ExactTableSelection }>;
 export type WorkspaceBootstrapRequest = WorkspaceManifest & { kind: "workspace"; hints: readonly WorkspaceSelectionHint[] };
 export type WorkspaceBootstrapResponse =
-  | { status: "ready"; context: ProjectionContext; workshop: WorkspaceCatalogue; evidence: SharedWorkspacePayload }
+  | { status: "ready"; context: ProjectionContext; workshop: WorkspaceCatalogue; evidence: SharedWorkspacePayload; durableWorking?: InitialDurableWorking }
   | { status: "empty" | "session_unavailable"; context: ProjectionContext; finding: string }
   | { status: "unavailable"; code: string; finding: string };
 

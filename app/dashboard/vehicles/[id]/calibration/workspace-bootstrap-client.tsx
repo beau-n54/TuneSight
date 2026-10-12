@@ -75,8 +75,8 @@ export default function WorkspaceBootstrapClient({ manifest, vehicle, upload }: 
   const response = result?.key === key ? result.value : null;
   if (response?.status === "ready" && SharedWorkspaceClient) return <div className="contents" data-calibration-interactive={interactive ? "true" : "false"}
     data-calibration-timings={JSON.stringify(timings)} data-calibration-server-timing={serverTiming} data-calibration-cache-policy={cachePolicy}>
-    <SharedWorkspaceClient workshop={response.workshop} evidence={response.evidence} context={response.context} vehicle={vehicle}
-      requestedKey={manifest.requestedKey} upload={upload} onInteractive={onInteractive}/>
+    <SharedWorkspaceClient key={JSON.stringify(response.context)} workshop={response.workshop} evidence={response.evidence} context={response.context} vehicle={vehicle}
+      requestedKey={manifest.requestedKey} upload={upload} onInteractive={onInteractive} initialWorking={response.durableWorking}/>
   </div>;
   if (response?.status === "empty" && EmptySharedWorkspace) return <EmptySharedWorkspace vehicle={vehicle} context={response.context} upload={upload} reason={response.finding}/>;
   return <main className="min-h-screen bg-black px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-4xl space-y-6">

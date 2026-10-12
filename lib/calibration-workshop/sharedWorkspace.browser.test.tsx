@@ -32,7 +32,8 @@ export async function runWorkspaceBrowserTests(container: HTMLElement, fixtures:
     };
     let root = createRoot(container);
     try {
-      const props = { ...fixture.props, upload: null };
+      const props = { ...fixture.props, upload: null, initialWorking: { status: "ready" as const,
+        snapshot: { head: null, working: null, history: [] } } };
       root.render(createElement(StrictMode, null, createElement(Workspace, props)));
       await settle(() => Boolean(container.querySelector('[data-working-cell="0"]')) && Object.keys(localStorage).some(key => key.includes(scope)));
       check(requests === 0, "Initial projection must not be fetched again in Strict Mode");
