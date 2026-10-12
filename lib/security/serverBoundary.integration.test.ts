@@ -25,8 +25,8 @@ registerHooks({ resolve(specifier, context, next) {
   if (local) {
     const normalized = local.replaceAll("\\", "/").replace(/\.ts$/, "");
     if (normalized.endsWith("/lib/supabase/server")) return next(mockSource("export async function createClient(){return globalThis.__securityClient}"), context);
-    if (normalized.endsWith("/lib/supabase/trustedServer")) return next(mockSource("export function createTrustedServerClient(){return globalThis.__securityStorage}"), context);
-    if (normalized.endsWith("/lib/supabase/trustedServerConfiguration")) return next(mockSource("export function resolveTrustedServerConfiguration(){return {serviceRoleKey:'synthetic-test-only-secret',url:'https://test.invalid'}}"), context);
+    if (normalized.endsWith("/lib/supabase/trustedServer")) return next(mockSource("export function createTrustedServerClient(observer){return typeof globalThis.__securityStorage === 'function' ? globalThis.__securityStorage(observer) : globalThis.__securityStorage}"), context);
+    if (normalized.endsWith("/lib/supabase/trustedServerConfiguration")) return next(mockSource("export function resolveTrustedServerConfiguration(){return {serviceRoleKey:'synthetic-test-only-secret',supabaseUrl:'https://test.invalid'}}"), context);
     if (context.parentURL?.replaceAll("\\", "/").endsWith("/app/api/vehicles/update-tune/route.ts")) {
       const processingExports: Record<string, string[]> = {
         tuneProfile: ["buildTuneProfile"], parseBinaryTune: ["parseEngineeringBinary"], detectBinaryDifferences: ["detectBinaryDifferences"],
@@ -163,13 +163,15 @@ test("source download signs for 60 seconds only after current entitlement and ex
 test("actual session storage distinguishes missing/expired/corrupt/transient without cleanup or writes", async()=>{
   const id="A".repeat(32);let writes=0;
   let mode:"missing"|"expired"|"corrupt"|"transient"|"available"="missing";
-  globals.__securityStorage={storage:{from:()=>({info:async()=>({data:{},error:null}),download:async(path:string)=>{
+  const body = () => mode === "corrupt" ? new Uint8Array([1,2]) : encodeSubscriberSession("alice","car",mode==="expired"?0:Date.now()+10000,diagnostic);
+  globals.__securityStorage=(observer?: (url: string, response: Response) => void)=>({storage:{from:()=>({info:async()=>({data:{id:"fixture",version:"1",etag:"fixture-etag",lastModified:"2026-10-12",size:body().length},error:null}),download:async(path:string)=>{
     if(mode==="transient")return {data:null,error:{statusCode:503,message:"offline"}};
     if(mode==="missing")return {data:null,error:{statusCode:404,message:"Object not found"}};
     if(path.startsWith("session-active/"))return {data:new Blob([id]),error:null};
-    const bytes=mode==="corrupt"?new Uint8Array([1,2]):encodeSubscriberSession("alice","car",mode==="expired"?0:Date.now()+10000,diagnostic);
+    const bytes=body();
+    observer?.(`https://test.invalid/storage/v1/object/subscriber-calibration-private/${path}`,new Response(null,{headers:{etag:'"fixture-etag"'}}));
     return {data:new Blob([Buffer.from(bytes)]),error:null};
-  },remove:async()=>{writes++;assert.fail("read deleted storage");},upload:async()=>{writes++;assert.fail("read wrote storage");}})}};
+  },remove:async()=>{writes++;assert.fail("read deleted storage");},upload:async()=>{writes++;assert.fail("read wrote storage");}})}});
   for(const next of ["missing","expired","corrupt"] as const){mode=next;assert.equal(await readLatestDurableSubscriberWorkshopSession("alice","car"),null);}
   mode="transient";await assert.rejects(readLatestDurableSubscriberWorkshopSession("alice","car"),/TEMPORARILY_UNAVAILABLE/);
   mode="available";assert.equal((await readLatestDurableSubscriberWorkshopSession("alice","car"))?.sessionId,id);assert.equal(writes,0);

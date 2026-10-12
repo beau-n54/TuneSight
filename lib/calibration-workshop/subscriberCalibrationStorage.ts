@@ -74,18 +74,27 @@ export async function createDurableSubscriberWorkshopSession(ownerId: string, ve
 }
 export async function readDurableSubscriberWorkshopSession(id: string, ownerId: string, vehicleId: string, timing?: SessionReadTiming): Promise<SubscriberCalibrationResult | null> {
   if (!isSubscriberWorkshopSessionId(id)) return null;
-  const storage = createTrustedServerClient().storage.from(BUCKET);
+  let downloadEtag: string | null = null;
+  const expectedDownload = new URL(`/storage/v1/object/${BUCKET}/${sessionPath(id)}`, resolveTrustedServerConfiguration(process.env).supabaseUrl).href;
+  const storage = createTrustedServerClient((url, response) => {
+    if (url === expectedDownload && response.ok) downloadEtag = response.headers.get("etag");
+  }).storage.from(BUCKET);
   const missing = (error: { statusCode?: string | number; message: string }) => String(error.statusCode) === "404" || error.message === "Object not found";
+  const download = async () => {
+    const { data, error } = await storage.download(sessionPath(id));
+    if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
+    return data ? new Uint8Array(await data.arrayBuffer()) : null;
+  };
   return sessionCache.read({ sessionId: id, ownerId, vehicleId }, {
     info: async () => {
       const { data, error } = await storage.info(sessionPath(id));
       if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
       return data;
     },
-    download: async () => {
-      const { data, error } = await storage.download(sessionPath(id));
-      if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
-      return data ? new Uint8Array(await data.arrayBuffer()) : null;
+    download,
+    downloadVersioned: async () => {
+      const bytes = await download();
+      return bytes ? { bytes, etag: downloadEtag } : null;
     },
   }, timing);
 }

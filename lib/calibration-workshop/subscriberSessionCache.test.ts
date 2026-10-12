@@ -132,3 +132,53 @@ test("R03: malformed session identity does not reach storage", async () => {
   assert.equal(await cache.read({ ...scope, sessionId: "../other" }, f.reader), null);
   assert.deepEqual(f.stats(), { checks: 0, downloads: 0 });
 });
+
+test("R03: versioned first read overlaps metadata and transfer, deduplicates callers and retains isolated bytes", async () => {
+  const f = fixture(), cache = createSubscriberSessionCache({ now: f.now });
+  let release!: () => void, started = false, transfers = 0;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const reader = { ...f.reader, info: async () => { await gate; assert.equal(started, true); return f.reader.info(); },
+    downloadVersioned: async () => { started = true; transfers++; const bytes = await f.reader.download(); assert.ok(bytes); return { bytes, etag: '"etag-1"' }; } };
+  const first = cache.read(scope, reader), second = cache.read(scope, reader);
+  assert.equal(started, true); release();
+  const values = await Promise.all([first, second]);
+  assert.deepEqual(values, [result, result]); assert.notEqual(values[0], values[1]);
+  assert.equal(transfers, 1); assert.deepEqual(f.stats(), { downloads: 1, checks: 3 });
+  f.bytes().fill(0);
+  assert.deepEqual(await cache.read(scope, reader), result);
+  assert.equal(transfers, 1); assert.equal(f.stats().checks, 4);
+});
+
+for (const failure of ["old-body", "weak-etag", "missing-etag", "changed-version", "deleted", "wrong-size"] as const)
+  test(`R03: parallel first read rejects ${failure} without retaining bytes`, async () => {
+    const f = fixture(), cache = createSubscriberSessionCache({ now: f.now }); let checks = 0;
+    const reader = { ...f.reader, info: async () => {
+      checks++;
+      if (checks > 1 && failure === "deleted") return null;
+      return checks > 1 && failure === "changed-version" ? { ...f.info(), version: "new" } : f.info();
+    }, downloadVersioned: async () => ({ bytes: failure === "wrong-size" ? new Uint8Array(1) : f.bytes(),
+      etag: failure === "old-body" ? "old" : failure === "weak-etag" ? 'W/"etag-1"' : failure === "missing-etag" ? null : '"etag-1"' }) };
+    assert.equal(await cache.read(scope, reader), null);
+    assert.deepEqual(await cache.read(scope, f.reader), result); assert.equal(f.stats().downloads, 1);
+  });
+
+test("R03: a parallel metadata/transfer failure is sanitized, handled and retryable", async () => {
+  for (const fails of ["info", "body"] as const) {
+    const f = fixture(), cache = createSubscriberSessionCache({ now: f.now });
+    const reader = { ...f.reader, info: async () => { if (fails === "info") throw Error("private metadata"); return f.info(); },
+      downloadVersioned: async () => { if (fails === "body") throw Error("private body token"); return { bytes: f.bytes(), etag: '"etag-1"' }; } };
+    await assert.rejects(cache.read(scope, reader), { message: "SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE" });
+    assert.deepEqual(await cache.read(scope, f.reader), result);
+  }
+});
+
+test("R03: versioned parallel transfers never join another owner, vehicle or session", async () => {
+  for (const field of ["ownerId", "vehicleId", "sessionId"] as const) {
+    const f = fixture(), cache = createSubscriberSessionCache({ now: f.now }); let transfers = 0;
+    const reader = { ...f.reader, downloadVersioned: async () => { transfers++; return { bytes: f.bytes(), etag: '"etag-1"' }; } };
+    const other = { ...scope, [field]: field === "sessionId" ? "b".repeat(32) : "other" };
+    const values = await Promise.all([cache.read(scope, reader), cache.read(other, reader)]);
+    assert.equal(transfers, 2); assert.deepEqual(values[0], result);
+    if (field !== "sessionId") assert.equal(values[1], null);
+  }
+});
