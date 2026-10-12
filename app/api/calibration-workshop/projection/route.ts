@@ -1,6 +1,5 @@
-import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
+import { protectSubscriberRequest, type SubscriberRequestAuthority } from "@/lib/security/subscriberAccess.server";
 import { createHash } from "node:crypto";
-import { createClient } from "@/lib/supabase/server";
 import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import { loadSubscriberTableProjection } from "@/lib/calibration-workshop/sharedWorkspaceProjectionLoader";
 import { loadSubscriberWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceBootstrap";
@@ -10,16 +9,17 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /** Read-only projection request: no recovery, upload, session creation or persistence. */
-async function handlePOST(request: Request) {
+async function handlePOST(request: Request, authority: SubscriberRequestAuthority) {
   const headers = new Headers({ "Cache-Control": "private, no-store" });
   const timings: string[] = [];
   try {
     const text = await request.text();
     if (text.length > 32768) return Response.json({ status: "unavailable", code: "INVALID_REQUEST", finding: "Projection request is too large." }, { status: 413, headers });
     const input = JSON.parse(text);
-    const supabase = await createClient();
+    const { supabase, user } = authority;
+    record("entitlement_auth", authority.authorizationMs);
     const owners = {
-      authenticate: async () => { const { data: { user } } = await supabase.auth.getUser(); return user ? { id: user.id, scope: createHash("sha256").update(user.id).digest("hex").slice(0, 24) } : null; },
+      authenticate: async () => ({ id: user.id, scope: createHash("sha256").update(user.id).digest("hex").slice(0, 24) }),
       ownsVehicle: async (ownerId: string, vehicleId: string) => { const { data, error } = await supabase.from("vehicles").select("id").eq("id", vehicleId).eq("user_id", ownerId).single(); return !error && Boolean(data); },
       readSession: (id: string, ownerId: string, vehicleId: string) => readSubscriberWorkshopSession(id, ownerId, vehicleId, record),
       readLatest: (ownerId: string, vehicleId: string, hint?: string) => readLatestSubscriberWorkshopSession(ownerId, vehicleId, record, hint),

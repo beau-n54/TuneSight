@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "../supabase/server";
 import { betaAccessDecision, isSameOriginMutation, type BetaProfile } from "./accessPolicy";
 import { boundedRequest, RequestBoundaryError } from "./requestBounds";
@@ -36,14 +36,20 @@ export async function requireSubscriberAction() {
 }
 
 /** Route-level authority runs before reading any request body; middleware is only an early check. */
-export function protectSubscriberRequest(handler: (request: Request) => Promise<Response>, maxBytes: number) {
+export type SubscriberRequestAuthority = Readonly<{ supabase: SupabaseClient; user: User; profile: BetaProfile; authorizationMs: number }>;
+export function protectSubscriberRequest(handler: (request: Request, authority: SubscriberRequestAuthority) => Promise<Response>, maxBytes: number) {
   return async (request: Request): Promise<Response> => {
     const headers = { "Cache-Control": "no-store" };
     try {
       if (!["GET", "HEAD"].includes(request.method) && !isSameOriginMutation(request)) return Response.json({ error: "Same-origin request required." }, { status: 403, headers });
-      const access = await subscriberAccess(await createClient());
+      const authorizationStart = performance.now(), supabase = await createClient();
+      const access = await subscriberAccess(supabase);
       if (!access.allowed) return Response.json({ error: access.status === 503 ? "Access could not be checked. Retry later." : access.status === 401 ? "Sign in required." : "Approved beta access required." }, { status: access.status, headers });
-      const response = await handler(await boundedRequest(request, maxBytes));
+      // Validated for this invocation only: no browser-supplied authority and no
+      // shared entitlement cache. Consumers can reuse the exact guarded identity.
+      const authority = Object.freeze({ supabase, user: access.user, profile: access.profile,
+        authorizationMs: performance.now() - authorizationStart });
+      const response = await handler(await boundedRequest(request, maxBytes), authority);
       response.headers.set("Cache-Control", "no-store");
       return response;
     } catch (error) {

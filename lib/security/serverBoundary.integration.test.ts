@@ -81,6 +81,23 @@ test("network failure never grants access and Server Actions require same-origin
   assert.equal((await requireSubscriberAction()).user.id,"alice");
   assert.equal((await subscriberAccess(globals.__securityClient as Parameters<typeof subscriberAccess>[0])).allowed,true);
 });
+
+test("request authority is freshly guarded once per request, isolated and unavailable after denial", async () => {
+  let currentOwner = "alice", checks = 0, handlers = 0;
+  const service = client({ id: "alice" });
+  service.auth.getUser = async () => { checks++; return { data: { user: { id: currentOwner } }, error: null }; };
+  globals.__securityClient = service;
+  const observed: string[] = [];
+  const guarded = protectSubscriberRequest(async (_request, authority) => {
+    handlers++; observed.push(authority.user.id); assert.equal(authority.supabase, service);
+    assert.equal(Object.isFrozen(authority), true); assert.ok(authority.authorizationMs >= 0);
+    return Response.json({ ok: true });
+  }, 8);
+  assert.equal((await guarded(request())).status, 200);
+  currentOwner = "bob"; assert.equal((await guarded(request())).status, 200);
+  assert.deepEqual(observed, ["alice", "bob"]); assert.equal(checks, 2);
+  globals.__securityClient = client(null); assert.equal((await guarded(request())).status, 401); assert.equal(handlers, 2);
+});
 test("stalled chunked request times out without treating cancelled partial input as complete", async()=>{
   let cancelled=false;
   const stream=new ReadableStream<Uint8Array>({start(controller){controller.enqueue(new Uint8Array([1]));},cancel(){cancelled=true;}});
@@ -286,7 +303,7 @@ test("R03: projection route retains private no-store after the subscriber guard,
     assert.equal(response.headers.get("Cache-Control"), "private, no-store");
     const timing = response.headers.get("Server-Timing")!;
     assert.match(timing, /total;dur=\d+\.\d/);
-    assert.ok(timing.split(", ").every(part => /^(auth|ownership|session|projection|serialization|total);dur=\d+\.\d$/.test(part)));
+    assert.ok(timing.split(", ").every(part => /^(entitlement_auth|auth|ownership|session|projection|serialization|total);dur=\d+\.\d$/.test(part)));
     assert.doesNotMatch(timing, /alice|vehicle|sessionId|secret/);
   }
 });
@@ -305,14 +322,16 @@ test("R03 actual bootstrap route preserves entitlement, Origin, exact owner and 
     assert.equal(response.status, status); assert.equal(response.headers.get("Cache-Control"), "private, no-store");
   }
   assert.equal(reads, 0);
-  globals.__securityClient = { auth: { getUser: async () => ({ data: { user: { id: "alice" } }, error: null }) },
+  let authChecks = 0;
+  globals.__securityClient = { auth: { getUser: async () => { authChecks++; return { data: { user: { id: "alice" } }, error: null }; } },
     from: (table: string) => { const chain = { select: () => chain, eq: () => chain,
       single: async () => ({ data: table === "profiles" ? approved : { id: "vehicle" }, error: null }) }; return chain; } };
   const crossed = await POST(request(body.replace(ownerScope, "other")));
   assert.equal(crossed.status, 409); assert.equal(reads, 0);
   const response = await POST(request(body));
   assert.equal(response.status, 200); assert.equal((await response.json()).status, "empty"); assert.equal(reads, 1);
+  assert.equal(authChecks, 2, "one fresh authentication per request, no repeated handler authentication");
   assert.equal(response.headers.get("Cache-Control"), "private, no-store");
-  assert.ok(response.headers.get("Server-Timing")!.split(", ").every(part => /^(auth|ownership|discovery|session|serialization|total);dur=\d+\.\d$/.test(part)));
+  assert.ok(response.headers.get("Server-Timing")!.split(", ").every(part => /^(entitlement_auth|auth|ownership|discovery|session|serialization|total);dur=\d+\.\d$/.test(part)));
   assert.doesNotMatch(response.headers.get("Server-Timing")!, /alice|vehicle|secret|sessions\//);
 });

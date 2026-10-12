@@ -7,6 +7,7 @@ import { bindDefinitionKnowledge, type WorkshopKnowledgeRecord, type WorkshopSem
 import type { CalibrationEditCapability } from "./editAuthority.ts";
 import type { WorkingEditCapability } from "./workingCalibration.ts";
 import type { WorkingDefinitionSeed } from "./workingCalibration.ts";
+import { createWorkshopFreezer } from "./workshopFreezer.ts";
 
 export type WorkshopFilter =
   | "all"
@@ -164,14 +165,7 @@ export type WorkshopViewModel = Readonly<{
   }>;
 }>;
 
-function deepFreeze<T>(value: T): T {
-  if (Array.isArray(value)) {
-    value.forEach(deepFreeze);
-  } else if (value && typeof value === "object") {
-    Object.values(value as Record<string, unknown>).forEach(deepFreeze);
-  }
-  return Object.freeze(value);
-}
+const deepFreeze = createWorkshopFreezer(false);
 
 function shapeOf(
   dimensions: DefinitionComparisonEvidence["dimensions"],

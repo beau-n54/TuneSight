@@ -122,7 +122,9 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   assert.match(page, /maskRetainedWorkspace\(workshop, subscriberSuccess\)/);
   assert.match(page, /return <SharedWorkspaceClient/);
   assert.doesNotMatch(page, /dispatchWorkspace|CurrentOnlyWorkshopClient|resolveWorkspacePresentation/);
-  assert.match(route, /supabase\.auth\.getUser\(\)/);
+  assert.match(route, /const \{ supabase, user \} = authority/);
+  assert.match(route, /protectSubscriberRequest\(handlePOST, 32768\)/);
+  assert.doesNotMatch(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /private, no-store/);
   assert.match(route, /readSubscriberWorkshopSession\(id, ownerId, vehicleId, record\)/);
   assert.match(page, /return <WorkspaceBootstrapClient/);
