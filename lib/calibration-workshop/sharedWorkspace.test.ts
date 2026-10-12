@@ -315,3 +315,21 @@ test("U1 imports keep tests/fixtures out of new production paths and the environ
   }
 
 });
+
+test("R03: seeded and requested projections share the same 12-entry LRU bound", async () => {
+  const base = projection(), cache = createProjectionCache(async () => assert.fail("Valid cached reopen performed a request"));
+  const requests = Array.from({ length: 13 }, (_, i) => ({ ...requestFor(), context: base.context, selection: { ...base.selection, key: `controlled-${i}` } }));
+  for (const request of requests.slice(0, 12)) cache.seed(request, { ...base, selection: request.selection });
+  assert.ok(cache.get(requests[0]));
+  cache.seed(requests[12], { ...base, selection: requests[12].selection });
+  assert.equal(cache.get(requests[1]), undefined); assert.ok(cache.get(requests[0]));
+  assert.equal((await cache.request(requests[0])).status, "ready");
+  cache.clear(); for (const request of requests) assert.equal(cache.get(request), undefined);
+});
+
+test("R03: boundary timing reports only completed fixed phases and preserves the exact response", async () => {
+  const phases: string[] = [], owners = boundary();
+  const response = await loadSubscriberTableProjection(requestFor(), { ...owners, onTiming: (phase, ms) => { phases.push(phase); assert.ok(Number.isFinite(ms) && ms >= 0); } });
+  assert.deepEqual(response, await loadSubscriberTableProjection(requestFor(), owners));
+  assert.deepEqual(phases, ["auth", "ownership", "session", "projection"]);
+});

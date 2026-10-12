@@ -162,7 +162,7 @@ test("source download signs for 60 seconds only after current entitlement and ex
 test("actual session storage distinguishes missing/expired/corrupt/transient without cleanup or writes", async()=>{
   const id="A".repeat(32);let writes=0;
   let mode:"missing"|"expired"|"corrupt"|"transient"|"available"="missing";
-  globals.__securityStorage={storage:{from:()=>({download:async(path:string)=>{
+  globals.__securityStorage={storage:{from:()=>({info:async()=>({data:{},error:null}),download:async(path:string)=>{
     if(mode==="transient")return {data:null,error:{statusCode:503,message:"offline"}};
     if(mode==="missing")return {data:null,error:{statusCode:404,message:"Object not found"}};
     if(path.startsWith("session-active/"))return {data:new Blob([id]),error:null};
@@ -272,4 +272,18 @@ test("Tune finalisation retry preserves completed evidence after a lost acknowle
   assert.doesNotMatch(await failure.text(), /PRIVATE_DATABASE_ERROR/);
   assert.deepEqual(completions, [true, false]);
   assert.deepEqual(released, ["mutation-lease", "mutation-lease"]);
+});
+
+test("R03: projection route retains private no-store after the subscriber guard, including failures", async () => {
+  const { POST } = await import("../../app/api/calibration-workshop/projection/route.ts");
+  for (const signedIn of [false, true]) {
+    globals.__securityClient = client(signedIn ? { id: "alice" } : null);
+    const response = await POST(request("{}"));
+    assert.equal(response.status, signedIn ? 409 : 401);
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+    const timing = response.headers.get("Server-Timing")!;
+    assert.match(timing, /total;dur=\d+\.\d/);
+    assert.ok(timing.split(", ").every(part => /^(auth|ownership|session|projection|total);dur=\d+\.\d$/.test(part)));
+    assert.doesNotMatch(timing, /alice|vehicle|sessionId|secret/);
+  }
 });

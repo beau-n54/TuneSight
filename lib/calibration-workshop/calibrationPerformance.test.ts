@@ -225,3 +225,22 @@ test("Phase 1: retained version-1 sessions use the same default and requested se
     parity(restored, restored.workshop.definitions[1].key);
   }
 });
+
+test("R03: all three cached serialized anchors reconstruct the same evidence and exact selected payload", async () => {
+  const { createSubscriberSessionCache } = await import("./subscriberSessionCache.ts");
+  for (const anchor of anchors) {
+    const bytes = encodeSubscriberSession(context.ownerId, context.vehicleId, 2000, anchor);
+    let downloads = 0;
+    const cache = createSubscriberSessionCache({ now: () => 1000 });
+    const reader = { info: async () => ({ id: "controlled", version: "one", etag: "one", lastModified: "one", size: bytes.length }),
+      download: async () => { downloads++; return bytes; } };
+    const scope = { ...context, sessionId: "a".repeat(32) };
+    const first = await cache.read(scope, reader), warm = await cache.read(scope, reader);
+    if (first?.status !== "workshop_ready" || warm?.status !== "workshop_ready") assert.fail("Session unavailable");
+    assert.equal(downloads, 1); assert.notEqual(first, warm); assert.notEqual(first.material.current, warm.material.current);
+    const direct = decodeSubscriberSession(bytes, context.ownerId, context.vehicleId, 1000);
+    if (direct?.status !== "workshop_ready") assert.fail("Direct decode unavailable");
+    assert.deepEqual(warm.material, direct.material); assert.deepEqual(warm.quarantines, direct.quarantines);
+    assert.deepEqual(buildSharedWorkspacePayload(warm.workshop, warm, context), buildSharedWorkspacePayload(direct.workshop, direct, context));
+  }
+});

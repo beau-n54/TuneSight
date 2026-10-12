@@ -4,8 +4,9 @@ import { createTrustedServerClient } from "@/lib/supabase/trustedServer";
 import { resolveTrustedServerConfiguration } from "@/lib/supabase/trustedServerConfiguration";
 import type { SubscriberCalibrationResult } from "./subscriberCalibrationProvider";
 import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation";
-import { decodeSubscriberSession, inspectSubscriberSession, encodeSubscriberSession, expiredObjectPaths, issueUploadLease, resolveUploadLease, type ContainerExtension } from "./subscriberCalibrationPersistence";
+import { inspectSubscriberSession, encodeSubscriberSession, expiredObjectPaths, issueUploadLease, resolveUploadLease, type ContainerExtension } from "./subscriberCalibrationPersistence";
 import { activeSubscriberSessionObjectPath } from "./subscriberSessionPointer";
+import { createSubscriberSessionCache } from "./subscriberSessionCache";
 import { registerPrivateObjects } from "../security/privateObjectInventory.server";
 
 export const SUBSCRIBER_CALIBRATION_BUCKET = "subscriber-calibration-private";
@@ -17,6 +18,7 @@ export const SUBSCRIBER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const opaqueId = () => randomBytes(24).toString("base64url");
 const rawPath = (id: string) => `${RAW_PREFIX}/${id}`;
 const sessionPath = (id: string) => `${SESSION_PREFIX}/${id}`;
+const sessionCache = createSubscriberSessionCache();
 const activeSessionPath = (ownerId: string, vehicleId: string) => activeSubscriberSessionObjectPath(ownerId, vehicleId, resolveTrustedServerConfiguration(process.env).serviceRoleKey);
 async function readActiveSessionId(ownerId: string, vehicleId: string): Promise<string | null> {
   const { data, error } = await createTrustedServerClient().storage.from(BUCKET).download(activeSessionPath(ownerId, vehicleId));
@@ -71,13 +73,20 @@ export async function createDurableSubscriberWorkshopSession(ownerId: string, ve
 }
 export async function readDurableSubscriberWorkshopSession(id: string, ownerId: string, vehicleId: string): Promise<SubscriberCalibrationResult | null> {
   if (!isSubscriberWorkshopSessionId(id)) return null;
-  const storage = createTrustedServerClient().storage.from(BUCKET), { data, error } = await storage.download(sessionPath(id));
-  if (error) {
-    if (String(error.statusCode) === "404" || error.message === "Object not found") return null;
-    throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
-  }
-  if (!data) return null;
-  return decodeSubscriberSession(new Uint8Array(await data.arrayBuffer()), ownerId, vehicleId);
+  const storage = createTrustedServerClient().storage.from(BUCKET);
+  const missing = (error: { statusCode?: string | number; message: string }) => String(error.statusCode) === "404" || error.message === "Object not found";
+  return sessionCache.read({ sessionId: id, ownerId, vehicleId }, {
+    info: async () => {
+      const { data, error } = await storage.info(sessionPath(id));
+      if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
+      return data;
+    },
+    download: async () => {
+      const { data, error } = await storage.download(sessionPath(id));
+      if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
+      return data ? new Uint8Array(await data.arrayBuffer()) : null;
+    },
+  });
 }
 export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
   const sessionId = await readActiveSessionId(ownerId, vehicleId);

@@ -43,15 +43,25 @@ export function projectionMatchesRequest(request: ProjectionRequest, projection:
 export function createProjectionCache(load: (request: ProjectionRequest, signal: AbortSignal) => Promise<ProjectionResponse>) {
   const ready = new Map<string, WorkspaceTableProjection>();
   const pending = new Map<string, Promise<ProjectionResponse>>();
+  const retain = (key: string, projection: WorkspaceTableProjection) => {
+    ready.delete(key);
+    if (ready.size >= 12) ready.delete(ready.keys().next().value!);
+    ready.set(key, projection);
+  };
+  const lookup = (key: string) => {
+    const projection = ready.get(key);
+    if (projection) { ready.delete(key); ready.set(key, projection); }
+    return projection;
+  };
   let generation = 0, controller = new AbortController();
   return {
     seed(request: ProjectionRequest, projection: WorkspaceTableProjection) {
-      if (projectionMatchesRequest(request, projection)) ready.set(projectionRequestKey(request), projection);
+      if (projectionMatchesRequest(request, projection)) retain(projectionRequestKey(request), projection);
     },
-    get(request: ProjectionRequest) { return ready.get(projectionRequestKey(request)); },
+    get(request: ProjectionRequest) { return lookup(projectionRequestKey(request)); },
     clear() { generation++; controller.abort(); controller = new AbortController(); ready.clear(); pending.clear(); },
     request(request: ProjectionRequest): Promise<ProjectionResponse> {
-      const key = projectionRequestKey(request), cached = ready.get(key);
+      const key = projectionRequestKey(request), cached = lookup(key);
       if (cached) return Promise.resolve({ status: "ready", projection: cached });
       const inflight = pending.get(key); if (inflight) return inflight;
       const epoch = generation, signal = controller.signal;
@@ -59,8 +69,7 @@ export function createProjectionCache(load: (request: ProjectionRequest, signal:
         if (epoch !== generation) return unavailableProjection("STALE_RESPONSE", "The workspace context changed; this response was discarded.");
         if (result.status === "ready") {
           if (!projectionMatchesRequest(request, result.projection)) return unavailableProjection("IDENTITY_MISMATCH", "Projection identity did not match the exact request.");
-          if (ready.size >= 12) ready.delete(ready.keys().next().value!);
-          ready.set(key, result.projection);
+          retain(key, result.projection);
         }
         return result;
       }).catch(() => unavailableProjection("REQUEST_FAILED", "Table evidence could not be loaded. No values were substituted."))
