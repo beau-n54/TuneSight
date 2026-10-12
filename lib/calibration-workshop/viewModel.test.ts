@@ -5,6 +5,7 @@ import type { QualifiedCalibrationDataset } from "../xdf/qualifiedCalibrationDat
 import type { QualifiedCalibrationComparisonEvidence } from "../xdf/qualifiedCalibrationComparison.ts";
 import {
   buildWorkshopViewModel,
+  buildWorkshopDefinitionDetail,
   filterWorkshopDefinitions,
   materializeWorkshopDefinition,
   selectWorkshopDefinitionKey,
@@ -100,6 +101,30 @@ test("every table can be materialized client-side from the governed Workshop sna
   assert.equal(unchanged.cells[0]?.referenceValue, 4);
   assert.equal(unchanged.information.definitionSetRevision, model.source.definitionSetRevision);
   assert.equal(materializeWorkshopDefinition(model, "unknown"), model.selectedDefinition);
+});
+
+test("compact comparison material preserves the detailed Evidence for every occurrence and percentage outcome", () => {
+  const changed = structuredClone(definitions[0]);
+  const variants = ["available", "undefined_from_zero", "unavailable"].map(outcome => ({ ...structuredClone(changed),
+    changedCells: [{ ...changed.changedCells[0], percentageDelta: { outcome, value: 50 } }],
+    axisComparisons: [{ axisId: "X", outcome: "comparison_unavailable" }],
+  }));
+  const input = { ...comparison, definitions: [...variants, ...definitions.slice(1)] } as unknown as QualifiedCalibrationComparisonEvidence;
+  const reference = { ...dataset("stock_candidate"), definitions: input.definitions.map((item, index) => ({
+    definitionRevisionId: item.definitionRevisionId, unavailableStage: index === 4 ? "conversion" : null, findings: [`Occurrence ${index}`],
+  })) } as unknown as QualifiedCalibrationDataset;
+  const model = buildWorkshopViewModel({ reference, current: dataset("mapswitch"), comparison: input, source });
+  for (const [index, material] of model.tableMaterials.entries()) {
+    const detail = buildWorkshopDefinitionDetail(input.definitions[index], reference, model.definitions[index]);
+    assert.deepEqual(material.cells, detail.cells.map(cell => [cell.index, cell.row, cell.column, cell.referenceRawOffset,
+      cell.currentRawOffset, cell.referenceRawValue, cell.currentRawValue, cell.referenceValue, cell.currentValue,
+      cell.signedDelta, cell.percentageDelta, cell.changed ? 1 : 0]));
+    assert.deepEqual(material.axes, detail.axes); assert.deepEqual(material.referenceAxes, detail.referenceAxes);
+    assert.deepEqual(material.findings, detail.findings); assert.equal(material.unavailableStage, detail.unavailableStage);
+    assert.equal(material.axisChangeState, detail.information.axisChangeState);
+    assert.ok(Object.isFrozen(material)); assert.ok(material.cells.every(Object.isFrozen));
+  }
+  assert.equal(model.definitions[2].occurrence, 2);
 });
 
 test("every generated Definition retains structural information without semantic Knowledge", () => {

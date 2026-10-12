@@ -407,8 +407,26 @@ export function buildWorkshopViewModel(input: {
   if (!selected || !selectedSummary) throw new Error("Qualified comparison contains no selectable Definition.");
   const referenceOccurrences = new Map<string, number>(), referenceByOccurrence = new Map<string, QualifiedCalibrationDataset["definitions"][number]>();
   for (const record of reference.definitions) { const occurrence = referenceOccurrences.get(record.definitionRevisionId) ?? 0; referenceOccurrences.set(record.definitionRevisionId, occurrence + 1); referenceByOccurrence.set(`${record.definitionRevisionId}:${occurrence}`, record); }
-  const sharedContext = { definitionSetRevision: reference.definitionSetRevisionId, romLayoutId: reference.romLayoutId, referenceDatasetId: reference.datasetId, currentDatasetId: current.datasetId, referenceRole: comparison.reference.role, currentRole: comparison.modified.role, datasetProvenance: [...new Set([...reference.provenance, ...current.provenance])], limitations: [...new Set([...reference.limitations, ...current.limitations])] };
-  const tableMaterials = comparison.definitions.map((definition, index): WorkshopTableMaterial => { const summary = definitions[index]!, detail = buildWorkshopDefinitionDetail(definition, undefined, summary, sharedContext, referenceByOccurrence.get(`${definition.definitionRevisionId}:${summary.occurrence}`) ?? null); return deepFreeze({ key: summary.key, rows: detail.rows, columns: detail.columns, axes: detail.axes, referenceAxes: detail.referenceAxes, cells: detail.cells.map(cell => [cell.index, cell.row, cell.column, cell.referenceRawOffset, cell.currentRawOffset, cell.referenceRawValue, cell.currentRawValue, cell.referenceValue, cell.currentValue, cell.signedDelta, cell.percentageDelta, cell.changed ? 1 : 0] as const), unavailableStage: detail.unavailableStage, findings: detail.findings, equationRevision: detail.equationRevision, sourceArtifactDigest: detail.sourceArtifactDigest, sourceDescription: detail.information.sourceDescription, sourceCategory: detail.information.sourceCategory, axisChangeState: detail.information.axisChangeState }); });
+  // Nonselected Tables need compact material, not a temporary full Grid and
+  // Inspector object for every cell. Build the same tuples directly from Evidence.
+  const tableMaterials = comparison.definitions.map((definition, index): WorkshopTableMaterial => {
+    const summary = definitions[index]!, record = referenceByOccurrence.get(`${definition.definitionRevisionId}:${summary.occurrence}`);
+    const a = definition.referenceEngineeringEvidence, b = definition.modifiedEngineeringEvidence;
+    const changes = new Map(definition.changedCells.map(cell => [cell.index, cell]));
+    const cells = a && b ? a.engineeringValues.map((referenceValue, cellIndex) => {
+      const traceA = a.cellTrace[cellIndex]!, traceB = b.cellTrace[cellIndex]!, change = changes.get(cellIndex);
+      const percentage = change?.percentageDelta.outcome === "available" ? change.percentageDelta.value : change ? null : 0;
+      return [cellIndex, traceA.row, traceA.column, traceA.rawOffset, traceB.rawOffset, traceA.rawValue, traceB.rawValue,
+        referenceValue, b.engineeringValues[cellIndex]!, change?.signedDelta ?? 0, percentage, change ? 1 : 0] as const;
+    }) : [];
+    return deepFreeze({ key: summary.key, rows: definition.dimensions?.rows ?? 0, columns: definition.dimensions?.columns ?? 0,
+      axes: axisValues(definition, "current"), referenceAxes: axisValues(definition, "reference"), cells,
+      unavailableStage: record?.unavailableStage ?? null, findings: [...new Set([...(record?.findings ?? []), ...definition.findings])],
+      equationRevision: definition.equationRevision, sourceArtifactDigest: definition.sourceArtifactDigest,
+      sourceDescription: summary.description, sourceCategory: null,
+      axisChangeState: definition.axisComparisons.some(axis => axis.outcome === "changed") ? "changed"
+        : definition.axisComparisons.some(axis => axis.outcome === "comparison_unavailable") ? "unavailable" : "unchanged" });
+  });
 
   return deepFreeze({
     source: {
