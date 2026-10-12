@@ -1,4 +1,4 @@
-import { decodeSubscriberSession } from "./subscriberCalibrationPersistence.ts";
+import { decodeSubscriberSession, type SessionReadTiming } from "./subscriberCalibrationPersistence.ts";
 import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation.ts";
 
 type SessionScope = Readonly<{ sessionId: string; ownerId: string; vehicleId: string }>;
@@ -39,28 +39,32 @@ export function createSubscriberSessionCache(options: {
   };
   const prune = () => { for (const [key, entry] of entries) if (entry.until <= now()) remove(key); };
   return {
-    async read(scope: SessionScope, reader: SessionObjectReader) {
+    async read(scope: SessionScope, reader: SessionObjectReader, timing?: SessionReadTiming) {
       if (!isSubscriberWorkshopSessionId(scope.sessionId) || !scope.ownerId || !scope.vehicleId) return null;
       const key = JSON.stringify([scope.ownerId, scope.vehicleId, scope.sessionId]);
       prune();
       try {
-        const info = await reader.info();
+        const metadataStart = performance.now(), info = await reader.info();
+        timing?.("metadata", performance.now() - metadataStart);
         if (!readable(info)) { remove(key); return null; }
         const version = stamp(info), cached = entries.get(key);
         let bytes: Uint8Array | null;
         if (version && cached?.stamp === version && cached.until > now()) {
           entries.delete(key); entries.set(key, cached); // bounded LRU, not sliding lifetime
           bytes = cached.bytes;
+          timing?.("retained", 0);
         } else {
           remove(key);
           const pendingKey = JSON.stringify([key, version]);
           let load = version ? pending.get(pendingKey) : undefined;
           if (!load) {
             load = (async () => {
-              const downloaded = await reader.download();
+              const downloadStart = performance.now(), downloaded = await reader.download();
+              timing?.("download", performance.now() - downloadStart);
               if (!downloaded) return null;
               // A replacement/deletion during a download must not seed the cache.
-              const after = await reader.info();
+              const versionStart = performance.now(), after = await reader.info();
+              timing?.("version_check", performance.now() - versionStart);
               if (!readable(after) || (version && stamp(after) !== version) ||
                 (typeof after.size === "number" && after.size !== downloaded.byteLength)) return null;
               const ownedBytes = Uint8Array.from(downloaded);
@@ -82,7 +86,7 @@ export function createSubscriberSessionCache(options: {
         }
         // V8 may deserialize typed arrays as views into the input buffer. Give
         // each decode its own bytes so callers cannot alter the retained entry.
-        const result = bytes ? decodeSubscriberSession(Uint8Array.from(bytes), scope.ownerId, scope.vehicleId, now()) : null;
+        const result = bytes ? decodeSubscriberSession(Uint8Array.from(bytes), scope.ownerId, scope.vehicleId, now(), timing) : null;
         if (!result) remove(key);
         return result;
       } catch {

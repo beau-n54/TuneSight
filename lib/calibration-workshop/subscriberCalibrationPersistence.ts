@@ -28,20 +28,25 @@ export function encodeSubscriberSession(ownerId: string, vehicleId: string, expi
   const compactResult = result.status === "workshop_ready" ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== "workshop")) as CompactSubscriberSuccess : result;
   return serialize({ version: 2, ownerId, vehicleId, expiresAt, result: compactResult } satisfies StoredSessionV2);
 }
-export function decodeSubscriberSession(bytes: Uint8Array, ownerId: string, vehicleId: string, now = Date.now()): SubscriberCalibrationResult | null {
-  const decoded = inspectSubscriberSession(bytes, ownerId, vehicleId, now);
+export type SessionReadTiming = (phase: string, durationMs: number) => void;
+export function decodeSubscriberSession(bytes: Uint8Array, ownerId: string, vehicleId: string, now = Date.now(), timing?: SessionReadTiming): SubscriberCalibrationResult | null {
+  const decoded = inspectSubscriberSession(bytes, ownerId, vehicleId, now, timing);
   return decoded.state === "available" ? decoded.result : null;
 }
 
 export type SubscriberSessionRead = { state: "available"; result: SubscriberCalibrationResult } | { state: "expired" | "corrupt" | "scope_mismatch" };
-export function inspectSubscriberSession(bytes: Uint8Array, ownerId: string, vehicleId: string, now = Date.now()): SubscriberSessionRead {
+export function inspectSubscriberSession(bytes: Uint8Array, ownerId: string, vehicleId: string, now = Date.now(), timing?: SessionReadTiming): SubscriberSessionRead {
   try {
+    let started = performance.now();
     const entry = deserialize(bytes) as StoredSession;
+    timing?.("decode", performance.now() - started);
     if (!entry || (entry.version !== 1 && entry.version !== 2) || !Number.isFinite(entry.expiresAt) || !Number.isFinite(now)
       || !entry.result || !["workshop_ready", "coverage_unavailable", "invalid_upload"].includes(entry.result.status)) return { state: "corrupt" };
     if (entry.ownerId !== ownerId || entry.vehicleId !== vehicleId) return { state: "scope_mismatch" };
     if (entry.expiresAt <= now) return { state: "expired" };
+    started = performance.now();
     const result = entry.version === 2 && entry.result.status === "workshop_ready" ? Object.freeze({ ...entry.result, workshop: buildSubscriberWorkshop(entry.result) }) : entry.result as SubscriberCalibrationResult;
+    timing?.("reconstruction", performance.now() - started);
     return { state: "available", result };
   } catch { return { state: "corrupt" }; }
 }

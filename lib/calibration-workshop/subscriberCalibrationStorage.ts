@@ -4,7 +4,7 @@ import { createTrustedServerClient } from "@/lib/supabase/trustedServer";
 import { resolveTrustedServerConfiguration } from "@/lib/supabase/trustedServerConfiguration";
 import type { SubscriberCalibrationResult } from "./subscriberCalibrationProvider";
 import { isSubscriberWorkshopSessionId } from "./subscriberUploadNavigation";
-import { inspectSubscriberSession, encodeSubscriberSession, expiredObjectPaths, issueUploadLease, resolveUploadLease, type ContainerExtension } from "./subscriberCalibrationPersistence";
+import { inspectSubscriberSession, encodeSubscriberSession, expiredObjectPaths, issueUploadLease, resolveUploadLease, type ContainerExtension, type SessionReadTiming } from "./subscriberCalibrationPersistence";
 import { activeSubscriberSessionObjectPath } from "./subscriberSessionPointer";
 import { createSubscriberSessionCache } from "./subscriberSessionCache";
 import { registerPrivateObjects } from "../security/privateObjectInventory.server";
@@ -71,7 +71,7 @@ export async function createDurableSubscriberWorkshopSession(ownerId: string, ve
   if (previousId && previousId !== id) await storage.remove([sessionPath(previousId)]);
   return id;
 }
-export async function readDurableSubscriberWorkshopSession(id: string, ownerId: string, vehicleId: string): Promise<SubscriberCalibrationResult | null> {
+export async function readDurableSubscriberWorkshopSession(id: string, ownerId: string, vehicleId: string, timing?: SessionReadTiming): Promise<SubscriberCalibrationResult | null> {
   if (!isSubscriberWorkshopSessionId(id)) return null;
   const storage = createTrustedServerClient().storage.from(BUCKET);
   const missing = (error: { statusCode?: string | number; message: string }) => String(error.statusCode) === "404" || error.message === "Object not found";
@@ -86,12 +86,13 @@ export async function readDurableSubscriberWorkshopSession(id: string, ownerId: 
       if (error && !missing(error)) throw new Error("SUBSCRIBER_SESSION_TEMPORARILY_UNAVAILABLE");
       return data ? new Uint8Array(await data.arrayBuffer()) : null;
     },
-  });
+  }, timing);
 }
-export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
-  const sessionId = await readActiveSessionId(ownerId, vehicleId);
+export async function readLatestDurableSubscriberWorkshopSession(ownerId: string, vehicleId: string, timing?: SessionReadTiming): Promise<Readonly<{ sessionId: string; result: SubscriberCalibrationResult }> | null> {
+  const started = performance.now(), sessionId = await readActiveSessionId(ownerId, vehicleId);
+  timing?.("discovery", performance.now() - started);
   if (!sessionId) return null;
-  const result = await readDurableSubscriberWorkshopSession(sessionId, ownerId, vehicleId);
+  const result = await readDurableSubscriberWorkshopSession(sessionId, ownerId, vehicleId, timing);
   if (result) return Object.freeze({ sessionId, result });
   // Reads never clean up a pointer or evidence, including corrupt/expired data.
   // Only an explicit owner-authorised repair may replace this state.

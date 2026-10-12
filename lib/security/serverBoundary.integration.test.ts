@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -283,7 +284,33 @@ test("R03: projection route retains private no-store after the subscriber guard,
     assert.equal(response.headers.get("Cache-Control"), "private, no-store");
     const timing = response.headers.get("Server-Timing")!;
     assert.match(timing, /total;dur=\d+\.\d/);
-    assert.ok(timing.split(", ").every(part => /^(auth|ownership|session|projection|total);dur=\d+\.\d$/.test(part)));
+    assert.ok(timing.split(", ").every(part => /^(auth|ownership|session|projection|serialization|total);dur=\d+\.\d$/.test(part)));
     assert.doesNotMatch(timing, /alice|vehicle|sessionId|secret/);
   }
+});
+
+test("R03 actual bootstrap route preserves entitlement, Origin, exact owner and no-store before storage", async () => {
+  const { POST } = await import("../../app/api/calibration-workshop/projection/route.ts");
+  const ownerScope = createHash("sha256").update("alice").digest("hex").slice(0, 24);
+  const body = JSON.stringify({ kind: "workspace", ownerScope, vehicleId: "vehicle", hints: [] });
+  let reads = 0;
+  globals.__securityStorage = { storage: { from: () => ({ download: async () => { reads++; return { data: null, error: { statusCode: "404", message: "Object not found" } }; } }) } };
+  for (const [candidate, origin, status] of [[client(null), "https://site.invalid", 401],
+    [client({ id: "alice" }, { ...approved, beta_status: "suspended" }), "https://site.invalid", 403],
+    [client({ id: "alice" }), "https://evil.invalid", 403]] as const) {
+    globals.__securityClient = candidate;
+    const response = await POST(request(body, origin));
+    assert.equal(response.status, status); assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+  }
+  assert.equal(reads, 0);
+  globals.__securityClient = { auth: { getUser: async () => ({ data: { user: { id: "alice" } }, error: null }) },
+    from: (table: string) => { const chain = { select: () => chain, eq: () => chain,
+      single: async () => ({ data: table === "profiles" ? approved : { id: "vehicle" }, error: null }) }; return chain; } };
+  const crossed = await POST(request(body.replace(ownerScope, "other")));
+  assert.equal(crossed.status, 409); assert.equal(reads, 0);
+  const response = await POST(request(body));
+  assert.equal(response.status, 200); assert.equal((await response.json()).status, "empty"); assert.equal(reads, 1);
+  assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+  assert.ok(response.headers.get("Server-Timing")!.split(", ").every(part => /^(auth|ownership|discovery|session|serialization|total);dur=\d+\.\d$/.test(part)));
+  assert.doesNotMatch(response.headers.get("Server-Timing")!, /alice|vehicle|secret|sessions\//);
 });

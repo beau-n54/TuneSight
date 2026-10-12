@@ -12,6 +12,8 @@ import { selectRestoredSubscriberWorkshop } from "./selectRestoredSubscriberWork
 import { buildSharedWorkspacePayload, workspaceCatalogue } from "./sharedWorkspaceAdapter.ts";
 import { maskRetainedWorkspace } from "./sharedWorkspaceDispatch.ts";
 import { resolveSubscriberWorkshopSession } from "./subscriberWorkshopEntry.ts";
+import { loadSubscriberWorkspace } from "./sharedWorkspaceBootstrap.ts";
+import { workspaceUiKey } from "./workspaceRestoration.ts";
 
 // Count real provider constructions without adding instrumentation to production.
 // Node 24's synchronous hooks are newer than the installed Node type definitions.
@@ -122,10 +124,54 @@ test("Phase 1: region scope, existing page dispatch and projection authenticatio
   assert.doesNotMatch(page, /dispatchWorkspace|CurrentOnlyWorkshopClient|resolveWorkspacePresentation/);
   assert.match(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /private, no-store/);
-  assert.match(route, /readSession: readSubscriberWorkshopSession/);
+  assert.match(route, /readSubscriberWorkshopSession\(id, ownerId, vehicleId, record\)/);
+  assert.match(page, /return <WorkspaceBootstrapClient/);
+  assert.ok(page.indexOf("return <WorkspaceBootstrapClient") < page.indexOf("const session = await resolveSubscriberWorkshopSession"));
+  assert.match(page, /const \{ supabase, user \} = await requireSubscriberPage\(\)/);
   const helper = fs.readFileSync("lib/calibration-workshop/selectRestoredSubscriberWorkshop.ts", "utf8");
   assert.doesNotMatch(helper, /(?:from|import)\s*["'][^"']*(?:test|fixtures)/);
   assert.doesNotMatch(helper, /buildSubscriberWorkshop|buildWorkshopViewModel|buildCurrentOnlyWorkshopViewModel|fetch\(|readSession|Storage|persist/);
+});
+
+for (const [index, label] of ["N54", "B58 Gen1", "Supra DTF"].entries()) test(`R03 bootstrap ${label}: one session decode and restored projection, no discarded default`, async () => {
+  const anchor = anchors[index], catalogue = workspaceCatalogue(anchor.workshop);
+  const selection = catalogue.definitions.find(d => d.available && d.key !== catalogue.selectedDefinitionKey)!;
+  const bytes = encodeSubscriberSession(context.ownerId, context.vehicleId, Date.now() + 60000, anchor);
+  let reads = 0;
+  const before = counts.phaseOneWorkshopBuilds;
+  const result = await loadSubscriberWorkspace({ kind: "workspace", ownerScope: context.ownerId, vehicleId: context.vehicleId,
+    hints: [{ scope: workspaceUiKey(context, catalogue, "adaptive"), selection }] }, {
+    authenticate: async () => ({ id: context.ownerId, scope: context.ownerId }), ownsVehicle: async () => true,
+    readSession: async () => assert.fail("Latest discovery uses exactly one decode"),
+    readLatest: async () => { reads++; return { sessionId: context.sessionId, result: decodeSubscriberSession(bytes, context.ownerId, context.vehicleId)! }; },
+  });
+  assert.equal(reads, 1); assert.equal(counts.phaseOneWorkshopBuilds - before, 1);
+  assert.equal(result.status, "ready"); if (result.status !== "ready") return;
+  assert.equal(result.evidence.projection?.selection.key, selection.key);
+  assert.equal(result.workshop.selectedDefinitionKey, selection.key);
+  assert.deepEqual(result.evidence, buildSharedWorkspacePayload(selectRestoredSubscriberWorkshop(anchor, selection.key), anchor, context, selection.key));
+  assert.equal((JSON.stringify(result).match(/"tableIdentity":/g) ?? []).length, 1);
+  assert.ok(result.workshop.definitions.every(d => !("cells" in d) && !("axes" in d)));
+});
+
+test("R03 bootstrap rejects crossed owner/vehicle, ambiguous explicit session and exact-scope forged occurrence before projection", async () => {
+  const anchor = anchors[0]; let reads = 0;
+  const owners = { authenticate: async () => ({ id: context.ownerId, scope: context.ownerId }), ownsVehicle: async () => true,
+    readSession: async () => { reads++; return anchor; }, readLatest: async () => { reads++; return { sessionId: context.sessionId, result: anchor }; } };
+  const request = { kind: "workspace", ownerScope: context.ownerId, vehicleId: context.vehicleId, hints: [] };
+  assert.equal((await loadSubscriberWorkspace({ ...request, ownerScope: "other" }, owners)).status, "unavailable");
+  assert.equal((await loadSubscriberWorkspace(request, { ...owners, ownsVehicle: async () => false })).status, "unavailable");
+  assert.equal(reads, 0);
+  assert.equal((await loadSubscriberWorkspace({ ...request, requestedSession: [context.sessionId, context.sessionId] }, owners)).status, "session_unavailable");
+  assert.equal(reads, 0);
+  const selected = workspaceCatalogue(anchor.workshop).definitions[0];
+  const hints = [{ scope: workspaceUiKey(context, anchor.workshop, "adaptive"), selection: { ...selected, occurrence: 99999 } }];
+  const forged = await loadSubscriberWorkspace({ ...request, hints }, owners);
+  assert.equal(forged.status, "unavailable"); if (forged.status === "unavailable") assert.equal(forged.code, "RESTORATION_UNAVAILABLE");
+  const stale = await loadSubscriberWorkspace({ ...request, hints: [{ ...hints[0], scope: hints[0].scope + "old" }] }, owners);
+  assert.equal(stale.status, "ready"); if (stale.status === "ready") assert.equal(stale.evidence.projection?.selection.key, workspaceCatalogue(anchor.workshop).selectedDefinitionKey);
+  const explicit = await loadSubscriberWorkspace({ ...request, requestedKey: selected.key, hints }, owners);
+  assert.equal(explicit.status, "ready"); if (explicit.status === "ready") assert.equal(explicit.evidence.projection?.selection.key, selected.key);
 });
 
 function parity(result: SubscriberCalibrationSuccess, key?: string) {

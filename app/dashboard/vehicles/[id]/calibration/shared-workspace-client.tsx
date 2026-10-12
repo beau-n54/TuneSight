@@ -68,9 +68,10 @@ export function EmptySharedWorkspace({ vehicle, context, reason, upload }: { veh
     limitations="No evidence or numeric values have been substituted. Open Calibration File to begin."/>;
 }
 
-export default function SharedWorkspaceClient({ workshop, evidence, context, vehicle, requestedKey, upload }: {
-  workshop: WorkspaceCatalogue; evidence: SharedWorkspacePayload; context: ProjectionContext; vehicle: WorkspaceVehicle; requestedKey?: string; upload: ReactNode;
+export default function SharedWorkspaceClient({ workshop, evidence, context, vehicle, requestedKey, upload, onInteractive }: {
+  workshop: WorkspaceCatalogue; evidence: SharedWorkspacePayload; context: ProjectionContext; vehicle: WorkspaceVehicle; requestedKey?: string; upload: ReactNode; onInteractive?: (workspaceMs: number) => void;
 }) {
+  const [mountedAt] = useState(() => performance.now());
   const [workspace, setWorkspace] = useState<WorkspaceTabsState>(() => {
     const selected = exactWorkspaceDefinition(workshop, requestedKey);
     if (!selected) return { tabs: [], activeId: "" };
@@ -304,6 +305,13 @@ export default function SharedWorkspaceClient({ workshop, evidence, context, veh
   </> : <p role="status">{activeEvidence?.status === "loading" ? "Loading exact Table evidence…" : activeEvidence?.status === "unavailable"
     ? activeEvidence.finding : evidence.finding ?? "Exact Table evidence is unavailable; select the Table in Explorer to load it."}</p>;
   const inspector = tableModel ? <Inspector model={tableModel} selected={selectedCell} definitions={workshop.definitions} onOpen={open} onCollapse={() => changePanels({ ...panels, inspectorCollapsed: true })}/> : <p className="bmw-border rounded-2xl bg-zinc-950 p-5">No exact Table evidence selected.</p>;
+  const interactiveReady = uiRestored && saveStatus !== "loading" && (!active || projection?.selection.key === active.definitionKey);
+  useEffect(() => {
+    if (!interactiveReady || !onInteractive) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => onInteractive(performance.now() - mountedAt)); });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [interactiveReady, onInteractive, mountedAt]);
   const content = <SharedCalibrationShell header={<Header vehicle={vehicle} context={context} evidence={evidence} upload={upload} onNavigate={event => { if (!guardPending()) event.preventDefault(); }}/>} evidence={<SharedEvidenceStrip projection={projection} working={working} reason="The requested Table is unresolved."/>}
     controls={<><CalibrationTerminologyControl mode={mode} onMode={next => { if (guardPending()) setMode(next); }}/>{interaction.reason && <p className="text-xs text-amber-200">{interaction.reason}</p>}</>} panels={panels} onPanels={next => { if (guardPending()) changePanels(next); }}
     navigation={<><EngineeringNavigationControl navigation={navigation} mode={navigationMode} selectedSystem={system} onMode={setNavigationMode} onSystem={setSystem}/>

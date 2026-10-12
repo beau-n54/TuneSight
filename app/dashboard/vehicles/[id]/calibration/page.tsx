@@ -1,14 +1,13 @@
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import Link from "next/link";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
-import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 import { selectN54PreviewRom } from "@/lib/calibration-workshop/developmentPreviewSelection";
 import SharedWorkspaceClient, { EmptySharedWorkspace } from "./shared-workspace-client";
 import { workspaceCatalogue, buildSharedWorkspacePayload, compactWorkspaceProjection, exactWorkspaceDefinition, projectWorkspaceTable, sharedWorkspaceContextKey, type SharedWorkspacePayload } from "@/lib/calibration-workshop/sharedWorkspaceAdapter";
 import { maskRetainedWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceDispatch";
 import { buildWorkshopDeepLink } from "@/lib/calibration-workshop/workshopNavigation";
-import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
+import WorkspaceBootstrapClient from "./workspace-bootstrap-client";
 import UploadCalibration from "./upload-calibration";
 import { selectRestoredSubscriberWorkshop } from "@/lib/calibration-workshop/selectRestoredSubscriberWorkshop";
 import { publicWorkshopFailureDiagnostic } from "@/lib/calibration-workshop/workshopFailureDiagnostic";
@@ -30,15 +29,12 @@ export const maxDuration = 60;
 
 
 export default async function CalibrationWorkshopPage({ params, searchParams }: PageProps) {
-  await requireSubscriberPage();
+  const { supabase, user } = await requireSubscriberPage();
   const { id } = await params;
   const query = await searchParams;
   const definition = Array.isArray(query.definition) ? query.definition[0] : query.definition;
   const requestedPreviewRom = Array.isArray(query.previewRom) ? query.previewRom[0] : query.previewRom;
   const previewSelection = selectN54PreviewRom(requestedPreviewRom);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
   const { data: vehicle, error } = await supabase
     .from("vehicles")
@@ -48,6 +44,14 @@ export default async function CalibrationWorkshopPage({ params, searchParams }: 
     .single();
   if (error || !vehicle) notFound();
 
+  // A thin authenticated page lets the browser supply its bounded selection hint
+  // before any session body is read or default Table is projected.
+  if (process.env.NODE_ENV === "production" || !requestedPreviewRom?.trim()) {
+    return <WorkspaceBootstrapClient vehicle={vehicle} manifest={{ ownerScope: createHash("sha256").update(user.id).digest("hex").slice(0, 24),
+      vehicleId: vehicle.id, requestedSession: query.session, requestedKey: definition }}
+      upload={<><UploadCalibration vehicleId={vehicle.id}/><RestoreCalibrationSession vehicleId={vehicle.id}/></>}/>;
+  }
+  const { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } = await import("@/lib/calibration-workshop/subscriberWorkshopSession.server");
   const session = await resolveSubscriberWorkshopSession({ requestedSession: query.session, ownerId: user.id, vehicleId: vehicle.id }, {
     readSession: readSubscriberWorkshopSession,
     readLatest: readLatestSubscriberWorkshopSession,

@@ -1,8 +1,9 @@
 import { protectSubscriberRequest } from "@/lib/security/subscriberAccess.server";
 import { createHash } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
-import { readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
+import { readLatestSubscriberWorkshopSession, readSubscriberWorkshopSession } from "@/lib/calibration-workshop/subscriberWorkshopSession.server";
 import { loadSubscriberTableProjection } from "@/lib/calibration-workshop/sharedWorkspaceProjectionLoader";
+import { loadSubscriberWorkspace } from "@/lib/calibration-workshop/sharedWorkspaceBootstrap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,15 +18,21 @@ async function handlePOST(request: Request) {
     if (text.length > 32768) return Response.json({ status: "unavailable", code: "INVALID_REQUEST", finding: "Projection request is too large." }, { status: 413, headers });
     const input = JSON.parse(text);
     const supabase = await createClient();
-    const result = await loadSubscriberTableProjection(input, {
+    const owners = {
       authenticate: async () => { const { data: { user } } = await supabase.auth.getUser(); return user ? { id: user.id, scope: createHash("sha256").update(user.id).digest("hex").slice(0, 24) } : null; },
-      ownsVehicle: async (ownerId, vehicleId) => { const { data, error } = await supabase.from("vehicles").select("id").eq("id", vehicleId).eq("user_id", ownerId).single(); return !error && Boolean(data); },
-      readSession: readSubscriberWorkshopSession,
-      onTiming: (phase, durationMs) => { if (Number.isFinite(durationMs)) timings.push(`${phase};dur=${Math.max(0, durationMs).toFixed(1)}`); },
-    });
+      ownsVehicle: async (ownerId: string, vehicleId: string) => { const { data, error } = await supabase.from("vehicles").select("id").eq("id", vehicleId).eq("user_id", ownerId).single(); return !error && Boolean(data); },
+      readSession: (id: string, ownerId: string, vehicleId: string) => readSubscriberWorkshopSession(id, ownerId, vehicleId, record),
+      readLatest: (ownerId: string, vehicleId: string) => readLatestSubscriberWorkshopSession(ownerId, vehicleId, record),
+      onTiming: record,
+    };
+    function record(phase: string, durationMs: number) { if (Number.isFinite(durationMs)) timings.push(`${phase};dur=${Math.max(0, durationMs).toFixed(1)}`); }
+    const result = input?.kind === "workspace" ? await loadSubscriberWorkspace(input, owners) : await loadSubscriberTableProjection(input, owners);
     // Durations only: no owner, vehicle, session, Definition, path or evidence value.
+    const serializeStart = performance.now(), body = JSON.stringify(result);
+    record("serialization", performance.now() - serializeStart);
     headers.set("Server-Timing", timings.join(", "));
-    return Response.json(result, { status: result.status === "ready" ? 200 : result.code === "AUTH_REQUIRED" ? 401 : 409, headers });
+    headers.set("Content-Type", "application/json");
+    return new Response(body, { status: result.status === "unavailable" ? result.code === "AUTH_REQUIRED" ? 401 : 409 : 200, headers });
   } catch {
     return Response.json({ status: "unavailable", code: "REQUEST_FAILED", finding: "Projection evidence is unavailable." }, { status: 400, headers });
   }
