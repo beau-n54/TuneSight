@@ -26,6 +26,8 @@ export function analysisEvidenceSections(source: AnalysisSource | null) {
       minimum: differences.reduce((a, b) => Math.min(a, b)), maximum: differences.reduce((a, b) => Math.max(a, b))} : null,
     timing: ranges.filter(r => /^timing_correction_cyl_[1-8]$/.test(r.channel)),
     systems: [
+      {channels: ["rpm"], system: "Engine speed measurements"},
+      {channels: ["iat"], system: "Intake air temperature measurements"},
       {channels: ["rail_pressure"], system: "High-pressure fuel supply"},
       {channels: ["lpfp"], system: "Low-pressure fuel supply"},
       {channels: ["throttle", "accelerator_pedal"], system: "Air / driver demand"},

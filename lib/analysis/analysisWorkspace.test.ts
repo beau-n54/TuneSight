@@ -181,7 +181,7 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 2);
     assert.match(html, /exact-revision; occurrence 0/);
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
-    assert.match(html, /no available, unambiguous Definition occurrence/);
+    assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
     if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);
   } finally { admittedContext = null; }
 });
@@ -198,4 +198,15 @@ for (const platform of [...masterFamilies, "N20", "N55", "S55", "N13", "future B
   if (platform !== "N54") assert.doesNotMatch(html, /N54|n54/);
   if (!platform.toLowerCase().startsWith("b58")) assert.doesNotMatch(html, /B58|b58/);
   assert.doesNotMatch(html, /undefined|NaN/);
+});
+
+for (const platform of [...masterFamilies, "N20"]) test(`${platform}: Calibration Context keeps logged RPM, IAT and HPFP available without table authority`, async () => {
+  selectedSource = {...source(), measurements: parseSourceMeasurements("Time,RPM,Boost Mean PSI,IAT (*C),Rail pressure (PSI)\n0,1000,2,30,2000\n1,2000,3,31,1900")};
+  const html = await render(platform);
+  for (const key of ["rpm", "iat", "rail_pressure"]) {
+    assert.match(html, new RegExp(`data-telemetry-channel="${key}" data-telemetry-state="available"`));
+    assert.doesNotMatch(html, new RegExp(`${key}: Not present`));
+  }
+  for (const title of ["Observed Telemetry", "System Association", "Unavailable Bindings", "Related XDF", "Related Calibration Tables"]) assert(html.includes(title));
+  assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
 });

@@ -1,7 +1,8 @@
 import { getMissingCoreChannels, read, readTemperatureC, readAdditionalCylinderCorrection } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
-const MHD_ALIASES = {
+export const MHD_ALIASES = {
+  ethanol: ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content (Active) (%)", "Ethanol Content[%]"],
   time: ["Time", "time", "TIME", "Time (s)"],
 
   rpm: [
@@ -91,7 +92,7 @@ export function translateMhdRows(
       timingCyl7: readAdditionalCylinderCorrection(row, 7),
       timingCyl8: readAdditionalCylinderCorrection(row, 8),
       iat: readTemperatureC(row),
-      ethanol: read(row, ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content (Active) (%)", "Ethanol Content[%]"]),
+      ethanol: read(row, MHD_ALIASES.ethanol),
     };
   });
 

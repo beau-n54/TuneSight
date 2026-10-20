@@ -12,7 +12,7 @@ type Relationship = {title: string; occurrence: number; revision: string; key: s
 
 /** Exact session scope and occurrence resolution; never infer a binding from a title. */
 export function resolveAnalysisCalibration(context: AnalysisCalibrationContext, log: OwnedLog | null, owner: string, vehicle: string, channels: readonly string[]) {
-  const unavailable = (reason: string) => ({reason, identity: null, relationships: [] as Relationship[], withheld: channels.map(channel => `${channel}: ${reason}`), href: null, resolutionPath: null, sourceId: null});
+  const unavailable = (reason: string) => ({reason, identity: null, relationships: [] as Relationship[], withheld: channels.map(channel => `${channel}: Calibration-table binding unavailable. ${reason} Telemetry status is assessed independently from the owned source.`), href: null, resolutionPath: null, sourceId: null});
   try {
   if (!log || log.user_id !== owner || log.vehicle_id !== vehicle) return unavailable("An owned selected log for this vehicle is required.");
   if (context.state !== "available") return unavailable(context.reason);
@@ -56,8 +56,8 @@ export function resolveAnalysisCalibration(context: AnalysisCalibrationContext, 
     identity: {software: r.identity, family: d.exactBinaryIdentity.romFamily, bytes: r.byteLength, container: r.container,
       digest: r.digest, dataset: d.datasetRevision, definitionSet: d.definitionSetRevisionId, artifact: d.sourceArtifactDigest},
     relationships,
-    withheld: channels.filter(channel => !relationships.some(r => r.channel === channel)).map(channel =>
-      `${channel}: no available, unambiguous Definition occurrence in this exact Dataset has a qualified telemetry binding, qualified system relationship or admitted source-description assertion for this channel. No table-name match or diagnostic conclusion is inferred.`),
+    withheld: channels.filter(channel => !relationships.some(r => r.channel === channel && r.grade === "Exact Definition telemetry relationship")).map(channel =>
+      `${channel}: Telemetry available; no qualified Calibration-table binding has been established. Inspection suggestions do not establish an exact binding or diagnostic conclusion.`),
     resolutionPath: context.resolutionPath ?? "Current admitted session (read-only)",
     sourceId: context.sourceId ?? null,
     href: context.sessionId ? `/dashboard/vehicles/${encodeURIComponent(vehicle)}/calibration?session=${encodeURIComponent(context.sessionId)}` : null,

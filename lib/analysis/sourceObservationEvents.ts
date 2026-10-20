@@ -5,7 +5,7 @@ export type SourceObservationEvent = {
   channels: string[]; unit: string; startRow: number; endRow: number; startSeconds: number | null; endSeconds: number | null;
   value: number; evidence: string; alternatives: string[]; withheld: string; inspection: string;
 };
-export type ObservationCheck = {id: string; title: string; state: "observed" | "not_observed" | "unavailable"; reason: string; events: SourceObservationEvent[]};
+export type ObservationCheck = {id: string; title: string; channels: string[]; state: "observed" | "not_observed" | "unavailable"; reason: string; events: SourceObservationEvent[]};
 const finite = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n);
 
 /** Source-only calculations. No vehicle-label routing, threshold, causal score,
@@ -17,7 +17,7 @@ export function sourceObservationEvents(source: AnalysisSource | null) {
   function check(id: string, title: string, channels: string[], unit: string, values: (number | null)[] | null,
     missing: string, describe: (value: number) => string, alternatives: string[], withheld: string, inspection: string,
     grade: SourceObservationEvent["grade"] = "source-derived observation", preceding = false) {
-    if (!values) { checks.push({id, title, state: "unavailable", reason: missing, events: []}); return; }
+    if (!values) { checks.push({id, title, channels, state: "unavailable", reason: missing, events: []}); return; }
     const events: SourceObservationEvent[] = [];
     let start = -1, peak = 0;
     const close = (end: number) => {
@@ -34,7 +34,7 @@ export function sourceObservationEvents(source: AnalysisSource | null) {
       else close(i - 1);
     });
     close(values.length - 1);
-    checks.push({id, title, state: events.length ? "observed" : "not_observed",
+    checks.push({id, title, channels, state: events.length ? "observed" : "not_observed",
       reason: events.length ? `${events.length} contiguous source interval(s). No fault tolerance or severity threshold is implied.`
         : "No matching observation in the supplied finite rows. This is not an all-systems health confirmation.", events});
   }

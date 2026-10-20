@@ -707,7 +707,9 @@ const groupedDiagnosticEvents =
             <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length}/>
           }
           calibrationContext={
-            <CalibrationEvidenceSections resolution={calibrationEvidence} logId={latestLog?.id ?? null} vehicleId={id}/>
+            <CalibrationEvidenceSections resolution={calibrationEvidence} source={source}
+              diagnosticChannels={diagnosticsAvailable ? (engineV2?.events ?? []).filter(event => engineCrossReferences.some(r => r.eventId === event.id)).flatMap(event => event.supportingChannels ?? []) : []}
+              logId={latestLog?.id ?? null} vehicleId={id}/>
           }
         />
 

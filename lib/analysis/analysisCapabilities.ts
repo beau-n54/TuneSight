@@ -6,6 +6,7 @@ import { qualifyTranslatedEvidenceSource } from "./evidenceSourceQualification.t
 import { loadEvidenceReloadWithProvenance } from "./evidenceProvenance.ts";
 import type { TranslatedLogRow } from "../logging/types.ts";
 import type { VehicleSetup } from "./types.ts";
+import { channelRecognition } from "../logging/channelRecognition.ts";
 
 export type OwnedLog = { id: string; user_id: string; vehicle_id: string; created_at: string; log_name?: string | null; raw_source_storage_path?: string | null; file_url?: string | null; authoritative_log_summary_id?: string | null };
 export type OwnedResult = { id: string; user_id: string; vehicle_id: string; log_id: string; created_at?: string; summary?: unknown };
@@ -64,8 +65,11 @@ export function parseSourceMeasurements(text: string) {
     metadataTrailer = true;
   }
   const translated = translateLogRows(csv.rows);
+  const recognition = channelRecognition(csv.headers, translated.platform, Object.values(channelDefinitions).map(([field]) => field));
+  const headerEvidence = {headers: csv.headers, unassigned: recognition.unassigned,
+    channels: Object.entries(channelDefinitions).map(([key, [field]]) => ({key, headers: recognition.fields[field]}))};
   const qualification = qualifyTranslatedEvidenceSource(translated, {sourceLogId: null, sourceAvailability: "unknown"});
-  if (qualification.kind === "unsupported_source") return {parsedLog: null, timestamps: null, channels: [] as {key: string; unit: string; values: (number | null)[]}[], blockers: ["CSV parsed, but no qualified channel/unit translator exists for this source format. No measurements or diagnostic conclusions are inferred."], sourceFormat: translated.platform, sampleCount: csv.rows.length};
+  if (qualification.kind === "unsupported_source") return {headerEvidence, parsedLog: null, timestamps: null, channels: [] as {key: string; unit: string; values: (number | null)[]}[], blockers: ["CSV parsed, but no qualified channel/unit translator exists for this source format. No measurements or diagnostic conclusions are inferred."], sourceFormat: translated.platform, sampleCount: csv.rows.length};
   const times = translated.rows.map(row => row.time);
   const timestamps = times.length && times.every(finite) && times.every((value, index) => index === 0 || value > times[index - 1]!) ? times as number[] : null;
   const channels: {key: string; unit: string; values: (number | null)[]}[] = [];
@@ -86,9 +90,11 @@ export function parseSourceMeasurements(text: string) {
   let parsedLog: ParsedLog | null = null;
   try { parsedLog = buildQualifiedParsedLog(translated); }
   catch { blockers.push("Diagnostic input unavailable: aligned finite RPM and a strictly increasing timebase are required."); }
-  return {parsedLog, timestamps, channels, blockers, sourceFormat: translated.platform, sampleCount: translated.rows.length};
+  return {headerEvidence, parsedLog, timestamps, channels, blockers, sourceFormat: translated.platform, sampleCount: translated.rows.length};
 }
-export type SourceMeasurements = ReturnType<typeof parseSourceMeasurements>;
+export type SourceMeasurements = Omit<ReturnType<typeof parseSourceMeasurements>, "headerEvidence"> & {
+  headerEvidence?: ReturnType<typeof parseSourceMeasurements>["headerEvidence"];
+};
 export function analysisCapabilities(source: SourceState, measurements: SourceMeasurements | null, vehicle: VehicleSetup, diagnostics: boolean) {
   return {ownedSourceAccessible: source === "available", sourceParsed: measurements !== null,
     unitsQualified: !measurements?.channels.length ? "unavailable" : measurements.blockers.length ? "partial" : "qualified",
