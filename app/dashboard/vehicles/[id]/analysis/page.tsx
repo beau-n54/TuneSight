@@ -1,7 +1,10 @@
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
-import { declaredAnalysisPlatform } from "@/lib/identity/identityOwners";
 import Link from "next/link";
+import SourceMeasurements from "./SourceMeasurements";
+import { selectMeasurementSource } from "@/lib/analysis/analysisSource";
+import { selectAnalysisEvidence, type OwnedLog, type OwnedResult } from "@/lib/analysis/analysisCapabilities";
+import { readAnalysisSource } from "@/lib/analysis/analysisSource.server";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
@@ -56,6 +59,7 @@ import {
 } from "./intelligentWarningsPresentation";
 
 type PageProps = {
+  searchParams: Promise<{log?: string; reprocess?: string}>;
   params: Promise<{
     id: string;
   }>;
@@ -178,7 +182,7 @@ type TuneProfileRow = {
   created_at?: string | null;
 };
 
-export default async function AnalysisPage({ params }: PageProps) {
+export default async function AnalysisPage({ params, searchParams }: PageProps) {
   await requireSubscriberPage();
   const { id } = await params;
   const supabase = await createClient();
@@ -203,14 +207,32 @@ export default async function AnalysisPage({ params }: PageProps) {
     notFound();
   }
 
-  const { data: latestLog } = await supabase
-    .from("logs")
-    .select("*")
-    .eq("vehicle_id", vehicle.id)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const query = await searchParams;
+  const ownedLogs: OwnedLog[] = [];
+  let historyUnavailable = false;
+  // Page through owned history so an older qualified authority is not hidden by a fixed recent-log limit.
+  for (let offset = 0; ; offset += 100) {
+    const {data, error} = await supabase.from("logs").select("*").eq("vehicle_id", vehicle.id).eq("user_id", user.id)
+      .order("created_at", {ascending: false}).order("id").range(offset, offset + 99);
+    if (error) { historyUnavailable = true; break; }
+    ownedLogs.push(...(data ?? []));
+    if (!data || data.length < 100) break;
+  }
+  const candidateResults: OwnedResult[] = [];
+  const authorityIds = ownedLogs.flatMap(log => log.authoritative_log_summary_id ? [log.authoritative_log_summary_id] : []);
+  for (let offset = 0; offset < authorityIds.length; offset += 100) {
+    const {data} = await supabase.from("log_summaries").select("*").eq("vehicle_id", vehicle.id).eq("user_id", user.id)
+      .in("id", authorityIds.slice(offset, offset + 100));
+    candidateResults.push(...(data ?? []));
+  }
+  const vehicleContext = {vehicleId: vehicle.id, engineCode: vehicle.engine_code};
+  const selection = await selectAnalysisEvidence(ownedLogs, candidateResults, user.id, vehicleContext, query.log);
+  const measurementSelection = selection.result ? null : await selectMeasurementSource(ownedLogs, user.id, vehicle.id,
+    log => readAnalysisSource(log, user.id, vehicle.id), query.log);
+  const latestLog = selection.result ? selection.log : measurementSelection?.log ?? selection.log;
+  const source = measurementSelection?.source ?? (latestLog ? await readAnalysisSource(latestLog, user.id, vehicle.id) : null);
+  const sourcePanel = <SourceMeasurements vehicleId={vehicle.id} vehicle={vehicleContext} logs={ownedLogs} selected={latestLog} source={source}
+    diagnostics={Boolean(selection.result)} historyUnavailable={historyUnavailable} priorResultId={selection.result?.id ?? latestLog?.authoritative_log_summary_id ?? null}/>;
 
   const { data: latestTune } = await supabase
     .from("tunes")
@@ -250,6 +272,8 @@ export default async function AnalysisPage({ params }: PageProps) {
   }
 
   async function loadExactLog(logId: string) {
+    const captured = ownedLogs.find(log => log.id === logId);
+    if (captured) return captured;
     const { data } = await supabase
       .from("logs")
       .select("*")
@@ -261,6 +285,8 @@ export default async function AnalysisPage({ params }: PageProps) {
   }
 
   async function loadExactSummary(summaryId: string) {
+    const captured = candidateResults.find(result => result.id === summaryId);
+    if (captured) return captured;
     const { data } = await supabase
       .from("log_summaries")
       .select("*")
@@ -334,8 +360,8 @@ export default async function AnalysisPage({ params }: PageProps) {
   );
 
   const engineV2 = getEngineV2(latestSummary);
-  if (latestLog && (engineV2?.inputQualification?.contract !== "qualified-source-v1" || engineV2.inputQualification.platform !== "n54" || declaredAnalysisPlatform(vehicle) !== "n54")) {
-    return <main className="min-h-screen bg-black px-6 py-10 text-white"><section className="bmw-border mx-auto max-w-5xl space-y-4 rounded-2xl bg-zinc-900 p-6"><Link href={`/dashboard/vehicles/${id}`} className="underline">Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis qualification unavailable</h1><IdentityOwnerSummary vehicle={vehicle}/><p>{engineV2?.inputQualification?.contract === "qualified-source-v1" ? "This vehicle has no qualified Analysis rule contract. N54 rules and thresholds have not been applied." : "This stored result predates source, units and platform qualification. It is preserved, but its diagnostic conclusions are not presented as verified. Upload the original source again for qualified processing."}</p><p>No source, Working Calibration or stored evidence was changed by this page.</p><Link href={`/dashboard/vehicles/${id}/logs`} className="underline">Review owned source logs</Link></section></main>;
+  if (!selection.result) {
+    return <main className="min-h-screen space-y-6 bg-black px-6 py-10 text-white"><Link className="underline" href={`/dashboard/vehicles/${id}`}>Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis · {vehicle.nickname || "Owned vehicle"}</h1><IdentityOwnerSummary vehicle={vehicle}/>{sourcePanel}</main>;
   }
 
 
@@ -601,6 +627,7 @@ const groupedDiagnosticEvents =
 
   return (
     <main className="min-h-screen bg-black px-6 py-10 text-white">
+      {sourcePanel}
       <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href={`/dashboard/vehicles/${id}`}

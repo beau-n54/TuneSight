@@ -435,13 +435,14 @@ test("channel aliases resolve without changing their samples", () => {
 });
 
 test("invalid source samples are not removed or shifted", () => {
-  assert.deepEqual(
-    getSeries(
-      { boost: [1, "invalid", 3] },
-      TELEMETRY_CHANNELS.boostActual.aliases
-    ),
-    []
-  );
+  for (const invalid of ["invalid", null, undefined, NaN, Infinity]) {
+    const source = [1, invalid, 3];
+    assert.deepEqual(
+      getSeries({ boost: source }, TELEMETRY_CHANNELS.boostActual.aliases),
+      [1, null, 3]
+    );
+    assert.deepEqual(source, [1, invalid, 3]);
+  }
 });
 
 test("visual refinement preserves linear exact-point rendering", () => {
