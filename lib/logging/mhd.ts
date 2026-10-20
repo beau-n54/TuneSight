@@ -7,6 +7,7 @@ const MHD_ALIASES = {
   rpm: [
     "RPM",
     "RPM (RPM)",
+    "RPM (rpm)",
     "Engine speed (rpm)",
     "Engine Speed",
     "rpm",
@@ -19,6 +20,7 @@ const MHD_ALIASES = {
 
   afr: [
     "Lambda bank 1 (AFR)",
+    "Lambda 1 (AFR)",
     "Lambda[AFR]",
     "Lambda Act.[AFR]",
     "AFR",
@@ -28,11 +30,11 @@ const MHD_ALIASES = {
 
   lambda: ["Lambda", "Lambda Bank 1"],
 
-  railPressure: ["Rail pressure (PSI)", "Rail Pressure (PSI)", "rail_pressure_psi", "HPFP Act.[psig]"],
+  railPressure: ["Rail pressure (PSI)", "Rail Pressure (PSI)", "Rail pressure mean 1 (PSI)", "rail_pressure_psi", "HPFP Act.[psig]"],
 
   lpfp: ["Fuel low pressure sensor (PSI)", "Fuel Low Pressure Sensor (PSI)", "Low pressure fuel pump (PSI)", "LPFP (PSI)", "lpfp_psi", "LPFP Act. (Raw)[psig]"],
 
-  wgdc: ["WGDC Bank 1 (%)", "WGDC[%]"],
+  wgdc: ["WGDC Bank 1 (%)", "WGDC 1 (%)", "WGDC[%]"],
 
   throttle: ["Throttle Position (%)", "Throttle Angle[%]"],
 
@@ -87,7 +89,7 @@ export function translateMhdRows(
       timingCyl5: read(row, MHD_ALIASES.timingCyl5),
       timingCyl6: read(row, MHD_ALIASES.timingCyl6),
       iat: readTemperatureC(row),
-      ethanol: read(row, ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content[%]"]),
+      ethanol: read(row, ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content (Active) (%)", "Ethanol Content[%]"]),
     };
   });
 

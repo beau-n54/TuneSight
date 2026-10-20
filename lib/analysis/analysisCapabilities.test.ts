@@ -37,7 +37,7 @@ test("existing qualified N54 authoritative result and diagnostic payload remain 
 for (const platform of ["B58 Gen 1", "B58 Gen 2", "N55"]) test(`${platform} has owned history, safe measurements and graphs but no N54 conclusions`, async () => {
   assert.equal((await selectAnalysisEvidence([log()], [result], owner, {vehicleId, engineCode: platform})).result, null);
   const html = render(platform);
-  assert.match(html, /Open complete owned-log history/); assert.match(html, /Source measurements available/); assert.match(html, /<svg/);
+  assert.match(html, /Open complete owned-log history/); assert.match(html, /Source measurements available/); assert.match(html, /<select/); assert.doesNotMatch(html, /max-h-64|overflow-auto/);
   assert.match(html, /conclusions are not yet qualified/); assert.doesNotMatch(html, /preserved-qualified-event/);
   assert.equal(analysisCapabilities("available", available.measurements, {vehicleId, engineCode: platform}, false).platformSpecificRulesQualified, false);
 });
@@ -63,12 +63,12 @@ test("ambiguous temperature units exclude only temperature and identify the sour
   const parsed = parseSourceMeasurements(csv.replace("IAT (*C)", "IAT"));
   assert(!parsed.channels.some(channel => channel.key === "iat")); assert(parsed.channels.some(channel => channel.key === "rpm"));
   assert(parsed.blockers.some(item => item.includes("Temperature unit/alias blocker: source headers IAT")));
-  assert.match(render("B58", {...available, measurements: parsed}), /<svg/);
+  assert.match(render("B58", {...available, measurements: parsed}), /channel\/unit blockers/);
 });
 test("missing and nonmonotonic time preserve measurements without fabricating graphs", () => {
   for (const raw of [csv.replace("Time", "Clock unknown"), csv.replace("2,2000", "1,2000")]) {
     const parsed = parseSourceMeasurements(raw); assert.equal(parsed.timestamps, null); assert(parsed.channels.length > 0);
-    const html = render("B58", {...available, measurements: parsed}); assert.doesNotMatch(html, /<svg/); assert.match(html, /Measured values in source-row order/);
+    const html = render("B58", {...available, measurements: parsed}); assert.doesNotMatch(html, /<svg/); assert.match(html, /Elapsed-time graphs unavailable/);
   }
 });
 test("partial observations preserve measured zero and null gaps", () => {
@@ -88,7 +88,7 @@ test("unsupported format fails closed without deriving identity", () => {
   assert.equal(analysisCapabilities("available", unsupported, n54, false).sourceParsed, true);
   assert.equal(analysisCapabilities("available", unsupported, n54, false).unitsQualified, "unavailable");
   assert.equal(analysisCapabilities("available", available.measurements, n54, false).platformEvidenceAvailable, false);
-  assert.match(render("N54"), /Saved vehicle labels are owner declarations/);
+  assert.match(render("N54"), /Saved labels are owner declarations/);
 });
 test("owned reprocessing is repeatable and cannot write or create duplicate records", async () => {
   const paths: string[] = [];
@@ -132,8 +132,8 @@ test("measurement fallback skips unusable newest source, explicit selection does
 });
 test("route keeps unavailable-result dashboard, authenticated ownership and original diagnostic branch", () => {
   const route = readFileSync("app/dashboard/vehicles/[id]/analysis/page.tsx", "utf8");
-  assert.match(route, /await requireSubscriberPage/); assert.match(route, /if \(!selection.result\)/);
-  assert.match(route, /IdentityOwnerSummary vehicle=\{vehicle\}\/\>\{sourcePanel\}/);
+  assert.match(route, /await requireSubscriberPage/); assert.doesNotMatch(route, /if \(!selection.result\)/);
+  assert.match(route, /recoverAnalysisWorkspace/); assert.match(route, /EngineeringWorkspaceShell/);
   assert.doesNotMatch(route, /Upload the original source again/);
   assert.doesNotMatch(readFileSync("lib/analysis/analysisSource.server.ts", "utf8"), /\.(insert|update|upsert|delete|upload|remove)\(/);
 });

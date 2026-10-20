@@ -20,7 +20,7 @@ export type GraphPoint = {
   [seriesId: string]: number | null;
 };
 
-export type HorizontalAxisMode = "rpm" | "sample_sequence";
+export type HorizontalAxisMode = "rpm" | "elapsed_time" | "sample_sequence";
 
 export type GraphRegion = {
   id: string;
@@ -226,7 +226,8 @@ export function buildGraphPoints(
   rpm: readonly (number | null)[],
   sharedSampleCount?: number,
   forceSampleSequence = false,
-  sourceStartIndex = 0
+  sourceStartIndex = 0,
+  timestamps: readonly (number | null)[] = []
 ): {
   points: GraphPoint[];
   usesRpm: boolean;
@@ -266,14 +267,18 @@ export function buildGraphPoints(
         (value as number) >= (alignedRpm[index - 1] as number)
     );
 
+  const usesTime = !usesRpm && timestamps.length === sampleCount && sampleCount > 0 &&
+    timestamps.every((value, index) => typeof value === "number" && Number.isFinite(value) &&
+      (index === 0 || value > timestamps[index - 1]!));
   const points = Array.from({ length: sampleCount }, (_, localIndex) => {
     const sourceIndex = sourceStartIndex + localIndex;
     const recordedRpm = rpmIsAligned ? alignedRpm[localIndex] ?? null : null;
     const point: GraphPoint = {
       index: sourceIndex,
-      x: usesRpm ? (recordedRpm as number) : sourceIndex,
+      x: usesRpm ? (recordedRpm as number) : usesTime ? timestamps[localIndex]! - timestamps[0]! : sourceIndex,
       rpm: recordedRpm,
     };
+    if (usesTime) point.elapsedSeconds = point.x;
 
     for (const item of series) {
       point[item.id] = item.values[localIndex] ?? null;
@@ -286,7 +291,7 @@ export function buildGraphPoints(
     points,
     usesRpm,
     hasStoredRpm,
-    axisMode: usesRpm ? "rpm" : "sample_sequence",
+    axisMode: usesRpm ? "rpm" : usesTime ? "elapsed_time" : "sample_sequence",
   };
 }
 
@@ -298,6 +303,7 @@ export function formatHorizontalAxisTick(
   if (usesRpm) {
     return Math.round(sampleCoordinate).toLocaleString();
   }
+  if (typeof _points[0]?.elapsedSeconds === "number") return `${Number(sampleCoordinate.toFixed(2))}`;
 
   const sampleIndex = Math.round(sampleCoordinate);
 
@@ -307,6 +313,7 @@ export function formatHorizontalAxisTick(
 export function getHorizontalAxisPresentation(input: {
   usesRpm: boolean;
   hasStoredRpm: boolean;
+  usesTime?: boolean;
 }): {
   label: string;
   note: string;
@@ -318,6 +325,7 @@ export function getHorizontalAxisPresentation(input: {
     };
   }
 
+  if (input.usesTime) return {label: "Elapsed Time (s)", note: "Actual acquired time; gaps remain gaps. Hover for source sample and RPM."};
   return {
     label: "Sample Sequence",
     note: input.hasStoredRpm

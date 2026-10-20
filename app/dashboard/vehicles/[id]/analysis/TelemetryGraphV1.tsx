@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildGraphPoints,
   getRpmSeries,
+  getSeries,
   getHorizontalAxisPresentation,
   type GraphChannel,
   type GraphRegion,
@@ -97,6 +98,12 @@ function parseFocusedChannels(
 }
 
 const CHARTS: readonly ChartDefinition[] = [
+  { id: "rpm", title: "Engine Speed", description: "Recorded engine speed, without interpolated observations.",
+    channels: [{id: "rpm", label: "Engine Speed", unit: "RPM", aliases: ["rpm"], color: "#38bdf8"}] },
+  { id: "pedal", title: "Accelerator Pedal", description: "Driver demand is separate from throttle plate position.",
+    channels: [{id: "accelerator_pedal", label: "Accelerator Pedal", unit: "%", aliases: ["accelerator_pedal"], color: "#a3e635"}], domain: [0, 100] },
+  { id: "ethanol", title: "Measured Ethanol Content", description: "Measured source content; no fuel target is inferred.",
+    channels: [{id: "ethanol", label: "Ethanol Content", unit: "%", aliases: ["ethanol"], color: "#c084fc"}], domain: [0, 100] },
   {
     id: "boost",
     title: "Boost Control",
@@ -281,20 +288,22 @@ function EngineeringTelemetryChart({
     () => resolveGraphSeries(telemetry, definition.channels),
     [definition.channels, telemetry]
   );
-  const { points, usesRpm, hasStoredRpm } = useMemo(
+  const { points, usesRpm, hasStoredRpm, axisMode } = useMemo(
     () =>
       buildGraphPoints(
         series,
         rpm,
         sharedSampleCount,
-        regions.filter((region) => region.kind === "pull").length > 1,
-        sourceStartIndex
+        definition.id === "rpm" || regions.filter((region) => region.kind === "pull").length > 1,
+        sourceStartIndex,
+        graphView === "line" ? getSeries(telemetry, ["timestamps"]) : []
       ),
-    [regions, rpm, series, sharedSampleCount, sourceStartIndex]
+    [definition.id, regions, rpm, series, sharedSampleCount, sourceStartIndex, graphView, telemetry]
   );
   const horizontalAxis = getHorizontalAxisPresentation({
     usesRpm,
     hasStoredRpm,
+    usesTime: axisMode === "elapsed_time",
   });
   const plottedRegions = useMemo(
     () => resolveRegionCoordinates(regions, points),

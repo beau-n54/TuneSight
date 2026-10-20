@@ -15,6 +15,19 @@ import {
   TELEMETRY_SECTION_CLASS_NAME,
 } from "./telemetryGraphPresentation.ts";
 
+test("qualified elapsed seconds preserve irregular acquisition times and null gaps", () => {
+  const series = resolveGraphSeries({boost: [1, null, 3]}, [TELEMETRY_CHANNELS.boostActual]);
+  const result = buildGraphPoints(series, [3000, 2000, 2500], 3, false, 8, [40, 40.2, 42]);
+  assert.equal(result.axisMode, "elapsed_time");
+  assert.deepEqual(result.points.map(point => point.x), [0, 40.2 - 40, 2]);
+  assert.deepEqual(result.points.map(point => point.boost_actual), [1,null,3]);
+  assert.deepEqual(result.points.map(point => point.index), [8,9,10]);
+  assert.equal(formatHorizontalAxisTick(0.2, result.points, false), "0.2");
+  assert.equal(getHorizontalAxisPresentation({usesRpm: false, hasStoredRpm: true, usesTime: true}).label, "Elapsed Time (s)");
+  assert.equal(buildGraphPoints(series, [], 3, false, 0, [1,1,2]).axisMode, "sample_sequence");
+  assert.equal(buildGraphPoints(series, [], 3, false, 0, [1,null,2]).axisMode, "sample_sequence");
+});
+
 test("graph points preserve every original telemetry sample", () => {
   const boost = [2.1, 8.7, 5.4, 12.3];
   const rpm = [1800, 2400, 3000, 3600];

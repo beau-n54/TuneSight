@@ -2,6 +2,7 @@ import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import Link from "next/link";
 import SourceMeasurements from "./SourceMeasurements";
+import { recoverAnalysisWorkspace } from "@/lib/analysis/analysisWorkspace";
 import { selectMeasurementSource } from "@/lib/analysis/analysisSource";
 import { selectAnalysisEvidence, type OwnedLog, type OwnedResult } from "@/lib/analysis/analysisCapabilities";
 import { readAnalysisSource } from "@/lib/analysis/analysisSource.server";
@@ -231,8 +232,10 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
     log => readAnalysisSource(log, user.id, vehicle.id), query.log);
   const latestLog = selection.result ? selection.log : measurementSelection?.log ?? selection.log;
   const source = measurementSelection?.source ?? (latestLog ? await readAnalysisSource(latestLog, user.id, vehicle.id) : null);
+  const recovered = recoverAnalysisWorkspace({log: latestLog, owner: user.id, vehicle: vehicleContext, source});
+  const diagnosticsAvailable = (Boolean(selection.result) && query.reprocess !== "1") || recovered.diagnostics;
   const sourcePanel = <SourceMeasurements vehicleId={vehicle.id} vehicle={vehicleContext} logs={ownedLogs} selected={latestLog} source={source}
-    diagnostics={Boolean(selection.result)} historyUnavailable={historyUnavailable} priorResultId={selection.result?.id ?? latestLog?.authoritative_log_summary_id ?? null}/>;
+    diagnostics={diagnosticsAvailable} historyUnavailable={historyUnavailable} priorResultId={selection.result?.id ?? latestLog?.authoritative_log_summary_id ?? null}/>;
 
   const { data: latestTune } = await supabase
     .from("tunes")
@@ -309,12 +312,15 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
       )
     : null;
 
-  const latestSummary =
+  const storedSummary =
     evidenceReloadState?.currentAuthority.state === "available"
       ? (evidenceReloadState.currentAuthority.summary as Awaited<
           ReturnType<typeof loadExactSummary>
         >)
       : null;
+
+  // Historical rows are immutable lineage, not current diagnostic authority.
+  const latestSummary = selection.result && query.reprocess !== "1" ? storedSummary : recovered.summaryRow;
 
   const { data: historicalAuthorityLogs } = await supabase
     .from("logs")
@@ -342,7 +348,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   );
   const historicalSummaries = historicalAuthorityIds.flatMap((summaryId) => {
     const summary = historicalRowsById.get(summaryId);
-    return summary && getEngineV2(summary)?.inputQualification?.contract === "qualified-source-v1" && getEngineV2(summary)?.inputQualification?.platform === "n54" ? [summary] : [];
+    return diagnosticsAvailable && summary && getEngineV2(summary)?.inputQualification?.contract === "qualified-source-v1" && getEngineV2(summary)?.inputQualification?.platform === "n54" ? [summary] : [];
   });
 
   const effectiveTuneProfile = latestTuneProfile;
@@ -360,12 +366,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   );
 
   const engineV2 = getEngineV2(latestSummary);
-  if (!selection.result) {
-    return <main className="min-h-screen space-y-6 bg-black px-6 py-10 text-white"><Link className="underline" href={`/dashboard/vehicles/${id}`}>Back to Vehicle</Link><h1 className="text-3xl font-bold">Analysis · {vehicle.nickname || "Owned vehicle"}</h1><IdentityOwnerSummary vehicle={vehicle}/>{sourcePanel}</main>;
-  }
-
-
-  const fallbackFlags: AnalysisFlag[] = [];
+  const fallbackFlags: AnalysisFlag[] = [{title: "Analysis availability", message: recovered.finding, tone: "info"}];
 
 const legacyPipelineWarnings: EngineWarning[] =
   (engineV2?.pipelineWarnings ?? []).map((warning) => ({
@@ -462,41 +463,7 @@ const legacyPipelineWarnings: EngineWarning[] =
     crossReferences: engineCrossReferences,
   });
 
-const xdfCrossReferences = Array.isArray(engineV2?.xdfCrossReferences)
-  ? engineV2.xdfCrossReferences
-  : [
-    
-      {
-        tableName: "Fuel Pressure Target / HPFP Control",
-        category: "fueling",
-        matchReason: "Fallback XDF reference for rail pressure and HPFP capacity findings",
-      },
-      {
-        tableName: "Low Pressure Fuel Pump Control",
-        category: "fueling",
-        matchReason: "Fallback XDF reference for LPFP drop findings",
-      },
-      {
-        tableName: "Boost Target Main",
-        category: "boost",
-        matchReason: "Fallback XDF reference for boost target findings",
-      },
-      {
-        tableName: "Wastegate Duty Cycle Base",
-        category: "boost",
-        matchReason: "Fallback XDF reference for WGDC and boost control findings",
-      },
-      {
-        tableName: "Ignition Timing Main",
-        category: "timing",
-        matchReason: "Fallback XDF reference for timing correction findings",
-      },
-      {
-        tableName: "Torque / Load Limiters",
-        category: "torque",
-        matchReason: "Fallback XDF reference for throttle closure and torque intervention findings",
-      },
-    ];
+const xdfCrossReferences = Array.isArray(engineV2?.xdfCrossReferences) ? engineV2.xdfCrossReferences : [];
 const tuneProfile = effectiveTuneProfile;
 
 const tuneReasoningFlags: AnalysisFlag[] = (engineV2?.warnings ?? []).map(mapLegacyWarningToFlag);
@@ -626,8 +593,7 @@ const groupedDiagnosticEvents =
   groupDiagnosticEvents(renderedRoutedEvents);
 
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-white">
-      {sourcePanel}
+    <main className="min-h-screen space-y-6 bg-black px-4 py-6 text-white sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href={`/dashboard/vehicles/${id}`}
@@ -647,9 +613,7 @@ const groupedDiagnosticEvents =
               <IdentityOwnerSummary vehicle={vehicle}/>
               <p className="mt-2 text-xs text-zinc-500">Analysis platform context is owner-declared; qualified source and rule contracts remain required. It is not an observed controller identity.</p>
               <p className="mt-2 text-zinc-400">
-                {engineV2
-                  ? "Engine v2 analysis loaded from the latest uploaded log."
-                  : "First-pass analysis using the latest uploaded log and tune."}
+                {latestSummary === recovered.summaryRow ? "Read-only view of the selected original source; stored results remain unchanged." : "Qualified stored analysis for the selected log."}
               </p>
             </div>
 
@@ -702,6 +666,8 @@ const groupedDiagnosticEvents =
           </div>
         </div>
 
+        {sourcePanel}
+        <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>
         <EngineeringWorkspaceShell
           summary={
             <EngineeringSummaryCard
@@ -725,7 +691,7 @@ const groupedDiagnosticEvents =
             <TelemetryGraphV1
               events={engineV2?.events ?? []}
               pullWindows={engineV2?.pullWindows ?? []}
-              telemetry={engineV2?.telemetry ?? null}
+              telemetry={latestSummary === recovered.summaryRow ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
             />
           }
           evidence={
@@ -739,17 +705,24 @@ const groupedDiagnosticEvents =
             </WorkspaceReservedPanel>
           }
           calibrationContext={
-            <WorkspaceReservedPanel title="Calibration context">
-              Calibration context is reserved for governed calibration material.
-              This shell does not infer, calculate or publish calibration
-              intelligence.
-            </WorkspaceReservedPanel>
+            <div className="space-y-4">
+              <WorkspaceReservedPanel title="Universal XDF">
+                Exact Definition bindings are not supplied by this log-processing
+                contract. No table address, value or calibration instruction is inferred
+                from a logger header or the latest unrelated tune.
+              </WorkspaceReservedPanel>
+              <WorkspaceReservedPanel title="Calibration Cross Reference">
+                {diagnosticsAvailable
+                  ? "Qualified event inspection directions and supported relationships appear in Cross-Reference Details below. Related XDF/Calibration tables require exact supplied Definition evidence."
+                  : "Platform-specific inspection directions remain unavailable under the current rule contract. Source measurements and Engineering Evidence remain accessible."}
+              </WorkspaceReservedPanel>
+            </div>
           }
         />
 
         <div className="grid gap-4 md:grid-cols-4">
           <InfoCard
-            title="Latest Log"
+            title="Selected Log"
             value={latestLog?.log_name || "No log uploaded"}
           />
           <InfoCard
@@ -941,7 +914,7 @@ const groupedDiagnosticEvents =
 
           {latestTune && tuneReasoningFlags.length === 0 && (
             <p className="text-zinc-400">
-              No major tune-aware signals were surfaced from the current data.
+              No qualified tune-specific signals are available. The latest uploaded tune is not assumed to have produced the selected log.
             </p>
           )}
 
@@ -984,7 +957,7 @@ const groupedDiagnosticEvents =
           />
 
           <AnalysisCard
-            title="Boost Error"
+            title="Peak Target − Peak Boost (not time-aligned error)"
             value={
               boostError !== null ? `${formatValue(boostError, 1)} psi` : "No data"
             }
@@ -1068,9 +1041,9 @@ const groupedDiagnosticEvents =
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Intelligent Warnings</h2>
             <StatusBadge
-              label={intelligentWarningsSummary.state.toUpperCase()}
+              label={diagnosticsAvailable ? intelligentWarningsSummary.state.toUpperCase() : "UNAVAILABLE"}
               tone={
-                intelligentWarningsSummary.state === "warning"
+                !diagnosticsAvailable ? "info" : intelligentWarningsSummary.state === "warning"
                   ? "bad"
                   : intelligentWarningsSummary.state === "caution"
                     ? "warn"
@@ -1093,9 +1066,7 @@ const groupedDiagnosticEvents =
 
          {latestLog && latestSummary && (
   <>
-    <IntelligentWarningsSummaryCard
-      summary={intelligentWarningsSummary}
-    />
+    {diagnosticsAvailable ? <IntelligentWarningsSummaryCard summary={intelligentWarningsSummary}/> : <p>{recovered.finding}</p>}
     <div className="space-y-3">
       {renderedRoutedEvents.length > 0 &&
   Object.entries(groupedDiagnosticEvents).map(([groupName, events]) =>
@@ -1302,7 +1273,7 @@ const groupedDiagnosticEvents =
         </div>
       ) : (
         <p className="text-zinc-400">
-          No detected events were returned by the engine for this log.
+          {diagnosticsAvailable ? "No detected events were returned for the qualified available channels." : "Diagnostic events are unavailable under the current source/platform rule contract; this is not an all-clear."}
         </p>
       )}
     </div>

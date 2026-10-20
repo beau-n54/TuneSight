@@ -64,6 +64,13 @@ test("R01: different authority vocabularies are preserved without guessed cross-
 });
 test("R01: Analysis retains its declared N54 boundary without source-family or ROM fallback", () => {
   assert.equal(declaredAnalysisPlatform({ engine_code: "N54" }), "n54");
+  const legacy = { engine_code: "N54b30" };
+  assert.equal(declaredAnalysisPlatform(legacy), "n54");
+  assert.equal(savedVehicleIdentity(legacy).declaredEngineCode, "N54b30");
+  assert.equal(observedControllerIdentity().observedDmeFamily.state, "not_observed");
+  assert.equal(observedControllerIdentity().exactSoftwareIdentity.state, "not_observed");
+  assert.equal(declaredAnalysisPlatform(legacy, [observation({ observedDmeFamily: "MG1CS201" })]), "unknown");
+  assert.equal(declaredAnalysisPlatform({ engine_code: "N54b30 expected" }), "unknown");
   for (const engine_code of [null, "", "B58 Gen 1", "B58 Gen 2", "MSD81"]) assert.equal(declaredAnalysisPlatform({ engine_code }), "unknown");
   assert.equal(declaredAnalysisPlatform(null,[observation()]), "unknown");
 });

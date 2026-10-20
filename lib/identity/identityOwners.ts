@@ -100,5 +100,8 @@ export function declaredAnalysisPlatform(vehicle: SavedVehicleInput | null, obse
   if (identity.controller.observedDmeFamily.state === "conflict" || identity.controller.exactSoftwareIdentity.state === "conflict" || identity.controller.observedVin.state === "conflict") return "unknown";
   const observedFamily = identity.controller.observedDmeFamily.value;
   if (observedFamily !== null && !["MSD80", "MSD81"].includes(observedFamily.trim().toUpperCase())) return "unknown";
-  return identity.savedVehicle.declaredEngineCode?.trim().toUpperCase() === "N54" ? "n54" : "unknown";
+  // Founder explicitly authorised this legacy owner-declaration alias during the
+  // Analysis restoration. Preserve the saved label; never call it observed hardware.
+  const declared = identity.savedVehicle.declaredEngineCode?.trim().toUpperCase();
+  return declared === "N54" || declared === "N54B30" ? "n54" : "unknown";
 }

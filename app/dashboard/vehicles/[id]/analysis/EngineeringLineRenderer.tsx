@@ -78,6 +78,7 @@ function GraphTooltip({
         <p className="font-mono font-semibold text-sky-300">
           {usesRpm && point.rpm !== null
             ? `${Math.round(point.rpm).toLocaleString()} RPM`
+            : typeof point.elapsedSeconds === "number" ? `${point.elapsedSeconds.toFixed(2)} s`
             : `Sample Sequence ${point.index + 1}`}
         </p>
         <p className="mt-1 font-mono text-[10px] text-zinc-500">

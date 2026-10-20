@@ -1,4 +1,5 @@
-import { qualifiedAnalysisPlatform } from "./qualifiedAnalysisInput.ts";
+import { buildQualifiedParsedLog, qualifiedAnalysisPlatform } from "./qualifiedAnalysisInput.ts";
+import type { ParsedLog } from "./types.ts";
 import { parseBoundedLogCsv } from "../logging/boundedCsv.ts";
 import { translateLogRows } from "../logging/translator.ts";
 import { qualifyTranslatedEvidenceSource } from "./evidenceSourceQualification.ts";
@@ -63,7 +64,7 @@ export function parseSourceMeasurements(text: string) {
   }
   const translated = translateLogRows(csv.rows);
   const qualification = qualifyTranslatedEvidenceSource(translated, {sourceLogId: null, sourceAvailability: "unknown"});
-  if (qualification.kind === "unsupported_source") return {timestamps: null, channels: [] as {key: string; unit: string; values: (number | null)[]}[], blockers: ["CSV parsed, but no qualified channel/unit translator exists for this source format. No measurements or diagnostic conclusions are inferred."], sourceFormat: translated.platform, sampleCount: csv.rows.length};
+  if (qualification.kind === "unsupported_source") return {parsedLog: null, timestamps: null, channels: [] as {key: string; unit: string; values: (number | null)[]}[], blockers: ["CSV parsed, but no qualified channel/unit translator exists for this source format. No measurements or diagnostic conclusions are inferred."], sourceFormat: translated.platform, sampleCount: csv.rows.length};
   const times = translated.rows.map(row => row.time);
   const timestamps = times.length && times.every(finite) && times.every((value, index) => index === 0 || value > times[index - 1]!) ? times as number[] : null;
   const channels: {key: string; unit: string; values: (number | null)[]}[] = [];
@@ -78,7 +79,10 @@ export function parseSourceMeasurements(text: string) {
   const temperatureHeaders = csv.headers.filter(header => /iat|intake air temp/i.test(header));
   if (!channels.some(channel => channel.key === "iat") && temperatureHeaders.length) blockers.push(`Temperature unit/alias blocker: source headers ${temperatureHeaders.join(", ")}. Exactly one recognised Celsius or Fahrenheit column with finite values is required.`);
   if (!timestamps) blockers.push("Elapsed-time graphs unavailable: time observations must be finite, in qualified seconds, and strictly increasing. Channel measurements remain available in source-row order.");
-  return {timestamps, channels, blockers, sourceFormat: translated.platform, sampleCount: translated.rows.length};
+  let parsedLog: ParsedLog | null = null;
+  try { parsedLog = buildQualifiedParsedLog(translated); }
+  catch { blockers.push("Diagnostic input unavailable: aligned finite RPM and a strictly increasing timebase are required."); }
+  return {parsedLog, timestamps, channels, blockers, sourceFormat: translated.platform, sampleCount: translated.rows.length};
 }
 export type SourceMeasurements = ReturnType<typeof parseSourceMeasurements>;
 export function analysisCapabilities(source: SourceState, measurements: SourceMeasurements | null, vehicle: VehicleSetup, diagnostics: boolean) {
