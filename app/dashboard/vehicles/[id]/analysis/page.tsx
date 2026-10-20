@@ -7,6 +7,8 @@ import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSection
 import { resolveAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext";
 import { readAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext.server";
 import { recoverAnalysisWorkspace } from "@/lib/analysis/analysisWorkspace";
+import { sourceObservationEvents } from "@/lib/analysis/sourceObservationEvents";
+import { ObservationPrimary, ObservationChecks, ObservationWarnings } from "./SourceObservationSections";
 import { selectMeasurementSource } from "@/lib/analysis/analysisSource";
 import { selectAnalysisEvidence, type OwnedLog, type OwnedResult } from "@/lib/analysis/analysisCapabilities";
 import { readAnalysisSource } from "@/lib/analysis/analysisSource.server";
@@ -25,7 +27,6 @@ import {
 import { WorkshopDiagnosticCard } from "@/lib/components/diagnostics/WorkshopDiagnosticCard";
 import {
   EngineeringWorkspaceShell,
-  WorkspaceReservedPanel,
 } from "@/components/EngineeringWorkspaceShell";
 import { groupDiagnosticEvents } from "@/lib/diagnostics/groupDiagnosticEvents";
 import { buildHistoricalDiagnosticEvents } from "@/lib/diagnostics/buildHistoricalDiagnosticEvents";
@@ -238,6 +239,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   const source = measurementSelection?.source ?? (latestLog ? await readAnalysisSource(latestLog, user.id, vehicle.id) : null);
   const recovered = recoverAnalysisWorkspace({log: latestLog, owner: user.id, vehicle: vehicleContext, source});
   const factualEvidence = analysisEvidenceSections(source);
+  const observations = sourceObservationEvents(source);
   const calibrationEvidence = resolveAnalysisCalibration(
     await readAnalysisCalibration(latestLog, user.id, vehicle.id), latestLog, user.id, vehicle.id,
     factualEvidence.ranges.map(range => range.channel));
@@ -395,7 +397,7 @@ const legacyPipelineWarnings: EngineWarning[] =
 
   const renderedVerdictFlags = engineV2?.quickVerdict
     ? buildVerdictFlagsFromEngine(engineV2.quickVerdict)
-    : fallbackFlags;
+    : [{title: "Source-derived engineering summary", message: observations.summary, tone: "info" as const}, ...fallbackFlags];
 
   const enginePullCount = Array.isArray(engineV2?.pullWindows)
     ? engineV2.pullWindows.length
@@ -686,15 +688,10 @@ const groupedDiagnosticEvents =
             />
           }
           primaryResults={
-            scopedPrimaryResults.length > 0 ? (
-              <PrimaryEngineeringResults results={scopedPrimaryResults} />
-            ) : (
-              <WorkspaceReservedPanel title="Primary result availability">
-                {diagnosticsAvailable
-                  ? "No scoped primary conclusions were returned for the qualified inputs."
-                  : "Platform-specific primary conclusions are unavailable under the current source/platform rule contract. Factual measurements, quality warnings and independently qualified Calibration relationships remain available below."}
-              </WorkspaceReservedPanel>
-            )
+            <div className="space-y-4">
+              {scopedPrimaryResults.length > 0 && <PrimaryEngineeringResults results={scopedPrimaryResults} />}
+              <ObservationPrimary analysis={observations}/>
+            </div>
           }
           telemetry={
             <TelemetryGraphV1
@@ -905,6 +902,7 @@ const groupedDiagnosticEvents =
               No tune uploaded yet, so tune-aware reasoning is unavailable.
             </p>
           )}
+          <p className="text-sm text-zinc-300">Logged actual-versus-target observations are evaluated independently below. Exact admitted Calibration inspection targets are shown in Related XDF. Neither the latest tune nor the current Calibration is assumed to have produced this log; tune-specific cause and suitability require an explicit source association.</p>
 
           {latestTune && tuneReasoningFlags.length === 0 && (
             <p className="text-zinc-400">
@@ -1003,31 +1001,12 @@ const groupedDiagnosticEvents =
             Per-Cylinder Timing Corrections
           </h2>
 
-          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-            <AnalysisCard
-              title="Cylinder 1"
-              value={formatValue(latestSummary?.cyl1_max_timing_correction, 1)}
-            />
-            <AnalysisCard
-              title="Cylinder 2"
-              value={formatValue(latestSummary?.cyl2_max_timing_correction, 1)}
-            />
-            <AnalysisCard
-              title="Cylinder 3"
-              value={formatValue(latestSummary?.cyl3_max_timing_correction, 1)}
-            />
-            <AnalysisCard
-              title="Cylinder 4"
-              value={formatValue(latestSummary?.cyl4_max_timing_correction, 1)}
-            />
-            <AnalysisCard
-              title="Cylinder 5"
-              value={formatValue(latestSummary?.cyl5_max_timing_correction, 1)}
-            />
-            <AnalysisCard
-              title="Cylinder 6"
-              value={formatValue(latestSummary?.cyl6_max_timing_correction, 1)}
-            />
+          <p className="mb-3 text-sm text-zinc-400">Supplied cylinder channels only. Missing channels do not establish the installed cylinder count.</p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {factualEvidence.timing.map(channel => <AnalysisCard key={channel.channel}
+              title={`Cylinder ${channel.channel.split("_").at(-1)}`}
+              value={`${formatValue(channel.minimum, 1)} ${channel.unit}`}/>)}
+            {!factualEvidence.timing.length && <p>No unambiguous timing-correction channels with qualified angle units were supplied.</p>}
           </div>
         </div>
 
@@ -1062,7 +1041,8 @@ const groupedDiagnosticEvents =
 
          {(
   <>
-    {diagnosticsAvailable ? <IntelligentWarningsSummaryCard summary={intelligentWarningsSummary}/> : <p>{recovered.finding}</p>}
+    {diagnosticsAvailable && <IntelligentWarningsSummaryCard summary={intelligentWarningsSummary}/>}
+    <ObservationWarnings analysis={observations}/>
     <div className="space-y-3">
       {renderedRoutedEvents.length > 0 &&
   Object.entries(groupedDiagnosticEvents).map(([groupName, events]) =>
@@ -1268,10 +1248,9 @@ const groupedDiagnosticEvents =
           )}
         </div>
       ) : (
-        <p className="text-zinc-400">
-          {diagnosticsAvailable ? "No detected events were returned for the qualified available channels." : "Diagnostic events are unavailable under the current source/platform rule contract; this is not an all-clear."}
-        </p>
+        <p className="text-zinc-400">No platform-qualified fault event is established. Source-derived event intervals and their individual limits follow.</p>
       )}
+      <ObservationChecks analysis={observations}/>
     </div>
   </>
 )}

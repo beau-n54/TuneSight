@@ -28,7 +28,7 @@ export function SourceWarningSections({facts, diagnostics}: {facts: AnalysisEvid
       : <p>Unavailable: both unambiguous boost and boost-target channels in the same qualified unit are required. Independent peaks are not subtracted.</p>}</Section>
     <Section title="Platform-specific diagnostic warnings">{diagnostics
       ? "Qualified diagnostic warnings and event evidence follow below; source facts above retain their independent authority."
-      : "Unavailable: no applicable qualified source/platform diagnostic rule contract for this selection. N54 thresholds and causal conclusions are not applied."}</Section>
+      : "Fault severity and causal conclusions need an applicable rule and its required channels. Source-derived observations and inspection evidence remain available independently."}</Section>
   </div>;
 }
 

@@ -457,7 +457,7 @@ export function buildAnalysisResult(input: {
   const fuelPressureThresholds = fuelValidation.detectedFuel === "unavailable" ? null : getFuelPressureThresholds(fuelValidation.detectedFuel);
   if (platform !== "n54") return {
     inputQualification,
-    quickVerdict: { status: "caution", summary: "Analysis unavailable: this engine context has no qualified rule contract. N54 rules were not applied.", confidence: 0, pullQuality: "questionable" },
+    quickVerdict: { status: "caution", summary: "Platform-specific fault conclusions require an applicable rule contract. Source-derived observations remain independently available.", confidence: 0, pullQuality: "questionable" },
     warnings: [], pipelineWarnings: [], suggestedFixes: [], crossReferences: [], xdfCrossReferences: [],
     summary, fuelValidation, fuelPressureThresholds: null, events: [], routedEvents: [], pullWindows: [],
     telemetry: summary.telemetry, worstCylinder: null, diagnosticTimeline: [],

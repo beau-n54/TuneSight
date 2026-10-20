@@ -43,6 +43,7 @@ const channelDefinitions = {
   afr: ["afr", "AFR"], rail_pressure: ["railPressure", "psi"], lpfp: ["lpfp", "psi"], wgdc: ["wgdc", "%"], ethanol: ["ethanol", "%"],
   timing_correction_cyl_1: ["timingCyl1", "°"], timing_correction_cyl_2: ["timingCyl2", "°"], timing_correction_cyl_3: ["timingCyl3", "°"],
   timing_correction_cyl_4: ["timingCyl4", "°"], timing_correction_cyl_5: ["timingCyl5", "°"], timing_correction_cyl_6: ["timingCyl6", "°"],
+  timing_correction_cyl_7: ["timingCyl7", "°"], timing_correction_cyl_8: ["timingCyl8", "°"],
 } as const satisfies Record<string, readonly [keyof TranslatedLogRow, string]>;
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
@@ -70,6 +71,9 @@ export function parseSourceMeasurements(text: string) {
   const channels: {key: string; unit: string; values: (number | null)[]}[] = [];
   const blockers: string[] = metadataTrailer ? ["BM3 trailing logger identifier has no measurement column; excluded from the in-memory projection only."] : [];
   for (const [key, [source, unit]] of Object.entries(channelDefinitions)) {
+    // An optional eight-cylinder logger layout is displayed only when supplied.
+    // It cannot establish physical cylinder count or change diagnostic applicability.
+    if (/timing_correction_cyl_[78]/.test(key) && !csv.headers.some(h => h.toLowerCase().replace(/[.\s]/g, "").includes(`cyl${key.at(-1)}`))) continue;
     const values = translated.rows.map(row => finite(row[source]) ? row[source] as number : null);
     if (values.some(finite)) {
       channels.push({key, unit, values});

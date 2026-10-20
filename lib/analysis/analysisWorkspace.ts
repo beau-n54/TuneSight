@@ -22,7 +22,7 @@ export function recoverAnalysisWorkspace(input: {
   let analysis: ReturnType<typeof buildAnalysisResult> | null = null;
   let finding = !measurements ? source?.finding ?? "No owned source is selected."
     : qualifiedAnalysisPlatform(vehicle) === "unknown"
-      ? "Source measurements recovered. Platform-specific conclusions are unavailable under the current declared-platform rule contract; N54 rules were not applied."
+      ? "Owned source recovered. Source-derived events, comparisons and inspection evidence are available. A platform-specific fault conclusion requires its own applicable rule and complete inputs."
       : "Source measurements recovered. Diagnostic input lacks a fully observed RPM channel or qualified timebase.";
   if (measurements?.parsedLog && qualifiedAnalysisPlatform(vehicle) === "n54") {
     try {

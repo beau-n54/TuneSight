@@ -24,7 +24,7 @@ export function analysisEvidenceSections(source: AnalysisSource | null) {
     ranges,
     targetDifference: differences.length ? {count: differences.length, unit: actual!.unit,
       minimum: differences.reduce((a, b) => Math.min(a, b)), maximum: differences.reduce((a, b) => Math.max(a, b))} : null,
-    timing: ranges.filter(r => /^timing_correction_cyl_[1-6]$/.test(r.channel)),
+    timing: ranges.filter(r => /^timing_correction_cyl_[1-8]$/.test(r.channel)),
     systems: [
       {channels: ["rail_pressure"], system: "High-pressure fuel supply"},
       {channels: ["lpfp"], system: "Low-pressure fuel supply"},

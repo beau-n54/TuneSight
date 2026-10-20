@@ -17,7 +17,7 @@ export function validateBoostAgainstTune(
 : BoostValidationResult {
   const boostIntent = context.boostIntent ?? "unknown";
   if (context.platform !== "n54" || typeof context.maxBoost !== "number" || !Number.isFinite(context.maxBoost) || typeof context.maxBoostTarget !== "number" || !Number.isFinite(context.maxBoostTarget)) {
-    return { status: "unavailable", boostIntent, boostErrorPsi: null, message: "Boost validation requires measured relative pressure in PSI and qualified N54 context." };
+    return { status: "unavailable", boostIntent, boostErrorPsi: null, message: "Boost fault classification requires measured relative pressure in PSI and an applicable platform rule. Same-row target comparisons remain available independently." };
   }
   const maxBoost = context.maxBoost;
   const maxBoostTarget = context.maxBoostTarget;

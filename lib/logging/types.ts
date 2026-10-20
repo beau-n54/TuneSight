@@ -34,6 +34,8 @@ export type TranslatedLogRow = {
   timingCyl4?: number | null;
   timingCyl5?: number | null;
   timingCyl6?: number | null;
+  timingCyl7?: number | null;
+  timingCyl8?: number | null;
   iat?: number | null;
   ethanol?: number | null;
 };

@@ -118,7 +118,7 @@ export const TELEMETRY_CHANNELS = {
 } as const satisfies Record<string, GraphChannel>;
 
 export const TIMING_CHANNELS: readonly GraphChannel[] = Array.from(
-  { length: 6 },
+  { length: 8 },
   (_, index) => {
     const cylinder = index + 1;
     return {
@@ -137,6 +137,8 @@ export const TIMING_CHANNELS: readonly GraphChannel[] = Array.from(
         "#e11d48",
         "#be123c",
         "#9f1239",
+        "#c084fc",
+        "#38bdf8",
       ][index],
     };
   }

@@ -10,6 +10,8 @@ import type {AnalysisCalibrationContext} from "./analysisCalibrationContext";
 
 // Execute the real TS/TSX tree with only auth, database and source I/O replaced.
 // The query boundary exposes reads only: an accidental write is a test failure.
+const masterCensus = JSON.parse(fs.readFileSync("engineering/calibration/bmw-master-99-xdf-census.json", "utf8")) as {rows: {family: string}[]};
+const masterFamilies = [...new Set(masterCensus.rows.map(row => row.family))];
 const require = createRequire(import.meta.url);
 const ts = require("typescript"), React = require("react"), {renderToStaticMarkup} = require("react-dom/server");
 const cache = new Map<string, {exports: unknown}>();
@@ -112,7 +114,7 @@ for (const engineCode of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) test(`${engineCod
   assert.match(html, /bmw-border/); assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:flex-row/);
   assert.match(html, /name="log"/); assert.match(html, /value="first" selected/);
   assert.doesNotMatch(html, /max-h-64/);
-  if (engineCode !== "N54b30") assert.match(html, /N54 rules were not applied/);
+  if (engineCode !== "N54b30") assert.doesNotMatch(html, /N54/);
   else { assert.match(html, /Detected Events/); assert.match(html, /Cross-Reference Details/); assert.match(html, /Evidence and Selection Logic|Supplied Evidence/); }
 });
 test("explicit log selection and repeated read-only reprocessing retain exact log and original bytes", async () => {
@@ -138,7 +140,7 @@ test("three platforms share the ordered section contract at desktop and stacked 
     assert.match(html, /grid gap-4 md:grid-cols-2/);
     assert.doesNotMatch(html, /(?:hidden|display:none)[^>]*data-analysis-section/);
     assert.match(html, /min-w-0 space-y-2/);
-    if (platform !== "N54b30") assert.match(html, /N54 thresholds and causal conclusions are not applied/);
+    if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);
   }
   assert(sections[0].length >= 17);
   assert.deepEqual(sections[0], sections[1]); assert.deepEqual(sections[1], sections[2]);
@@ -158,12 +160,12 @@ test("historical N54 records cannot supply diagnostic trends to a B58 page", asy
   historicalN54 = true; selectedSource = source();
   try {
     const html = await render("B58 Gen 1");
-    assert.match(html, /N54 rules were not applied/);
+    assert.doesNotMatch(html, /N54/);
     assert.doesNotMatch(html, /historical-comparison|Repeated Correction|Pressure Declining/);
   } finally { historicalN54 = false; }
 });
 
-for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 Gen 1", "00003076501103", 7864320], ["B58 Gen 2", "00005D553C8C05", 8388608]] as const) test(`${platform}: response-only exact Definitions render in all three Calibration sections`, async () => {
+for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 Gen 1", "00003076501103", 7864320], ["B58 Gen 2", "00005D553C8C05", 8388608], ...masterFamilies.map(family => [family, "synthetic-owned-ROM", 16] as const)] as const) test(`${platform}: response-only exact Definitions render in all three Calibration sections`, async () => {
   selectedSource = source();
   admittedContext = {state: "available", owner: "owner", vehicle: "vehicle", sessionId: null, sourceId: "owned-tune", resolutionPath: "Fresh response-only admission", result: {
     status: "workshop_ready", identity: software, digest: "synthetic-digest", byteLength: bytes, container: "bin",
@@ -180,6 +182,20 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     assert.match(html, /exact-revision; occurrence 0/);
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
     assert.match(html, /no available, unambiguous Definition occurrence/);
-    if (platform !== "N54b30") assert.match(html, /N54 thresholds and causal conclusions are not applied/);
+    if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);
   } finally { admittedContext = null; }
+});
+
+
+for (const platform of [...masterFamilies, "N20", "N55", "S55", "N13", "future BMW family"]) test(`${platform}: complete master-platform page contains events, reasoning and item-level blockers`, async () => {
+  selectedSource = source();
+  const html = await render(platform);
+  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Detected Events", "Tune-Aware Reasoning", "Calibration Cross Reference", "Related XDF", "Related Calibration Tables", "Supplied evidence, alternatives and selection limits", "Withheld conclusion", "Source-derived engineering results", "Event observations and individual blockers"]) assert(html.includes(title), title);
+  assert.match(html, /Largest same-row difference/);
+  assert.match(html, /Measured rail-pressure decline.*additional evidence needed/);
+  assert.match(html, /representative|representative selection|One representative/);
+  assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:grid-cols-2/); assert.match(html, /bmw-border/);
+  if (platform !== "N54") assert.doesNotMatch(html, /N54|n54/);
+  if (!platform.toLowerCase().startsWith("b58")) assert.doesNotMatch(html, /B58|b58/);
+  assert.doesNotMatch(html, /undefined|NaN/);
 });

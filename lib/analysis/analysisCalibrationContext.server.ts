@@ -5,7 +5,7 @@ import type { OwnedLog } from "./analysisCapabilities";
 import { readAnalysisCalibrationContext } from "./analysisCalibrationRead";
 import { resolveDurableAnalysisContext } from "./analysisDurableContext";
 import { readVehicleCalibrationRole } from "../calibration-workshop/vehicleCalibrationRoleStorage";
-import { readVehicleOwnedTune } from "../calibration-workshop/vehicleOwnedTuneRead.server";
+import { readVehicleOwnedTune, readUniqueVehicleOwnedTune } from "../calibration-workshop/vehicleOwnedTuneRead.server";
 
 export async function readAnalysisCalibration(log: OwnedLog | null, owner: string, vehicle: string) {
   try {
@@ -25,12 +25,10 @@ export async function readAnalysisCalibration(log: OwnedLog | null, owner: strin
       const client = createTrustedServerClient();
       const {data, error} = await client.from("tunes").select("id").eq("user_id", owner).eq("vehicle_id", vehicle).order("id").limit(101);
       if (error || !data || data.length > 100) return {state: "unavailable", reason: "The bounded owned-source locator could not resolve the vehicle's source inventory."};
-      for (const tune of data) {
-        const result = await readVehicleOwnedTune({ownerId: owner, vehicleId: vehicle, tuneId: tune.id, locator: session.locator});
-        if (result) return {state: "available", owner, vehicle, sessionId: null, sourceId: tune.id, result,
-          resolutionPath: "Owner-scoped historical hash locator → matching durable owned bytes → fresh existing Calibration admission → response-only Dataset. Expired metadata supplied no admission authority."};
-      }
-      return {state: "unavailable", reason: "No durable owned source matches the exact historical source hash, length and independently re-observed software identity."};
+      const admitted = await readUniqueVehicleOwnedTune({ownerId: owner, vehicleId: vehicle, tuneIds: data.map(tune => tune.id), locator: session.locator});
+      if (admitted) return {state: "available", owner, vehicle, sessionId: null, sourceId: admitted.sourceIds.join(", "), result: admitted.result,
+        resolutionPath: "Owner-scoped historical hash locator → one byte-identical owned content identity (all matching source records retained) → fresh existing Calibration admission → response-only Dataset. No upload is promoted to Current; expired metadata supplies no admission authority."};
+      return {state: "unavailable", reason: "No unique owned content identity could be admitted: source hash, length, software or byte-equivalence checks failed. No ambiguous source was selected."};
     });
   } catch {
     return {state: "unavailable" as const, reason: "The server-owned Calibration context is temporarily unavailable. No source or configuration was changed."};

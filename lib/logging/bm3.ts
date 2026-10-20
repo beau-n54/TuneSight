@@ -1,4 +1,4 @@
-import { getMissingCoreChannels, read, readTemperatureC } from "./helpers.ts";
+import { getMissingCoreChannels, read, readTemperatureC, readAdditionalCylinderCorrection } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
 export function translateBm3Rows(rawRows: Record<string, unknown>[]): TranslatedLog {
@@ -32,6 +32,8 @@ export function translateBm3Rows(rawRows: Record<string, unknown>[]): Translated
       timingCyl4: read(row, ["Cyl4 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 4[°]"]),
       timingCyl5: read(row, ["Cyl5 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 5[°]"]),
       timingCyl6: read(row, ["Cyl6 Timing Cor (*)", "(RAM) Ignition Timing Corr. Cyl. 6[°]"]),
+      timingCyl7: readAdditionalCylinderCorrection(row, 7),
+      timingCyl8: readAdditionalCylinderCorrection(row, 8),
       iat: readTemperatureC(row),
       ethanol: read(row, ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content[%]"]),
     };

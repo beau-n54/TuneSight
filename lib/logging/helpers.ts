@@ -23,6 +23,11 @@ export function readTemperatureC(row: Record<string, unknown>): number | null {
   return value === null ? null : fahrenheit.includes(matches[0]) ? (value - 32) * 5 / 9 : value;
 }
 
+/** Explicit logger channel identifiers, not an inference of installed cylinder count. */
+export function readAdditionalCylinderCorrection(row: Record<string, unknown>, cylinder: 7 | 8): number | null {
+  return read(row, [`Cyl${cylinder} Timing Cor (*)`, `Cyl ${cylinder} Timing Cor (*)`, `(RAM) Ignition Timing Corr. Cyl. ${cylinder}[\u00B0]`]);
+}
+
 export function getMissingCoreChannels(rows: TranslatedLogRow[]): string[] {
   const hasAnyValue = (key: keyof TranslatedLogRow) =>
     rows.some((row) => row[key] !== null && row[key] !== undefined);

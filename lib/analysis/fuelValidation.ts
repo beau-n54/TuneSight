@@ -14,7 +14,7 @@ export function validateFuelAgainstTune(
 )
 : FuelValidationResult {
   if (context.platform !== "n54" || typeof context.ethanolContent !== "number" || !Number.isFinite(context.ethanolContent) || context.ethanolContent < 0 || context.ethanolContent > 100) {
-    return { status: "unavailable", detectedFuel: "unavailable", message: "Fuel classification requires measured ethanol content and qualified N54 context." };
+    return { status: "unavailable", detectedFuel: "unavailable", message: "Fuel classification requires measured ethanol content and an applicable platform fuel-classification rule. Measured fuel-system channels remain available independently." };
   }
   const ethanolContent = context.ethanolContent;
 

@@ -11,9 +11,19 @@ import {
   resolveGraphSeries,
   resolveRegionCoordinates,
   TELEMETRY_CHANNELS,
+  TIMING_CHANNELS,
   TELEMETRY_PANEL_CLASS_NAME,
   TELEMETRY_SECTION_CLASS_NAME,
 } from "./telemetryGraphPresentation.ts";
+
+for (const count of [4, 6, 8]) test(`${count} supplied cylinder series render without invented extra cylinders`, () => {
+  const telemetry = Object.fromEntries(Array.from({length: count}, (_, i) => [`timing_correction_cyl_${i + 1}`, [0, null, -i]]));
+  const series = resolveGraphSeries(telemetry, TIMING_CHANNELS);
+  assert.equal(series.length, count);
+  assert.deepEqual(series.map(s => s.id), Object.keys(telemetry));
+  assert(series.every(s => s.unit === "\u00B0" && typeof s.color === "string"));
+  assert.deepEqual(series.at(-1)!.values, [0, null, -(count - 1)]);
+});
 
 test("qualified elapsed seconds preserve irregular acquisition times and null gaps", () => {
   const series = resolveGraphSeries({boost: [1, null, 3]}, [TELEMETRY_CHANNELS.boostActual]);
