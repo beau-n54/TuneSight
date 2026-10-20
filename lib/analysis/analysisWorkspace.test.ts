@@ -36,7 +36,7 @@ function load(file: string): unknown {
   file = path.resolve(file);
   if (cache.has(file)) return cache.get(file)!.exports;
   const mod = {exports: {} as unknown}; cache.set(file, mod);
-  const compiled = ts.transpileModule(fs.readFileSync(file, "utf8"), {compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true}}).outputText;
+  const compiled = ts.transpileModule(fs.readFileSync(file, "utf8"), {fileName: file, compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true}}).outputText;
   new Function("require", "module", "exports", compiled)((id: string) => {
     if (id === "server-only") return {};
     if (id === "next/link") return function TestLink({prefetch, ...props}: {prefetch?: boolean}) {void prefetch; return React.createElement("a", props);};
@@ -44,6 +44,7 @@ function load(file: string): unknown {
     if (id.endsWith("subscriberAccess.server")) return {requireSubscriberPage: async () => {if (!authorised) throw Error("signed-out");}};
     if (id === "@/lib/supabase/server") return {createClient: async () => ({auth: {getUser: async () => ({data: {user: {id: "owner"}}})}, from: query})};
     if (id.endsWith("analysisSource.server")) return {readAnalysisSource: async (log: {id: string}) => {reads.push(log.id); return selectedSource;}};
+    if (id.endsWith("analysisCalibrationContext.server")) return {readAnalysisCalibration: async (log: {id: string}) => ({state: "unavailable", reason: `Controlled expired Calibration context for ${log.id}.`})};
     const local = id.startsWith("@/") ? path.resolve(id.slice(2)) : id.startsWith(".") ? path.resolve(path.dirname(file), id) : null;
     if (local) {
       const target = [local, local + ".ts", local + ".tsx", path.join(local, "index.ts")].find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile());
@@ -61,7 +62,7 @@ const source = (): AnalysisSource => ({state: "available", digest: "synthetic-sh
 function recover(engineCode = "N54b30", value = source()) {
   return recoverAnalysisWorkspace({log: logs[0], owner: "owner", vehicle: {vehicleId: "vehicle", engineCode}, source: value});
 }
-async function render(engineCode = "N54b30", log = "first", reprocess?: string) {
+async function render(engineCode = "N54b30", log = "first", reprocess?: string): Promise<string> {
   declaration = engineCode; reads.length = 0;
   return renderToStaticMarkup(await Page({params: Promise.resolve({id: "vehicle"}), searchParams: Promise.resolve({log, reprocess})}));
 }
@@ -105,7 +106,7 @@ test("explicit unit aliases restore safe measured channels but do not qualify un
 for (const engineCode of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) test(`${engineCode}: actual page renders full established workspace, compact history and source actions`, async () => {
   selectedSource = source();
   const html = await render(engineCode);
-  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Engineering Inspection Panels", "Engineering Evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log"]) assert(html.includes(title), title);
+  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Engineering Inspection Panels", "Engineering Evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log", "Related XDF", "Related Calibration Tables", "Cross-Reference Details", "Detected Events", "Root Cause and candidate ranking", "Alternatives and rejected explanations", "Inspection directions", "Event notes", "Cylinder Timing Observation", "Source and data quality", "Missing-channel warnings", "Unit and header warnings", "Measurement-limit observations", "Factual target-versus-actual observations"]) assert(html.includes(title), title);
   assert.match(html, /bmw-border/); assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:flex-row/);
   assert.match(html, /name="log"/); assert.match(html, /value="first" selected/);
   assert.doesNotMatch(html, /max-h-64/);
@@ -124,6 +125,27 @@ test("missing source leaves the full dashboard and exact recovery action accessi
   selectedSource = {state: "missing", measurements: null, digest: null, finding: "The original object for this exact log is missing."};
   const html = await render("N54b30");
   assert.match(html, /Engineering Summary/); assert.match(html, /Recover only the original file for log first/);
+  for (const heading of ["Detected Events", "Cross-Reference Details", "Related XDF unavailable", "Cylinder Timing Observation", "Intelligent Warnings"]) assert(html.includes(heading));
+});
+test("three platforms share the ordered section contract at desktop and stacked breakpoints", async () => {
+  selectedSource = source();
+  const sections: string[][] = [];
+  for (const platform of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) {
+    const html = await render(platform);
+    sections.push(Array.from(html.matchAll(/data-analysis-section="([^"]+)"/g), m => m[1]));
+    assert.match(html, /grid gap-4 md:grid-cols-2/);
+    assert.doesNotMatch(html, /(?:hidden|display:none)[^>]*data-analysis-section/);
+    assert.match(html, /min-w-0 space-y-2/);
+    if (platform !== "N54b30") assert.match(html, /N54 thresholds and causal conclusions are not applied/);
+  }
+  assert(sections[0].length >= 17);
+  assert.deepEqual(sections[0], sections[1]); assert.deepEqual(sections[1], sections[2]);
+});
+test("selected log updates the Calibration evidence path and unavailable reason", async () => {
+  selectedSource = source();
+  const html = await render("B58 Gen 1", "second", "1");
+  assert.match(html, /selected owned log second/); assert.match(html, /Controlled expired Calibration context for second/);
+  assert.doesNotMatch(html, /Controlled expired Calibration context for first/);
 });
 test("authentication fails before any source read", async () => {
   authorised = false;

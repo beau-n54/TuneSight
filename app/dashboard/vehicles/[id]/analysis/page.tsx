@@ -2,6 +2,10 @@ import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import Link from "next/link";
 import SourceMeasurements from "./SourceMeasurements";
+import { SourceWarningSections, FactualInvestigation, CalibrationEvidenceSections } from "./EvidenceSections";
+import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSections";
+import { resolveAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext";
+import { readAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext.server";
 import { recoverAnalysisWorkspace } from "@/lib/analysis/analysisWorkspace";
 import { selectMeasurementSource } from "@/lib/analysis/analysisSource";
 import { selectAnalysisEvidence, type OwnedLog, type OwnedResult } from "@/lib/analysis/analysisCapabilities";
@@ -233,6 +237,10 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   const latestLog = selection.result ? selection.log : measurementSelection?.log ?? selection.log;
   const source = measurementSelection?.source ?? (latestLog ? await readAnalysisSource(latestLog, user.id, vehicle.id) : null);
   const recovered = recoverAnalysisWorkspace({log: latestLog, owner: user.id, vehicle: vehicleContext, source});
+  const factualEvidence = analysisEvidenceSections(source);
+  const calibrationEvidence = resolveAnalysisCalibration(
+    await readAnalysisCalibration(latestLog, user.id, vehicle.id), latestLog, user.id, vehicle.id,
+    factualEvidence.ranges.map(range => range.channel));
   const diagnosticsAvailable = (Boolean(selection.result) && query.reprocess !== "1") || recovered.diagnostics;
   const sourcePanel = <SourceMeasurements vehicleId={vehicle.id} vehicle={vehicleContext} logs={ownedLogs} selected={latestLog} source={source}
     diagnostics={diagnosticsAvailable} historyUnavailable={historyUnavailable} priorResultId={selection.result?.id ?? latestLog?.authoritative_log_summary_id ?? null}/>;
@@ -681,9 +689,10 @@ const groupedDiagnosticEvents =
             scopedPrimaryResults.length > 0 ? (
               <PrimaryEngineeringResults results={scopedPrimaryResults} />
             ) : (
-              <WorkspaceReservedPanel title="No primary results available">
-                Primary engineering results will appear here when the existing
-                analysis produces scoped results for this record.
+              <WorkspaceReservedPanel title="Primary result availability">
+                {diagnosticsAvailable
+                  ? "No scoped primary conclusions were returned for the qualified inputs."
+                  : "Platform-specific primary conclusions are unavailable under the current source/platform rule contract. Factual measurements, quality warnings and independently qualified Calibration relationships remain available below."}
               </WorkspaceReservedPanel>
             )
           }
@@ -698,25 +707,10 @@ const groupedDiagnosticEvents =
             <EngineeringCorrelationSurface result={correlationResult} />
           }
           investigation={
-            <WorkspaceReservedPanel title="Investigation workspace">
-              Detailed investigation surfaces remain below and retain their
-              existing engineering ownership. Shared focus synchronisation is
-              reserved for a later authorised slice.
-            </WorkspaceReservedPanel>
+            <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length}/>
           }
           calibrationContext={
-            <div className="space-y-4">
-              <WorkspaceReservedPanel title="Universal XDF">
-                Exact Definition bindings are not supplied by this log-processing
-                contract. No table address, value or calibration instruction is inferred
-                from a logger header or the latest unrelated tune.
-              </WorkspaceReservedPanel>
-              <WorkspaceReservedPanel title="Calibration Cross Reference">
-                {diagnosticsAvailable
-                  ? "Qualified event inspection directions and supported relationships appear in Cross-Reference Details below. Related XDF/Calibration tables require exact supplied Definition evidence."
-                  : "Platform-specific inspection directions remain unavailable under the current rule contract. Source measurements and Engineering Evidence remain accessible."}
-              </WorkspaceReservedPanel>
-            </div>
+            <CalibrationEvidenceSections resolution={calibrationEvidence} logId={latestLog?.id ?? null} vehicleId={id}/>
           }
         />
 
@@ -1041,7 +1035,7 @@ const groupedDiagnosticEvents =
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Intelligent Warnings</h2>
             <StatusBadge
-              label={diagnosticsAvailable ? intelligentWarningsSummary.state.toUpperCase() : "UNAVAILABLE"}
+              label={diagnosticsAvailable ? intelligentWarningsSummary.state.toUpperCase() : factualEvidence.ranges.length ? "FACTUAL EVIDENCE" : "UNAVAILABLE"}
               tone={
                 !diagnosticsAvailable ? "info" : intelligentWarningsSummary.state === "warning"
                   ? "bad"
@@ -1051,6 +1045,8 @@ const groupedDiagnosticEvents =
               }
             />
           </div>
+
+          <SourceWarningSections facts={factualEvidence} diagnostics={diagnosticsAvailable}/>
 
           {!latestLog && (
             <p className="text-zinc-400">
@@ -1064,7 +1060,7 @@ const groupedDiagnosticEvents =
             </p>
           )}
 
-         {latestLog && latestSummary && (
+         {(
   <>
     {diagnosticsAvailable ? <IntelligentWarningsSummaryCard summary={intelligentWarningsSummary}/> : <p>{recovered.finding}</p>}
     <div className="space-y-3">
@@ -1280,7 +1276,7 @@ const groupedDiagnosticEvents =
   </>
 )}
 
-        {engineV2 && (
+        {(
           <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">Cross-Reference Details</h2>
@@ -1342,7 +1338,7 @@ const groupedDiagnosticEvents =
               </div>
             ) : (
               <p className="text-zinc-400">
-                No cross-reference details were returned by the engine for this log.
+                {diagnosticsAvailable ? "No diagnostic cross-reference records were returned for the qualified available inputs." : "Diagnostic cross-reference records are unavailable under the current source/platform rule contract. Factual system observations and exact Calibration evidence are evaluated independently above."}
               </p>
             )}
           </div>
