@@ -11,6 +11,7 @@ test("production calibration routes explicitly trace every controlled runtime Ev
   const includes = nextConfig.outputFileTracingIncludes;
   assert.deepEqual(includes?.["/dashboard/vehicles/*/calibration"], ["./BMW-XDFs-master/**/*.xdf", "./BMW-XDFs-master/N54/**/*.bin"]);
   assert.deepEqual(includes?.["/api/calibration-workshop/upload"], includes?.["/dashboard/vehicles/*/calibration"]);
+  assert.deepEqual(includes?.["/dashboard/vehicles/*/analysis"], includes?.["/dashboard/vehicles/*/calibration"]);
   const root = path.resolve(process.cwd(), "BMW-XDFs-master", "N54");
   for (const file of required) { const stat = fs.statSync(path.join(root, file)); assert.ok(stat.isFile() && stat.size > 0, `${file} must be a non-empty repository-controlled runtime resource`); }
   const page = fs.readFileSync(path.resolve("app/dashboard/vehicles/[id]/calibration/page.tsx"), "utf8"), upload = fs.readFileSync(path.resolve("app/api/calibration-workshop/upload/route.ts"), "utf8");

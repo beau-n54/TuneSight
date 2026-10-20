@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { parseSourceMeasurements } from "./analysisCapabilities.ts";
 import type { AnalysisSource } from "./analysisSource.ts";
 import type { recoverAnalysisWorkspace as Recover } from "./analysisWorkspace";
+import type {AnalysisCalibrationContext} from "./analysisCalibrationContext";
 
 // Execute the real TS/TSX tree with only auth, database and source I/O replaced.
 // The query boundary exposes reads only: an accidental write is a test failure.
@@ -13,6 +14,7 @@ const require = createRequire(import.meta.url);
 const ts = require("typescript"), React = require("react"), {renderToStaticMarkup} = require("react-dom/server");
 const cache = new Map<string, {exports: unknown}>();
 let authorised = true, declaration = "N54b30", selectedSource: AnalysisSource, historicalN54 = false;
+let admittedContext: AnalysisCalibrationContext | null = null;
 const logs = ["first", "second"].map((id, index) => ({id, user_id: "owner", vehicle_id: "vehicle", created_at: `2026-01-0${index + 1}`, log_name: id, authoritative_log_summary_id: null}));
 const reads: string[] = [];
 function query(table: string) {
@@ -44,7 +46,7 @@ function load(file: string): unknown {
     if (id.endsWith("subscriberAccess.server")) return {requireSubscriberPage: async () => {if (!authorised) throw Error("signed-out");}};
     if (id === "@/lib/supabase/server") return {createClient: async () => ({auth: {getUser: async () => ({data: {user: {id: "owner"}}})}, from: query})};
     if (id.endsWith("analysisSource.server")) return {readAnalysisSource: async (log: {id: string}) => {reads.push(log.id); return selectedSource;}};
-    if (id.endsWith("analysisCalibrationContext.server")) return {readAnalysisCalibration: async (log: {id: string}) => ({state: "unavailable", reason: `Controlled expired Calibration context for ${log.id}.`})};
+    if (id.endsWith("analysisCalibrationContext.server")) return {readAnalysisCalibration: async (log: {id: string}) => admittedContext ?? ({state: "unavailable", reason: `Controlled expired Calibration context for ${log.id}.`})};
     const local = id.startsWith("@/") ? path.resolve(id.slice(2)) : id.startsWith(".") ? path.resolve(path.dirname(file), id) : null;
     if (local) {
       const target = [local, local + ".ts", local + ".tsx", path.join(local, "index.ts")].find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile());
@@ -159,4 +161,25 @@ test("historical N54 records cannot supply diagnostic trends to a B58 page", asy
     assert.match(html, /N54 rules were not applied/);
     assert.doesNotMatch(html, /historical-comparison|Repeated Correction|Pressure Declining/);
   } finally { historicalN54 = false; }
+});
+
+for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 Gen 1", "00003076501103", 7864320], ["B58 Gen 2", "00005D553C8C05", 8388608]] as const) test(`${platform}: response-only exact Definitions render in all three Calibration sections`, async () => {
+  selectedSource = source();
+  admittedContext = {state: "available", owner: "owner", vehicle: "vehicle", sessionId: null, sourceId: "owned-tune", resolutionPath: "Fresh response-only admission", result: {
+    status: "workshop_ready", identity: software, digest: "synthetic-digest", byteLength: bytes, container: "bin",
+    material: {reference: null, comparison: null, current: {sourceRole: "user_modified", provenance: ["Synthetic fixture"], contractVersion: "tunesight.qualified-calibration-dataset.v1", datasetId: "dataset", datasetRevision: "dataset-revision", definitionSetRevisionId: "set", sourceArtifactDigest: "artifact",
+      exactBinaryIdentity: {softwareIdentity: software, digest: "synthetic-digest", byteLength: bytes, romFamily: "Synthetic"},
+      definitions: [{definitionRevisionId: "exact-revision", title: "Exact admitted synthetic table", state: "qualified_engineering_value", sourceArtifactDigest: "artifact"}]}},
+    workshop: {source: {currentDatasetId: "dataset", currentDatasetRevision: "dataset-revision", definitionSetRevision: "set"}, definitions: [{key: "key", definitionRevision: "exact-revision", occurrence: 0, availability: "current_available", semantic: {outcome: "exact", telemetryRelationships: [{value: {channelId: "boost", meaning: "Controlled inspection relationship"}, assertionId: "assertion", assertionRevision: "1", provenance: ["Synthetic"], limitations: ["No diagnostic authority"]}]}}]},
+  }} as unknown as AnalysisCalibrationContext;
+  try {
+    const html = await render(platform);
+    assert.match(html, /Fresh response-only admission/);
+    assert.match(html, /evidence-supported inspection relationships available/);
+    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 2);
+    assert.match(html, /exact-revision; occurrence 0/);
+    assert.doesNotMatch(html, /href="null|calibration\?session=/);
+    assert.match(html, /no available, unambiguous Definition occurrence/);
+    if (platform !== "N54b30") assert.match(html, /N54 thresholds and causal conclusions are not applied/);
+  } finally { admittedContext = null; }
 });

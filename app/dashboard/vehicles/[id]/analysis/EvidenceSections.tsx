@@ -56,6 +56,7 @@ export function CalibrationEvidenceSections({resolution, logId, vehicleId}: {res
     <Section title="Universal XDF">
       <p>Vehicle {vehicleId}; selected owned log {logId ?? "unavailable"}. Definition-source identity is separate from observed DME/ROM identity.</p>
       {identity && <dl className="mt-2 space-y-1">
+        <dt>Read-only resolution path / durable source record</dt><dd>{resolution.resolutionPath} {resolution.sourceId}</dd>
         <dt>Exact source software / Definition-source family</dt><dd>{identity.software} / {identity.family ?? "unestablished"}</dd>
         <dt>Source container / engineering bytes</dt><dd>{identity.container} / {identity.bytes.toLocaleString("en")}</dd>
         <dt>Engineering source SHA-256</dt><dd className="break-all">{identity.digest}</dd>
@@ -64,12 +65,13 @@ export function CalibrationEvidenceSections({resolution, logId, vehicleId}: {res
       </dl>}
     </Section>
     <Section title="Calibration Cross Reference">
-      <p>Evidence path: owned selected log → owned vehicle → exact Calibration source → admitted Dataset → exact Definition occurrence → qualified telemetry relationship.</p>
-      <p>{resolution.reason ?? `${resolution.relationships.length} exact relationships available. These do not establish a platform-specific diagnosis or editing authority.`}</p>
+      <p>Evidence path: owned selected log → owned vehicle → exact Calibration source → admitted Dataset → exact Definition occurrence → individually graded relationship.</p>
+      <p>{resolution.reason ?? `${resolution.relationships.length} evidence-supported inspection relationships available. Their grades distinguish qualified telemetry bindings, system membership and source-described suggestions. These do not establish a platform-specific diagnosis or editing authority.`}</p>
+      <Items items={resolution.withheld} empty="Every present channel has an inspection relationship; this does not imply diagnostic qualification."/>
     </Section>
     <Section title="Related XDF">
       {resolution.relationships.length ? <ul className="space-y-3">{resolution.relationships.map((r, i) => <li key={`${r.key}:${i}`}>
-        <Link className="text-sky-300 underline" href={`${resolution.href}&definition=${encodeURIComponent(r.key)}`}>{r.title}</Link>
+        {resolution.href ? <Link className="text-sky-300 underline" href={`${resolution.href}&definition=${encodeURIComponent(r.key)}`}>{r.title}</Link> : <strong>{r.title}</strong>}
         <p>{r.grade}: {r.channel} → {r.meaning}</p>
         <p className="break-all">Occurrence {r.occurrence}; {r.revision}; assertion {r.assertion}</p>
         <Items items={r.provenance} empty="No additional provenance text."/>
@@ -77,7 +79,7 @@ export function CalibrationEvidenceSections({resolution, logId, vehicleId}: {res
       </li>)}</ul> : <p>Related XDF unavailable: {resolution.reason}</p>}
     </Section>
     <Section title="Related Calibration Tables">
-      {resolution.relationships.length ? <p>The exact inspectable occurrences above are the related tables. Suggested investigation targets and diagnostic conclusions are not interchangeable with these bindings.</p>
+      {resolution.relationships.length ? <ul className="space-y-2">{Array.from(new Map(resolution.relationships.map(r => [r.key, r])).values()).map(r => <li key={r.key}><strong>{r.title}</strong><p className="break-all">{r.revision}; occurrence {r.occurrence}. {resolution.href ? "Inspectable in the current Calibration session." : "Exact admitted Definition evidence is displayed above in this response. No persistent Calibration session or editing access was created."}</p></li>)}</ul>
         : <p>Unavailable: {resolution.reason} No table name, address or relationship is guessed.</p>}
     </Section>
   </div>;

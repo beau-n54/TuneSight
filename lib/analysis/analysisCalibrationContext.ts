@@ -1,15 +1,18 @@
 import type { OwnedLog } from "./analysisCapabilities";
 import type { SubscriberCalibrationSuccess } from "../calibration-workshop/subscriberCalibrationProvider";
 import { resolveVehicleOwnedCalibrationEvidence } from "../calibration-workshop/vehicleOwnedCalibrationEvidence.ts";
+import { definitionInspectionRelationships } from "./analysisDefinitionRelationships.ts";
 
-export type AnalysisCalibrationContext =
-  | {state: "available"; owner: string; vehicle: string; sessionId: string; result: SubscriberCalibrationSuccess}
-  | {state: "unavailable"; reason: string};
+export type CalibrationSourceLocator = Readonly<{digest: string; byteLength: number; software: string}>;
+export type AnalysisCalibrationContext = (
+  | {state: "available"; owner: string; vehicle: string; sessionId: string | null; result: SubscriberCalibrationSuccess}
+  | {state: "unavailable"; reason: string}
+) & {locator?: CalibrationSourceLocator; resolutionPath?: string; sourceId?: string};
 type Relationship = {title: string; occurrence: number; revision: string; key: string; channel: string; meaning: string; assertion: string; grade: string; provenance: readonly string[]; limitations: readonly string[]};
 
 /** Exact session scope and occurrence resolution; never infer a binding from a title. */
 export function resolveAnalysisCalibration(context: AnalysisCalibrationContext, log: OwnedLog | null, owner: string, vehicle: string, channels: readonly string[]) {
-  const unavailable = (reason: string) => ({reason, identity: null, relationships: [] as Relationship[], href: null});
+  const unavailable = (reason: string) => ({reason, identity: null, relationships: [] as Relationship[], withheld: channels.map(channel => `${channel}: ${reason}`), href: null, resolutionPath: null, sourceId: null});
   try {
   if (!log || log.user_id !== owner || log.vehicle_id !== vehicle) return unavailable("An owned selected log for this vehicle is required.");
   if (context.state !== "available") return unavailable(context.reason);
@@ -43,20 +46,21 @@ export function resolveAnalysisCalibration(context: AnalysisCalibrationContext, 
     if (keys.get(item.key) !== 1) continue;
     if (!["qualified_engineering_value", "identity_conversion"].includes(definition.state)) continue;
     if ("availability" in item ? item.availability !== "current_available" : !item.available) continue;
-    if (item.semantic.outcome !== "exact") continue;
-    for (const field of item.semantic.telemetryRelationships) {
-      if (!channels.includes(field.value.channelId)) continue;
+    for (const relationship of definitionInspectionRelationships(definition, item.semantic, channels)) {
       relationships.push({title: definition.title ?? "Unnamed exact Definition", occurrence, revision: definition.definitionRevisionId, key: item.key,
-        channel: field.value.channelId, meaning: field.value.meaning, assertion: `${field.assertionId}@${field.assertionRevision}`, grade: "Exact Definition telemetry relationship",
-        provenance: field.provenance, limitations: field.limitations});
+        ...relationship});
     }
   }
   return {
-    reason: relationships.length ? null : "The exact Dataset is available, but no unambiguous admitted Definition occurrence has a qualified telemetry relationship to the selected source channels.",
+    reason: relationships.length ? null : "The exact Dataset is available, but no unambiguous admitted Definition occurrence has a qualified telemetry relationship, qualified system membership or explicit source-described inspection relationship to the selected channels.",
     identity: {software: r.identity, family: d.exactBinaryIdentity.romFamily, bytes: r.byteLength, container: r.container,
       digest: r.digest, dataset: d.datasetRevision, definitionSet: d.definitionSetRevisionId, artifact: d.sourceArtifactDigest},
     relationships,
-    href: `/dashboard/vehicles/${encodeURIComponent(vehicle)}/calibration?session=${encodeURIComponent(context.sessionId)}`,
+    withheld: channels.filter(channel => !relationships.some(r => r.channel === channel)).map(channel =>
+      `${channel}: no available, unambiguous Definition occurrence in this exact Dataset has a qualified telemetry binding, qualified system relationship or admitted source-description assertion for this channel. No table-name match or diagnostic conclusion is inferred.`),
+    resolutionPath: context.resolutionPath ?? "Current admitted session (read-only)",
+    sourceId: context.sourceId ?? null,
+    href: context.sessionId ? `/dashboard/vehicles/${encodeURIComponent(vehicle)}/calibration?session=${encodeURIComponent(context.sessionId)}` : null,
   };
   } catch {
     return unavailable("The admitted Calibration context has incomplete or invalid Dataset/Definition evidence.");
