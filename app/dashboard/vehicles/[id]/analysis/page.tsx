@@ -6,7 +6,7 @@ import { SourceWarningSections, FactualInvestigation, CalibrationEvidenceSection
 import { sourceInvestigation } from "@/lib/analysis/sourceInvestigation";
 import {sourceEvidenceScoring} from "@/lib/analysis/sourceEvidenceScoring";
 import {sourceInspectionCrossReferences} from "@/lib/analysis/sourceInspectionCrossReferences";
-import {SourceInspectionDetails} from "./SourceInspectionDetails";
+import {SourceInspectionDetails, EvidenceDisclosure} from "./SourceInspectionDetails";
 import { readAnalysisTuneEvidence } from "@/lib/analysis/analysisTuneEvidence.server";
 import { TuneEvidenceContext } from "./TuneEvidenceContext";
 import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSections";
@@ -2764,7 +2764,7 @@ function CrossReferenceCard({
           </div>
 
           {(rootCause.confidenceBreakdown?.length ?? 0) > 0 && (
-            <DisclosureSection title="Evidence and Selection Logic">
+            <EvidenceDisclosure title="Evidence and Selection Logic">
               <p className="text-xs font-medium text-zinc-300">
                 Why TuneSight selected this cause
               </p>
@@ -2783,7 +2783,7 @@ function CrossReferenceCard({
                     className="flex items-center justify-between text-xs"
                   >
                     <span className="text-zinc-400">{factor.factor}</span>
-                    <span className="text-zinc-200">
+                    <span className={factor.contribution > 0 ? "font-semibold tabular-nums text-emerald-300" : factor.contribution < 0 ? "font-semibold tabular-nums text-amber-300" : "tabular-nums text-zinc-400"}>
                       {factor.contribution > 0 ? `+${factor.contribution}` : "0"}
                     </span>
                   </div>
@@ -2792,15 +2792,15 @@ function CrossReferenceCard({
 
               <div className="mt-2 flex items-center justify-between border-t border-zinc-800 pt-2 text-xs">
                 <span className="text-zinc-400">Final Confidence</span>
-                <span className="font-medium text-zinc-100">
+                <span className="rounded-md border border-sky-700/60 bg-sky-950/60 px-2 py-1 font-semibold tabular-nums text-cyan-200">
                   {rootCause.confidence}%
                 </span>
               </div>
-            </DisclosureSection>
+            </EvidenceDisclosure>
 )}
 
 {(rootCause.candidateCauses?.length ?? 0) > 0 && (
-  <DisclosureSection title="Diagnostic Ranking">
+  <EvidenceDisclosure title="Diagnostic Ranking">
     <div className="mt-2 space-y-2">
       {(rootCause.candidateCauses ?? []).map(
         (candidate, candidateIndex) => (
@@ -2810,11 +2810,11 @@ function CrossReferenceCard({
           >
       <div className="flex items-center justify-between">
         <span className="text-zinc-400">
-          #{candidateIndex + 1} {candidate.cause}
+          <span className="mr-2 inline-flex rounded-md border border-blue-700/70 bg-blue-950 px-2 py-1 font-semibold text-blue-200">#{candidateIndex + 1}</span>{" "}{candidate.cause}
         </span>
 
         <div className="text-right">
-      <div className="text-zinc-200">
+      <div className="rounded-md border border-sky-700/60 bg-sky-950/60 px-2 py-1 font-semibold tabular-nums text-cyan-200">
         {candidate.score} pts
       </div>
 
@@ -2842,7 +2842,7 @@ function CrossReferenceCard({
               <span
                 className={
                   factor.contribution < 0
-                    ? "text-red-300"
+                    ? "text-amber-300"
                     : "text-emerald-300"
                 }
               >
@@ -2858,11 +2858,11 @@ function CrossReferenceCard({
         )
       )}
     </div>
-  </DisclosureSection>
+  </EvidenceDisclosure>
 )}
 
           {(rootCause.evidence?.length ?? 0) > 0 && (
-            <DisclosureSection title="Supplied Evidence">
+            <EvidenceDisclosure title="Supplied Evidence">
               <div className="mt-1 space-y-1">
                 {(rootCause.evidence ?? []).map(
                   (e, evidenceIndex) => (
@@ -2875,11 +2875,11 @@ function CrossReferenceCard({
                   )
                 )}
               </div>
-            </DisclosureSection>
+            </EvidenceDisclosure>
           )}
 
           {(rootCause.rejectedCauses?.length ?? 0) > 0 && (
-            <DisclosureSection title="Rejected and Alternative Causes">
+            <EvidenceDisclosure title="Rejected and Alternative Causes">
               <div className="mt-1 space-y-1">
                 {(rootCause.rejectedCauses ?? []).map(
                   (rejected, rejectedIndex) => (
@@ -2907,7 +2907,7 @@ function CrossReferenceCard({
                   )
                 )}
               </div>
-            </DisclosureSection>
+            </EvidenceDisclosure>
           )}
           {false && (rootCause.relatedTables?.length ?? 0) > 0 && (
             <div className="mt-3">
@@ -2944,7 +2944,7 @@ function CrossReferenceCard({
 )}
 
       {eventSpecificNotes.length > 0 && (
-        <DisclosureSection title="Event Context and Notes">
+        <EvidenceDisclosure title="Event Context and Notes">
           <div className="mt-2 space-y-1">
             {eventSpecificNotes.map((note, index) => (
               <p key={index} className="text-sm text-zinc-300">
@@ -2952,7 +2952,7 @@ function CrossReferenceCard({
               </p>
             ))}
           </div>
-        </DisclosureSection>
+        </EvidenceDisclosure>
       )}
 
          {false && (
@@ -3011,7 +3011,7 @@ function CalibrationInspectionRecords({
   records: readonly CalibrationInspectionRecord[];
 }) {
   return (
-    <DisclosureSection title="Related Calibration Tables">
+    <EvidenceDisclosure title="Related Calibration Tables">
       <div className="space-y-4">
         {records.map((record, index) => (
           <article
@@ -3112,10 +3112,7 @@ function CalibrationInspectionRecords({
                   : "Unavailable"}
               </p>
               {record.measuredValues.length > 0 && (
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-xs text-zinc-400">
-                    Relevant measured event values
-                  </summary>
+                <EvidenceDisclosure title="Relevant measured event values">
                   <dl className="mt-2 grid gap-1 font-mono text-[11px] text-zinc-500 sm:grid-cols-2">
                     {record.measuredValues.map((measurement) => (
                       <div key={measurement.label}>
@@ -3126,7 +3123,7 @@ function CalibrationInspectionRecords({
                       </div>
                     ))}
                   </dl>
-                </details>
+                </EvidenceDisclosure>
               )}
             </div>
 
@@ -3153,7 +3150,7 @@ function CalibrationInspectionRecords({
           </article>
         ))}
       </div>
-    </DisclosureSection>
+    </EvidenceDisclosure>
   );
 }
 
