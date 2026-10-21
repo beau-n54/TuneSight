@@ -1,9 +1,10 @@
+import { relationshipPresentation } from "./relationshipPresentation";
 import type {SourceInspectionCrossReferences} from "@/lib/analysis/sourceInspectionCrossReferences";
 import type {ReactNode} from "react";
 
 // Native disclosure semantics retain keyboard operation and expanded state
 // without client state, extra requests or a misleading static aria-expanded.
-export function EvidenceDisclosure({title, children, open = false}: {title: string; children: ReactNode; open?: boolean}) {
+export function EvidenceDisclosure({title, children, open = false}: {title: ReactNode; children: ReactNode; open?: boolean}) {
   return <details open={open} className="group/evidence mt-4 overflow-hidden rounded-xl border border-blue-700/60 bg-blue-950/20 shadow-sm open:border-sky-500/70 open:bg-blue-950/30">
     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 bg-blue-950/70 px-4 py-3 text-sm font-semibold text-blue-100 transition-colors hover:bg-blue-900/70 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-sky-300 group-open/evidence:bg-blue-900/60 [&::-webkit-details-marker]:hidden">
       <span>{title}</span>
@@ -39,17 +40,17 @@ export function SourceInspectionDetails({model}: {model: SourceInspectionCrossRe
     {model.tables.map(t => <article key={t.revision} className="bmw-border min-w-0 rounded-2xl bg-gradient-to-br from-slate-900 to-zinc-950 p-3 shadow-lg shadow-black/15 sm:p-5" data-inspection-table={t.revision}>
       <h4 className="break-words text-base font-semibold text-sky-100">{t.title}</h4>
       {!t.families.length && <div className="mt-2 text-sm"><p>Observed telemetry inspection only: no qualifying source-derived event relationship. No event score contribution.</p>
-        {[...new Set(t.relationships.map(r=>r.grade))].map(grade=><p key={grade} className="text-sky-300">{grade}</p>)}
-        <EvidenceDisclosure title="Exact telemetry relationship and limitations"><p className="break-all">Definition revision: {t.revision}</p>
-          {t.relationships.map((r,i)=><div key={`${r.key}:${i}`}><p>{r.channel}: {r.meaning} {r.assertion}</p><p className="break-all">{r.key}; occurrence {r.occurrence}</p><p>{r.provenance.join("; ")}</p><p>{r.limitations.join(" ")}</p></div>)}
+        {[...new Set(t.relationships.map(r=>relationshipPresentation(r).label))].map(label=><p key={label} className="text-sky-300">{label}</p>)}
+        <EvidenceDisclosure title="Advanced technical evidence"><p className="break-all">Definition revision: {t.revision}</p>
+          {t.relationships.map((r,i)=><div key={`${r.key}:${i}`}><p>{r.grade}: {r.channel}: {r.meaning} {r.assertion}</p><p className="break-all">{r.key}; occurrence {r.occurrence}</p><p>{r.provenance.join("; ")}</p><p>{r.limitations.join(" ")}</p></div>)}
         </EvidenceDisclosure></div>}
       {t.families.map(link => {
         const family = model.families.find(f => f.kind === link.kind)!;
         return <div key={link.kind} className="mt-4 space-y-2 rounded-xl border border-slate-700/70 bg-black/20 p-3 text-sm sm:p-4">
           <p className="font-medium">{family.title}: {family.events.length} interval(s), {family.score.toFixed(2)} evidence points. Relationship adds 0 points.</p>
-          {[...new Set(link.relationships.map(r => r.grade))].map(grade => <p key={grade} className="text-sky-300">{grade}</p>)}
-          {[...new Set(link.relationships.map(r => `${r.channel}: ${r.meaning} ${r.assertion}`))].map(reason => <p key={reason}>{reason}</p>)}
-          <EvidenceDisclosure title="Exact relationship evidence, rows and limits">
+          {[...new Set(link.relationships.map(r => relationshipPresentation(r).label))].map(label => <p key={label} className="text-sky-300">{label}</p>)}
+          <EvidenceDisclosure title="Advanced technical evidence">
+            {[...new Set(link.relationships.map(r => `${r.grade}: ${r.channel}: ${r.meaning} ${r.assertion}`))].map(reason => <p key={reason}>{reason}</p>)}
             <p className="break-all">Definition revision: {t.revision}</p>
             <p>Source intervals (rows are one-based): {family.events.map(e => `${e.startRow + 1}–${e.endRow + 1}${e.startSeconds !== null && e.endSeconds !== null ? ` (${e.startSeconds.toFixed(3)}–${e.endSeconds.toFixed(3)} s)` : " (time unqualified)"}`).join("; ")}</p>
             {link.relationships.map((r, i) => <div key={`${r.key}:${r.channel}:${i}`} className="mt-2 break-words"><p>Occurrence {r.occurrence}; exact key: {r.key}</p><p>{r.provenance.join("; ")}</p><p>{r.limitations.join(" ")}</p></div>)}

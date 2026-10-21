@@ -15,7 +15,9 @@ const ts = require("typescript"), React = require("react"), {renderToStaticMarku
 const file = "app/dashboard/vehicles/[id]/analysis/SourceInspectionDetails.tsx";
 const compiled = ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const mod = {exports:{}};
-new Function("require","module","exports",compiled)(require,mod,mod.exports);
+const helper = {exports:{}};
+new Function("require","module","exports",ts.transpileModule(fs.readFileSync("app/dashboard/vehicles/[id]/analysis/relationshipPresentation.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(require,helper,helper.exports);
+new Function("require","module","exports",compiled)((id: string) => id === "./relationshipPresentation" ? helper.exports : require(id),mod,mod.exports);
 const {EvidencePoints,EvidenceDisclosure,SourceInspectionDetails} = mod.exports as {
   EvidencePoints:(props:{points:number})=>ReactNode;
   EvidenceDisclosure:(props:{title:string;children:ReactNode;open?:boolean})=>ReactNode;

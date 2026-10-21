@@ -110,7 +110,7 @@ test("explicit unit aliases restore safe measured channels but do not qualify un
 for (const engineCode of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) test(`${engineCode}: actual page renders full established workspace, compact history and source actions`, async () => {
   selectedSource = source();
   const html = await render(engineCode);
-  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Engineering Inspection Panels", "Engineering Evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log", "Related XDF", "Related Calibration Tables", "Cross-Reference Details", "Detected Events", "Root Cause and candidate ranking", "Alternatives and rejected explanations", "Inspection directions", "Event notes", "Cylinder Timing Observation", "Source and data quality", "Missing-channel warnings", "Unit and header warnings", "Measurement-limit observations", "Factual target-versus-actual observations"]) assert(html.includes(title), title);
+  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Engineering Inspection Panels", "Engineering Evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log", "Related XDF", "Related Calibration Tables", "Cross-Reference Details", "Detected Events", "Evidence-supported investigation candidates", "Alternatives and rejected explanations", "Inspection directions", "Event notes", "Cylinder Timing Observation", "Source and data quality", "Missing or unusable channels", "Measured operating ranges", "Factual target-versus-actual observations"]) assert(html.includes(title), title);
   assert.match(html, /bmw-border/); assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:flex-row/);
   assert.match(html, /name="log"/); assert.match(html, /value="first" selected/);
   assert.doesNotMatch(html, /max-h-64/);
@@ -137,12 +137,12 @@ test("three platforms share the ordered section contract at desktop and stacked 
   for (const platform of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) {
     const html = await render(platform);
     sections.push(Array.from(html.matchAll(/data-analysis-section="([^"]+)"/g), m => m[1]));
-    assert.match(html, /grid gap-4 md:grid-cols-2/);
+    assert.match(html, /grid items-start gap-4 md:grid-cols-2/);
     assert.doesNotMatch(html, /(?:hidden|display:none)[^>]*data-analysis-section/);
-    assert.match(html, /min-w-0 space-y-2/);
+    assert.match(html, /min-w-0 space-y-3/);
     if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);
   }
-  assert(sections[0].length >= 17);
+  assert(sections[0].length >= 15);
   assert.deepEqual(sections[0], sections[1]); assert.deepEqual(sections[1], sections[2]);
 });
 test("selected log updates the Calibration evidence path and unavailable reason", async () => {
@@ -178,15 +178,16 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     const html = await render(platform);
     assert.match(html, /Fresh response-only admission/);
     assert.match(html, /evidence-supported inspection relationships available/);
-    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 4);
+    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 2);
+    assert.equal((html.match(/data-primary-table=/g) ?? []).length, 1);
     assert.equal((html.match(/data-inspection-table="exact-revision"/g) ?? []).length, 1);
     assert.match(html, /1 maps/);
     assert.match(html, /Source-derived Evidence Score \/ Investigation Priority/);
     assert.match(html, /Points, reductions and source intervals/);
     assert.match(html, /Relationship adds 0 points/);
     assert.match(html, /Platform-qualified diagnostic cross-references/);
-    assert.match(html, /Qualified Definition inspection relationships \(independent of active modified bytes\)/);
-    assert.match(html, /exact-revision; occurrence 0/);
+    assert.match(html, /Direct table relationship/);
+    assert.match(html, /Occurrence 0; exact-revision/);
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
     assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
     if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);

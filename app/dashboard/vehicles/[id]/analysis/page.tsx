@@ -765,7 +765,7 @@ const groupedDiagnosticEvents =
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Tune Profile V1</h2>
+            <h2 className="text-xl font-semibold text-sky-100">Tune Profile V1</h2>
             <StatusBadge
               label={
                 tuneProfile?.parsing_status
@@ -794,7 +794,8 @@ const groupedDiagnosticEvents =
 
           {latestTune && tuneProfile && (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
+              <p className="mb-4 max-w-3xl text-sm leading-6 text-zinc-300">File-profile interpretation is separate from owner-provided metadata and freshly detected binary evidence. Neither a platform candidate nor an intent label proves the active tune or its settings.</p>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <InfoCard
                   title="File-profile platform candidate"
                   value={
@@ -848,6 +849,7 @@ const groupedDiagnosticEvents =
                 />
               </div>
 
+              {typeof tuneProfile.confidence === "number" && <div className="mt-4 rounded-xl border border-blue-800/60 bg-blue-950/20 p-4"><label className="block text-sm text-blue-100" htmlFor="profile-confidence">Recorded profile confidence — {Math.round(tuneProfile.confidence * 100)}%</label><progress id="profile-confidence" className="mt-2 h-2 w-full accent-sky-500" max={1} value={tuneProfile.confidence}/><p className="mt-2 text-xs text-zinc-400">Existing profile confidence; not diagnostic confidence or active-tune verification.</p></div>}
               {tuneProfile.categories && tuneProfile.categories.length > 0 && (
                 <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
                   <p className="text-sm font-medium text-zinc-200">Categories</p>
@@ -860,8 +862,8 @@ const groupedDiagnosticEvents =
               )}
 
               {tuneProfile.notes && tuneProfile.notes.length > 0 && (
-                <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                  <p className="text-sm font-medium text-zinc-200">Notes</p>
+                <EvidenceDisclosure title="Profile evidence and notes">
+                  <p className="text-sm font-medium text-zinc-200">Recorded metadata, binary scanning notes and interpretation limits</p>
                   <div className="mt-2 space-y-1">
                     {tuneProfile.notes.map((note, index) => (
                       <p key={index} className="text-sm leading-relaxed text-zinc-300">
@@ -869,7 +871,7 @@ const groupedDiagnosticEvents =
                       </p>
                     ))}
                   </div>
-                </div>
+                </EvidenceDisclosure>
               )}
             </>
           )}
