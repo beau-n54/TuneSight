@@ -178,7 +178,13 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     const html = await render(platform);
     assert.match(html, /Fresh response-only admission/);
     assert.match(html, /evidence-supported inspection relationships available/);
-    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 3);
+    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 4);
+    assert.equal((html.match(/data-inspection-table="exact-revision"/g) ?? []).length, 1);
+    assert.match(html, /1 maps/);
+    assert.match(html, /Source-derived Evidence Score \/ Investigation Priority/);
+    assert.match(html, /Points, reductions and source intervals/);
+    assert.match(html, /Relationship adds 0 points/);
+    assert.match(html, /Platform-qualified diagnostic cross-references/);
     assert.match(html, /Qualified Definition inspection relationships \(independent of active modified bytes\)/);
     assert.match(html, /exact-revision; occurrence 0/);
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
@@ -193,6 +199,9 @@ for (const platform of [...masterFamilies, "N20", "N55", "S55", "N13", "future B
   const html = await render(platform);
   for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Detected Events", "Tune-Aware Reasoning", "Calibration Cross Reference", "Related XDF", "Related Calibration Tables", "Supplied evidence, alternatives and selection limits", "Withheld conclusion", "Source-derived engineering results", "Event observations and individual blockers"]) assert(html.includes(title), title);
   assert.match(html, /Largest same-row difference/);
+  assert.match(html, /Source-derived Evidence Score \/ Investigation Priority/);
+  assert.match(html, /No qualified Calibration-table relationship is available for this event/);
+  assert.match(html, /Diagnostic confidence is retained separately/);
   assert.match(html, /Measured rail-pressure decline.*additional evidence needed/);
   assert.match(html, /representative|representative selection|One representative/);
   assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:grid-cols-2/); assert.match(html, /bmw-border/);

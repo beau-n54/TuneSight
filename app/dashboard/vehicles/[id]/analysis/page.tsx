@@ -4,6 +4,9 @@ import Link from "next/link";
 import SourceMeasurements from "./SourceMeasurements";
 import { SourceWarningSections, FactualInvestigation, CalibrationEvidenceSections } from "./EvidenceSections";
 import { sourceInvestigation } from "@/lib/analysis/sourceInvestigation";
+import {sourceEvidenceScoring} from "@/lib/analysis/sourceEvidenceScoring";
+import {sourceInspectionCrossReferences} from "@/lib/analysis/sourceInspectionCrossReferences";
+import {SourceInspectionDetails} from "./SourceInspectionDetails";
 import { readAnalysisTuneEvidence } from "@/lib/analysis/analysisTuneEvidence.server";
 import { TuneEvidenceContext } from "./TuneEvidenceContext";
 import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSections";
@@ -246,6 +249,8 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   const investigation = sourceInvestigation(source);
   const calibrationEvidence = resolveAnalysisCalibration(
     await readAnalysisCalibration(latestLog, user.id, vehicle.id), latestLog, user.id, vehicle.id,
+    factualEvidence.ranges.map(range => range.channel));
+  const sourceCrossReferences = sourceInspectionCrossReferences(sourceEvidenceScoring(source, investigation), calibrationEvidence,
     factualEvidence.ranges.map(range => range.channel));
   const diagnosticsAvailable = (Boolean(selection.result) && query.reprocess !== "1") || recovered.diagnostics;
   const sourcePanel = <SourceMeasurements vehicleId={vehicle.id} vehicle={vehicleContext} logs={ownedLogs} selected={latestLog} source={source}
@@ -1276,11 +1281,13 @@ const groupedDiagnosticEvents =
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">Cross-Reference Details</h2>
               <StatusBadge
-                label={`${engineCrossReferences.length} maps`}
-                tone={engineCrossReferences.length > 0 ? "info" : "warn"}
+                label={`${sourceCrossReferences.mapCount} maps`}
+                tone={sourceCrossReferences.mapCount > 0 ? "info" : "warn"}
               />
             </div>
 
+            <SourceInspectionDetails model={sourceCrossReferences}/>
+            <h3 className="mb-3 mt-6 text-lg font-semibold">Platform-qualified diagnostic cross-references — {engineCrossReferences.length} records</h3>
             {engineCrossReferences.length > 0 ? (
               <div className="space-y-4">
                 {repeatedUnresolvedEventGroups.map((group) => (
