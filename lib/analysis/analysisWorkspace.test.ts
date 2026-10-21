@@ -178,7 +178,8 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     const html = await render(platform);
     assert.match(html, /Fresh response-only admission/);
     assert.match(html, /evidence-supported inspection relationships available/);
-    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 2);
+    assert.equal((html.match(/Exact admitted synthetic table/g) ?? []).length, 3);
+    assert.match(html, /Qualified Definition inspection relationships \(independent of active modified bytes\)/);
     assert.match(html, /exact-revision; occurrence 0/);
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
     assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
@@ -198,6 +199,10 @@ for (const platform of [...masterFamilies, "N20", "N55", "S55", "N13", "future B
   if (platform !== "N54") assert.doesNotMatch(html, /N54|n54/);
   if (!platform.toLowerCase().startsWith("b58")) assert.doesNotMatch(html, /B58|b58/);
   assert.doesNotMatch(html, /undefined|NaN/);
+  for (const title of ["Pull and operating windows", "source-derived event notes", "Tune evidence and declared operating context", "Declare operating tune context for this page only"]) assert(html.includes(title), title);
+  assert.doesNotMatch(html, /Unavailable: source measurements alone|Unavailable: no qualified causal assessment|No qualified diagnostic event notes are available/);
+  assert.match(html, /measured high-demand acceleration window/);
+  if (platform !== "N54") assert.match(html, /source-acceleration-0/);
 });
 
 for (const platform of [...masterFamilies, "N20"]) test(`${platform}: Calibration Context keeps logged RPM, IAT and HPFP available without table authority`, async () => {

@@ -4,6 +4,7 @@ import type { AnalysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSe
 import type { AnalysisCalibrationResolution } from "@/lib/analysis/analysisCalibrationContext";
 import type { AnalysisSource } from "@/lib/analysis/analysisSource";
 import { analysisChannelStatus } from "@/lib/analysis/analysisChannelStatus";
+import type { SourceInvestigation } from "@/lib/analysis/sourceInvestigation";
 
 function Section({title, children}: {title: string; children: ReactNode}) {
   return <section className="min-w-0 space-y-2" data-analysis-section={title}>
@@ -34,19 +35,52 @@ export function SourceWarningSections({facts, diagnostics}: {facts: AnalysisEvid
   </div>;
 }
 
-export function FactualInvestigation({facts, diagnostics, references}: {facts: AnalysisEvidenceSections; diagnostics: boolean; references: number}) {
+export function FactualInvestigation({facts, diagnostics, references, investigation}: {facts: AnalysisEvidenceSections; diagnostics: boolean; references: number; investigation: SourceInvestigation}) {
   return <div className="space-y-4">
+    <Section title="Pull and operating windows">
+      <p>{investigation.operatingRegion}</p>
+      <p>{investigation.windowBlocker ?? (investigation.pullState === "observed" ? `${investigation.windows.filter(w => w.loadedAcceleration).length} measured high-demand acceleration window(s).` : "No qualifying high-demand acceleration window was captured. Source observations remain available in the recorded operating region.")}</p>
+      <details><summary>Window criteria and exact source intervals</summary><p>{investigation.windowCriteria}</p>
+        <ul>{investigation.windows.map(w => <li key={w.startRow}>Rows {w.startRow + 1}–{w.endRow + 1}; {number(w.startSeconds)}–{number(w.endSeconds)} s; {w.rpmStart}–{w.rpmEnd} rpm. {w.loadedAcceleration ? "Acceleration selection criteria met." : "Demand interval only; duration or net acceleration criteria not met."}</li>)}</ul>
+      </details>
+    </Section>
     <Section title="Factual observations"><Items items={facts.systems.map(s => `${s.channels.join(", ")} → ${s.system}. Factual channel-to-system association only; not a Definition binding or diagnosis.`)} empty="No qualified channel-to-system observations available."/></Section>
     <Section title="Root Cause and candidate ranking">{diagnostics && references
       ? `${references} qualified event cross-reference records are expanded in Cross-Reference Details below, with their existing candidate ranking and evidence.`
-      : "Unavailable: source measurements alone do not establish a qualified causal ranking."}</Section>
+      : "Root cause is not established. Measured inspection candidates below remain available without a platform-specific fault contract or active modified BIN."}
+      <p>{investigation.ranking}</p>
+      {investigation.observations.checks.filter(c => c.events.length).map(check => <details key={check.id}>
+        <summary>{check.title} — {check.events.length} evidence-supported inspection candidates</summary>
+        <ol className="list-decimal space-y-2 pl-5">{investigation.candidates.filter(c => c.event.kind === check.id).slice(0, 50).map(c => <li key={c.event.id}>
+          <p>#{c.rankWithinCheck} within this check: {c.note} Rows {c.event.startRow + 1}–{c.event.endRow + 1}.</p>
+          <p>Coincident observations: {c.relatedKinds.join("; ") || "none established"}. Coincidence does not identify a cause.</p>
+          {c.contextCandidate && <details><summary>Evidence-supported context candidate: {c.contextCandidate.label}</summary><p>{c.contextCandidate.conclusion}</p><Items items={c.contextCandidate.evidence} empty="No transition evidence."/></details>}
+        </li>)}</ol>
+        {check.events.length > 50 && <p>First 50 ranked candidates displayed; all {check.events.length} intervals remain included in the count. Inspect the original source for the complete sequence.</p>}
+      </details>)}
+      {!investigation.candidates.length && <p>No event candidate established by the available source checks; individual channel blockers remain listed below.</p>}
+    </Section>
     <Section title="Alternatives and rejected explanations">{diagnostics && references
       ? "Event-specific alternatives and rejected candidates remain in the qualified cross-reference records below."
-      : "Unavailable: no qualified causal assessment exists from which to accept or reject an explanation."}</Section>
+      : "Alternatives remain open unless independent evidence distinguishes them. A source-derived observation is not a component diagnosis."}
+      {investigation.observations.primary.map(event => <details key={event.id}><summary>{event.title}: alternatives and unsupported claims</summary>
+        <Items items={event.alternatives.map(a => `${a}: open; not excluded by these observations.`)} empty="No alternative established."/>
+        <p>Unsupported claim withheld: {event.withheld}</p>
+      </details>)}
+    </Section>
     <Section title="Inspection directions">{facts.ranges.length
       ? "Inspect the original source rows and channel gaps alongside the graphs. Exact Calibration inspection requires the admitted Definition relationship shown in Related XDF; a measured range is not an instruction to change a table."
-      : "Recover access to the selected original source before investigating its measurements."}</Section>
-    <Section title="Event notes">{diagnostics ? "Qualified event notes remain attached to their event records below." : "No qualified diagnostic event notes are available. Factual observations do not imply event severity."}</Section>
+      : "Recover access to the selected original source before investigating its measurements."}
+      <Items items={investigation.observations.primary.map(e => `${e.title}: ${e.inspection}`)} empty="No additional event-specific inspection direction."/>
+    </Section>
+    <Section title="Event notes">{diagnostics && <p>Qualified diagnostic event notes remain attached to their event records below.</p>}
+      <p>{investigation.candidates.length} source-derived event notes, independent of diagnostic qualification. No fault severity is implied.</p>
+      <details><summary>Exact event notes and channel blockers</summary>
+        <Items items={investigation.candidates.slice(0, 200).map(c => `${c.event.title}; rows ${c.event.startRow + 1}–${c.event.endRow + 1}: ${c.note}`)} empty="No matching event observed."/>
+        {investigation.candidates.length > 200 && <p>First 200 notes displayed; counts include all source intervals.</p>}
+        <Items items={investigation.observations.checks.filter(c => c.state === "unavailable").map(c => `${c.title}: ${c.reason}`)} empty="All source checks have their required inputs."/>
+      </details>
+    </Section>
     <Section title="Cylinder Timing Observation"><Items items={facts.timing.map(r => `${r.channel}: ${number(r.minimum)} to ${number(r.maximum)} ${r.unit}; ${r.count} observations, ${r.missing} gaps. Measured correction only, not a knock diagnosis.`)} empty="Unavailable: no unambiguous cylinder timing-correction channel with qualified units. Damaged or missing headers are not inferred."/></Section>
     <Section title="Channel and unit blockers"><Items items={facts.blockers} empty="No additional source-contract blockers reported."/></Section>
   </div>;
@@ -77,6 +111,11 @@ export function CalibrationEvidenceSections({resolution, source, diagnosticChann
       <Section title="Observed Telemetry">
         <ul className="space-y-2">{observed.map(c => <li key={c.key} data-telemetry-channel={c.key} data-telemetry-state="available">
           <strong>{c.key}</strong>: {c.telemetryMessage} <p>{c.bindingMessage}</p>
+          {resolution.relationships.some(r => r.channel === c.key) && <div className="mt-1 text-sm">
+            <p>Qualified Definition inspection relationships (independent of active modified bytes):</p>
+            <ul>{resolution.relationships.filter(r => r.channel === c.key).map(r => <li key={`${r.key}:${r.assertion}`}>{r.title} — {r.grade}.</li>)}</ul>
+            <p>Active-tune table values are not established by an inspection relationship.</p>
+          </div>}
           <details><summary className="cursor-pointer text-sky-300">Channel evidence and independent states</summary>
             <p>Raw channel: {c.raw}; translator alias: {c.alias}; headers: {c.headers.join(", ") || "qualified normalised source"}.</p>
             <p>System association: {c.system ?? "not established"}.</p>

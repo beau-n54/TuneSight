@@ -3,6 +3,9 @@ import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import Link from "next/link";
 import SourceMeasurements from "./SourceMeasurements";
 import { SourceWarningSections, FactualInvestigation, CalibrationEvidenceSections } from "./EvidenceSections";
+import { sourceInvestigation } from "@/lib/analysis/sourceInvestigation";
+import { readAnalysisTuneEvidence } from "@/lib/analysis/analysisTuneEvidence.server";
+import { TuneEvidenceContext } from "./TuneEvidenceContext";
 import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSections";
 import { resolveAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext";
 import { readAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext.server";
@@ -240,6 +243,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   const recovered = recoverAnalysisWorkspace({log: latestLog, owner: user.id, vehicle: vehicleContext, source});
   const factualEvidence = analysisEvidenceSections(source);
   const observations = sourceObservationEvents(source);
+  const investigation = sourceInvestigation(source);
   const calibrationEvidence = resolveAnalysisCalibration(
     await readAnalysisCalibration(latestLog, user.id, vehicle.id), latestLog, user.id, vehicle.id,
     factualEvidence.ranges.map(range => range.channel));
@@ -257,6 +261,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
     .maybeSingle();
 
   let latestTuneProfile: TuneProfileRow | null = null;
+  const tuneByteEvidence = await readAnalysisTuneEvidence(user.id, vehicle.id, latestTune?.id ?? null);
 
   if (latestTune?.id) {
     const { data } = await supabase
@@ -376,6 +381,14 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   );
 
   const engineV2 = getEngineV2(latestSummary);
+  const displayPullWindows = diagnosticsAvailable ? engineV2?.pullWindows ?? [] : investigation.windows.filter(w => w.loadedAcceleration).map(w => ({
+    id: `source-acceleration-${w.startRow}`, startIndex: w.startRow, endIndex: w.endRow,
+    rpmStart: w.rpmStart, rpmEnd: w.rpmEnd, durationSec: w.endSeconds - w.startSeconds,
+    issues: [investigation.windowCriteria],
+  }));
+  const displayEvents = diagnosticsAvailable ? engineV2?.events ?? [] : observations.events.map(e => ({
+    id: e.id, type: e.title, startIndex: e.startRow, endIndex: e.endRow, supportingChannels: e.channels,
+  }));
   const fallbackFlags: AnalysisFlag[] = [{title: "Analysis availability", message: recovered.finding, tone: "info"}];
 
 const legacyPipelineWarnings: EngineWarning[] =
@@ -662,7 +675,7 @@ const groupedDiagnosticEvents =
                 label={
                   engineV2?.quickVerdict?.pullQuality
                     ? `Pull: ${engineV2.quickVerdict.pullQuality}`
-                    : "Pull: unknown"
+                    : investigation.pullState === "observed" ? "Acceleration window observed" : investigation.pullState === "blocked" ? "Pull: inputs unqualified" : "No qualifying pull"
                 }
                 tone={
                   engineV2?.quickVerdict?.pullQuality === "strong"
@@ -677,6 +690,7 @@ const groupedDiagnosticEvents =
         </div>
 
         {sourcePanel}
+        <TuneEvidenceContext bytes={tuneByteEvidence}/>
         <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>
         <EngineeringWorkspaceShell
           summary={
@@ -695,8 +709,8 @@ const groupedDiagnosticEvents =
           }
           telemetry={
             <TelemetryGraphV1
-              events={engineV2?.events ?? []}
-              pullWindows={engineV2?.pullWindows ?? []}
+              events={displayEvents}
+              pullWindows={displayPullWindows}
               telemetry={latestSummary === recovered.summaryRow ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
             />
           }
@@ -704,7 +718,7 @@ const groupedDiagnosticEvents =
             <EngineeringCorrelationSurface result={correlationResult} />
           }
           investigation={
-            <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length}/>
+            <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length} investigation={investigation}/>
           }
           calibrationContext={
             <CalibrationEvidenceSections resolution={calibrationEvidence} source={source}
