@@ -17,7 +17,9 @@ const compiled = ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOption
 const mod = {exports:{}};
 const helper = {exports:{}};
 new Function("require","module","exports",ts.transpileModule(fs.readFileSync("app/dashboard/vehicles/[id]/analysis/relationshipPresentation.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(require,helper,helper.exports);
-new Function("require","module","exports",compiled)((id: string) => id === "./relationshipPresentation" ? helper.exports : require(id),mod,mod.exports);
+const copy = {exports:{}};
+new Function("require","module","exports",ts.transpileModule(fs.readFileSync("app/dashboard/vehicles/[id]/analysis/CopyEvidence.tsx","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText)(require,copy,copy.exports);
+new Function("require","module","exports",compiled)((id: string) => id === "./relationshipPresentation" ? helper.exports : id === "./CopyEvidence" ? copy.exports : require(id),mod,mod.exports);
 const {EvidencePoints,EvidenceDisclosure,SourceInspectionDetails} = mod.exports as {
   EvidencePoints:(props:{points:number})=>ReactNode;
   EvidenceDisclosure:(props:{title:string;children:ReactNode;open?:boolean})=>ReactNode;
@@ -53,7 +55,7 @@ for(const platform of ["N54","B58","Supra"])test(`${platform}: shared cards reta
   assert.match(html,/Suggested inspection target — admitted source description/);
   assert.match(html,/data-evidence-total="true" class="[^"]*text-cyan-200/);
   assert.match(html,/data-evidence-rank="true" class="[^"]*text-blue-200/);
-  for(const s of scores){assert(html.includes(`${s.score.toFixed(2)} / 95 points`)); assert(html.includes(`#${s.rank}`));}
+  for(const s of scores){assert(html.includes(`${Math.round(s.score)} / 95 points (rounded)`)); assert(html.includes(`#${s.rank}`));}
   assert.match(html,/bmw-border/); assert.match(html,/flex-wrap/); assert.match(html,/min-w-0/);
   assert.doesNotMatch(html,/N54|B58|Supra/);
 });

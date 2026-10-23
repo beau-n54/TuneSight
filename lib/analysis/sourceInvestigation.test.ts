@@ -36,7 +36,7 @@ test("missing pedal is not silently replaced with throttle; missing source fails
 });
 test("gaps break windows and candidates rank only within one check", () => {
   const input = source(); input.measurements!.channels.find(c => c.key === "rpm")!.values[1] = null;
-  const result = sourceInvestigation(input); assert.equal(result.windows.length, 0);
+  const result = sourceInvestigation(input); assert.equal(result.windows.length, 2); assert(result.windows.every(w=>!w.loadedAcceleration));
   for (const kind of new Set(result.candidates.map(c => c.event.kind))) {
     const group = result.candidates.filter(c => c.event.kind === kind);
     assert.deepEqual(group.map(c => c.rankWithinCheck), group.map((_,i)=>i+1));
@@ -57,7 +57,7 @@ test("context candidates cite actual transitions without diagnosing shifts or co
   input.measurements!.channels.find(c=>c.key==="rpm")!.values[2]=2500;
   const result=sourceInvestigation(input);
   const candidate=result.candidates.find(c=>c.contextCandidate);
-  assert(candidate); assert(candidate.contextCandidate!.evidence.some(e=>e.includes("rpm decreased from 3000 to 2500")));
+  assert(candidate); assert(candidate.contextCandidate!.evidence.some(e=>e.includes("rpm:") && e.includes("significance unqualified")));
   assert.match(candidate.contextCandidate!.conclusion,/does not prove.*cause.*gear change/);
   assert(candidate.alternatives.every(a=>a.state==="open"));
 });

@@ -1,3 +1,4 @@
+import {CopyEvidence} from "./CopyEvidence";
 import { relationshipPresentation } from "./relationshipPresentation";
 import type {SourceInspectionCrossReferences} from "@/lib/analysis/sourceInspectionCrossReferences";
 import type {ReactNode} from "react";
@@ -27,10 +28,11 @@ export function SourceInspectionDetails({model}: {model: SourceInspectionCrossRe
     <p className="text-sm text-zinc-400">Zero starting prior; sum the contributions below, bounded to 0–95 points. Highest score ranks first; ties use earliest source row, then family identifier. Coincidence between different event families does not prove agreement or causation and earns no bonus.</p>
     {model.families.length === 0 && <p>No source-derived event is available to score.</p>}
     <ol className="space-y-4">{model.families.map(f => <li key={f.kind} className="min-w-0 rounded-2xl border border-slate-700/80 bg-gradient-to-br from-slate-900 to-zinc-950 p-3 shadow-lg shadow-black/15 sm:p-5">
-      <h4 className="mb-3 flex flex-wrap items-center gap-2 font-semibold sm:gap-3"><span data-evidence-rank className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-blue-700/70 bg-blue-950 px-2 text-sm text-blue-200">#{f.rank}</span>{" "}<span className="min-w-0 flex-1 basis-48 text-zinc-100">{f.title} — </span><span data-evidence-total className="inline-flex rounded-lg border border-sky-500/60 bg-sky-950/80 px-3 py-2 text-lg font-bold tabular-nums text-cyan-200 shadow-sm shadow-sky-950">{f.score.toFixed(2)} / 95 points</span></h4>
-      <p className="text-sm text-zinc-300">{f.events.length} interval(s); peak {f.peak.toFixed(2)} {f.unit}; {f.gapToLeader.toFixed(2)} points behind the leading inspection family.</p>
+      <h4 className="mb-3 flex flex-wrap items-center gap-2 font-semibold sm:gap-3"><span data-evidence-rank className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-blue-700/70 bg-blue-950 px-2 text-sm text-blue-200">#{f.rank}</span>{" "}<span className="min-w-0 flex-1 basis-48 text-zinc-100">{f.title} — </span><span data-evidence-total className="inline-flex rounded-lg border border-sky-500/60 bg-sky-950/80 px-3 py-2 text-lg font-bold tabular-nums text-cyan-200 shadow-sm shadow-sky-950">{Math.round(f.score)} / 95 points (rounded)</span></h4>
+      <p className="text-sm text-zinc-300">{f.events.length} interval(s); peak {f.peak.toFixed(2)} {f.unit}; {Math.round(f.gapToLeader)} rounded points behind the leading inspection family.</p>
       {f.unavailable && <p className="text-sm text-zinc-400">{f.unavailable}</p>}
       <EvidenceDisclosure title="Points, reductions and source intervals">
+        <p>Exact inspection score: {f.score.toFixed(2)} / 95; this precision records the heuristic arithmetic, not measurement certainty.</p><CopyEvidence text={JSON.stringify(f,null,2)}/>
         <ul className="space-y-3 text-sm">{f.factors.map(p => <li key={p.label} className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3"><strong className="mb-2 flex flex-wrap items-center gap-2"><EvidencePoints points={p.points}/><span>: {p.label}.</span></strong>{" "}<span className="text-zinc-300">{p.explanation}</span></li>)}</ul>
         <ul className="mt-3 max-h-80 overflow-y-auto text-sm">{f.events.map(e => <li key={e.id}>Source rows {e.startRow + 1}–{e.endRow + 1}; {e.startSeconds !== null && e.endSeconds !== null ? `${e.startSeconds.toFixed(3)}–${e.endSeconds.toFixed(3)} seconds` : "elapsed time unqualified"}. {e.evidence}</li>)}</ul>
       </EvidenceDisclosure>
@@ -41,7 +43,7 @@ export function SourceInspectionDetails({model}: {model: SourceInspectionCrossRe
       <h4 className="break-words text-base font-semibold text-sky-100">{t.title}</h4>
       {!t.families.length && <div className="mt-2 text-sm"><p>Observed telemetry inspection only: no qualifying source-derived event relationship. No event score contribution.</p>
         {[...new Set(t.relationships.map(r=>relationshipPresentation(r).label))].map(label=><p key={label} className="text-sky-300">{label}</p>)}
-        <EvidenceDisclosure title="Advanced technical evidence"><p className="break-all">Definition revision: {t.revision}</p>
+        <EvidenceDisclosure title="Advanced technical evidence"><p className="break-all">Definition revision: {t.revision}</p><CopyEvidence text={JSON.stringify(t,null,2)}/>
           {t.relationships.map((r,i)=><div key={`${r.key}:${i}`}><p>{r.grade}: {r.channel}: {r.meaning} {r.assertion}</p><p className="break-all">{r.key}; occurrence {r.occurrence}</p><p>{r.provenance.join("; ")}</p><p>{r.limitations.join(" ")}</p></div>)}
         </EvidenceDisclosure></div>}
       {t.families.map(link => {
@@ -51,7 +53,7 @@ export function SourceInspectionDetails({model}: {model: SourceInspectionCrossRe
           {[...new Set(link.relationships.map(r => relationshipPresentation(r).label))].map(label => <p key={label} className="text-sky-300">{label}</p>)}
           <EvidenceDisclosure title="Advanced technical evidence">
             {[...new Set(link.relationships.map(r => `${r.grade}: ${r.channel}: ${r.meaning} ${r.assertion}`))].map(reason => <p key={reason}>{reason}</p>)}
-            <p className="break-all">Definition revision: {t.revision}</p>
+            <p className="break-all">Definition revision: {t.revision}</p><CopyEvidence text={JSON.stringify(t,null,2)}/>
             <p>Source intervals (rows are one-based): {family.events.map(e => `${e.startRow + 1}–${e.endRow + 1}${e.startSeconds !== null && e.endSeconds !== null ? ` (${e.startSeconds.toFixed(3)}–${e.endSeconds.toFixed(3)} s)` : " (time unqualified)"}`).join("; ")}</p>
             {link.relationships.map((r, i) => <div key={`${r.key}:${r.channel}:${i}`} className="mt-2 break-words"><p>Occurrence {r.occurrence}; exact key: {r.key}</p><p>{r.provenance.join("; ")}</p><p>{r.limitations.join(" ")}</p></div>)}
           </EvidenceDisclosure>

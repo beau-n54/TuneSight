@@ -9,11 +9,11 @@ test("declares the permanent Engineering Workspace hierarchy once and in order",
   );
   const expectedIds = [
     "engineering-summary",
-    "primary-engineering-results",
     "engineering-telemetry",
-    "engineering-evidence",
+    "primary-engineering-results",
     "engineering-investigation",
     "calibration-context",
+    "engineering-evidence",
   ];
   const declaredIds = [
     ...source.matchAll(/\{ id: "([^"]+)", label:/g),

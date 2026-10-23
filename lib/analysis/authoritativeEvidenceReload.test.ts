@@ -269,7 +269,7 @@ test("Presentation and telemetry reload from only authoritative engine_v2", () =
   const page = analysisPageSource();
   assert.match(page, /loadEvidenceReloadWithProvenance/);
   assert.match(page, /currentAuthority\.state === "available"/);
-  assert.match(page, /<TelemetryGraphV1[\s\S]*engineV2\?\.telemetry/);
+  assert.match(page, /<TelemetryGraphV1[\s\S]*telemetry=\{source\?\.state === "available" && source\.digest \? recovered\.telemetry : engineV2\?\.telemetry \?\? recovered\.telemetry\}/);
 });
 
 test("no active current-Evidence query establishes authority by created_at", () => {

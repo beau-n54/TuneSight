@@ -229,7 +229,8 @@ export function buildGraphPoints(
   sharedSampleCount?: number,
   forceSampleSequence = false,
   sourceStartIndex = 0,
-  timestamps: readonly (number | null)[] = []
+  timestamps: readonly (number | null)[] = [],
+  timeOrigin: number = timestamps[0] ?? 0
 ): {
   points: GraphPoint[];
   usesRpm: boolean;
@@ -277,7 +278,7 @@ export function buildGraphPoints(
     const recordedRpm = rpmIsAligned ? alignedRpm[localIndex] ?? null : null;
     const point: GraphPoint = {
       index: sourceIndex,
-      x: usesRpm ? (recordedRpm as number) : usesTime ? timestamps[localIndex]! - timestamps[0]! : sourceIndex,
+      x: usesRpm ? (recordedRpm as number) : usesTime ? timestamps[localIndex]! - timeOrigin : sourceIndex,
       rpm: recordedRpm,
     };
     if (usesTime) point.elapsedSeconds = point.x;

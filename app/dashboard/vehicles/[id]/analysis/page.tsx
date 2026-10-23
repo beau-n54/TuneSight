@@ -1,3 +1,4 @@
+import { RunOverview, RunTimeline, ContextualFindings, NextChecks } from "./RunFindings";
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import { resolveAnalysisCalibration } from "@/lib/analysis/analysisCalibrationCo
 import { readAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext.server";
 import { recoverAnalysisWorkspace } from "@/lib/analysis/analysisWorkspace";
 import { sourceObservationEvents } from "@/lib/analysis/sourceObservationEvents";
-import { ObservationPrimary, ObservationChecks, ObservationWarnings } from "./SourceObservationSections";
+import { ObservationChecks, ObservationWarnings } from "./SourceObservationSections";
 import { selectMeasurementSource } from "@/lib/analysis/analysisSource";
 import { selectAnalysisEvidence, type OwnedLog, type OwnedResult } from "@/lib/analysis/analysisCapabilities";
 import { readAnalysisSource } from "@/lib/analysis/analysisSource.server";
@@ -378,22 +379,19 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
       ? "Yes"
       : latestSummary?.throttle_closure_detected === false
       ? "No"
-      : "No data";
+      : "Interpretation unavailable — see source-channel evidence";
 
-  const boostError = calculateBoostError(
-    latestSummary?.max_boost,
-    latestSummary?.max_boost_target
-  );
+
 
   const engineV2 = getEngineV2(latestSummary);
-  const displayPullWindows = diagnosticsAvailable ? engineV2?.pullWindows ?? [] : investigation.windows.filter(w => w.loadedAcceleration).map(w => ({
+  const displayPullWindows = investigation.windows.filter(w => w.loadedAcceleration).map(w => ({
     id: `source-acceleration-${w.startRow}`, startIndex: w.startRow, endIndex: w.endRow,
     rpmStart: w.rpmStart, rpmEnd: w.rpmEnd, durationSec: w.endSeconds - w.startSeconds,
     issues: [investigation.windowCriteria],
   }));
-  const displayEvents = diagnosticsAvailable ? engineV2?.events ?? [] : observations.events.map(e => ({
+  const displayEvents = [...(diagnosticsAvailable ? engineV2?.events ?? [] : []), ...observations.events.map(e => ({
     id: e.id, type: e.title, startIndex: e.startRow, endIndex: e.endRow, supportingChannels: e.channels,
-  }));
+  })), ...investigation.operatingContext.transitions.map(t=>({id:t.id,type:t.label,startIndex:t.startRow,endIndex:t.endRow,supportingChannels:["rpm","gear"]}))];
   const fallbackFlags: AnalysisFlag[] = [{title: "Analysis availability", message: recovered.finding, tone: "info"}];
 
 const legacyPipelineWarnings: EngineWarning[] =
@@ -698,33 +696,22 @@ const groupedDiagnosticEvents =
         <TuneEvidenceContext bytes={tuneByteEvidence}/>
         <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>
         <EngineeringWorkspaceShell
-          summary={
-            <EngineeringSummaryCard
-              hasLog={!!latestLog}
-              hasSummary={!!latestSummary}
-              quickVerdict={engineV2?.quickVerdict}
-              verdictFlags={renderedVerdictFlags}
-            />
-          }
-          primaryResults={
-            <div className="space-y-4">
-              {scopedPrimaryResults.length > 0 && <PrimaryEngineeringResults results={scopedPrimaryResults} />}
-              <ObservationPrimary analysis={observations}/>
-            </div>
-          }
-          telemetry={
+          summary={<RunOverview source={source} investigation={investigation} logName={latestLog?.log_name || "No owned log selected"} vehicleName={vehicle.nickname || vehicle.model || "Selected vehicle"} declarations={[vehicle.fuel_type ? `Fuel: ${vehicle.fuel_type}` : null, typeof vehicle.modifications === "string" ? `Modifications: ${vehicle.modifications}` : null].filter((s):s is string=>!!s)}/>}
+          primaryResults={<ContextualFindings investigation={investigation}/>}
+          telemetry={<> <RunTimeline investigation={investigation}/>
             <TelemetryGraphV1
               events={displayEvents}
               pullWindows={displayPullWindows}
-              telemetry={latestSummary === recovered.summaryRow ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
+              telemetry={source?.state === "available" && source.digest ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
             />
-          }
-          evidence={
-            <EngineeringCorrelationSurface result={correlationResult} />
-          }
-          investigation={
+          </>}
+          evidence={<EvidenceDisclosure title="Engineering evidence, qualified diagnostics and original investigation details">
+            <EngineeringSummaryCard hasLog={!!latestLog} hasSummary={!!latestSummary} quickVerdict={engineV2?.quickVerdict} verdictFlags={renderedVerdictFlags}/>
+            {scopedPrimaryResults.length > 0 && <PrimaryEngineeringResults results={scopedPrimaryResults}/>}
+            <EngineeringCorrelationSurface result={correlationResult}/>
             <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length} investigation={investigation}/>
-          }
+          </EvidenceDisclosure>}
+          investigation={<NextChecks investigation={investigation}/>}
           calibrationContext={
             <CalibrationEvidenceSections resolution={calibrationEvidence} source={source}
               diagnosticChannels={diagnosticsAvailable ? (engineV2?.events ?? []).filter(event => engineCrossReferences.some(r => r.eventId === event.id)).flatMap(event => event.supportingChannels ?? []) : []}
@@ -732,6 +719,7 @@ const groupedDiagnosticEvents =
           }
         />
 
+        <EvidenceDisclosure title="Advanced profile, diagnostic and scoring audit">
         <div className="grid gap-4 md:grid-cols-4">
           <InfoCard
             title="Selected Log"
@@ -794,7 +782,7 @@ const groupedDiagnosticEvents =
 
           {latestTune && tuneProfile && (
             <>
-              <p className="mb-4 max-w-3xl text-sm leading-6 text-zinc-300">File-profile interpretation is separate from owner-provided metadata and freshly detected binary evidence. Neither a platform candidate nor an intent label proves the active tune or its settings.</p>
+              <p className="mb-4 max-w-3xl text-sm leading-6 text-zinc-300">This is the latest vehicle-associated file profile, not proof of the tune active during the selected log. Profile hints are inferred from naming, metadata and scanned strings, separate from owner declarations and freshly detected binary evidence. Neither a platform candidate nor an intent label proves the active tune or its settings.</p>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <InfoCard
                   title="File-profile platform candidate"
@@ -813,16 +801,16 @@ const groupedDiagnosticEvents =
                   }
                 />
                 <InfoCard
-                  title="Confidence"
+                  title="Unverified profile hint score"
                   value={
                     typeof tuneProfile.confidence === "number"
                       ? `${Math.round(tuneProfile.confidence * 100)}%`
-                      : "No data"
+                      : "Interpretation unavailable — see source-channel evidence"
                   }
                 />
 
                 <InfoCard
-                  title="Boost Intent"
+                  title="Boost intent hint — unverified"
                   value={
                     tuneProfile.boost_intent
                       ? humanizeToken(tuneProfile.boost_intent)
@@ -830,7 +818,7 @@ const groupedDiagnosticEvents =
                   }
                 />
                 <InfoCard
-                  title="Ignition Intent"
+                  title="Ignition intent hint — unverified"
                   value={
                     tuneProfile.ignition_intent
                       ? humanizeToken(tuneProfile.ignition_intent)
@@ -838,7 +826,7 @@ const groupedDiagnosticEvents =
                   }
                 />
                 <InfoCard
-                  title="Fueling Intent"
+                  title="Fueling intent hint — unverified"
                  value={
                    effectiveTuneProfile?.fueling_intent
                      ? humanizeToken(
@@ -849,7 +837,7 @@ const groupedDiagnosticEvents =
                 />
               </div>
 
-              {typeof tuneProfile.confidence === "number" && <div className="mt-4 rounded-xl border border-blue-800/60 bg-blue-950/20 p-4"><label className="block text-sm text-blue-100" htmlFor="profile-confidence">Recorded profile confidence — {Math.round(tuneProfile.confidence * 100)}%</label><progress id="profile-confidence" className="mt-2 h-2 w-full accent-sky-500" max={1} value={tuneProfile.confidence}/><p className="mt-2 text-xs text-zinc-400">Existing profile confidence; not diagnostic confidence or active-tune verification.</p></div>}
+              {typeof tuneProfile.confidence === "number" && <div className="mt-4 rounded-xl border border-blue-800/60 bg-blue-950/20 p-4"><label className="block text-sm text-blue-100" htmlFor="profile-confidence">Metadata/string hint score — {Math.round(tuneProfile.confidence * 100)}%</label><progress id="profile-confidence" className="mt-2 h-2 w-full accent-sky-500" max={1} value={tuneProfile.confidence}/><p className="mt-2 text-xs text-zinc-400">Heuristic evidence-coverage score from naming, metadata and scanned strings (base 35%, capped at 85%); not a calibrated probability, deep XDF validation or active-tune identity.</p></div>}
               {tuneProfile.categories && tuneProfile.categories.length > 0 && (
                 <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
                   <p className="text-sm font-medium text-zinc-200">Categories</p>
@@ -955,51 +943,51 @@ const groupedDiagnosticEvents =
 
         <div className="grid gap-4 md:grid-cols-4">
           <AnalysisCard
-            title="Average Boost"
+            title="Whole-log Average Boost (psi)"
             value={formatValue(latestSummary?.avg_boost, 2)}
           />
           <AnalysisCard
-            title="Max Boost"
+            title="Whole-log Max Boost (psi)"
             value={formatValue(latestSummary?.max_boost, 1)}
           />
           <AnalysisCard
-            title="Average Boost Target"
+            title="Whole-log Average Boost Target (psi)"
             value={formatValue(latestSummary?.avg_boost_target, 1)}
           />
           <AnalysisCard
-            title="Max Boost Target"
+            title="Whole-log Max Boost Target (psi)"
             value={formatValue(latestSummary?.max_boost_target, 1)}
           />
 
           <AnalysisCard
-            title="Peak Target − Peak Boost (not time-aligned error)"
+            title="Whole-log same-row boost minus target range"
             value={
-              boostError !== null ? `${formatValue(boostError, 1)} psi` : "No data"
+              factualEvidence.targetDifference ? `${formatValue(factualEvidence.targetDifference.minimum, 2)} to ${formatValue(factualEvidence.targetDifference.maximum, 2)} psi (locations unverified)` : "Requires qualified same-row pressure channels"
             }
           />
           <AnalysisCard
-            title="Max IAT"
+            title="Whole-log Max IAT (°C)"
             value={formatValue(latestSummary?.max_iat, 0)}
           />
           <AnalysisCard
-            title="Min AFR"
+            title="Whole-log Min AFR (AFR)"
             value={formatValue(latestSummary?.min_afr, 2)}
           />
           <AnalysisCard
-            title="Max WGDC"
+            title="Whole-log Max WGDC (%)"
             value={formatValue(latestSummary?.max_wgdc, 1)}
           />
 
           <AnalysisCard
-            title="Min Rail Pressure"
+            title="Whole-log Min Rail Pressure (psi)"
             value={formatValue(latestSummary?.min_rail_pressure, 0)}
           />
           <AnalysisCard
-            title="Min LPFP"
+            title="Whole-log Min LPFP (psi)"
             value={formatValue(latestSummary?.min_lpfp, 1)}
           />
           <AnalysisCard
-            title="Ethanol Content"
+            title="Whole-log Ethanol Content (%)"
             value={formatValue(latestSummary?.ethanol_content, 0)}
           />
           <AnalysisCard
@@ -1035,7 +1023,7 @@ const groupedDiagnosticEvents =
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Intelligent Warnings</h2>
+            <h2 className="text-xl font-semibold">Data quality and qualified diagnostic notices</h2>
             <StatusBadge
               label={diagnosticsAvailable ? intelligentWarningsSummary.state.toUpperCase() : factualEvidence.ranges.length ? "FACTUAL EVIDENCE" : "UNAVAILABLE"}
               tone={
@@ -1352,6 +1340,7 @@ const groupedDiagnosticEvents =
           <GlobalTuneNotesCard notes={noteHierarchy.globalNotes} />
         )}
       </div>
+        </EvidenceDisclosure>
     </main>
   );
 }
@@ -1493,20 +1482,6 @@ function humanizeToken(value: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function calculateBoostError(
-  maxBoost: number | null | undefined,
-  maxBoostTarget: number | null | undefined
-) {
-  const boost = toNumber(maxBoost);
-  const target = toNumber(maxBoostTarget);
-
-  if (boost === null || target === null) {
-    return null;
-  }
-
-  return target - boost;
-}
-
 function toNumber(value: unknown): number | null {
   if (typeof value === "number" && !Number.isNaN(value)) {
     return value;
@@ -1533,7 +1508,7 @@ function formatValue(
   decimals = 1
 ): string {
   const num = toNumber(value);
-  if (num === null) return "No data";
+  if (num === null) return "Interpretation unavailable — see source-channel evidence";
   return num.toFixed(decimals);
 }
 
@@ -1548,7 +1523,7 @@ function InfoCard({ title, value }: { title: string; value: string }) {
 
 function AnalysisCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="bmw-border rounded-xl bg-zinc-950/80 p-4 opacity-70 shadow-lg shadow-black/20">
+    <div className="bmw-border rounded-xl bg-zinc-950/80 p-4 shadow-lg shadow-black/20">
       <p className="text-xs uppercase tracking-wide text-zinc-400">{title}</p>
       <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>

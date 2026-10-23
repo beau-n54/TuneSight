@@ -32,6 +32,11 @@ export function analysisChannelStatus(source: AnalysisSource | null, resolution:
         : count ? "Telemetry available; no qualified Calibration-table binding has been established."
         : "No qualified Calibration-table binding has been established."};
   });
-  return {channels, unassignedHeaders, sourceFinding: m ? null : source?.finding ?? "No owned source selected."};
+  const columns = (m?.headerEvidence?.headers ?? []).map(header=>{
+    const candidates=channels.filter(c=>c.headers.includes(header));
+    const qualifiedTime=m?.timestamps&&["Time","time","TIME","Time (s)"].includes(header);
+    return {header, state:qualifiedTime||candidates.some(c=>c.samples.count>0)?"available_for_analysis":candidates.some(c=>c.alias==="ambiguous")?"present_but_mapping_or_units_unverified":candidates.length?"present_but_samples_invalid_or_unusable":"present_but_mapping_or_units_unverified"};
+  });
+  return {channels, columns, unassignedHeaders, sourceFinding: m ? null : source?.finding ?? "No owned source selected."};
 }
 export type AnalysisChannelStatus = ReturnType<typeof analysisChannelStatus>;

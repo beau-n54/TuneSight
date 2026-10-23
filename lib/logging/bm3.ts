@@ -1,7 +1,9 @@
+import { CONTEXT_ALIASES, readContextChannels } from "./contextChannels.ts";
 import { getMissingCoreChannels, read, readTemperatureC, readAdditionalCylinderCorrection } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
 export const BM3_ALIASES = {
+  ...CONTEXT_ALIASES,
   boostPsi: ["Boost (psi)", "Boost Pressure (psi)", "Boost (Pre-Throttle)[psig]"],
   boostTargetPsi: ["Boost Target (psi)", "Target Boost (psi)", "Boost pressure (Target)[psig]"],
   throttlePlate: ["Throttle Angle[%]", "Throttle Position (%)"],
@@ -34,6 +36,7 @@ export function translateBm3Rows(rawRows: Record<string, unknown>[]): Translated
       boostPsi !== null && boostTargetPsi !== null ? boostTargetPsi - boostPsi : null;
 
     return {
+      ...readContextChannels(row),
       time: read(row, BM3_ALIASES.time),
       rpm: read(row, BM3_ALIASES.rpm),
       throttle: acceleratorPedal ?? throttlePlate,

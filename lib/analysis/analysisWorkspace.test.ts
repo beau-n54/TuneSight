@@ -12,6 +12,25 @@ import type {AnalysisCalibrationContext} from "./analysisCalibrationContext";
 // The query boundary exposes reads only: an accidental write is a test failure.
 const masterCensus = JSON.parse(fs.readFileSync("engineering/calibration/bmw-master-99-xdf-census.json", "utf8")) as {rows: {family: string}[]};
 const masterFamilies = [...new Set(masterCensus.rows.map(row => row.family))];
+
+test("canonical findings have unique occurrences; references and chart links preserve exact source rows", async()=>{
+  selectedSource=source();
+  const before=JSON.stringify(selectedSource),html=await render("B58 Gen 1");
+  const events=(load("lib/analysis/sourceObservationEvents.ts") as typeof import("./sourceObservationEvents")).sourceObservationEvents(selectedSource).events;
+  for(const event of events){
+    assert.equal(html.split(`data-finding-id="${event.id}"`).length-1,1);
+    assert(html.includes(`href="#analysis-interval-${event.startRow}-${event.endRow}"`));
+    assert(html.includes(`href="#occurrence-${event.id}"`));
+  }
+  assert.equal(JSON.stringify(selectedSource),before);
+  assert.match(html,/Copy exact evidence/);
+  assert.match(html,/Owner-declared context/);
+  assert.match(html,/No whole-log peak is promoted/);
+  const primaryIds=["engineering-summary","engineering-telemetry","primary-engineering-results","engineering-investigation","calibration-context","engineering-evidence"];
+  const positions=primaryIds.map(id=>html.indexOf(`id="${id}"`));
+  assert(positions.every((v,i)=>v>=0&&(!i||v>positions[i-1])));
+  assert.doesNotMatch(html,/Create Next App/);
+});
 const require = createRequire(import.meta.url);
 const ts = require("typescript"), React = require("react"), {renderToStaticMarkup} = require("react-dom/server");
 const cache = new Map<string, {exports: unknown}>();
@@ -110,7 +129,7 @@ test("explicit unit aliases restore safe measured channels but do not qualify un
 for (const engineCode of ["N54b30", "B58 Gen 1", "B58 Gen 2"]) test(`${engineCode}: actual page renders full established workspace, compact history and source actions`, async () => {
   selectedSource = source();
   const html = await render(engineCode);
-  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Engineering Inspection Panels", "Engineering Evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log", "Related XDF", "Related Calibration Tables", "Cross-Reference Details", "Detected Events", "Evidence-supported investigation candidates", "Alternatives and rejected explanations", "Inspection directions", "Event notes", "Cylinder Timing Observation", "Source and data quality", "Missing or unusable channels", "Measured operating ranges", "Factual target-versus-actual observations"]) assert(html.includes(title), title);
+  for (const title of ["Engineering Summary", "Contextual findings", "Data quality and qualified diagnostic notices", "Engineering Inspection Panels", "Advanced technical evidence", "Universal XDF", "Calibration Cross Reference", "Per-Cylinder Timing Corrections", "Tune Profile V1", "Tune-Aware Reasoning", "Download original source log", "Related XDF", "Related Calibration Tables", "Cross-Reference Details", "Detected Events", "Evidence-supported investigation candidates", "Alternatives and rejected explanations", "Inspection directions", "Event notes", "Cylinder Timing Observation", "Source and data quality", "Missing or unusable channels", "Measured operating ranges", "Factual target-versus-actual observations"]) assert(html.includes(title), title);
   assert.match(html, /bmw-border/); assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:flex-row/);
   assert.match(html, /name="log"/); assert.match(html, /value="first" selected/);
   assert.doesNotMatch(html, /max-h-64/);
@@ -129,7 +148,7 @@ test("missing source leaves the full dashboard and exact recovery action accessi
   selectedSource = {state: "missing", measurements: null, digest: null, finding: "The original object for this exact log is missing."};
   const html = await render("N54b30");
   assert.match(html, /Engineering Summary/); assert.match(html, /Recover only the original file for log first/);
-  for (const heading of ["Detected Events", "Cross-Reference Details", "Related XDF unavailable", "Cylinder Timing Observation", "Intelligent Warnings"]) assert(html.includes(heading));
+  for (const heading of ["Detected Events", "Cross-Reference Details", "Related XDF unavailable", "Cylinder Timing Observation", "Data quality and qualified diagnostic notices"]) assert(html.includes(heading));
 });
 test("three platforms share the ordered section contract at desktop and stacked breakpoints", async () => {
   selectedSource = source();
@@ -198,13 +217,13 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
 for (const platform of [...masterFamilies, "N20", "N55", "S55", "N13", "future BMW family"]) test(`${platform}: complete master-platform page contains events, reasoning and item-level blockers`, async () => {
   selectedSource = source();
   const html = await render(platform);
-  for (const title of ["Engineering Summary", "Primary Engineering Results", "Intelligent Warnings", "Detected Events", "Tune-Aware Reasoning", "Calibration Cross Reference", "Related XDF", "Related Calibration Tables", "Supplied evidence, alternatives and selection limits", "Withheld conclusion", "Source-derived engineering results", "Event observations and individual blockers"]) assert(html.includes(title), title);
+  for (const title of ["Engineering Summary", "Contextual findings", "Data quality and qualified diagnostic notices", "Detected Events", "Tune-Aware Reasoning", "Calibration Cross Reference", "Related XDF", "Related Calibration Tables", "Exact source evidence and unresolved alternatives", "No whole-log peak", "Contextual findings", "Event observations and individual blockers"]) assert(html.includes(title), title);
   assert.match(html, /Largest same-row difference/);
   assert.match(html, /Source-derived Evidence Score \/ Investigation Priority/);
   assert.match(html, /No qualified Calibration-table relationship is available for this event/);
   assert.match(html, /Diagnostic confidence is retained separately/);
   assert.match(html, /Measured rail-pressure decline.*additional evidence needed/);
-  assert.match(html, /representative|representative selection|One representative/);
+  assert.match(html, /distinct occurrence\(s\)/);
   assert.match(html, /lg:grid-cols-2/); assert.match(html, /sm:grid-cols-2/); assert.match(html, /bmw-border/);
   if (platform !== "N54") assert.doesNotMatch(html, /N54|n54/);
   if (!platform.toLowerCase().startsWith("b58")) assert.doesNotMatch(html, /B58|b58/);

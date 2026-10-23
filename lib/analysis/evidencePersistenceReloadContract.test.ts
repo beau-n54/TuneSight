@@ -498,7 +498,7 @@ test("Correlation, Explanation, Presentation and telemetry share authoritative g
   assert.match(page, /currentAuthority\.state === "available"/);
   assert.match(page, /correlateEngineeringObservations/);
   assert.match(page, /engineV2\?\.crossReferences/);
-  assert.match(page, /<TelemetryGraphV1[\s\S]*engineV2\?\.telemetry/);
+  assert.match(page, /<TelemetryGraphV1[\s\S]*telemetry=\{source\?\.state === "available" && source\.digest \? recovered\.telemetry : engineV2\?\.telemetry \?\? recovered\.telemetry\}/);
 });
 
 test("security ownership remains protected-RPC-only and server-only", () => {

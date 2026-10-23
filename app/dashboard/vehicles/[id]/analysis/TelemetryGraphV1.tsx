@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { parseAnalysisInterval, intervalMarkers } from "./analysisIntervalSelection";
 import {
   buildGraphPoints,
   getRpmSeries,
@@ -98,21 +99,35 @@ function parseFocusedChannels(
 }
 
 const CHARTS: readonly ChartDefinition[] = [
+  ...[
+    ["gear", "Recorded forward gear", "gear", "No gear is inferred from RPM; invalid codes remain gaps."],
+    ["throttle_angle", "Throttle angle", "°", "Angle is not throttle percentage or driver demand."],
+    ["manifold_pressure_reported", "Reported manifold pressure", "psi (reference unverified)", "Pressure reference is unverified; not compared with other boost locations or targets."],
+    ["manifold_gauge_pressure", "Manifold gauge pressure", "psig", "Explicit manifold gauge measurement; never substituted for pre-throttle boost."],
+    ["manifold_gauge_target", "Manifold gauge target", "psig", "Explicit manifold target; kept separate from generic boost targets."],
+    ["rail_deviation_reported", "Reported rail deviation", "MPa (sign convention unverified)", "Reported deviation is not actual pressure; command/error sign is unqualified."],
+    ["load_actual", "Reported load actual", "%", "Logger load percentage is not proof of full engine load."],
+    ["load_requested", "Reported load requested", "%", "Kept separate from measured torque and driver demand."],
+    ["clutch_torque", "Reported clutch torque", "Nm", "Logger-reported quantity; not dyno-measured wheel torque."],
+    ["mass_air_flow", "Measured air mass flow", "g/s", "Exact source observations."],
+  ].map(([id,title,unit,description])=>({id,title,description,channels:[{id,label:title,unit,aliases:[id],color:"#38bdf8"}]})),
+  {id:"ignition-actual",title:"Actual ignition timing",description:"Actual ignition angle is separate from cylinder correction; no correction is inferred.",channels:Array.from({length:8},(_,i)=>({id:`ignition_timing_cyl_${i+1}`,label:`Cylinder ${i+1} actual timing`,unit:"°",aliases:[`ignition_timing_cyl_${i+1}`],color:["#38bdf8","#f87171","#a3e635","#c084fc","#fbbf24","#2dd4bf","#fb923c","#e879f9"][i]}))},
+
   { id: "rpm", title: "Engine Speed", description: "Recorded engine speed, without interpolated observations.",
     channels: [{id: "rpm", label: "Engine Speed", unit: "RPM", aliases: ["rpm"], color: "#38bdf8"}] },
   { id: "pedal", title: "Accelerator Pedal", description: "Driver demand is separate from throttle plate position.",
-    channels: [{id: "accelerator_pedal", label: "Accelerator Pedal", unit: "%", aliases: ["accelerator_pedal"], color: "#a3e635"}], domain: [0, 100] },
+    channels: [{id: "accelerator_pedal", label: "Accelerator Pedal", unit: "%", aliases: ["accelerator_pedal"], color: "#a3e635"}], domain: ["auto", "auto"] },
   { id: "ethanol", title: "Measured Ethanol Content", description: "Measured source content; no fuel target is inferred.",
-    channels: [{id: "ethanol", label: "Ethanol Content", unit: "%", aliases: ["ethanol"], color: "#c084fc"}], domain: [0, 100] },
+    channels: [{id: "ethanol", label: "Ethanol Content", unit: "%", aliases: ["ethanol"], color: "#c084fc"}], domain: ["auto", "auto"] },
   {
     id: "boost",
     title: "Boost Control",
-    description: "Actual boost compared directly with the requested target.",
+    description: "Logged boost and target. Sensor location and pressure reference must match before interpreting tracking; a numerical difference is not a fault.",
     channels: [
       TELEMETRY_CHANNELS.boostActual,
       TELEMETRY_CHANNELS.boostTarget,
     ],
-    domain: [0, "auto"],
+    domain: ["auto", "auto"],
   },
   {
     id: "air-control",
@@ -123,21 +138,21 @@ const CHARTS: readonly ChartDefinition[] = [
       TELEMETRY_CHANNELS.wastegateDuty,
       TELEMETRY_CHANNELS.throttlePosition,
     ],
-    domain: [0, 100],
+    domain: ["auto", "auto"],
   },
   {
     id: "high-pressure-fuel",
     title: "High-Pressure Fuel",
     description: "Fuel-rail pressure throughout the recorded pull.",
     channels: [TELEMETRY_CHANNELS.highPressureFuel],
-    domain: [0, "auto"],
+    domain: ["auto", "auto"],
   },
   {
     id: "low-pressure-fuel",
     title: "Low-Pressure Fuel",
     description: "Low-pressure fuel supply throughout the recorded pull.",
     channels: [TELEMETRY_CHANNELS.lowPressureFuel],
-    domain: [0, "auto"],
+    domain: ["auto", "auto"],
   },
   {
     id: "temperature",
@@ -294,9 +309,10 @@ function EngineeringTelemetryChart({
         series,
         rpm,
         sharedSampleCount,
-        definition.id === "rpm" || regions.filter((region) => region.kind === "pull").length > 1,
+        graphView === "line" || definition.id === "rpm" || regions.filter((region) => region.kind === "pull").length > 1,
         sourceStartIndex,
-        graphView === "line" ? getSeries(telemetry, ["timestamps"]) : []
+        graphView === "line" ? getSeries(telemetry, ["timestamps"]) : [],
+        isRecord(telemetry) && typeof telemetry.sourceTimeOrigin === "number" ? telemetry.sourceTimeOrigin : undefined
       ),
     [definition.id, regions, rpm, series, sharedSampleCount, sourceStartIndex, graphView, telemetry]
   );
@@ -452,7 +468,8 @@ export default function TelemetryGraphV1({
     DEFAULT_TELEMETRY_WORKSPACE_MODE
   );
   const [selectedPullId, setSelectedPullId] = useState<string | null>(null);
-  const [graphView, setGraphView] = useState<GraphView>("terrain");
+  const [graphView, setGraphView] = useState<GraphView>("line");
+  const [selectedInterval, setSelectedInterval] = useState<TelemetryWorkspacePull | null>(null);
   const [focusedChannels, setFocusedChannels] = useState<
     Readonly<Record<string, string | null>>
   >({});
@@ -537,11 +554,30 @@ export default function TelemetryGraphV1({
     }
   }, [focusedChannels, graphView, hasRestoredWorkspaceState, mode, selectedPullId]);
 
-  const selectedPull =
+  useEffect(() => {
+    const select = () => {
+        const target = document.getElementById(window.location.hash.slice(1));
+        if (target) {
+          let ancestor = target.parentElement;
+          while (ancestor) { if (ancestor instanceof HTMLDetailsElement) ancestor.open = true; ancestor = ancestor.parentElement; }
+          if (window.location.hash.startsWith("#occurrence-") || window.location.hash.startsWith("#finding-")) target.scrollIntoView({block:"start"});
+        }
+      const interval = parseAnalysisInterval(window.location.hash, sharedSampleCount);
+      setSelectedInterval(interval);
+      if (interval) {
+        setMode("engineer"); setGraphView("line");
+        document.getElementById("engineering-telemetry")?.scrollIntoView({block:"start"});
+        // Native details keep their semantics; open ancestors for deep-linked audit references.
+      }
+    };
+    select(); window.addEventListener("hashchange", select);
+    return () => window.removeEventListener("hashchange", select);
+  }, [sharedSampleCount, telemetry]);
+  const selectedPull = selectedInterval ??
     authoritativePulls.find((pull) => pull.id === selectedPullId) ??
     authoritativePulls[0] ??
     null;
-  const isIndividualPull = mode === "individual_pull" && selectedPull !== null;
+  const isIndividualPull = (selectedInterval !== null || mode === "individual_pull") && selectedPull !== null;
   const visibleTelemetry = useMemo(
     () =>
       isIndividualPull
@@ -552,7 +588,7 @@ export default function TelemetryGraphV1({
   const visibleEvents = useMemo(
     () =>
       isIndividualPull
-        ? eventsWithinPull(events, selectedPull)
+        ? intervalMarkers(events, selectedPull)
         : events,
     [events, isIndividualPull, selectedPull]
   );
@@ -596,6 +632,7 @@ export default function TelemetryGraphV1({
       className={TELEMETRY_SECTION_CLASS_NAME}
     >
       <header className="border-b border-zinc-800 px-5 py-4">
+        {selectedInterval && <div role="status" className="mb-3 rounded-lg bg-blue-950 p-3 text-sm">Selected interval: source rows {selectedInterval.startIndex+1}–{selectedInterval.endIndex+1}. All panels share this selection; elapsed seconds retain the original log origin. <button type="button" className="ml-3 underline focus-visible:outline-2" onClick={()=>{setSelectedInterval(null);window.history.replaceState(window.history.state,"",window.location.pathname+window.location.search+"#engineering-telemetry");}}>Return to whole log</button></div>}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-400">

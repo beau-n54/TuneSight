@@ -63,14 +63,15 @@ export function sliceTelemetryToPull(
     return telemetry;
   }
 
-  return Object.fromEntries(
+  const source = telemetry as Record<string, unknown>;
+  return {...Object.fromEntries(
     Object.entries(telemetry).map(([key, value]) => [
       key,
       Array.isArray(value)
         ? value.slice(pull.startIndex, pull.endIndex + 1)
         : value,
     ])
-  );
+  ), ...(typeof source.sourceTimeOrigin === "number" || Array.isArray(source.timestamps) ? {sourceTimeOrigin: typeof source.sourceTimeOrigin === "number" ? source.sourceTimeOrigin : (source.timestamps as unknown[])[0]} : {})};
 }
 
 export function eventsWithinPull<T extends TelemetryWorkspaceEvent>(

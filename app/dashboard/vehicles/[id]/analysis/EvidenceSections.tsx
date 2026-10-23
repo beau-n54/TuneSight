@@ -57,7 +57,7 @@ export function FactualInvestigation({facts, diagnostics, references, investigat
       <p>{investigation.ranking}</p>
       {investigation.observations.checks.filter(c => c.events.length).map(check => <EvidenceDisclosure key={check.id} title={`${check.title} — ${check.events.length} evidence-supported inspection candidates`}>
         <ol className="list-decimal space-y-2 pl-5">{investigation.candidates.filter(c => c.event.kind === check.id).map(c => <li key={c.event.id}>
-          <p className="font-semibold text-sky-200">Inspection priority #{c.rankWithinCheck} within this check; {c.event.startSeconds !== null && c.event.endSeconds !== null ? `${number(c.event.startSeconds)}–${number(c.event.endSeconds)} s` : "elapsed time unqualified"}; {number(c.event.value)} {c.event.unit}.</p><p>{c.note} Rows {c.event.startRow + 1}–{c.event.endRow + 1}.</p>
+          <a className="text-sky-300 underline" href={`#occurrence-${c.event.id}`}>Canonical observation: {c.event.title}, rows {c.event.startRow+1}–{c.event.endRow+1}</a>
           <p>Coincident observations: {c.relatedKinds.join("; ") || "none established"}. Coincidence does not identify a cause.</p>
           {c.contextCandidate && <EvidenceDisclosure title={<> Evidence-supported context candidate: {c.contextCandidate.label} </>}><p>{c.contextCandidate.conclusion}</p><Items items={c.contextCandidate.evidence} empty="No transition evidence."/></EvidenceDisclosure>}
         </li>)}</ol>
@@ -68,19 +68,18 @@ export function FactualInvestigation({facts, diagnostics, references, investigat
       ? "Event-specific alternatives and rejected candidates remain in the qualified cross-reference records below."
       : "Alternatives remain open unless independent evidence distinguishes them. A source-derived observation is not a component diagnosis."}
       {investigation.observations.primary.map(event => <EvidenceDisclosure key={event.id} title={<> {event.title}: alternatives and unsupported claims </>}>
-        <Items items={event.alternatives.map(a => `${a}: open; not excluded by these observations.`)} empty="No alternative established."/>
-        <p>Unsupported claim withheld: {event.withheld}</p>
+        <a className="text-sky-300 underline" href={`#occurrence-${event.id}`}>Review unresolved alternatives and withheld conclusions with the canonical observation.</a>
       </EvidenceDisclosure>)}
     </Section>
     <Section title="Inspection directions">{facts.ranges.length
       ? "Inspect the original source rows and channel gaps alongside the graphs. Exact Calibration inspection requires the admitted Definition relationship shown in Related XDF; a measured range is not an instruction to change a table."
       : "Recover access to the selected original source before investigating its measurements."}
-      <Items items={investigation.observations.primary.map(e => `${e.title}: ${e.inspection}`)} empty="No additional event-specific inspection direction."/>
+      {investigation.observations.primary.map(e=><a key={e.id} className="block text-sky-300 underline" href={`#finding-${e.kind}`}>{e.title}: next check</a>)}
     </Section>
     <Section title="Event notes">{diagnostics && <p>Qualified diagnostic event notes remain attached to their event records below.</p>}
       <p>{investigation.candidates.length} source-derived event notes, independent of diagnostic qualification. No fault severity is implied.</p>
       <EvidenceDisclosure title={<> Exact event notes and channel blockers </>}>
-        <Items items={investigation.candidates.map(c => `${c.event.title}; rows ${c.event.startRow + 1}–${c.event.endRow + 1}: ${c.note}`)} empty="No matching event observed."/>
+        {investigation.candidates.map(c=><a key={c.event.id} className="block text-sky-300 underline" href={`#occurrence-${c.event.id}`}>{c.event.title}; rows {c.event.startRow+1}–{c.event.endRow+1}</a>)}
         <Items items={investigation.observations.checks.filter(c => c.state === "unavailable").map(c => `${c.title}: ${c.reason}`)} empty="All source checks have their required inputs."/>
       </EvidenceDisclosure>
     </Section>
@@ -106,7 +105,7 @@ export function CalibrationEvidenceSections({resolution, source, diagnosticChann
     ["Channels without exact bindings", unbound.length],
     ["Definition/XDF admission", identity ? "Exact source admitted" : "Evidence unavailable"],
   ];
-  return <div className="min-w-0 space-y-4" data-calibration-inventory="primary">
+  return <div className="bmw-border min-w-0 space-y-4 rounded-2xl bg-slate-950 p-4 sm:p-6" data-calibration-inventory="primary">
     <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">{summary.map(([label, value]) => <div key={label} className="rounded-xl border border-blue-800/60 bg-blue-950/30 p-4"><dt className="text-sm text-blue-200">{label}</dt><dd className="mt-2 text-lg font-semibold text-zinc-100">{value}</dd></div>)}</dl>
     <Section title="Universal XDF">
       <p>Calibration evidence is checked against the selected owned log. Definition-source identity is separate from observed DME/ROM identity.</p>

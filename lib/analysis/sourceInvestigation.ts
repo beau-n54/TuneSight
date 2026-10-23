@@ -1,3 +1,4 @@
+import { sourceOperatingContext, eventOperatingContext } from "./sourceOperatingContext.ts";
 import type {AnalysisSource} from "./analysisSource";
 import {sourceObservationEvents} from "./sourceObservationEvents.ts";
 
@@ -14,7 +15,7 @@ export function sourceInvestigation(source: AnalysisSource | null) {
   const windows: OperatingWindow[] = [];
   let start = -1;
   const close = (end: number) => {
-    if (start >= 0 && times && rpm && end > start) windows.push({startRow: start, endRow: end,
+    if (start >= 0 && times && rpm && end >= start) windows.push({startRow: start, endRow: end,
       startSeconds: times[start] - times[0], endSeconds: times[end] - times[0], rpmStart: rpm[start]!, rpmEnd: rpm[end]!,
       loadedAcceleration: times[end] - times[start] >= 2 && rpm[end]! > rpm[start]!});
     start = -1;
@@ -25,6 +26,7 @@ export function sourceInvestigation(source: AnalysisSource | null) {
   }
   close((m?.sampleCount ?? 0) - 1);
   const observations = sourceObservationEvents(source);
+  const operatingContext = sourceOperatingContext(source, windows);
   const candidates = observations.checks.flatMap(check => {
     if (!check.events.length) return [];
     // Compare like quantities only, never turn degrees/psi into a fault score.
@@ -45,16 +47,14 @@ export function sourceInvestigation(source: AnalysisSource | null) {
       const changes = [["rpm", "rpm"], ["accelerator_pedal", "%"], ["boost_target", "psi"]].flatMap(([key, unit]) => {
         const values = channel(key, unit);
         if (!values) return [];
-        const drops: string[] = [];
-        for (let i = Math.max(1, event.startRow); i <= event.endRow; i++) if (finite(values[i]) && finite(values[i - 1]) && values[i]! < values[i - 1]!) {
-          drops.push(`${key} decreased from ${values[i - 1]} to ${values[i]} ${unit} at source rows ${i}–${i + 1}`);
-        }
-        return drops;
+        const rows=values.slice(event.startRow,event.endRow+1).filter(finite);
+        if (!rows.length) return [];
+        return [`${key}: ${rows[0]} to ${rows.at(-1)} ${unit}; observed range ${rows.reduce((a,b)=>Math.min(a,b))}–${rows.reduce((a,b)=>Math.max(a,b))} ${unit} across source rows ${event.startRow+1}–${event.endRow+1}. Net change ${(rows.at(-1)!-rows[0]).toFixed(3)} ${unit}; significance unqualified; gaps are not interpolated.`];
       });
-      return {event, rankWithinCheck: index + 1, loadedWindows: overlapping.filter(w => w.loadedAcceleration),
+      return {event, operatingContext: eventOperatingContext(event, operatingContext), rankWithinCheck: index + 1, loadedWindows: overlapping.filter(w => w.loadedAcceleration),
         relatedKinds,
-        contextCandidate: changes.length ? {label: "Operating-demand or speed transition", evidence: changes,
-          conclusion: "Directly supported context to inspect first; it does not prove that the transition caused the event or establish a gear change."} : null,
+        contextCandidate: changes.length ? {label: "Measured operating context — significance unqualified", evidence: changes,
+          conclusion: "Measured interval context only; it does not prove a cause or gear change. Small changes are not promoted to meaningful transitions; recorded gear evidence is assessed separately."} : null,
         alternatives: event.alternatives.map(explanation => ({explanation, state: "open" as const,
           reason: "These channels do not independently distinguish this cause. Coincidence is not causation."})),
         rejectedClaims: ["A specific failed component or active map value cannot be inferred from this observation.", event.withheld],
@@ -62,7 +62,7 @@ export function sourceInvestigation(source: AnalysisSource | null) {
     });
   });
   const rpms = rpm?.filter(finite) ?? [];
-  return {windows, candidates, observations,
+  return {windows, candidates, observations, operatingContext,
     pullState: !rpm || !pedal || !times ? "blocked" as const : windows.some(w => w.loadedAcceleration) ? "observed" as const : "not_observed" as const,
     operatingRegion: rpms.length ? `${rpms.reduce((a,b)=>Math.min(a,b))}–${rpms.reduce((a,b)=>Math.max(a,b))} rpm over ${times ? (times.at(-1)! - times[0]).toFixed(3) + " seconds" : "source rows; elapsed time unqualified"}.` : "Qualified RPM observations are unavailable.",
     windowCriteria: "High-demand windows require qualified pedal ≥85%, finite RPM and increasing source time. At least two seconds and a net RPM rise qualify an acceleration window. This is a selection heuristic, not proof of road load, gear, WOT, safety or fault severity.",

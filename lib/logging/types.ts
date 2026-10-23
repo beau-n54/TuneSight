@@ -15,6 +15,7 @@ export type InternalLogChannel = {
 };
 
 export type TranslatedLogRow = {
+  [channel: string]: number | null | undefined;
   time?: number | null;
   rpm?: number | null;
   throttle?: number | null;

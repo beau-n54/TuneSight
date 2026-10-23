@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
 export const engineeringWorkspaceSections = [
-  { id: "engineering-summary", label: "Engineering Summary" },
-  { id: "primary-engineering-results", label: "Primary Engineering Results" },
-  { id: "engineering-telemetry", label: "Engineering Telemetry Workspace" },
-  { id: "engineering-evidence", label: "Engineering Evidence" },
-  { id: "engineering-investigation", label: "Engineering Investigation" },
-  { id: "calibration-context", label: "Calibration Context" },
+  { id: "engineering-summary", label: "Run overview" },
+  { id: "engineering-telemetry", label: "Run and gear timeline / telemetry" },
+  { id: "primary-engineering-results", label: "Prioritised findings" },
+  { id: "engineering-investigation", label: "Next checks and unresolved questions" },
+  { id: "calibration-context", label: "Calibration context" },
+  { id: "engineering-evidence", label: "Advanced technical evidence" },
 ] as const;
 
 type Props = {
@@ -27,7 +27,7 @@ export function EngineeringWorkspaceShell(props: Props) {
     "group-has-[#engineering-investigation:target]/workspace:bg-blue-900 group-has-[#engineering-investigation:target]/workspace:text-white",
     "group-has-[#calibration-context:target]/workspace:bg-blue-900 group-has-[#calibration-context:target]/workspace:text-white",
   ];
-  const content = [props.summary, props.primaryResults, props.telemetry, props.evidence, props.investigation, props.calibrationContext];
+  const content = [props.summary, props.telemetry, props.primaryResults, props.investigation, props.calibrationContext, props.evidence];
 
   return (
     <div aria-label="Engineering Workspace" className="group/workspace space-y-6" data-workspace-focus="shared">
@@ -35,7 +35,7 @@ export function EngineeringWorkspaceShell(props: Props) {
         <ul className="flex min-w-max gap-1">
           {engineeringWorkspaceSections.map((section, index) => (
             <li key={section.id}>
-              <a className={`${activeClasses[index]} block rounded-xl px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-zinc-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400`} href={`#${section.id}`}>
+              <a className={`${activeClasses[[0,2,1,4,5,3][index]]} block rounded-xl px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-zinc-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400`} href={`#${section.id}`}>
                 {section.label.replace("Engineering ", "")}
               </a>
             </li>

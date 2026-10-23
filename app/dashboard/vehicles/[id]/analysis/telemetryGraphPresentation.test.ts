@@ -550,13 +550,13 @@ test("Line and Terrain are independent renderers with one composition owner", ()
   assert.doesNotMatch(terrainSource, /from "recharts"/);
 });
 
-test("Terrain is the Individual Pull default and remains Individual Pull-only", () => {
+test("Elapsed line view is the default; optional Terrain remains selection-only", () => {
   const source = readFileSync(
     new URL("./TelemetryGraphV1.tsx", import.meta.url),
     "utf8"
   );
 
-  assert.match(source, /useState<GraphView>\("terrain"\)/);
+  assert.match(source, /useState<GraphView>\("line"\)/);
   assert.match(source, /\{isIndividualPull && \(\s*<div>\s*<p[^>]*>Graph View<\/p>/);
   assert.match(source, /graphView=\{isIndividualPull \? graphView : "line"\}/);
   assert.match(source, /focusedChannel \?\? series\[0\]\?\.id \?\? null/);

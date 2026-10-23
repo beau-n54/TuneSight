@@ -1,21 +1,7 @@
 import type {SourceObservationAnalysis, SourceObservationEvent} from "@/lib/analysis/sourceObservationEvents";
 
 function Evidence({event}: {event: SourceObservationEvent}) {
-  return <div className="min-w-0 space-y-2 rounded-xl border border-zinc-700 bg-black/20 p-4">
-    <p className="font-semibold">{event.title}</p>
-    <p className="text-xs text-sky-300">{event.grade}</p>
-    <p>{event.evidence}</p>
-    <p className="text-sm text-zinc-400">Source rows {event.startRow + 1}–{event.endRow + 1}
-      {event.startSeconds !== null && event.endSeconds !== null ? `; elapsed ${event.startSeconds.toFixed(2)}–${event.endSeconds.toFixed(2)} s` : "; elapsed time unavailable"}.</p>
-    <details><summary className="cursor-pointer text-sky-300">Supplied evidence, alternatives and selection limits</summary>
-      <div className="mt-2 space-y-2 text-sm">
-        <p>Channels: {event.channels.join(", ")}.</p>
-        <p>Alternatives still open: {event.alternatives.join("; ")}. The log alone does not exclude these explanations.</p>
-        <p>Withheld conclusion: {event.withheld}</p>
-        <p>Inspection: {event.inspection}</p>
-      </div>
-    </details>
-  </div>;
+  return <a className="block rounded-lg px-3 py-2 text-sky-300 underline focus-visible:outline-2" href={`#occurrence-${event.id}`}>{event.title} — rows {event.startRow+1}–{event.endRow+1}; view the canonical observation and its chart link.</a>;
 }
 export function ObservationPrimary({analysis}: {analysis: SourceObservationAnalysis}) {
   return <section className="bmw-border min-w-0 rounded-2xl bg-zinc-900 p-5" data-analysis-section="Source-derived engineering results">
@@ -40,7 +26,7 @@ export function ObservationChecks({analysis}: {analysis: SourceObservationAnalys
 export function ObservationWarnings({analysis}: {analysis: SourceObservationAnalysis}) {
   return <div className="space-y-2" data-analysis-section="Evidence-derived warnings">
     <p>Observed changes to inspect—not platform fault thresholds:</p>
-    <ul className="list-disc space-y-1 pl-5">{analysis.primary.map(event => <li key={event.id}>{event.title}: {event.evidence}</li>)}</ul>
+    <ul className="list-disc space-y-1 pl-5">{analysis.primary.map(event => <li key={event.id}><a className="text-sky-300 underline" href={`#finding-${event.kind}`}>{event.title}: inspect the canonical finding</a></li>)}</ul>
     {!analysis.primary.length && <p>No change established by the available checks; missing inputs remain explicitly unavailable.</p>}
     <p className="text-sm text-zinc-400">Sensor locations, commanded responses and applicable limits are required before attributing a cause or warning severity.</p>
   </div>;

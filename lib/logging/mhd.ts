@@ -1,7 +1,9 @@
+import { CONTEXT_ALIASES, readContextChannels } from "./contextChannels.ts";
 import { getMissingCoreChannels, read, readTemperatureC, readAdditionalCylinderCorrection } from "./helpers.ts";
 import type { TranslatedLog, TranslatedLogRow } from "./types.ts";
 
 export const MHD_ALIASES = {
+  ...CONTEXT_ALIASES,
   ethanol: ["Ethanol Content (%)", "Ethanol content (%)", "Ethanol Content (Active) (%)", "Ethanol Content[%]"],
   time: ["Time", "time", "TIME", "Time (s)"],
 
@@ -15,9 +17,9 @@ export const MHD_ALIASES = {
     "Engine speed[1/min]",
   ],
 
-  boost: ["Boost Mean PSI", "Boost PSI", "Boost (PSI)", "Boost (Pre-Throttle)[psig]", "(RAM) Boost (Pre-Throttle)[psig]", "(RAM) Boost (MAP)[psig]"],
+  boost: ["Boost Mean PSI", "Boost PSI", "Boost (PSI)", "Boost (Pre-Throttle)[psig]", "(RAM) Boost (Pre-Throttle)[psig]"],
 
-  boostTarget: ["Boost target (PSI)", "Boost Target PSI", "Boost Setpoint (PSI)", "Boost pressure (Target)[psig]", "(RAM) Boost Pressure (Target)[psig]", "(RAM) Boost Pressure (Manifold Target)[psig]"],
+  boostTarget: ["Boost target (PSI)", "Boost Target PSI", "Boost Setpoint (PSI)", "Boost pressure (Target)[psig]", "(RAM) Boost Pressure (Target)[psig]"],
 
   afr: [
     "Lambda bank 1 (AFR)",
@@ -70,6 +72,7 @@ export function translateMhdRows(
         : null;
 
     return {
+      ...readContextChannels(row),
       time: read(row, MHD_ALIASES.time),
       rpm: read(row, MHD_ALIASES.rpm),
       throttle: acceleratorPedal ?? throttlePlate,

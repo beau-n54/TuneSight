@@ -1,3 +1,4 @@
+import { CONTEXT_CHANNEL_DEFINITIONS } from "../logging/contextChannels.ts";
 import { buildQualifiedParsedLog, qualifiedAnalysisPlatform } from "./qualifiedAnalysisInput.ts";
 import type { ParsedLog } from "./types.ts";
 import { parseBoundedLogCsv } from "../logging/boundedCsv.ts";
@@ -39,6 +40,7 @@ export async function selectAnalysisEvidence(logs: readonly OwnedLog[], results:
 }
 
 const channelDefinitions = {
+  ...CONTEXT_CHANNEL_DEFINITIONS,
   rpm: ["rpm", "rpm"], boost: ["boostPsi", "psi"], boost_target: ["boostTargetPsi", "psi"],
   throttle: ["throttlePlate", "%"], accelerator_pedal: ["acceleratorPedal", "%"], iat: ["iat", "°C"],
   afr: ["afr", "AFR"], rail_pressure: ["railPressure", "psi"], lpfp: ["lpfp", "psi"], wgdc: ["wgdc", "%"], ethanol: ["ethanol", "%"],
@@ -67,7 +69,7 @@ export function parseSourceMeasurements(text: string) {
   const translated = translateLogRows(csv.rows);
   const recognition = channelRecognition(csv.headers, translated.platform, Object.values(channelDefinitions).map(([field]) => field));
   const headerEvidence = {headers: csv.headers, unassigned: recognition.unassigned,
-    channels: Object.entries(channelDefinitions).map(([key, [field]]) => ({key, headers: recognition.fields[field]}))};
+    channels: Object.entries(channelDefinitions).filter(([key,[field]]) => !(/^(timing_correction_cyl_[78]|ignition_timing_cyl_)/.test(key)) || recognition.fields[field]?.length).map(([key, [field]]) => ({key, headers: recognition.fields[field]}))};
   const qualification = qualifyTranslatedEvidenceSource(translated, {sourceLogId: null, sourceAvailability: "unknown"});
   if (qualification.kind === "unsupported_source") return {headerEvidence, parsedLog: null, timestamps: null, channels: [] as {key: string; unit: string; values: (number | null)[]}[], blockers: ["CSV parsed, but no qualified channel/unit translator exists for this source format. No measurements or diagnostic conclusions are inferred."], sourceFormat: translated.platform, sampleCount: csv.rows.length};
   const times = translated.rows.map(row => row.time);
@@ -78,6 +80,7 @@ export function parseSourceMeasurements(text: string) {
     // An optional eight-cylinder logger layout is displayed only when supplied.
     // It cannot establish physical cylinder count or change diagnostic applicability.
     if (/timing_correction_cyl_[78]/.test(key) && !csv.headers.some(h => h.toLowerCase().replace(/[.\s]/g, "").includes(`cyl${key.at(-1)}`))) continue;
+    if (key in CONTEXT_CHANNEL_DEFINITIONS && !(recognition.fields[source]?.length)) continue;
     const values = translated.rows.map(row => finite(row[source]) ? row[source] as number : null);
     if (values.some(finite)) {
       channels.push({key, unit, values});
