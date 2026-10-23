@@ -6,7 +6,6 @@ import {
   ComposedChart,
   Line,
   ReferenceArea,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -166,8 +165,9 @@ export default function EngineeringLineRenderer({
         }}
         tabIndex={0}
       >
-        <ResponsiveContainer height="100%" width="100%">
           <ComposedChart
+            responsive
+            style={{ width: "100%", height: "100%", minWidth: 0 }}
             data={points}
             margin={{ top: 14, right: 20, bottom: 24, left: 10 }}
           >
@@ -318,7 +318,6 @@ export default function EngineeringLineRenderer({
               />
             ))}
           </ComposedChart>
-        </ResponsiveContainer>
       </div>
     </div>
   );

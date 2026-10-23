@@ -20,7 +20,7 @@ export async function readAnalysisCalibration(log: OwnedLog | null, owner: strin
           resolutionPath: "Explicit vehicle Current assignment → exact owned bytes → existing Calibration admission provider → response-only Dataset."}
           : {state: "unavailable", reason: "The explicitly assigned owned Current source could not be read or admitted. No substitute was selected."};
       }
-      if (!session.locator) return {state: "unavailable", reason: "No explicit Current assignment or owner-scoped source-hash locator is available."};
+      if (!session.locator) return {state: "unavailable", reason: `No explicit Current assignment or owner-scoped source-hash locator is available. ${session.state === "unavailable" ? session.reason : ""}`};
       // Locate exact bytes only. Stock flags and role assignments remain unchanged.
       const client = createTrustedServerClient();
       const {data, error} = await client.from("tunes").select("id").eq("user_id", owner).eq("vehicle_id", vehicle).order("id").limit(101);

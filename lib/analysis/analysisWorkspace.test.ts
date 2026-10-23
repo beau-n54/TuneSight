@@ -36,6 +36,8 @@ const ts = require("typescript"), React = require("react"), {renderToStaticMarku
 const cache = new Map<string, {exports: unknown}>();
 let authorised = true, declaration = "N54b30", selectedSource: AnalysisSource, historicalN54 = false;
 let admittedContext: AnalysisCalibrationContext | null = null;
+let delayedCalibration: Promise<AnalysisCalibrationContext> | null = null;
+let calibrationReads = 0;
 const logs = ["first", "second"].map((id, index) => ({id, user_id: "owner", vehicle_id: "vehicle", created_at: `2026-01-0${index + 1}`, log_name: id, authoritative_log_summary_id: null}));
 const reads: string[] = [];
 function query(table: string) {
@@ -67,7 +69,7 @@ function load(file: string): unknown {
     if (id.endsWith("subscriberAccess.server")) return {requireSubscriberPage: async () => {if (!authorised) throw Error("signed-out");}};
     if (id === "@/lib/supabase/server") return {createClient: async () => ({auth: {getUser: async () => ({data: {user: {id: "owner"}}})}, from: query})};
     if (id.endsWith("analysisSource.server")) return {readAnalysisSource: async (log: {id: string}) => {reads.push(log.id); return selectedSource;}};
-    if (id.endsWith("analysisCalibrationContext.server")) return {readAnalysisCalibration: async (log: {id: string}) => admittedContext ?? ({state: "unavailable", reason: `Controlled expired Calibration context for ${log.id}.`})};
+    if (id.endsWith("analysisCalibrationContext.server")) return {readAnalysisCalibration: async (log: {id: string}) => { calibrationReads++; return delayedCalibration ?? admittedContext ?? ({state: "unavailable", reason: `Controlled expired Calibration context for ${log.id}.`}); }};
     const local = id.startsWith("@/") ? path.resolve(id.slice(2)) : id.startsWith(".") ? path.resolve(path.dirname(file), id) : null;
     if (local) {
       const target = [local, local + ".ts", local + ".tsx", path.join(local, "index.ts")].find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile());
@@ -85,9 +87,19 @@ const source = (): AnalysisSource => ({state: "available", digest: "synthetic-sh
 function recover(engineCode = "N54b30", value = source()) {
   return recoverAnalysisWorkspace({log: logs[0], owner: "owner", vehicle: {vehicleId: "vehicle", engineCode}, source: value});
 }
+// Resolve async server children for controlled markup tests; browser streaming is checked separately.
+async function resolveServerTree(value: unknown): Promise<unknown> {
+  if (Array.isArray(value)) return Promise.all(value.map(resolveServerTree));
+  if (!React.isValidElement(value)) return value;
+  const element = value as {type: unknown; props: Record<string, unknown>};
+  if (typeof element.type === "function" && element.type.constructor.name === "AsyncFunction")
+    return resolveServerTree(await element.type(element.props));
+  const props = Object.fromEntries(await Promise.all(Object.entries(element.props).map(async ([key, child]) => [key, await resolveServerTree(child)])));
+  return React.cloneElement(value, props);
+}
 async function render(engineCode = "N54b30", log = "first", reprocess?: string): Promise<string> {
   declaration = engineCode; reads.length = 0;
-  return renderToStaticMarkup(await Page({params: Promise.resolve({id: "vehicle"}), searchParams: Promise.resolve({log, reprocess})}));
+  return renderToStaticMarkup(await resolveServerTree(await Page({params: Promise.resolve({id: "vehicle"}), searchParams: Promise.resolve({log, reprocess})})));
 }
 test("historical N54 source without a stored qualification runs the established engine in memory", () => {
   const input = source(), before = JSON.stringify(input), result = recover("N54b30", input);
@@ -147,8 +159,8 @@ test("explicit log selection and repeated read-only reprocessing retain exact lo
 test("missing source leaves the full dashboard and exact recovery action accessible", async () => {
   selectedSource = {state: "missing", measurements: null, digest: null, finding: "The original object for this exact log is missing."};
   const html = await render("N54b30");
-  assert.match(html, /Engineering Summary/); assert.match(html, /Recover only the original file for log first/);
-  for (const heading of ["Detected Events", "Cross-Reference Details", "Related XDF unavailable", "Cylinder Timing Observation", "Data quality and qualified diagnostic notices"]) assert(html.includes(heading));
+  assert.match(html, /Source inspection unavailable/); assert.match(html, /Recover only the original file for log first/);
+  for (const heading of ["Detected Events", "Cross-Reference Details", "Advanced profile, diagnostic and scoring audit"]) assert(html.includes(heading));
 });
 test("three platforms share the ordered section contract at desktop and stacked breakpoints", async () => {
   selectedSource = source();
@@ -210,6 +222,10 @@ for (const [platform, software, bytes] of [["N54b30", "I8A0S", 2097152], ["B58 G
     assert.doesNotMatch(html, /href="null|calibration\?session=/);
     assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
     if (platform !== "N54b30" && platform !== "N54") assert.doesNotMatch(html, /N54/);
+    if (admittedContext.state === "available") { const r=admittedContext.result; admittedContext={...admittedContext,result:{...r,material:{...r.material,current:{...r.material.current,exactBinaryIdentity:{...r.material.current.exactBinaryIdentity,softwareIdentity:"mismatched-source"}}}}}; }
+    const rejected = await render(platform);
+    assert.doesNotMatch(rejected, /data-primary-table=/);
+    assert.match(rejected, /Calibration bindings not evaluated/);
   } finally { admittedContext = null; }
 });
 
@@ -242,5 +258,28 @@ for (const platform of [...masterFamilies, "N20"]) test(`${platform}: Calibratio
     assert.doesNotMatch(html, new RegExp(`${key}: Not present`));
   }
   for (const title of ["Observed Telemetry", "System Association", "Unavailable Bindings", "Related XDF", "Related Calibration Tables"]) assert(html.includes(title));
-  assert.match(html, /Telemetry available; no qualified Calibration-table binding has been established/);
+  assert.match(html, /Calibration bindings not evaluated/);
+});
+
+test("qualified existing check with no event reaches the UI, separately from detection", async () => {
+ selectedSource=source(); const html=await render("N54b30");
+ assert.match(html,/Qualified check evaluated; no event detected/);
+ assert.match(html,/heat_soak/);
+ const checks=recover().summaryRow?.summary.engine_v2?.diagnosticChecks;
+ assert.equal(checks?.find(c=>c.id==="heat_soak")?.state,"evaluated_no_event");
+});
+
+test("telemetry server tree does not await supplementary Calibration; one read supplies both surfaces", async () => {
+ selectedSource=source(); declaration="B58 Gen 1"; calibrationReads=0;
+ let finish!: (value: AnalysisCalibrationContext)=>void;
+ delayedCalibration=new Promise(resolve=>{finish=resolve});
+ let timer: ReturnType<typeof setTimeout> | undefined;
+ try {
+  const tree=await Promise.race([Page({params:Promise.resolve({id:"vehicle"}),searchParams:Promise.resolve({log:"first"})}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error("Telemetry blocked on Calibration")),500)})]);
+  assert(tree); assert.equal(calibrationReads,1);
+  finish({state:"unavailable",reason:"Synthetic retrieval timeout"});
+  const html=renderToStaticMarkup(await resolveServerTree(tree));
+  assert.match(html,/Calibration bindings not evaluated: Synthetic retrieval timeout/);
+  assert.match(html,/50 source samples/);assert.equal(calibrationReads,1);
+ } finally {if(timer)clearTimeout(timer); finish({state:"unavailable",reason:"Synthetic end"}); delayedCalibration=null;}
 });

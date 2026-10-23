@@ -1,3 +1,4 @@
+import {diagnosticCheckAvailability} from "./diagnosticCheckAvailability";
 import type {
   AnalysisResult,
   CrossReference,
@@ -547,6 +548,7 @@ const quickVerdict = buildQuickVerdict(
   summary.diagnosticTimeline = events.map(event => ({ timestamp: input.parsedLog.timestamps[event.startIndex], event: event.type, severity: event.severity }));
   return {
   inputQualification,
+  diagnosticChecks: diagnosticCheckAvailability(input.parsedLog, pullWindows, events, Boolean(fuelPressureThresholds)),
   quickVerdict,
   warnings,
   pipelineWarnings,

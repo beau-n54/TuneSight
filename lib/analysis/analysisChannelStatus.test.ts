@@ -19,7 +19,7 @@ for (const [rpm, iat, rail] of [
     const c = status.channels.find(c => c.key === key)!;
     assert.equal(c.raw, "present"); assert.equal(c.alias, "qualified"); assert.equal(c.samples.count, 2);
     assert(c.system); assert.equal(c.bindings.length, 0); assert.equal(c.diagnosticRelationship, "not_established");
-    assert.equal(c.bindingMessage, "Telemetry available; no qualified Calibration-table binding has been established.");
+    assert.equal(c.bindingState, "not_evaluated"); assert.match(c.bindingMessage, /evaluation could not complete/);
   }
   assert.equal(new Set(status.channels.map(c => c.key)).size, status.channels.length);
   assert.equal(JSON.stringify(s), before);

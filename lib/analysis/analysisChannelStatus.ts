@@ -5,7 +5,7 @@ import { sourceObservationEvents } from "./sourceObservationEvents.ts";
 
 /** Telemetry existence and semantic authority are independent. No alias guessing,
  * source admission, diagnostic inference or persistence takes place here. */
-export function analysisChannelStatus(source: AnalysisSource | null, resolution: AnalysisCalibrationResolution, diagnosticChannels: readonly string[] = []) {
+export function analysisChannelStatus(source: AnalysisSource | null, resolution: AnalysisCalibrationResolution, diagnosticChannels: readonly string[] = [], diagnosticChecks: readonly import("./diagnosticCheckAvailability").DiagnosticCheck[] = []) {
   const m = source?.state === "available" && source.digest ? source.measurements : null;
   const facts = analysisEvidenceSections(source), events = sourceObservationEvents(source);
   const unassignedHeaders = m?.headerEvidence?.unassigned ?? [];
@@ -27,8 +27,12 @@ export function analysisChannelStatus(source: AnalysisSource | null, resolution:
       : "No authorised channel/unit mapping is established. Unassigned source headers are listed below; they are not treated as absent or guessed into this channel.";
     return {key, raw, headers, alias, samples: {state: count ? "available" : "unavailable", count, unit: values?.unit ?? null},
       system, eventUsage: usage, bindings, inspectionRelationships: relationships.filter(r => !bindings.includes(r)),
+      diagnosticChecks: diagnosticChecks.filter(check => check.channels.includes(key)),
+      contextUsage: key === "gear" ? "Recorded gear supports run segmentation and interpretation; no standalone gear-fault rule is asserted." : key === "rpm" ? "Recorded engine speed supports time-aligned evaluation and run segmentation." : null,
+      bindingState: !resolution.identity ? "not_evaluated" : bindings.length ? "exact" : relationships.length ? "system_or_source_association" : "evaluated_no_binding",
       diagnosticRelationship: count && diagnosticChannels.includes(key) ? "available" : "not_established",
       telemetryMessage, bindingMessage: bindings.length ? "Qualified exact Calibration-table binding available."
+        : !resolution.identity ? "Telemetry available; Calibration binding evaluation could not complete. See the shared retrieval/admission blocker."
         : count ? "Telemetry available; no qualified Calibration-table binding has been established."
         : "No qualified Calibration-table binding has been established."};
   });

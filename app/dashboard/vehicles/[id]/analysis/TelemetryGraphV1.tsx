@@ -1,4 +1,6 @@
 "use client";
+import { ADDITIONAL_TELEMETRY_COLORS, ADDITIONAL_TELEMETRY_DASHES, IGNITION_TIMING_COLORS } from "./telemetryGraphPresentation";
+
 
 import { useEffect, useMemo, useState } from "react";
 import { parseAnalysisInterval, intervalMarkers } from "./analysisIntervalSelection";
@@ -110,15 +112,15 @@ const CHARTS: readonly ChartDefinition[] = [
     ["load_requested", "Reported load requested", "%", "Kept separate from measured torque and driver demand."],
     ["clutch_torque", "Reported clutch torque", "Nm", "Logger-reported quantity; not dyno-measured wheel torque."],
     ["mass_air_flow", "Measured air mass flow", "g/s", "Exact source observations."],
-  ].map(([id,title,unit,description])=>({id,title,description,channels:[{id,label:title,unit,aliases:[id],color:"#38bdf8"}]})),
-  {id:"ignition-actual",title:"Actual ignition timing",description:"Actual ignition angle is separate from cylinder correction; no correction is inferred.",channels:Array.from({length:8},(_,i)=>({id:`ignition_timing_cyl_${i+1}`,label:`Cylinder ${i+1} actual timing`,unit:"°",aliases:[`ignition_timing_cyl_${i+1}`],color:["#38bdf8","#f87171","#a3e635","#c084fc","#fbbf24","#2dd4bf","#fb923c","#e879f9"][i]}))},
+  ].map(([id,title,unit,description])=>({id,title,description,channels:[{id,label:title,unit,aliases:[id],color:ADDITIONAL_TELEMETRY_COLORS[id],strokeDasharray:ADDITIONAL_TELEMETRY_DASHES[id]}]})),
+  {id:"ignition-actual",title:"Actual ignition timing",description:"Actual ignition angle is separate from cylinder correction; no correction is inferred.",channels:Array.from({length:8},(_,i)=>({id:`ignition_timing_cyl_${i+1}`,label:`Cylinder ${i+1} actual timing`,unit:"°",aliases:[`ignition_timing_cyl_${i+1}`],color:IGNITION_TIMING_COLORS[`ignition_timing_cyl_${i+1}`]}))},
 
   { id: "rpm", title: "Engine Speed", description: "Recorded engine speed, without interpolated observations.",
-    channels: [{id: "rpm", label: "Engine Speed", unit: "RPM", aliases: ["rpm"], color: "#38bdf8"}] },
+    channels: [{id: "rpm", label: "Engine Speed", unit: "RPM", aliases: ["rpm"], color: ADDITIONAL_TELEMETRY_COLORS.rpm}] },
   { id: "pedal", title: "Accelerator Pedal", description: "Driver demand is separate from throttle plate position.",
-    channels: [{id: "accelerator_pedal", label: "Accelerator Pedal", unit: "%", aliases: ["accelerator_pedal"], color: "#a3e635"}], domain: ["auto", "auto"] },
+    channels: [{id: "accelerator_pedal", label: "Accelerator Pedal", unit: "%", aliases: ["accelerator_pedal"], color: ADDITIONAL_TELEMETRY_COLORS.accelerator_pedal}], domain: ["auto", "auto"] },
   { id: "ethanol", title: "Measured Ethanol Content", description: "Measured source content; no fuel target is inferred.",
-    channels: [{id: "ethanol", label: "Ethanol Content", unit: "%", aliases: ["ethanol"], color: "#c084fc"}], domain: ["auto", "auto"] },
+    channels: [{id: "ethanol", label: "Ethanol Content", unit: "%", aliases: ["ethanol"], color: ADDITIONAL_TELEMETRY_COLORS.ethanol}], domain: ["auto", "auto"] },
   {
     id: "boost",
     title: "Boost Control",

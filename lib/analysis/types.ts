@@ -265,6 +265,7 @@ export type QuickVerdict = {
 };
 
 export type AnalysisResult = {
+  diagnosticChecks?: readonly import("./diagnosticCheckAvailability").DiagnosticCheck[];
   inputQualification?: { contract: "qualified-source-v1"; platform: "n54" | "unknown"; missingChannels: readonly string[] };
   quickVerdict: QuickVerdict;
   warnings: WarningCard[];

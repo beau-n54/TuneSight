@@ -42,6 +42,22 @@ export const TELEMETRY_SECTION_CLASS_NAME =
 export const TELEMETRY_PANEL_CLASS_NAME =
   "bmw-border overflow-hidden border border-zinc-800 bg-zinc-950";
 
+/** Stable source-channel identity, shared by trace, legend and tooltip. */
+export const ADDITIONAL_TELEMETRY_COLORS: Readonly<Record<string, string>> = Object.freeze({
+  gear: "#c4b5fd", throttle_angle: "#bef264", manifold_pressure_reported: "#fb923c",
+  manifold_gauge_pressure: "#2dd4bf", manifold_gauge_target: "#99f6e4",
+  rail_deviation_reported: "#86efac", load_actual: "#e879f9", load_requested: "#f0abfc",
+  clutch_torque: "#fbbf24", mass_air_flow: "#60a5fa", rpm: "#38bdf8",
+  accelerator_pedal: "#a3e635", ethanol: "#c084fc",
+});
+export const IGNITION_TIMING_COLORS: Readonly<Record<string, string>> = Object.freeze({
+ ignition_timing_cyl_1: "#38bdf8", ignition_timing_cyl_2: "#f87171", ignition_timing_cyl_3: "#a3e635", ignition_timing_cyl_4: "#c084fc",
+ ignition_timing_cyl_5: "#fbbf24", ignition_timing_cyl_6: "#2dd4bf", ignition_timing_cyl_7: "#fb923c", ignition_timing_cyl_8: "#e879f9",
+});
+export const ADDITIONAL_TELEMETRY_DASHES: Readonly<Record<string, string>> = Object.freeze({
+  manifold_gauge_target: "8 5", load_requested: "8 5",
+});
+
 export const TELEMETRY_CHANNELS = {
   boostActual: {
     id: "boost_actual",

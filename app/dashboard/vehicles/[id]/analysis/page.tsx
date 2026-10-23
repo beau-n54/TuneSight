@@ -1,15 +1,14 @@
+import {Suspense} from "react";
+import {CalibrationLoading, DeferredCalibrationEvidence, DeferredInspectionDetails, DeferredTuneEvidence} from "./DeferredCalibrationEvidence";
 import { RunOverview, RunTimeline, ContextualFindings, NextChecks } from "./RunFindings";
 import { requireSubscriberPage } from "@/lib/security/subscriberAccess.server";
 import IdentityOwnerSummary from "@/components/IdentityOwnerSummary";
 import Link from "next/link";
 import SourceMeasurements from "./SourceMeasurements";
-import { SourceWarningSections, FactualInvestigation, CalibrationEvidenceSections } from "./EvidenceSections";
+import { SourceWarningSections, FactualInvestigation } from "./EvidenceSections";
 import { sourceInvestigation } from "@/lib/analysis/sourceInvestigation";
-import {sourceEvidenceScoring} from "@/lib/analysis/sourceEvidenceScoring";
-import {sourceInspectionCrossReferences} from "@/lib/analysis/sourceInspectionCrossReferences";
-import {SourceInspectionDetails, EvidenceDisclosure} from "./SourceInspectionDetails";
+import {EvidenceDisclosure} from "./SourceInspectionDetails";
 import { readAnalysisTuneEvidence } from "@/lib/analysis/analysisTuneEvidence.server";
-import { TuneEvidenceContext } from "./TuneEvidenceContext";
 import { analysisEvidenceSections } from "@/lib/analysis/analysisEvidenceSections";
 import { resolveAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext";
 import { readAnalysisCalibration } from "@/lib/analysis/analysisCalibrationContext.server";
@@ -158,6 +157,7 @@ type EngineCrossReference = PresentationCrossReference & {
 };
 
 type EngineV2 = {
+  diagnosticChecks?: readonly import("@/lib/analysis/diagnosticCheckAvailability").DiagnosticCheck[];
   inputQualification?: { contract?: string; platform?: string; missingChannels?: readonly string[] };
   quickVerdict?: EngineQuickVerdict;
   warnings?: EngineWarning[];
@@ -248,11 +248,8 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
   const factualEvidence = analysisEvidenceSections(source);
   const observations = sourceObservationEvents(source);
   const investigation = sourceInvestigation(source);
-  const calibrationEvidence = resolveAnalysisCalibration(
-    await readAnalysisCalibration(latestLog, user.id, vehicle.id), latestLog, user.id, vehicle.id,
-    factualEvidence.ranges.map(range => range.channel));
-  const sourceCrossReferences = sourceInspectionCrossReferences(sourceEvidenceScoring(source, investigation), calibrationEvidence,
-    factualEvidence.ranges.map(range => range.channel));
+  const calibrationEvidence = readAnalysisCalibration(latestLog, user.id, vehicle.id).then(context =>
+    resolveAnalysisCalibration(context, latestLog, user.id, vehicle.id, factualEvidence.ranges.map(range => range.channel)));
   const diagnosticsAvailable = (Boolean(selection.result) && query.reprocess !== "1") || recovered.diagnostics;
   const sourcePanel = <SourceMeasurements vehicleId={vehicle.id} vehicle={vehicleContext} logs={ownedLogs} selected={latestLog} source={source}
     diagnostics={diagnosticsAvailable} historyUnavailable={historyUnavailable} priorResultId={selection.result?.id ?? latestLog?.authoritative_log_summary_id ?? null}/>;
@@ -267,7 +264,7 @@ export default async function AnalysisPage({ params, searchParams }: PageProps) 
     .maybeSingle();
 
   let latestTuneProfile: TuneProfileRow | null = null;
-  const tuneByteEvidence = await readAnalysisTuneEvidence(user.id, vehicle.id, latestTune?.id ?? null);
+  const tuneByteEvidence = readAnalysisTuneEvidence(user.id, vehicle.id, latestTune?.id ?? null);
 
   if (latestTune?.id) {
     const { data } = await supabase
@@ -693,7 +690,7 @@ const groupedDiagnosticEvents =
         </div>
 
         {sourcePanel}
-        <TuneEvidenceContext bytes={tuneByteEvidence}/>
+        <Suspense fallback={<p role="status" className="bmw-border rounded-xl bg-slate-950 p-4">Loading supplementary owned-byte comparison. The active flashed tune is not established; telemetry remains usable.</p>}><DeferredTuneEvidence pending={tuneByteEvidence}/></Suspense>
         {source?.measurements && <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>}
         {source?.measurements ? <EngineeringWorkspaceShell
           summary={<RunOverview source={source} investigation={investigation} logName={latestLog?.log_name || "No owned log selected"} vehicleName={vehicle.nickname || vehicle.model || "Selected vehicle"} declarations={[vehicle.fuel_type ? `Fuel: ${vehicle.fuel_type}` : null, typeof vehicle.modifications === "string" ? `Modifications: ${vehicle.modifications}` : null].filter((s):s is string=>!!s)}/>}
@@ -713,9 +710,11 @@ const groupedDiagnosticEvents =
           </EvidenceDisclosure>}
           investigation={<NextChecks investigation={investigation}/>}
           calibrationContext={
-            <CalibrationEvidenceSections resolution={calibrationEvidence} source={source}
+            <Suspense fallback={<CalibrationLoading/>}><DeferredCalibrationEvidence pending={calibrationEvidence} source={source}
+              diagnosticChecks={recovered.summaryRow?.summary.engine_v2?.diagnosticChecks ?? engineV2?.diagnosticChecks ?? []}
+              diagnosticFinding={engineV2?.inputQualification?.platform === "n54" ? "Existing qualified N54 rules: per-check evaluation and missing inputs are shown below. An evaluated check is not a detected fault; controller identity remains independently evidenced." : "No platform-specific rule contract is currently qualified for this declaration. A supported rule contract with qualified inputs is required; owner labels do not establish observed controller identity. Platform-neutral checks and recorded gear context remain available."}
               diagnosticChannels={diagnosticsAvailable ? (engineV2?.events ?? []).filter(event => engineCrossReferences.some(r => r.eventId === event.id)).flatMap(event => event.supportingChannels ?? []) : []}
-              logId={latestLog?.id ?? null} vehicleId={id}/>
+              logId={latestLog?.id ?? null} vehicleId={id}/></Suspense>
           }
         /> : <section className="bmw-border rounded-2xl bg-zinc-900 p-6" aria-label="Source inspection unavailable"><h2 className="text-xl font-semibold text-sky-100">Source inspection unavailable</h2><p>Measurements, charts, run and gear intervals, findings and channel availability cannot be established until the original source is read. No zero measurements or absent channels are inferred. Owned history and preserved stored evidence remain accessible.</p></section>}
 
@@ -1270,13 +1269,10 @@ const groupedDiagnosticEvents =
           <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">Cross-Reference Details</h2>
-              <StatusBadge
-                label={`${sourceCrossReferences.mapCount} maps`}
-                tone={sourceCrossReferences.mapCount > 0 ? "info" : "warn"}
-              />
+
             </div>
 
-            <SourceInspectionDetails model={sourceCrossReferences}/>
+            <Suspense fallback={<CalibrationLoading/>}><DeferredInspectionDetails pending={calibrationEvidence} source={source}/></Suspense>
             <h3 className="mb-3 mt-6 text-lg font-semibold">Platform-qualified diagnostic cross-references — {engineCrossReferences.length} records</h3>
             {engineCrossReferences.length > 0 ? (
               <div className="space-y-4">

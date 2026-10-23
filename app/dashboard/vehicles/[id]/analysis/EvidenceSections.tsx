@@ -88,9 +88,9 @@ export function FactualInvestigation({facts, diagnostics, references, investigat
   </div>;
 }
 
-export function CalibrationEvidenceSections({resolution, source, diagnosticChannels = [], logId, vehicleId}: {resolution: AnalysisCalibrationResolution; source: AnalysisSource | null; diagnosticChannels?: readonly string[]; logId: string | null; vehicleId: string}) {
+export function CalibrationEvidenceSections({resolution, source, diagnosticChannels = [], diagnosticChecks = [], diagnosticFinding, logId, vehicleId}: {resolution: AnalysisCalibrationResolution; source: AnalysisSource | null; diagnosticChannels?: readonly string[]; diagnosticChecks?: readonly import("@/lib/analysis/diagnosticCheckAvailability").DiagnosticCheck[]; diagnosticFinding?: string; logId: string | null; vehicleId: string}) {
   const identity = resolution.identity;
-  const status = analysisChannelStatus(source, resolution, diagnosticChannels);
+  const status = analysisChannelStatus(source, resolution, diagnosticChannels, diagnosticChecks);
   const observed = status.channels.filter(c => c.samples.state === "available");
   const blocked = status.channels.filter(c => c.samples.state !== "available");
   const unbound = observed.filter(c => !c.bindings.length);
@@ -99,10 +99,10 @@ export function CalibrationEvidenceSections({resolution, source, diagnosticChann
   const summary = [
     ["Selected source", source?.state ?? "unavailable"],
     ["Observed telemetry", observed.length],
-    ["Direct table relationships", kinds.filter(k => k.kind === "direct").length],
-    ["Related-system relationships", kinds.filter(k => k.kind === "related").length],
-    ["Source-described relationships", kinds.filter(k => k.kind === "described").length],
-    ["Channels without exact bindings", unbound.length],
+    ["Direct table relationships", identity ? kinds.filter(k => k.kind === "direct").length : "Not evaluated"],
+    ["Related-system relationships", identity ? kinds.filter(k => k.kind === "related").length : "Not evaluated"],
+    ["Source-described relationships", identity ? kinds.filter(k => k.kind === "described").length : "Not evaluated"],
+    ["Channels without exact bindings", identity ? unbound.length : "Not evaluated"],
     ["Definition/XDF admission", identity ? "Exact source admitted" : "Evidence unavailable"],
   ];
   return <div className="bmw-border min-w-0 space-y-4 rounded-2xl bg-slate-950 p-4 sm:p-6" data-calibration-inventory="primary">
@@ -121,15 +121,19 @@ export function CalibrationEvidenceSections({resolution, source, diagnosticChann
       </dl></EvidenceDisclosure>}
     </Section>
     <Section title="Calibration Cross Reference">
+      <p data-diagnostic-availability="summary">{diagnosticFinding ?? "Platform-specific diagnostic availability requires an applicable rule contract and fully observed inputs; source observations are assessed separately."}</p>
+      {!identity && <p role="status">Calibration bindings not evaluated: {resolution.reason}</p>}
       <p>{observed.length} telemetry channels have valid observations. Table bindings and diagnostic relationships are assessed separately.</p>
       <EvidenceDisclosure title={`Observed Telemetry — ${observed.length} available channels`}>
         <ul className="grid gap-3 md:grid-cols-2">{observed.map(c => <li key={c.key} data-telemetry-channel={c.key} data-telemetry-state="available" className="min-w-0 rounded-lg border border-slate-700 p-3">
-          <strong className="text-sky-200">{c.key}</strong>: {c.telemetryMessage}<p>{c.bindingMessage}</p>
+          <strong className="text-sky-200">{c.key}</strong>: {c.telemetryMessage}{c.bindings.length > 0 && <p>{c.bindingMessage}</p>}
           <EvidenceDisclosure title="Channel evidence and independent states">
             <p>Raw channel: {c.raw}; translator alias: {c.alias}; headers: {c.headers.join(", ") || "qualified normalised source"}.</p>
             <p>System association: {c.system ?? "not established"}.</p>
             <p>Platform-neutral event usage: {c.eventUsage.join("; ") || "no applicable check established; measurements remain available"}.</p>
-            <p>Platform-qualified diagnostic relationship: {c.diagnosticRelationship === "available" ? "available in the separately qualified event cross-references" : "not established for this channel"}.</p>
+            <p>{c.contextUsage}</p>
+            {c.diagnosticChecks.map(check => <p key={check.id}>{check.id}: {check.state === "evaluated_no_event" ? "Qualified check evaluated; no event detected (not an all-clear)." : check.state === "event_detected" ? `${check.eventCount} event(s) detected; see qualified evidence.` : check.reason}</p>)}
+            {c.diagnosticRelationship === "available" && <p>Qualified detected-event relationship available in the separate diagnostic cross-references.</p>}
           </EvidenceDisclosure>
         </li>)}</ul>
         {!observed.length && <p>{status.sourceFinding ?? "No qualified finite observations are available."}</p>}
@@ -142,15 +146,15 @@ export function CalibrationEvidenceSections({resolution, source, diagnosticChann
         <Items items={Array.from(new Set(observed.filter(c => c.system).map(c => c.system))).map(system => `${system}: ${observed.filter(c => c.system === system).map(c => c.key).join(", ")}.`)} empty="No factual system association established."/>
         <p>Factual associations are not exact table bindings or diagnostic conclusions.</p>
       </EvidenceDisclosure>
-      <EvidenceDisclosure title={`Unavailable Bindings — ${unbound.length} observed channels without an exact table binding`}>
-        {unbound.length ? <p>Binding only — {unbound.map(c => c.key).join(", ")}: Telemetry available; no qualified Calibration-table binding has been established.</p> : <p>No additional binding gap for the observed channels.</p>}
+      <EvidenceDisclosure title={identity ? `Unavailable Bindings — ${unbound.length} observed channels without an exact table binding` : "Unavailable Bindings — evaluation not completed"}>
+        {!identity ? <p>No missing-binding conclusion is drawn until source and Definition admission succeeds.</p> : unbound.length ? <p>Binding only — {unbound.map(c => c.key).join(", ")}: Telemetry available; no qualified Calibration-table binding has been established.</p> : <p>No additional binding gap for the observed channels.</p>}
         <p>{resolution.reason ?? `${resolution.relationships.length} evidence-supported inspection relationships available. Exact telemetry bindings, system membership and source-described suggestions retain separate grades.`}</p>
-        <Items items={resolution.withheld} empty="No additional withheld relationship."/>
+
         <p>An inspection suggestion is not promoted to an exact binding. No diagnostic, editing or persistence authority is implied.</p>
       </EvidenceDisclosure>
     </Section>
     <Section title="Related XDF and Related Calibration Tables">
-      <p>{inventory.length} exact Definition/table occurrence(s). Related channels are grouped under each table; table availability does not establish active-tune values.</p>
+      <p>{identity ? `${inventory.length} exact Definition/table occurrence(s). Related channels are grouped under each table; table availability does not establish active-tune values.` : "Table inventory not evaluated: source and Definition admission must complete first."}</p>
       {[...new Set(inventory.map(t => t.group))].map(group => <div key={group} className="mt-5 space-y-3">
         <h4 className="border-l-2 border-sky-500 pl-3 text-base font-semibold text-blue-100">{group}</h4>
         {inventory.filter(t => t.group === group).map(t => <article key={t.id} data-primary-table={t.id} className="bmw-border min-w-0 rounded-xl bg-zinc-950/70 p-4">
