@@ -694,8 +694,8 @@ const groupedDiagnosticEvents =
 
         {sourcePanel}
         <TuneEvidenceContext bytes={tuneByteEvidence}/>
-        <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>
-        <EngineeringWorkspaceShell
+        {source?.measurements && <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>}
+        {source?.measurements ? <EngineeringWorkspaceShell
           summary={<RunOverview source={source} investigation={investigation} logName={latestLog?.log_name || "No owned log selected"} vehicleName={vehicle.nickname || vehicle.model || "Selected vehicle"} declarations={[vehicle.fuel_type ? `Fuel: ${vehicle.fuel_type}` : null, typeof vehicle.modifications === "string" ? `Modifications: ${vehicle.modifications}` : null].filter((s):s is string=>!!s)}/>}
           primaryResults={<ContextualFindings investigation={investigation}/>}
           telemetry={<> <RunTimeline investigation={investigation}/>
@@ -717,7 +717,7 @@ const groupedDiagnosticEvents =
               diagnosticChannels={diagnosticsAvailable ? (engineV2?.events ?? []).filter(event => engineCrossReferences.some(r => r.eventId === event.id)).flatMap(event => event.supportingChannels ?? []) : []}
               logId={latestLog?.id ?? null} vehicleId={id}/>
           }
-        />
+        /> : <section className="bmw-border rounded-2xl bg-zinc-900 p-6" aria-label="Source inspection unavailable"><h2 className="text-xl font-semibold text-sky-100">Source inspection unavailable</h2><p>Measurements, charts, run and gear intervals, findings and channel availability cannot be established until the original source is read. No zero measurements or absent channels are inferred. Owned history and preserved stored evidence remain accessible.</p></section>}
 
         <EvidenceDisclosure title="Advanced profile, diagnostic and scoring audit">
         <div className="grid gap-4 md:grid-cols-4">

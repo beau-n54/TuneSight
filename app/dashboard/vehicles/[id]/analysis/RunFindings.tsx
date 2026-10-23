@@ -11,6 +11,7 @@ const panel="bmw-border min-w-0 rounded-2xl bg-slate-950 p-4 sm:p-6 space-y-4";
 
 export function RunOverview({source, investigation, logName, vehicleName, declarations}: {source:AnalysisSource|null;investigation:SourceInvestigation;logName:string;vehicleName:string;declarations:readonly string[]}) {
   const m=source?.state === "available" && source.digest?source.measurements:null;
+  if (!m) return <section className={panel}><h3 className="text-xl font-semibold text-sky-100">{logName}</h3><p>{vehicleName}</p><p>Source measurements have not been established. Sample counts, run intervals and channel availability are unknown.</p></section>;
   const channelStatus=analysisChannelStatus(source,{identity:null,reason:"No table lookup in overview",relationships:[],withheld:[],href:null,resolutionPath:null,sourceId:null});
   const blockers=[...new Set(m?.blockers??[source?.finding??"Select an owned log."])];
   return <section className={panel}>

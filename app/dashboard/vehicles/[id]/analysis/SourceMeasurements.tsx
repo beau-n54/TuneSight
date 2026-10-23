@@ -24,7 +24,7 @@ export default function SourceMeasurements({vehicleId, logs, selected, source, d
     {!selected && <p>No owned log selected. Choose a log from your history.</p>}
     {selected && <>
       <p className="break-words text-sm">Selected: {selected.log_name || selected.id} · {selected.id}</p>
-      <p>{source?.finding}</p>
+      <p role="status">{source?.finding}</p>
       <div className="flex flex-wrap gap-4 text-sm">
         {source?.state === "available" && <>
           <Link prefetch={false} className="underline" href={`/dashboard/vehicles/${vehicleId}/analysis?log=${encodeURIComponent(selected.id)}&reprocess=1`}>Reprocess existing owned source (read-only)</Link>
@@ -43,6 +43,6 @@ export default function SourceMeasurements({vehicleId, logs, selected, source, d
         <ul className="list-inside list-disc">{source?.measurements?.blockers.map(blocker => <li key={blocker}>{blocker}</li>)}</ul>
       </details>
     </>}
-    {!diagnostics && <p className="text-sm text-amber-200">Platform-specific diagnostic conclusions are not yet qualified for this declaration or source input. The complete workspace remains available; no unqualified thresholds or causal conclusions are supplied.</p>}
+    {!diagnostics && source?.measurements && <p className="text-sm text-amber-200">Platform-specific diagnostic conclusions are not yet qualified for this declaration or source input. The complete workspace remains available; no unqualified thresholds or causal conclusions are supplied.</p>}
   </section>;
 }
