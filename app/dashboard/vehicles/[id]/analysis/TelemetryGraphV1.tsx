@@ -2,7 +2,7 @@
 import { ADDITIONAL_TELEMETRY_COLORS, ADDITIONAL_TELEMETRY_DASHES, IGNITION_TIMING_COLORS } from "./telemetryGraphPresentation";
 
 
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { parseAnalysisInterval, intervalMarkers } from "./analysisIntervalSelection";
 import {
   buildGraphPoints,
@@ -57,6 +57,7 @@ type EventPresentation = {
 };
 
 type TelemetryGraphV1Props = {
+  runContext?: ReactNode;
   telemetry: unknown;
   pullWindows?: readonly PullWindowPresentation[];
   events?: readonly EventPresentation[];
@@ -462,6 +463,7 @@ function EngineeringTelemetryChart({
 }
 
 export default function TelemetryGraphV1({
+  runContext,
   telemetry,
   pullWindows = [],
   events = [],
@@ -713,6 +715,7 @@ export default function TelemetryGraphV1({
 
         </div>
 
+        {runContext}
         <TelemetryViewEducation view={educationView} />
 
         {isIndividualPull && (

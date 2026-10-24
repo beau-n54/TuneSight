@@ -38,10 +38,10 @@ for(const state of ["temporarily_unavailable","missing","unresolved"] as const)t
   assert.match(html,/Open complete owned-log history/);assert.match(html,/preserved/);
   assert.doesNotMatch(html,/0 source samples|0 measured|provide a logger export|Present in source; interpretation unavailable|conclusions are not yet qualified/);
 });
-test("route gates live measurement surfaces and duplicate status while retaining stored audit",()=>{
+test("route retains shared structure but gates measurements and opens exact recovery on failure",()=>{
   const route=readFileSync("app/dashboard/vehicles/[id]/analysis/page.tsx","utf8");
-  assert.match(route,/source\?\.measurements \? <EngineeringWorkspaceShell/);
-  assert.match(route,/source\?\.measurements && <p role="status"/);
-  assert.match(route,/Advanced profile, diagnostic and scoring audit/);
+  assert.match(route,/telemetry=\{source\?\.measurements \? <TelemetryGraphV1/);
+  assert.match(route,/open=\{!source\?\.measurements\}/);
+  assert.doesNotMatch(route,/source\?\.measurements \? <EngineeringWorkspaceShell/);
   assert.match(route,/Source inspection unavailable/);
 });

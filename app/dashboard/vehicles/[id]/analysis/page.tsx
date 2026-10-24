@@ -1,3 +1,4 @@
+import { CylinderTimingPanel } from "./CylinderTimingPanel";
 import {Suspense} from "react";
 import {CalibrationLoading, DeferredCalibrationEvidence, DeferredInspectionDetails, DeferredTuneEvidence} from "./DeferredCalibrationEvidence";
 import { RunOverview, RunTimeline, ContextualFindings, NextChecks } from "./RunFindings";
@@ -33,6 +34,7 @@ import {
 import { WorkshopDiagnosticCard } from "@/lib/components/diagnostics/WorkshopDiagnosticCard";
 import {
   EngineeringWorkspaceShell,
+  WorkspaceReservedPanel,
 } from "@/components/EngineeringWorkspaceShell";
 import { groupDiagnosticEvents } from "@/lib/diagnostics/groupDiagnosticEvents";
 import { buildHistoricalDiagnosticEvents } from "@/lib/diagnostics/buildHistoricalDiagnosticEvents";
@@ -616,7 +618,7 @@ const groupedDiagnosticEvents =
   groupDiagnosticEvents(renderedRoutedEvents);
 
   return (
-    <main className="min-h-screen space-y-6 bg-black px-4 py-6 text-white sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-black px-6 py-10 text-white">
       <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href={`/dashboard/vehicles/${id}`}
@@ -648,7 +650,7 @@ const groupedDiagnosticEvents =
                     : "Summary"
                 }
                 tone={
-                  engineV2?.quickVerdict?.status === "critical"
+                  !engineV2?.quickVerdict ? "info" : engineV2.quickVerdict.status === "critical"
                     ? "bad"
                     : engineV2?.quickVerdict?.status === "caution"
                     ? "warn"
@@ -689,26 +691,27 @@ const groupedDiagnosticEvents =
           </div>
         </div>
 
-        {sourcePanel}
-        <Suspense fallback={<p role="status" className="bmw-border rounded-xl bg-slate-950 p-4">Loading supplementary owned-byte comparison. The active flashed tune is not established; telemetry remains usable.</p>}><DeferredTuneEvidence pending={tuneByteEvidence}/></Suspense>
-        {source?.measurements && <p role="status" className="text-sm text-zinc-300">{query.reprocess === "1" ? "Read-only processing: " : ""}{latestSummary === recovered.summaryRow ? recovered.finding : "Qualified stored result selected."}</p>}
-        {source?.measurements ? <EngineeringWorkspaceShell
-          summary={<RunOverview source={source} investigation={investigation} logName={latestLog?.log_name || "No owned log selected"} vehicleName={vehicle.nickname || vehicle.model || "Selected vehicle"} declarations={[vehicle.fuel_type ? `Fuel: ${vehicle.fuel_type}` : null, typeof vehicle.modifications === "string" ? `Modifications: ${vehicle.modifications}` : null].filter((s):s is string=>!!s)}/>}
-          primaryResults={<ContextualFindings investigation={investigation}/>}
-          telemetry={<> <RunTimeline investigation={investigation}/>
-            <TelemetryGraphV1
-              events={displayEvents}
-              pullWindows={displayPullWindows}
-              telemetry={source?.state === "available" && source.digest ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
-            />
-          </>}
-          evidence={<EvidenceDisclosure title="Engineering evidence, qualified diagnostics and original investigation details">
+        <EngineeringWorkspaceShell
+          summary={<>
             <EngineeringSummaryCard hasLog={!!latestLog} hasSummary={!!latestSummary} quickVerdict={engineV2?.quickVerdict} verdictFlags={renderedVerdictFlags}/>
-            {scopedPrimaryResults.length > 0 && <PrimaryEngineeringResults results={scopedPrimaryResults}/>}
-            <EngineeringCorrelationSurface result={correlationResult}/>
-            <FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length} investigation={investigation}/>
-          </EvidenceDisclosure>}
-          investigation={<NextChecks investigation={investigation}/>}
+            <DisclosureSection title="Selected source, owned history and run context" open={!source?.measurements}>
+              {sourcePanel}
+              {source?.measurements && query.reprocess === "1" && <p role="status">Read-only processing: {recovered.finding}</p>}
+              <RunOverview source={source} investigation={investigation} logName={latestLog?.log_name || "No owned log selected"} vehicleName={vehicle.nickname || vehicle.model || "Selected vehicle"} declarations={[vehicle.fuel_type ? `Fuel: ${vehicle.fuel_type}` : null, typeof vehicle.modifications === "string" ? `Modifications: ${vehicle.modifications}` : null].filter((s):s is string=>!!s)}/>
+            </DisclosureSection>
+          </>}
+          primaryResults={<>
+            {scopedPrimaryResults.length > 0 ? <PrimaryEngineeringResults results={scopedPrimaryResults}/> : <WorkspaceReservedPanel title="No primary results available">No platform-qualified primary result is established for this source. Measured observations remain distinct from diagnostic conclusions.</WorkspaceReservedPanel>}
+            <ContextualFindings investigation={investigation}/>
+          </>}
+          telemetry={source?.measurements ? <TelemetryGraphV1 events={displayEvents} pullWindows={displayPullWindows}
+            telemetry={source?.state === "available" && source.digest ? recovered.telemetry : engineV2?.telemetry ?? recovered.telemetry}
+            runContext={<DisclosureSection title="Recorded run and gear intervals"><RunTimeline investigation={investigation}/></DisclosureSection>}/> : <WorkspaceReservedPanel title="Source inspection unavailable">Measurements, charts and sample boundaries are unavailable until the owned source is read. No zero measurements or absent channels are inferred.</WorkspaceReservedPanel>}
+          evidence={<EngineeringCorrelationSurface result={correlationResult}/>}
+          investigation={<>
+            <NextChecks investigation={investigation}/>
+            <DisclosureSection title="Measured investigation evidence"><FactualInvestigation facts={factualEvidence} diagnostics={diagnosticsAvailable} references={engineCrossReferences.length} investigation={investigation}/></DisclosureSection>
+          </>}
           calibrationContext={
             <Suspense fallback={<CalibrationLoading/>}><DeferredCalibrationEvidence pending={calibrationEvidence} source={source}
               diagnosticChecks={recovered.summaryRow?.summary.engine_v2?.diagnosticChecks ?? engineV2?.diagnosticChecks ?? []}
@@ -716,9 +719,8 @@ const groupedDiagnosticEvents =
               diagnosticChannels={diagnosticsAvailable ? (engineV2?.events ?? []).filter(event => engineCrossReferences.some(r => r.eventId === event.id)).flatMap(event => event.supportingChannels ?? []) : []}
               logId={latestLog?.id ?? null} vehicleId={id}/></Suspense>
           }
-        /> : <section className="bmw-border rounded-2xl bg-zinc-900 p-6" aria-label="Source inspection unavailable"><h2 className="text-xl font-semibold text-sky-100">Source inspection unavailable</h2><p>Measurements, charts, run and gear intervals, findings and channel availability cannot be established until the original source is read. No zero measurements or absent channels are inferred. Owned history and preserved stored evidence remain accessible.</p></section>}
+        />
 
-        <EvidenceDisclosure title="Advanced profile, diagnostic and scoring audit">
         <div className="grid gap-4 md:grid-cols-4">
           <InfoCard
             title="Selected Log"
@@ -771,6 +773,7 @@ const groupedDiagnosticEvents =
             />
           </div>
 
+          <DisclosureSection title="Owned-byte profile evidence"><Suspense fallback={<CalibrationLoading/>}><DeferredTuneEvidence pending={tuneByteEvidence}/></Suspense></DisclosureSection>
           {!latestTune && <p className="text-zinc-400">No tune uploaded yet.</p>}
 
           {latestTune && !tuneProfile && (
@@ -782,7 +785,7 @@ const groupedDiagnosticEvents =
           {latestTune && tuneProfile && (
             <>
               <p className="mb-4 max-w-3xl text-sm leading-6 text-zinc-300">This is the latest vehicle-associated file profile, not proof of the tune active during the selected log. Profile hints are inferred from naming, metadata and scanned strings, separate from owner declarations and freshly detected binary evidence. Neither a platform candidate nor an intent label proves the active tune or its settings.</p>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3">
                 <InfoCard
                   title="File-profile platform candidate"
                   value={
@@ -1011,18 +1014,12 @@ const groupedDiagnosticEvents =
             Per-Cylinder Timing Corrections
           </h2>
 
-          <p className="mb-3 text-sm text-zinc-400">Supplied cylinder channels only. Missing channels do not establish the installed cylinder count.</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {factualEvidence.timing.map(channel => <AnalysisCard key={channel.channel}
-              title={`Cylinder ${channel.channel.split("_").at(-1)}`}
-              value={`${formatValue(channel.minimum, 1)} ${channel.unit}`}/>)}
-            {!factualEvidence.timing.length && <p>No unambiguous timing-correction channels with qualified angle units were supplied.</p>}
-          </div>
+          <CylinderTimingPanel timing={factualEvidence.timing}/>
         </div>
 
         <div className="bmw-border rounded-2xl bg-zinc-900 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Data quality and qualified diagnostic notices</h2>
+            <h2 className="text-xl font-semibold">Intelligent Warnings</h2>
             <StatusBadge
               label={diagnosticsAvailable ? intelligentWarningsSummary.state.toUpperCase() : factualEvidence.ranges.length ? "FACTUAL EVIDENCE" : "UNAVAILABLE"}
               tone={
@@ -1336,7 +1333,6 @@ const groupedDiagnosticEvents =
           <GlobalTuneNotesCard notes={noteHierarchy.globalNotes} />
         )}
       </div>
-        </EvidenceDisclosure>
     </main>
   );
 }
@@ -2962,14 +2958,16 @@ function CrossReferenceCard({
 }
 
 function DisclosureSection({
+  open,
   children,
   title,
 }: {
   children: ReactNode;
   title: string;
+  open?: boolean;
 }) {
   return (
-    <details className="mt-3 border border-zinc-800 bg-zinc-950">
+    <details open={open} className="mt-3 border border-zinc-800 bg-zinc-950">
       <summary className="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400">
         {title}
       </summary>

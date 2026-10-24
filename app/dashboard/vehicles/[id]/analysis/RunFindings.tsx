@@ -7,7 +7,7 @@ import {CopyEvidence} from "./CopyEvidence";
 
 const n=(v:number|null)=>v===null?"unavailable":v.toLocaleString("en",{maximumFractionDigits:3});
 const link=(start:number,end:number)=>`#analysis-interval-${start}-${end}`;
-const panel="bmw-border min-w-0 rounded-2xl bg-slate-950 p-4 sm:p-6 space-y-4";
+const panel="bmw-border min-w-0 rounded-2xl bg-zinc-900 p-6 space-y-4";
 
 export function RunOverview({source, investigation, logName, vehicleName, declarations}: {source:AnalysisSource|null;investigation:SourceInvestigation;logName:string;vehicleName:string;declarations:readonly string[]}) {
   const m=source?.state === "available" && source.digest?source.measurements:null;

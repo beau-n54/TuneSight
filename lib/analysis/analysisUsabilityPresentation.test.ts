@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {createRequire} from "node:module";
 import type {ReactNode} from "react";
-import type {AnalysisCalibrationResolution} from "./analysisCalibrationContext";
+import {resolveAnalysisCalibration, type AnalysisCalibrationResolution} from "./analysisCalibrationContext.ts";
 import {analysisEvidenceSections} from "./analysisEvidenceSections.ts";
 import {parseSourceMeasurements} from "./analysisCapabilities.ts";
 import type {AnalysisSource} from "./analysisSource";
@@ -39,7 +39,7 @@ function defaultView(html: string) {
 }
 const source: AnalysisSource = {state:"available",digest:"fixture-source",finding:"Owned fixture",measurements:parseSourceMeasurements("Time,RPM,Boost Mean PSI,Boost target (PSI),WGDC 1 (%)\n0,2000,5,4,50\n1,3000,7,5,60")};
 const relationship = {title:"Same exact table",occurrence:0,revision:"revision-private",key:"key-private",channel:"boost",meaning:"The observed channel and this exact Definition share the qualified Boost & Air Control system context. This does not establish direct control or causation.",assertion:"assertion:private",grade:"Suggested inspection target — qualified system membership",provenance:["provenance-private"],limitations:["limit-private"]};
-const resolution: AnalysisCalibrationResolution = {identity:{software:"software",family:"family",bytes:1,container:"bin",digest:"digest-private",dataset:"dataset-private",definitionSet:"set-private",artifact:"artifact-private"},relationships:[relationship,{...relationship,channel:"boost_target"},{...relationship,occurrence:1,key:"key-other",grade:"Exact Definition telemetry relationship"}],reason:null,withheld:["Unbound reason retained"],href:null,resolutionPath:"fresh admission",sourceId:"owned-record"};
+const resolution: AnalysisCalibrationResolution = {identity:{software:"software",family:"family",bytes:1,container:"bin",digest:"digest-private",dataset:"dataset-private",definitionSet:"set-private",artifact:"artifact-private"},relationships:[relationship,{...relationship,channel:"boost_target"},{...relationship,occurrence:1,key:"key-other",grade:"Exact Definition telemetry relationship"}],reason:null,withheld:["rpm", "boost_target", "wgdc"].map(channel => `${channel}: Telemetry available; no qualified Calibration-table binding has been established. Inspection suggestions do not establish an exact binding or diagnostic conclusion.`),href:null,resolutionPath:"fresh admission",sourceId:"owned-record"};
 
 test("warning cards deduplicate exact strings across categories without merging distinct reasons", () => {
   const facts = {...analysisEvidenceSections(source),missing:["Throttle unavailable","Throttle unavailable"],units:["Throttle unavailable","Throttle unit unqualified"],blockers:["Throttle unavailable","Distinct source reason"]};
@@ -57,7 +57,15 @@ test("primary inventory has one exact occurrence, retaining every channel, origi
   for (const r of resolution.relationships) for (const item of [r.channel,r.grade,r.assertion,...r.provenance,...r.limitations]) assert(html.includes(item),item);
   assert.match(html,/boost, boost_target/); assert.match(html,/Direct table relationship/);
   assert.match(html,/Related system to inspect — Boost &amp; Air Control/);
-  assert.match(html,/Unbound reason retained/); assert.equal(JSON.stringify(resolution),before);
+  const bindingDetails = unavailableBindings(html);
+  const groupedChannels = bindingDetails.match(/Binding only — ([^<:]+): Telemetry available;/)?.[1].split(", ");
+  assert.deepEqual(groupedChannels, ["rpm", "boost_target", "wgdc"]);
+  assert.match(bindingDetails,/Telemetry available; no qualified Calibration-table binding has been established\./);
+  assert.match(bindingDetails,/An inspection suggestion is not promoted to an exact binding\./);
+  assert.match(bindingDetails,/No diagnostic, editing or persistence authority is implied\./);
+  assert.equal((bindingDetails.match(/Telemetry available; no qualified Calibration-table binding/g) ?? []).length,1);
+  for (const channel of ["rpm", "boost", "boost_target", "wgdc"]) assert(html.includes(`data-telemetry-channel="${channel}" data-telemetry-state="available"`));
+  assert.equal(JSON.stringify(resolution),before);
 });
 
 test("identifiers and provenance are closed technical evidence, not default subscriber text", () => {
@@ -83,10 +91,50 @@ test("unavailable source and unknown grades remain explicit without invented aut
   assert.match(html,/No owned source selected/);
 });
 
-test("detailed sections occupy the full workspace row and selected navigation has target/focus treatment", () => {
+test("approved detail sections stack at full content width with keyboard navigation", () => {
   const {EngineeringWorkspaceShell} = load("components/EngineeringWorkspaceShell.tsx") as {EngineeringWorkspaceShell:(props: object)=>ReactNode};
   const html:string = renderToStaticMarkup(React.createElement(EngineeringWorkspaceShell,{investigation:"Detailed investigation",calibrationContext:"Detailed calibration"}));
   for (const id of ["engineering-investigation","calibration-context"]) assert.match(html,new RegExp(`<section[^>]*xl:col-span-12[^>]*id="${id}"`));
-  assert.doesNotMatch(html,/xl:col-span-6/); assert.match(html,/group-has-\[\#calibration-context:target\]/);
+  assert.equal((html.match(/xl:col-span-12/g) ?? []).length,6);
   assert.match(html,/focus-visible:outline-blue-400/); assert.match(html,/overflow-x-auto/);
+});
+
+// The current UI groups the resolver's repeated per-channel withheld messages.
+// Inspect that existing closed disclosure, not arbitrary legacy fixture wording.
+function unavailableBindings(html: string) {
+  const heading = html.indexOf("Unavailable Bindings —");
+  assert(heading >= 0);
+  const start = html.lastIndexOf("<details", heading);
+  const end = html.indexOf("</details>", heading);
+  assert(start >= 0 && end > heading);
+  const disclosure = html.slice(start, end + "</details>".length);
+  assert.doesNotMatch(disclosure, /^<details[^>]*\sopen(?:=|\s|>)/);
+  return disclosure;
+}
+
+test("failed admission displays the resolver's exact blocker without claiming evaluated missing bindings", () => {
+  const reason = "Exact ROM/source identity, Dataset revision or Definition Set does not match the admitted Calibration context.";
+  const r = resolveAnalysisCalibration({state:"unavailable",reason}, {id:"log",user_id:"owner",vehicle_id:"vehicle",created_at:"2026-01-01"}, "owner", "vehicle", ["rpm","boost"]);
+  const before = JSON.stringify(r);
+  const html = render("CalibrationEvidenceSections",{resolution:r,source,logId:"log",vehicleId:"vehicle"});
+  const details = unavailableBindings(html);
+  assert(details.includes(reason));
+  assert.match(details,/evaluation not completed/);
+  assert.match(details,/No missing-binding conclusion is drawn until source and Definition admission succeeds/);
+  assert.doesNotMatch(details,/Binding only —|No additional binding gap/);
+  assert(html.includes(`Calibration bindings not evaluated: ${reason}`));
+  assert(html.includes('data-telemetry-channel="rpm" data-telemetry-state="available"'));
+  assert.doesNotMatch(html,/data-primary-table=/);
+  assert.equal(JSON.stringify(r),before);
+});
+
+test("fully bound observed channels have no invented binding gap", () => {
+  const r = {...resolution,withheld:[],relationships:["rpm","boost","boost_target","wgdc"].map(channel=>({...relationship,channel,grade:"Exact Definition telemetry relationship"}))};
+  const before = JSON.stringify(r);
+  const html = render("CalibrationEvidenceSections",{resolution:r,source,logId:"log",vehicleId:"vehicle"});
+  const details = unavailableBindings(html);
+  assert.match(details,/0 observed channels without an exact table binding/);
+  assert.match(details,/No additional binding gap for the observed channels/);
+  assert.doesNotMatch(details,/Binding only —|evaluation not completed/);
+  assert.equal(JSON.stringify(r),before);
 });

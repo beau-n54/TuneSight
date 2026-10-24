@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
 export const engineeringWorkspaceSections = [
-  { id: "engineering-summary", label: "Run overview" },
-  { id: "engineering-telemetry", label: "Run and gear timeline / telemetry" },
-  { id: "primary-engineering-results", label: "Prioritised findings" },
-  { id: "engineering-investigation", label: "Next checks and unresolved questions" },
-  { id: "calibration-context", label: "Calibration context" },
-  { id: "engineering-evidence", label: "Advanced technical evidence" },
+  { id: "engineering-summary", label: "Engineering Summary" },
+  { id: "primary-engineering-results", label: "Primary Engineering Results" },
+  { id: "engineering-telemetry", label: "Engineering Telemetry Workspace" },
+  { id: "engineering-evidence", label: "Engineering Evidence" },
+  { id: "engineering-investigation", label: "Engineering Investigation" },
+  { id: "calibration-context", label: "Calibration Context" },
 ] as const;
 
 type Props = {
@@ -19,23 +19,15 @@ type Props = {
 };
 
 export function EngineeringWorkspaceShell(props: Props) {
-  const activeClasses = [
-    "group-has-[#engineering-summary:target]/workspace:bg-blue-900 group-has-[#engineering-summary:target]/workspace:text-white",
-    "group-has-[#primary-engineering-results:target]/workspace:bg-blue-900 group-has-[#primary-engineering-results:target]/workspace:text-white",
-    "group-has-[#engineering-telemetry:target]/workspace:bg-blue-900 group-has-[#engineering-telemetry:target]/workspace:text-white",
-    "group-has-[#engineering-evidence:target]/workspace:bg-blue-900 group-has-[#engineering-evidence:target]/workspace:text-white",
-    "group-has-[#engineering-investigation:target]/workspace:bg-blue-900 group-has-[#engineering-investigation:target]/workspace:text-white",
-    "group-has-[#calibration-context:target]/workspace:bg-blue-900 group-has-[#calibration-context:target]/workspace:text-white",
-  ];
-  const content = [props.summary, props.telemetry, props.primaryResults, props.investigation, props.calibrationContext, props.evidence];
+  const content = [props.summary, props.primaryResults, props.telemetry, props.evidence, props.investigation, props.calibrationContext];
 
   return (
-    <div aria-label="Engineering Workspace" className="group/workspace space-y-6" data-workspace-focus="shared">
+    <div aria-label="Engineering Workspace" className="space-y-6" data-workspace-focus="shared">
       <nav aria-label="Engineering Workspace sections" className="sticky top-3 z-20 overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950/95 p-2 shadow-xl shadow-black/20 backdrop-blur">
         <ul className="flex min-w-max gap-1">
-          {engineeringWorkspaceSections.map((section, index) => (
+          {engineeringWorkspaceSections.map((section) => (
             <li key={section.id}>
-              <a className={`${activeClasses[[0,2,1,4,5,3][index]]} block rounded-xl px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-zinc-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400`} href={`#${section.id}`}>
+              <a className="block rounded-xl px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-zinc-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400" href={`#${section.id}`}>
                 {section.label.replace("Engineering ", "")}
               </a>
             </li>
@@ -44,10 +36,10 @@ export function EngineeringWorkspaceShell(props: Props) {
       </nav>
       <div className="grid items-start gap-6 xl:grid-cols-12">
         {engineeringWorkspaceSections.map((section, index) => (
-          <section aria-labelledby={`${section.id}-heading`} className="min-w-0 scroll-mt-24 space-y-4 target:rounded-2xl target:outline target:outline-1 target:outline-sky-700/60 xl:col-span-12" id={section.id} key={section.id}>
+          <section aria-labelledby={`${section.id}-heading`} className="min-w-0 scroll-mt-24 space-y-4 xl:col-span-12" id={section.id} key={section.id}>
             <div className="flex items-center gap-3">
               <span className="h-px flex-1 bg-zinc-800" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-200" id={`${section.id}-heading`}>{section.label}</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500" id={`${section.id}-heading`}>{section.label}</h2>
               <span className="h-px flex-1 bg-zinc-800" />
             </div>
             {content[index]}
