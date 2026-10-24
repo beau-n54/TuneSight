@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 12 October 2026
+**Last Updated:** 24 October 2026
 
 
 
@@ -64,13 +64,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** R02 Calibration Workspace and R03 Calibration Performance Closure complete and deployed on 12 October 2026 under TS-RAT-028. R01 and Security/Trust remain closed under TS-RAT-027/026; the wider project audit remains open.
+**Current Engineering Phase:** Approved Analysis presentation integration released on 24 October 2026 under TS-RAT-029. R02–R03, R01 and Security/Trust remain historically closed within TS-RAT-028/027/026; wider project and functional gates remain open.
 
-**Current Active Work Package:** R02–R03 separate governance closure after final Production acceptance. U2–U6 functional migration and the bounded first/restored-navigation performance correction are complete; no follow-on implementation is activated.
+**Current Active Work Package:** Documentation reconciliation of the accepted Analysis release; no additional implementation is activated. The approved stacked UI and bounded Production verification are distinct from universal platform qualification and parent Work Package completion.
 
-**Current Objective:** Preserve the accepted shared Calibration workspace, measured performance and identity/security boundaries while keeping professional durability, output, broader Analysis/Explanation, hardware and launch capability explicit.
+**Current Objective:** Preserve the approved shared Analysis UI and current functionality/security alongside the accepted Calibration baseline; retain explicit cylinder-count, diagnostic, exact-handoff and other unfinished programme boundaries.
 
-**Next Authorised Objective:** Return the completed R02–R03 application/governance release evidence to Founder and Bob. R04 and later stages require a separately bounded instruction.
+**Next Authorised Objective:** Return this documentation reconciliation to Founder and Bob. No new implementation or broader closure is granted; R04–R05 and later programmes retain their separately authorised but unresolved status, not a completion claim from this release.
 
 **Next Subsystem Definition:** No subsystem is newly authorised. U2–U6 are complete within R02. Broader Analysis/Explanation, professional server revisions, physical bridge/mobile qualification, commercial and launch work retain separate gates.
 
@@ -148,6 +148,32 @@ Runtime Implementation
 ```
 
 Standards define stable, assessable and implementation-independent obligations. They constrain applicable Architecture and implementation without owning either. Ratification of the Framework changes no runtime capability, contract, Work Package or production status.
+
+---
+
+## Approved Analysis Integration and Production Release — 24 October 2026
+
+**Register:** [TS-RAT-029](engineering-ratification-register.md#ts-rat-029). **Visual acceptance:** Beau approved the historical N54/B58 presentation and final stacked amendment. **Implementation/release:** `ce3104b77acbc5345ff6276ba5f571b0e83f42f0` on `main`, preserving functional baseline `f91a91197a5e71024af1fd828e6e86bd53d96a49`. **Programme status:** bounded release complete; universal platform coverage and unfinished parent work are not complete.
+
+The [approved UI record](../APPROVED-ANALYSIS-UI.md) retains the six-section flow: Summary, Primary Results, Telemetry Workspace, Evidence, Investigation, Calibration Context. Engineering Investigation and Calibration Context now occupy separate full-width rows in that order, aligned with Engineering Correlation within the existing page margins. This explicit amendment supersedes their historical side-by-side arrangement only. Shared styling, navigation, evidence disclosures and current functionality/security remain intact.
+
+One common presentation serves supported BMW platforms; platform-aware source data, channel units, diagnostics and capabilities remain governed by existing authority. Current authenticated owner-scoped loading, source integrity, exact samples, run/gear and finding navigation, scoring and Calibration qualification are preserved. No snapshot adapter or fixture is a Production dependency.
+
+[Deployment EHwL22SakKtzseE7Fp7PvBKTtExE](https://vercel.com/beau-n54s-projects/tunesight/EHwL22SakKtzseE7Fp7PvBKTtExE) reached Ready / Production after the normal push. The [canonical alias](https://tunesight-beta.vercel.app) was verified against the exact application commit and [deployment URL](https://tunesight-g95wjkkmu-beau-n54s-projects.vercel.app); no manual deployment occurred.
+
+| Evidence dimension | Verified result / boundary |
+|---|---|
+| Regression closure | Obsolete `Unbound reason retained` phrase assertion corrected to behavioural checks; CLOSED, not waived. Required grouped explanations, exact admission blockers, grades and independent telemetry remain displayed; runtime files unchanged by the test correction |
+| Automated validation | 120/120 affected tests passed; final former-failure suite 8/8 passed; type-check, changed-file lint, encoding/whitespace and fresh isolated Production build passed. Unchanged broader evidence retained, not freshly rerun |
+| Local visual evidence | Populated B58/N54 desktop and measured 390-pixel mobile checks; 4/6/8 observed-cylinder-channel fixtures are not physical coverage claims |
+| Production B58 | 144 samples / 15 charts; third/fourth gear selected exact original intervals, finding link selected rows 1–73; source 00003076501103 admitted. 21 observed channels, 13 system and six source-described relationships, 12 table occurrences, zero direct bindings |
+| Production N54 | Existing WP-005 validation record, 480 samples / ten charts; Pull 2 selected 120 unchanged samples; source I8A0S admitted. 12 observed channels, 14 system relationships, eight table occurrences, zero direct bindings |
+| Production presentation/security | Both authenticated desktop pages retained six-section flow, full-width stacking, navigation and evidence expansion; no captured browser runtime errors. Anonymous access redirects to login. No subscriber writes, migrations or backfills performed; no fresh database fingerprint comparison claimed |
+| Browser-tool limit | Fourth-gear keyboard activation verified. Automated mouse centre-targeting hit whitespace between wrapped link fragments; actual mouse activation of that link is not claimed verified. Post-release mobile checks were not repeated |
+
+**Remaining work:** Authoritative installed-cylinder count is not established. Preserve actual observed channel numbers and values without interpreting missing channels as missing cylinders or filling zeros. Owner-declared engine labels and admitted Definition-source identities do not establish observed DME/ROM identity or active flashed tune. Unsupported diagnostics, unit/channel gaps, non-exact relationships, exact Analysis-to-Calibration handoff and broader Explanation coverage remain qualified/unfinished. Shared structure is not universal platform validation. This record neither closes R04–R05 nor advances R06–R07, output/Flash, professional collaboration, hardware or launch readiness.
+
+The following dated milestones retain their historical scope. Their older Analysis/gear statements are superseded only by the bounded current evidence here; no unrelated hold or incomplete capability is removed.
 
 ---
 
@@ -902,7 +928,7 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 - The Universal Engineering Presentation Refinement Implementation is complete and Founder ratified under [TS-RAT-008](engineering-ratification-register.md#ts-rat-008). Production build, regression validation and presentation validation completed successfully. The ratified scope is presentation-only and changes no engineering truth, detector behaviour, reasoning, correlation, persistence or platform-specific logic.
 - WP-011.2 is partially complete and not ratified. Presentation truthfully exposes the absence of Lean Under Load Root Cause output; future WP-007 Explanation coverage owns the missing capability.
 - WP-011.7 Engineering Workspace architecture is complete as a capstone sibling of WP-011.1 through WP-011.6. WP-011.7.1 and the current WP-011.7.2 Telemetry Workspace presentation milestone are implemented and Founder validated. Parent WP-011.7 remains in progress; every remaining implementation milestone requires separate Founder authority.
-- Primary Results scope communication, timing-event extent, B58 Gen1 logged-gear propagation, possible future AccelerationRun / GearSegment / ShiftEvent architecture and future channel-specific telemetry education remain separate open engineering items. None is closed or implemented by the accepted Telemetry Workspace milestone.
+- The earlier Telemetry Workspace milestone did not close Primary Results scope, timing-event extent or a future AccelerationRun / GearSegment / ShiftEvent architecture. TS-RAT-029 now records bounded B58 recorded-gear interval and finding navigation verification; it does not establish universal gear coverage or complete that future architecture. Authoritative installed-cylinder count and broader Analysis/Explanation and exact Calibration handoff remain outstanding.
 - WP-001, WP-002, parent WP-006 and WP-007 through parent WP-011 lack sufficient repository evidence for parent Work Package implementation-completion claims and remain REQUIRES VERIFICATION; the separately recorded WP-006.1 and WP-011.1 subsystem ratifications are unaffected.
 - WP-005.0.1 through WP-005.0.6, WP-005.0 and parent WP-005 are complete and Founder production-validated under TS-RAT-020. WP-005.1 runtime remains on Engineering Hold and requires separate Founder authority.
 - TS-RAT-024 and TS-RAT-025 remain unchanged historical architecture/U0 records. Subsequent accepted releases include a production Shared Shell consuming U0 and a narrower physically tested Windows ENET telemetry path. TS-RAT-026 closes the bounded Security and Trust Production programme; it does not establish universal hardware coverage, all U2–U6, professional persistence or full project readiness. TS-RAT-028 separately closes U2–U6/R03, with the three former U4 assertions passing unchanged; Export remains checksum/integrity locked and Flash unavailable.

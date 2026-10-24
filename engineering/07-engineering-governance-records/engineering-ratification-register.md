@@ -1693,6 +1693,50 @@ This entry records satisfaction of the existing conditional Founder authority, n
 ---
 
 
+### TS-RAT-029
+
+| Field | Record |
+|---|---|
+| Register ID | TS-RAT-029 |
+| Date | 24 October 2026 |
+| Artefact Type | Bounded Analysis presentation integration, approved amendment and Production release |
+| Artefact Name / Path | [Approved Analysis presentation integration](../APPROVED-ANALYSIS-UI.md) |
+| Authority | Beau's approval of both populated historical examples, final stacked layout approval, explicit integration/release instruction and subsequent governance reconciliation instruction |
+| Ratification Scope | Founder visual acceptance; bounded implementation and release acceptance; read-only Production verification as scoped below |
+| Status | APPROVED AND RELEASED within this scope; universal platform qualification and parent Work Package completion are not declared |
+| Historical Reference | `cb43823990cb421bd7e8242c01964f7f341804db` — Deploy Calibration compute in Sydney |
+| Functional Baseline / Parent | `f91a91197a5e71024af1fd828e6e86bd53d96a49` |
+| Released Application | [`ce3104b77acbc5345ff6276ba5f571b0e83f42f0`](https://github.com/beau-n54/TuneSight/commit/ce3104b77acbc5345ff6276ba5f571b0e83f42f0) — Integrate approved Analysis presentation with current functionality |
+| Production Deployment | [EHwL22SakKtzseE7Fp7PvBKTtExE](https://vercel.com/beau-n54s-projects/tunesight/EHwL22SakKtzseE7Fp7PvBKTtExE), Ready / Production, 2m 47s; automatic deployment after normal fast-forward push |
+| Production URL | [Canonical alias](https://tunesight-beta.vercel.app) verified against that exact commit and [deployment URL](https://tunesight-g95wjkkmu-beau-n54s-projects.vercel.app) |
+| Historical Effect | Additive; TS-RAT-001 through TS-RAT-028 remain unchanged. This does not close R04–R05 or retrospectively grant wider programme acceptance |
+
+**Approved presentation and amendment**
+
+Beau approved both populated historical N54 and B58 examples as the presentation reference, then approved the integrated current functionality. The historical review infrastructure used current persisted data through a local snapshot adapter; it was not an October database reconstruction or historical recalculation. No local adapter was included in the release.
+
+The shared six-section flow is Summary, Primary Results, Telemetry Workspace, Evidence, Investigation and Calibration Context. Beau explicitly superseded the historical side-by-side desktop arrangement: full-width Engineering Investigation is followed immediately by full-width Calibration Context, aligned with Engineering Correlation within the existing page margins. Headings, BMW borders, styling, contents, disclosures, responsive internal grids and interaction flow remain approved; no fixed-height neighbouring-column space is reserved.
+
+One shared presentation serves supported BMW platforms. Platform-aware data, units, channel availability, diagnostics and capability qualification remain owned by their existing contracts, not by platform-specific page layouts. Current source loading, authentication, authorisation, ownership, parsing/translation, exact sample boundaries, run/gear selection, findings, scoring, Calibration evidence and fail-closed controls were preserved. Visual consistency does not establish identical diagnostic applicability or universal platform coverage.
+
+**Validation and regression closure**
+
+- The obsolete `Unbound reason retained` fixture assertion is CLOSED, not waived. The current renderer groups repeated withheld messages while preserving the exact retrieval/admission blocker, observed unbound channels and relationship-specific limitations. Replacement behavioural assertions verify independent telemetry availability, exact-versus-suggested relationships, failed admission, fully bound channels and immutability. No runtime or layout change was made for that correction.
+- 120/120 affected resolver, channel-status, renderer, platform/page, recovery and layout tests passed. The final presentation regression rerun passed 8/8, including the formerly failing case. Unchanged broader evidence was retained, not represented as a fresh exhaustive test run. Type-check, changed-file lint, UTF-8 and whitespace checks passed; a fresh isolated Production build passed with final committed inputs. The existing Next middleware deprecation notice remains outside this scope.
+- Populated local desktop and measured 390-pixel mobile validation supported Beau's visual approval. Shared structure and 4/6/8 observed-cylinder-channel fixtures are regression evidence, not physical acceptance of every controller family.
+- Released B58 owned log `7e1cb8fe-2e3a-4612-9cdc-8a18674905c2`: 144 samples, 15 charts; third gear selected rows 84–102 (19 samples), fourth gear rows 103–126 (24 samples), and a finding link rows 1–73. Exact source `00003076501103` admitted with 21 observed channels, 13 system relationships, six source-described relationships and 12 table occurrences; zero direct bindings.
+- Released N54 log `97b8386b-fe54-4bb1-8130-51816e352a53`: existing WP-005 validation record, not claimed as a physical road log; 480 samples, ten charts and three selectable pulls; Pull 2 selected 120 unchanged samples. Exact source `I8A0S` admitted with 12 observed channels, 14 system relationships and eight table occurrences; zero direct bindings.
+- Both authenticated Production pages passed desktop six-section/stacking, navigation-anchor and evidence-expansion checks with no captured error-level browser logs. The unbound explanation was visibly verified. Anonymous protected access returned HTTP 307 to login. Post-release mobile acceptance was not rerun; existing local mobile evidence remains distinct.
+- Fourth-gear keyboard activation passed. Automated mouse targeting of its wrapped link hit the surrounding list-item whitespace; DOM hit testing identified the cause. Actual mouse activation of that wrapped link was not claimed verified. This is an explicit tooling limitation, not a hidden failed gate or an invented application repair.
+
+**Remaining boundaries**
+
+Authoritative installed-cylinder count remains outstanding for full cross-platform coverage. Only qualified observed channels are displayed with actual cylinder numbers; missing channels are neither absent cylinders nor zero values. Owner declarations and Definition-source identity are not observed DME/ROM identity or proof of the active flashed tune. Unsupported diagnostics, missing units/channels, absent exact bindings and broader Analysis/Explanation or exact Calibration handoff work retain their qualifications. Recorded gear selection does not ratify a complete AccelerationRun / GearSegment / ShiftEvent architecture.
+
+This release does not complete universal platform qualification, parent Presentation/Analysis Work Packages, R04–R05 closure, R06–R07, checksum/export/flashing, professional collaboration, hardware coverage or launch readiness. It introduced no subscriber writes, migrations, backfills, dependency/configuration changes or manual deployment. No fresh database fingerprint comparison was claimed. Historical worktrees, rejected restoration changes and local review evidence were preserved. The documentation reconciliation is separate from the exact application release recorded above.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.
