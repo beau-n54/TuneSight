@@ -1,0 +1,32 @@
+{
+  "archivedOn": "2026-10-31",
+  "localSourceManifestFiles": 31,
+  "localSourceManifestMismatches": [],
+  "localReleaseReceiptSha256": "d13b765c25ee7a40b7d1760673dbf372f01f43c33156bc848e419c8b9c807279",
+  "unmodifiedCopiedFiles": [
+    "github-final-status.json",
+    "production-http.json",
+    "release-artifact-validation.json",
+    "vercel-build-version.txt",
+    "ui/vercel-final-current-production.png",
+    "ui/vercel-next-16.4.1.png",
+    "ui/production-analysis-context-admitted.png",
+    "ui/production-analysis-selected-interval.png",
+    "ui/production-calibration-cell-r2c2.png",
+    "ui/production-calibration-2d.png"
+  ],
+  "omittedFromStructuredReceipt": [
+    "productionChecks.analysis.vehicle",
+    "productionChecks.analysis.log",
+    "productionChecks.calibration.vehicle"
+  ],
+  "otherChanges": [
+    "Repository-relative links repaired.",
+    "Local-only wording made explicitly historical.",
+    "Preservation receipts reduced to aggregate results and original hashes.",
+    "Raw accessibility dumps, helper scripts and redundant/nonessential screenshots omitted."
+  ],
+  "screenshots": "Six screenshots visually inspected. Copied byte-for-byte, with no pixel alteration. They contain the necessary deployment/repository public identity or technical workspace counts, but no credentials, owner vehicle/log UUIDs, nickname or raw source-record identifiers. Other screenshots with owner identity/source-record details or hover URLs were omitted.",
+  "credentials": "Candidate text is checked for private keys, token/JWT patterns, credential-bearing URLs, sensitive environment values and personal identifiers before staging. No environment files, cookies, authorization headers or session storage are included.",
+  "originalArtifacts": "Original local release artifacts and all committed pre-release evidence remain unchanged."
+}

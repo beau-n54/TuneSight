@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-10-31T11:11:17.555Z",
+  "scope": "Documentation-only closure; no application suite rerun",
+  "base": "d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3",
+  "localSourceArtifactsChecked": 31,
+  "localSourceArtifactMismatchCount": 0,
+  "originalEvidenceArtifactsChecked": 64,
+  "originalEvidenceMismatchCount": 0,
+  "originalEvidenceChanged": false,
+  "preReleaseReviewBodyUnchanged": true,
+  "ratificationHistoryUnchanged": true,
+  "ratificationIdsUnchanged": true,
+  "copiedArtifactCount": 10,
+  "copiedArtifactMismatches": [],
+  "protectedFileCount": 38,
+  "protectedFileMismatches": [],
+  "preservedWorktreeCount": 5,
+  "worktreeMismatches": [],
+  "stashUnchanged": true,
+  "unexpectedChangedFiles": [],
+  "credentialAndPrivacyScan": {
+    "textInputs": 13,
+    "rules": [
+      "privateKey",
+      "jwt",
+      "accessToken",
+      "bearer",
+      "credentialAssignment",
+      "credentialUrl",
+      "localUserPath",
+      "ownerUuid",
+      "email"
+    ],
+    "findings": [],
+    "screenshotsVisuallyReviewed": 6
+  },
+  "localLinksChecked": 22,
+  "brokenLinks": [],
+  "documentConsistency": true,
+  "diffCheckPassed": true,
+  "applicationSuitesRerun": false,
+  "passed": true
+}

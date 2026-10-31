@@ -1,3 +1,5 @@
+> **Release-status update — 31 October 2026 (documentation closure):** A01’s approved Next advisory correction was released as `d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3` and verified at deployment `8Yn19gxzdhs4SwTvatQqTyHCniPf`, with Next 16.4.1 and the canonical alias matched to that exact commit. See the [final release receipt](release/RELEASE-RECORD.md). The review below is the unchanged, dated pre-release record; its “pending” and “not authorised” wording describes that earlier stage. Development advisories, the reproduced local evidence-loading issue and the existing Calibration restoration warning remain open. Any later documentation deployment is separate from that application verification.
+
 # A01 dependency security review
 
 31 October 2026 · Prepared for Beau and Bob · Not pushed or deployed

@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-31T11:01:34.142Z",
+  "commit": "d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3",
+  "worktreeStatus": "",
+  "committedReviewArtifactsChecked": 64,
+  "committedArtifactMismatches": [],
+  "localReportLinksChecked": 20,
+  "missingLinks": [],
+  "productionHttp": {
+    "total": 8,
+    "failed": []
+  },
+  "preservationPassed": true,
+  "githubMainMatches": true,
+  "vercelSuccess": true,
+  "sourceScope": [],
+  "passed": true
+}

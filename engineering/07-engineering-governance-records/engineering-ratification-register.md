@@ -1737,6 +1737,29 @@ This release does not complete universal platform qualification, parent Presenta
 
 ---
 
+<a id="a01-release-execution-note-31-october-2026"></a>
+
+## A01 Release Execution Note — 31 October 2026
+
+This dated execution note records Beau’s explicit authorisation and the bounded outcome. It is **not a new ratification entry**; no TS-RAT identifier is allocated or reused. TS-RAT-001 through TS-RAT-029 remain unchanged, including Security/Trust acceptance under TS-RAT-026 and the approved Analysis presentation under TS-RAT-029.
+
+| Field | Record |
+| --- | --- |
+| Authority | Beau explicitly approved commit, integration and release of the prepared A01 dependency correction, then authorised this documentation-only closure |
+| Application release | [`d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3`](https://github.com/beau-n54/TuneSight/commit/d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3); normal fast-forward to main |
+| Verified application deployment | [8Yn19gxzdhs4SwTvatQqTyHCniPf](https://vercel.com/beau-n54s-projects/tunesight/8Yn19gxzdhs4SwTvatQqTyHCniPf), Ready / Production / Current at verification; build log Next 16.4.1 |
+| Canonical verification | `https://tunesight-beta.vercel.app` mapped to that exact deployment and application commit; screenshot, GitHub status and build-version evidence retained in the [final receipt](audits/2026-10-31-a01/release/RELEASE-RECORD.md) |
+| Validation scope | Unchanged clean-install/advisory/type/lint/build and 974-test evidence reused; eight new deployed HTTP checks and authenticated populated B58 Analysis/Calibration desktop smoke passed, including source-evidence loading |
+| Closure | A01 closed only within the approved three Next advisories; no broader Security/Trust, Work Package, universal UI or restoration ratification |
+| Open findings | Development advisories; reproduced local evidence-loading issue; existing Calibration restoration warning. None is fixed or waived by this package |
+| Preservation | No application/UI changes; original review/evidence and ratification history retained. Ownership, authentication, RLS and evidence controls unchanged |
+| Documentation release | Separate documentation/evidence commit. Any automatic Vercel deployment must be reported separately from the verified application deployment; no manual redeployment |
+| Tomorrow checkpoint | A02 BM3 dispatch correction recommended only; not started or authorised by this instruction |
+
+This note does not manufacture a fresh Founder runtime observation, extend prior acceptance, close other backlog items or permit any UI change. The canonical [Engineering Project Status](engineering-project-status.md) records current programme state; the receipt preserves the exact dated application evidence.
+
+---
+
 ## Legacy Ratification Registration
 
 Existing governance documents contain `Ratified` status labels. Their dates, versions, approval scopes and Founder Audit histories are not sufficiently documented to create complete permanent register entries without further authority.

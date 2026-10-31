@@ -1,0 +1,160 @@
+{
+  "recordedAt": "2026-10-31T11:01:34.326Z",
+  "files": [
+    {
+      "path": "RELEASE-RECORD.md",
+      "bytes": 8306,
+      "sha256": "d13b765c25ee7a40b7d1760673dbf372f01f43c33156bc848e419c8b9c807279"
+    },
+    {
+      "path": "analysis-source-evidence.txt",
+      "bytes": 121773,
+      "sha256": "d686d71b95635bae4e9c44b2ea579868de660bfe138f83d7b9bd5d784405a273"
+    },
+    {
+      "path": "calibration-evidence.txt",
+      "bytes": 30560,
+      "sha256": "9bfd857f3941e4d7a8fb49efb80bbb51147793dbb705c6457bdeb2341985cdcc"
+    },
+    {
+      "path": "finalize-release.mjs",
+      "bytes": 3409,
+      "sha256": "a7a12353e142d3c6fd1af4af43897c8607000d61e248c3580e761d4ad36ff2a8"
+    },
+    {
+      "path": "github-final-status.json",
+      "bytes": 324,
+      "sha256": "09d9291e1427cdf6d2d1cd5969c6895a8e34fcee94f292466719bb7eecaec9f5"
+    },
+    {
+      "path": "production-http.json",
+      "bytes": 3160,
+      "sha256": "014a1185a03330069b5fa70fb4f5e3db8bfb98a14a668149f14c09bdabaf9c50"
+    },
+    {
+      "path": "production-http.mjs",
+      "bytes": 2283,
+      "sha256": "99be2c05f35a41950ec26e145d89189d83b2354b380d14a0ea1e8eee7502fe88"
+    },
+    {
+      "path": "release-artifact-validation.json",
+      "bytes": 443,
+      "sha256": "8d59a2231695a0ca5ae6ad426fc587a2aee75b30ca1089aeff0d2b1b1f71c9f1"
+    },
+    {
+      "path": "release-final-preservation.json",
+      "bytes": 10411,
+      "sha256": "9a1edb663e6b7467544d0daa91e5bb8917a36eda762f1134fc8c833125f8f58e"
+    },
+    {
+      "path": "release-post-push-preservation.json",
+      "bytes": 10411,
+      "sha256": "92ce9c5ecff0c804f7fed98a7818a1ac94985147260d84f2cbd653c66620afea"
+    },
+    {
+      "path": "release-preflight.json",
+      "bytes": 2980,
+      "sha256": "b3375c9931bac59cfe4bebc9aa82b65338d984123bfc1148448e3ea2bd016075"
+    },
+    {
+      "path": "release-verification.json",
+      "bytes": 9781,
+      "sha256": "87cdae2a4ca3995c666b5ded34f2e90dbe152a816f20c06373b80c0ff2e72e3f"
+    },
+    {
+      "path": "ui/production-analysis-context-admitted.png",
+      "bytes": 108363,
+      "sha256": "482f17dd46a62400af34a262abece23f7baae3deeb65d6fad45fa2ba8c742c79"
+    },
+    {
+      "path": "ui/production-analysis-gear-intervals.png",
+      "bytes": 130461,
+      "sha256": "74d29b4d8268ff58cd62e06ed3366a4f03b01deb002d036b7927e335730a0c32"
+    },
+    {
+      "path": "ui/production-analysis-return-whole-log.png",
+      "bytes": 130837,
+      "sha256": "3c2baf034a351de9ef6681dd765a47a5899ebfc98aa3107d49d78896d04dce7b"
+    },
+    {
+      "path": "ui/production-analysis-selected-interval.png",
+      "bytes": 139860,
+      "sha256": "a691aca3b6d94eb48e0879cdeea492fc84fabcbcf298c8f411c9660066780b5a"
+    },
+    {
+      "path": "ui/production-analysis-source-evidence.png",
+      "bytes": 142385,
+      "sha256": "7dcaa99f0048f75a81d74eb3e6cc0bcd7eb9206f84569ca38fb34f36cfea1a38"
+    },
+    {
+      "path": "ui/production-analysis-stacked-sections.png",
+      "bytes": 150645,
+      "sha256": "84a871ac9f0179092635c1a6bf0cf4b4a4526de9b8d0b76046ec2097356a0f76"
+    },
+    {
+      "path": "ui/production-analysis-summary.png",
+      "bytes": 118083,
+      "sha256": "35175ae3a06da405b3c5611e983d9ae26917f683ab063bae189b9a07e4fc9e5e"
+    },
+    {
+      "path": "ui/production-analysis-telemetry.png",
+      "bytes": 132285,
+      "sha256": "591431faa2c89c36f1a0bc6823f11cbeabbfa6d7f2059f29ec85d46061297d83"
+    },
+    {
+      "path": "ui/production-calibration-2d.png",
+      "bytes": 148848,
+      "sha256": "714a9ccabbeb7916a41a50ef79bf76329bdae9de2efa2526260256a74c3e0a11"
+    },
+    {
+      "path": "ui/production-calibration-cell-r2c2.png",
+      "bytes": 180952,
+      "sha256": "5a4fbaa54a6427f3f8ad65d80679879f0e34b119959b9294076860d81480292e"
+    },
+    {
+      "path": "ui/production-calibration-engineer.png",
+      "bytes": 154312,
+      "sha256": "614703150346bd849ef20903b8981b73133b24309d0c01c8431fa13ebdcbb96b"
+    },
+    {
+      "path": "ui/production-calibration-evidence.png",
+      "bytes": 115841,
+      "sha256": "09296714fac922818268e19faa180b106f74ee395f08b8a41424cf36e8ea350d"
+    },
+    {
+      "path": "ui/production-calibration-header.png",
+      "bytes": 117504,
+      "sha256": "5767ff3b5c4eccc20b7566c0cb156bb94b058ff255dd9f216f7c0de615b10af1"
+    },
+    {
+      "path": "ui/vercel-current-production.png",
+      "bytes": 131383,
+      "sha256": "c1fac427f5bd99c475a80f5e46079a45383420bef83bbb25bdc06310f26a56b6"
+    },
+    {
+      "path": "ui/vercel-final-current-production.png",
+      "bytes": 124781,
+      "sha256": "48b0231f48f923181284203250f025b7f426918507abe157b47f8d102847d691"
+    },
+    {
+      "path": "ui/vercel-next-16.4.1.png",
+      "bytes": 137688,
+      "sha256": "fb655d4edda976b7cce7eb3ecad6ff59413e2624c4597306c479e2a1187338b1"
+    },
+    {
+      "path": "vercel-build-version.txt",
+      "bytes": 116,
+      "sha256": "0b7919e8be4998844b1cce810dd360b7dcec204582b444f5cee65aa2391f1aaf"
+    },
+    {
+      "path": "vercel-deployment-overview.txt",
+      "bytes": 12817,
+      "sha256": "53695a52fcc08b2ae08ab4e7897152a171de337b41aa7225c0390aebcfe91d3e"
+    },
+    {
+      "path": "vercel-final-overview.txt",
+      "bytes": 826,
+      "sha256": "f72440f6355ef3879722b84182629e502f0097223fed4a9b902f209a1f5f9fc4"
+    }
+  ]
+}

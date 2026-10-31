@@ -1,0 +1,110 @@
+{
+  "recordedAt": "2026-10-31T10:56:40.058Z",
+  "scope": "Canonical Production alias after A01 deployment. Anonymous requests only; no action identifier, credentials or exploit payload supplied.",
+  "rows": [
+    {
+      "name": "public homepage",
+      "method": "GET",
+      "url": "/",
+      "status": 200,
+      "expectedStatus": 200,
+      "pass": true,
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "location": null,
+      "contentType": "text/html; charset=utf-8",
+      "bodyBytes": 23539,
+      "durationMs": 990
+    },
+    {
+      "name": "normal image optimization",
+      "method": "GET",
+      "url": "/_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fhomepage%20banner.20-gl7k_o80a3.png&w=3840&q=75",
+      "status": 200,
+      "expectedStatus": 200,
+      "pass": true,
+      "cacheControl": "public,max-age=31536000,immutable",
+      "location": null,
+      "contentType": "image/png",
+      "bodyBytes": 255494,
+      "durationMs": 1122
+    },
+    {
+      "name": "invalid image width rejected",
+      "method": "GET",
+      "url": "/_next/image?url=%2Ffavicon.ico&w=not-a-number&q=75",
+      "status": 400,
+      "expectedStatus": 400,
+      "pass": true,
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "location": null,
+      "contentType": "text/plain; charset=utf-8",
+      "bodyBytes": 84,
+      "durationMs": 439
+    },
+    {
+      "name": "anonymous protected page",
+      "method": "GET",
+      "url": "/garage",
+      "status": 307,
+      "expectedStatus": 307,
+      "pass": true,
+      "cacheControl": "no-store",
+      "location": "/login?next=%2Fgarage",
+      "contentType": "text/plain",
+      "bodyBytes": 15,
+      "durationMs": 409
+    },
+    {
+      "name": "anonymous benign form POST",
+      "method": "POST",
+      "url": "/garage",
+      "status": 307,
+      "expectedStatus": 307,
+      "pass": true,
+      "cacheControl": "no-store",
+      "location": "/login?next=%2Fgarage",
+      "contentType": "text/plain",
+      "bodyBytes": 15,
+      "durationMs": 308
+    },
+    {
+      "name": "unsupported projection GET rejected",
+      "method": "GET",
+      "url": "/api/calibration-workshop/projection",
+      "status": 405,
+      "expectedStatus": 405,
+      "pass": true,
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "location": null,
+      "contentType": null,
+      "bodyBytes": 0,
+      "durationMs": 616
+    },
+    {
+      "name": "anonymous Calibration projection POST",
+      "method": "POST",
+      "url": "/api/calibration-workshop/projection",
+      "status": 401,
+      "expectedStatus": 401,
+      "pass": true,
+      "cacheControl": "private, no-store",
+      "location": null,
+      "contentType": "application/json",
+      "bodyBytes": 29,
+      "durationMs": 154
+    },
+    {
+      "name": "foreign-origin mutation rejected",
+      "method": "POST",
+      "url": "/api/calibration-workshop/working",
+      "status": 403,
+      "expectedStatus": 403,
+      "pass": true,
+      "cacheControl": "private, no-store",
+      "location": null,
+      "contentType": "application/json",
+      "bodyBytes": 41,
+      "durationMs": 153
+    }
+  ]
+}

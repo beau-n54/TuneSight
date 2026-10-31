@@ -6,7 +6,7 @@ This document forms part of TuneSight's Engineering Governance Framework.
 
 **Status:** Active Living Record
 
-**Last Updated:** 24 October 2026
+**Last Updated:** 31 October 2026
 
 
 
@@ -64,13 +64,13 @@ Architecture specifications answer what each Engineering Domain is. Work Package
 
 The rewritten Engineering Architecture Bible completed Constitutional Audit, Founder Amendment Pass, Editorial Amendment Pass, Founder Review and explicit Founder Ratification. It is now the authoritative architectural reference for TuneSight.
 
-**Current Engineering Phase:** Approved Analysis presentation integration released on 24 October 2026 under TS-RAT-029. R02–R03, R01 and Security/Trust remain historically closed within TS-RAT-028/027/026; wider project and functional gates remain open.
+**Current Engineering Phase:** A01 Next dependency-security correction released and verified on 31 October 2026, closed only within its approved Next advisory scope. Approved Analysis presentation under TS-RAT-029 is preserved. R02–R03, R01 and Security/Trust retain their historical TS-RAT-028/027/026 scopes; wider project and functional gates remain open.
 
-**Current Active Work Package:** Documentation reconciliation of the accepted Analysis release; no additional implementation is activated. The approved stacked UI and bounded Production verification are distinct from universal platform qualification and parent Work Package completion.
+**Current Active Work Package:** A01 documentation closure only; the application correction and bounded Production verification are complete. No additional implementation is activated. All application/UI, dependency, configuration and migration source is unchanged by this documentation package.
 
 **Current Objective:** Preserve the approved shared Analysis UI and current functionality/security alongside the accepted Calibration baseline; retain explicit cylinder-count, diagnostic, exact-handoff and other unfinished programme boundaries.
 
-**Next Authorised Objective:** Return this documentation reconciliation to Founder and Bob. No new implementation or broader closure is granted; R04–R05 and later programmes retain their separately authorised but unresolved status, not a completion claim from this release.
+**Next Authorised Objective:** Finish the authorised A01 documentation commit/push and report any automatic deployment, then stop for the night. A02 BM3 dispatch correction is the recommended tomorrow checkpoint only: it is not started or authorised by this instruction. R04–R05 and later programmes retain their existing unresolved boundaries; no broader closure is granted.
 
 **Next Subsystem Definition:** No subsystem is newly authorised. U2–U6 are complete within R02. Broader Analysis/Explanation, professional server revisions, physical bridge/mobile qualification, commercial and launch work retain separate gates.
 
@@ -148,6 +148,20 @@ Runtime Implementation
 ```
 
 Standards define stable, assessable and implementation-independent obligations. They constrain applicable Architecture and implementation without owning either. Ratification of the Framework changes no runtime capability, contract, Work Package or production status.
+
+---
+
+## A01 Next Advisory Release and Documentation Closure — 31 October 2026
+
+**Closure:** A01 is closed only within the approved Next advisory correction. **Application release:** [`d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3`](https://github.com/beau-n54/TuneSight/commit/d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3), parent `63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d`. **Release authority and limits:** [dated execution note](engineering-ratification-register.md#a01-release-execution-note-31-october-2026). No new ratification or extension of TS-RAT-026/029 is asserted.
+
+The [final release receipt](audits/2026-10-31-a01/release/RELEASE-RECORD.md) and [sanitised deployment evidence](audits/2026-10-31-a01/release/deployment-evidence.json) preserve the observed mapping at application verification: `https://tunesight-beta.vercel.app` → [deployment `8Yn19gxzdhs4SwTvatQqTyHCniPf`](https://vercel.com/beau-n54s-projects/tunesight/8Yn19gxzdhs4SwTvatQqTyHCniPf) → the exact application commit above. Vercel was Ready / Latest / Production / Current; GitHub status was success. The same deployment build log confirms **Next 16.4.1**. A later automatic documentation deployment has its own commit/deployment identity and is not this application smoke receipt.
+
+The correction changes only Next, its required matching env/SWC packages and Next’s optional sharp range; resolved sharp remains 0.35.5. The approved application/UI source and stacked full-width Analysis sections are preserved. Clean install, zero production advisory findings, type-check, lint, Production build and 974/974 regressions remain valid for the unchanged tested inputs. Eight deployed HTTP checks and authenticated populated B58 Analysis/Calibration smoke checks passed, including navigation, interval selection, Grid/2D/Inspector interaction and exact admitted source evidence loading. This bounded desktop check is not universal platform or UI acceptance. No unchanged application suites are rerun for documentation closure.
+
+**Explicitly open:** 17 development advisory package entries (16 moderate, one high); the local Analysis evidence-loading failure reproduced on both released 16.3.8 and candidate 16.4.1; and the existing Calibration restoration warning. Production source loading succeeds as before, without resolving the local cause or signing off durable restoration/editing. Existing ownership, authentication, RLS and evidence controls and the recorded Security/Trust acceptance remain in scope and unchanged.
+
+The [pre-release review](audits/2026-10-31-a01/README.md) and all original evidence remain dated historical records. This closure adds only documentation and essential sanitised evidence. No A02/BM3 or other implementation is started or authorised; no UI change anywhere is authorised without Beau’s explicit approval.
 
 ---
 
@@ -915,6 +929,8 @@ The existing parent WP-007 Explanation Implementation work package remains prese
 ---
 
 ## Current Blockers and Qualifications
+
+- A01 Next advisory correction is released within its bounded scope. Development advisories (16 moderate, one high package entry), the reproduced local Analysis evidence-loading issue and existing Calibration restoration warning remain open; see the [31 October receipt](audits/2026-10-31-a01/release/RELEASE-RECORD.md). Existing Security/Trust ratification remains scoped, and no wider dependency or restoration closure is claimed.
 
 - WP-003 Knowledge integration and production Founder Validation dependencies have been satisfied; formal hold disposition and WP-003 ratification remain Founder decisions.
 - WP-004.1 and WP-004.2 are ratified within their defined implementation scopes. WP-004.3 architecture and canonical Knowledge contract implementation are complete and Founder ratified within that boundary under TS-RAT-009 and TS-RAT-021. Qualified Calibration runtime, Workshop/Manual Editor and bounded Tuning Essentials semantic groundwork now exist. The broader programme remains incomplete; U0 and the subsequently released Shared Shell are deployed with a production consumer, U2–U6 and bounded R03 performance closure are complete under TS-RAT-028, and parent WP-004 completion has not been declared.

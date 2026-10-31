@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-31T10:51:39.498Z",
+  "sourceFile": "release-preflight.json",
+  "sourceSha256": "b3375c9931bac59cfe4bebc9aa82b65338d984123bfc1148448e3ea2bd016075",
+  "base": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "head": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "branch": "codex/a01-dependency-security",
+  "remoteTrackingMain": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "hashes": {
+    "packageJson": "a1c410d45e3200515bc131ecf3f6c73e5711f3e798220767f1450d33f9db6564",
+    "lockfile": "7e2f9569d7aa9511af605858e5f0bfd5b2834058dfd94beb263889bd54bdb461"
+  },
+  "reviewedPackageHashesMatch": true,
+  "evidenceFilesChecked": 64,
+  "evidenceMismatchCount": 0,
+  "originalFilesChecked": 38,
+  "originalFileMismatchCount": 0,
+  "originalStatusUnchanged": true,
+  "stashesUnchanged": true,
+  "historicalWorktreeCount": 4,
+  "historicalHeadsAndStatesUnchanged": true,
+  "applicationChangeCount": 0,
+  "dependencyAndProseDiffCheck": "",
+  "worktreeStatus": "Reviewed package staged later; original status details omitted.",
+  "passed": true,
+  "sanitization": "Absolute local paths, original dirty-file lists and stash descriptions omitted; original receipts retained locally."
+}

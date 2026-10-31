@@ -1,0 +1,2 @@
+															15827 text Detected Next.js version: 16.4.1
+															15839 text ▲ Next.js 16.4.1 (Turbopack)

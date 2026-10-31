@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-31T10:59:54.493Z",
+  "sourceFile": "release-final-preservation.json",
+  "sourceSha256": "9a1edb663e6b7467544d0daa91e5bb8917a36eda762f1134fc8c833125f8f58e",
+  "base": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "head": "d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3",
+  "branch": "codex/a01-dependency-security",
+  "remoteTrackingMain": "d0b8d17a5a7a7d541a83d7f6e79dff6c3a609ca3",
+  "hashes": {
+    "packageJson": "a1c410d45e3200515bc131ecf3f6c73e5711f3e798220767f1450d33f9db6564",
+    "lockfile": "7e2f9569d7aa9511af605858e5f0bfd5b2834058dfd94beb263889bd54bdb461"
+  },
+  "reviewedPackageHashesMatch": true,
+  "evidenceFilesChecked": 64,
+  "evidenceMismatchCount": 0,
+  "originalFilesChecked": 38,
+  "originalFileMismatchCount": 0,
+  "originalStatusUnchanged": true,
+  "stashesUnchanged": true,
+  "historicalWorktreeCount": 4,
+  "historicalHeadsAndStatesUnchanged": true,
+  "applicationChangeCount": 0,
+  "dependencyAndProseDiffCheck": "",
+  "worktreeStatus": "",
+  "passed": true,
+  "sanitization": "Absolute local paths, original dirty-file lists and stash descriptions omitted; original receipts retained locally."
+}
