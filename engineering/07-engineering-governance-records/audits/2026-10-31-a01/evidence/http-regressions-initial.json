@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-10-31T10:38:22.792Z",
+  "scope": "Loopback patched Production build. Anonymous requests only; no action identifier, credentials or exploit payload supplied.",
+  "rows": [
+    {
+      "name": "public homepage",
+      "method": "GET",
+      "url": "/",
+      "status": 200,
+      "expectedStatus": 200,
+      "pass": true,
+      "cacheControl": "s-maxage=31536000",
+      "location": null,
+      "contentType": "text/html; charset=utf-8",
+      "bodyBytes": 23204,
+      "durationMs": 49
+    },
+    {
+      "name": "normal image optimization",
+      "method": "GET",
+      "url": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhomepage%20banner.0m-zaz031pr0j.png&w=3840&q=75",
+      "status": 200,
+      "expectedStatus": 200,
+      "pass": true,
+      "cacheControl": "public, max-age=315360000, immutable",
+      "location": null,
+      "contentType": "image/png",
+      "bodyBytes": 253168,
+      "durationMs": 1678
+    },
+    {
+      "name": "invalid image width rejected",
+      "method": "GET",
+      "url": "/_next/image?url=%2Ffavicon.ico&w=not-a-number&q=75",
+      "status": 400,
+      "expectedStatus": 400,
+      "pass": true,
+      "cacheControl": null,
+      "location": null,
+      "contentType": null,
+      "bodyBytes": 55,
+      "durationMs": 3
+    },
+    {
+      "name": "anonymous protected page",
+      "method": "GET",
+      "url": "/garage",
+      "status": 307,
+      "expectedStatus": 307,
+      "pass": true,
+      "cacheControl": "no-store",
+      "location": "/login?next=%2Fgarage",
+      "contentType": null,
+      "bodyBytes": 21,
+      "durationMs": 10
+    },
+    {
+      "name": "anonymous benign form POST",
+      "method": "POST",
+      "url": "/garage",
+      "status": 307,
+      "expectedStatus": 307,
+      "pass": true,
+      "cacheControl": "no-store",
+      "location": "/login?next=%2Fgarage",
+      "contentType": null,
+      "bodyBytes": 21,
+      "durationMs": 10
+    },
+    {
+      "name": "anonymous Calibration projection",
+      "method": "GET",
+      "url": "/api/calibration-workshop/projection",
+      "status": 405,
+      "expectedStatus": 401,
+      "pass": false,
+      "cacheControl": null,
+      "location": null,
+      "contentType": null,
+      "bodyBytes": 0,
+      "durationMs": 2
+    },
+    {
+      "name": "foreign-origin mutation rejected",
+      "method": "POST",
+      "url": "/api/calibration-workshop/working",
+      "status": 403,
+      "expectedStatus": 403,
+      "pass": true,
+      "cacheControl": "private, no-store",
+      "location": null,
+      "contentType": "application/json",
+      "bodyBytes": 41,
+      "durationMs": 7
+    }
+  ]
+}

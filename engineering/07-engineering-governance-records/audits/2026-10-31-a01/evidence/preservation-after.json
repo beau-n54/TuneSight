@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-31T10:47:04.878Z",
+  "filesChecked": 38,
+  "fileHashMismatches": [],
+  "originalStatusUnchanged": true,
+  "stashesUnchanged": true,
+  "originalStatus": [
+    " M app/dashboard/vehicles/[id]/analysis/page.tsx",
+    " M components/EngineeringWorkspaceShell.test.ts",
+    " M components/EngineeringWorkspaceShell.tsx",
+    " M engineering/07-engineering-governance-records/engineering-project-status.md",
+    " M lib/analysis/analysisUsabilityPresentation.test.ts",
+    " M lib/analysis/analysisWorkspace.test.ts",
+    "?? engineering/07-engineering-governance-records/audits/2026-10-31/"
+  ],
+  "stashes": [
+    "stash@{0} 82eb6f8cdd39e6a9b113d2dd8b670e49d2c982c2 On codex/analysis-run-review: Preserve generated AGENTS change"
+  ],
+  "existingWorktrees": [
+    {
+      "path": "C:/Users/beaud/tunesight-app",
+      "head": "f91a91197a5e71024af1fd828e6e86bd53d96a49",
+      "status": " M app/dashboard/vehicles/[id]/analysis/page.tsx\n M components/EngineeringWorkspaceShell.test.ts\n M components/EngineeringWorkspaceShell.tsx\n M engineering/07-engineering-governance-records/engineering-project-status.md\n M lib/analysis/analysisUsabilityPresentation.test.ts\n M lib/analysis/analysisWorkspace.test.ts\n?? engineering/07-engineering-governance-records/audits/2026-10-31/"
+    },
+    {
+      "path": "C:/Users/beaud/.codex/visualizations/2026/09/19/01a0bb51-eeef-7262-9965-a826b252613c/analysis-integration/release-main",
+      "head": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+      "status": ""
+    },
+    {
+      "path": "C:/Users/beaud/.codex/worktrees/analysis-historical-cb43823/tunesight-app",
+      "head": "cb43823990cb421bd7e8242c01964f7f341804db",
+      "status": ""
+    },
+    {
+      "path": "C:/Users/beaud/.codex/worktrees/analysis-historical-integration/tunesight-app",
+      "head": "ce3104b77acbc5345ff6276ba5f571b0e83f42f0",
+      "status": ""
+    }
+  ],
+  "allWorktrees": [
+    "worktree C:/Users/beaud/tunesight-app",
+    "HEAD f91a91197a5e71024af1fd828e6e86bd53d96a49",
+    "branch refs/heads/codex/analysis-approved-ui",
+    "",
+    "worktree C:/Users/beaud/.codex/visualizations/2026/09/19/01a0bb51-eeef-7262-9965-a826b252613c/analysis-integration/release-main",
+    "HEAD 63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+    "branch refs/heads/main",
+    "",
+    "worktree C:/Users/beaud/.codex/visualizations/2026/10/31/01a19130-875d-77f3-881c-f4f99943691f/tunesight-a01/worktree",
+    "HEAD 63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+    "branch refs/heads/codex/a01-dependency-security",
+    "",
+    "worktree C:/Users/beaud/.codex/worktrees/analysis-historical-cb43823/tunesight-app",
+    "HEAD cb43823990cb421bd7e8242c01964f7f341804db",
+    "detached",
+    "",
+    "worktree C:/Users/beaud/.codex/worktrees/analysis-historical-integration/tunesight-app",
+    "HEAD ce3104b77acbc5345ff6276ba5f571b0e83f42f0",
+    "branch refs/heads/codex/analysis-historical-integration"
+  ],
+  "candidateTrackedChanges": [
+    "package-lock.json",
+    "package.json"
+  ],
+  "candidateDiffCheck": "",
+  "localEnvironmentIgnored": true
+}

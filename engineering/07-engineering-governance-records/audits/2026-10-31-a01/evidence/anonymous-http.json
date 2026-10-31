@@ -1,0 +1,40 @@
+[
+  {
+    "Url": "http://127.0.0.1:3101/",
+    "Status": 200,
+    "Location": null,
+    "Cache": [
+      "s-maxage=31536000"
+    ]
+  },
+  {
+    "Url": "http://127.0.0.1:3101/dashboard",
+    "Status": 307,
+    "Location": [
+      "/login?next=%2Fdashboard"
+    ],
+    "Cache": [
+      "no-store"
+    ]
+  },
+  {
+    "Url": "http://127.0.0.1:3101/dashboard/vehicles/827d39bc-1356-4af1-8220-fe39bd6f2fb3/analysis",
+    "Status": 307,
+    "Location": [
+      "/login?next=%2Fdashboard%2Fvehicles%2F827d39bc-1356-4af1-8220-fe39bd6f2fb3%2Fanalysis"
+    ],
+    "Cache": [
+      "no-store"
+    ]
+  },
+  {
+    "Url": "http://127.0.0.1:3101/dashboard/vehicles/827d39bc-1356-4af1-8220-fe39bd6f2fb3/calibration",
+    "Status": 307,
+    "Location": [
+      "/login?next=%2Fdashboard%2Fvehicles%2F827d39bc-1356-4af1-8220-fe39bd6f2fb3%2Fcalibration"
+    ],
+    "Cache": [
+      "no-store"
+    ]
+  }
+]

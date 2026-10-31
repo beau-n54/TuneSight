@@ -1,0 +1,202 @@
+{
+  "version": "0.1.0",
+  "name": "tunesight-app",
+  "dependencies": {
+    "eslint-config-next": {
+      "version": "16.3.8",
+      "resolved": "https://registry.npmjs.org/eslint-config-next/-/eslint-config-next-16.3.8.tgz",
+      "overridden": false,
+      "dependencies": {
+        "eslint-plugin-import": {
+          "version": "2.32.0",
+          "resolved": "https://registry.npmjs.org/eslint-plugin-import/-/eslint-plugin-import-2.32.0.tgz",
+          "overridden": false,
+          "dependencies": {
+            "minimatch": {
+              "version": "3.1.5"
+            }
+          }
+        },
+        "eslint-plugin-jsx-a11y": {
+          "version": "6.10.2",
+          "resolved": "https://registry.npmjs.org/eslint-plugin-jsx-a11y/-/eslint-plugin-jsx-a11y-6.10.2.tgz",
+          "overridden": false,
+          "dependencies": {
+            "minimatch": {
+              "version": "3.1.5"
+            }
+          }
+        },
+        "eslint-plugin-react-hooks": {
+          "version": "7.0.1",
+          "resolved": "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-7.0.1.tgz",
+          "overridden": false,
+          "dependencies": {
+            "zod-validation-error": {
+              "version": "4.0.2",
+              "resolved": "https://registry.npmjs.org/zod-validation-error/-/zod-validation-error-4.0.2.tgz",
+              "overridden": false,
+              "dependencies": {
+                "zod": {
+                  "version": "4.3.6"
+                }
+              }
+            },
+            "zod": {
+              "version": "4.3.6",
+              "resolved": "https://registry.npmjs.org/zod/-/zod-4.3.6.tgz",
+              "overridden": false
+            }
+          }
+        },
+        "eslint-plugin-react": {
+          "version": "7.37.5",
+          "resolved": "https://registry.npmjs.org/eslint-plugin-react/-/eslint-plugin-react-7.37.5.tgz",
+          "overridden": false,
+          "dependencies": {
+            "minimatch": {
+              "version": "3.1.5"
+            }
+          }
+        },
+        "typescript-eslint": {
+          "version": "8.58.1",
+          "resolved": "https://registry.npmjs.org/typescript-eslint/-/typescript-eslint-8.58.1.tgz",
+          "overridden": false,
+          "dependencies": {
+            "@typescript-eslint/typescript-estree": {
+              "version": "8.58.1",
+              "resolved": "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.58.1.tgz",
+              "overridden": false,
+              "dependencies": {
+                "minimatch": {
+                  "version": "10.2.5",
+                  "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.2.5.tgz",
+                  "overridden": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "eslint": {
+      "version": "9.39.4",
+      "resolved": "https://registry.npmjs.org/eslint/-/eslint-9.39.4.tgz",
+      "overridden": false,
+      "dependencies": {
+        "@eslint/config-array": {
+          "version": "0.21.2",
+          "resolved": "https://registry.npmjs.org/@eslint/config-array/-/config-array-0.21.2.tgz",
+          "overridden": false,
+          "dependencies": {
+            "minimatch": {
+              "version": "3.1.5"
+            }
+          }
+        },
+        "@eslint/eslintrc": {
+          "version": "3.3.5",
+          "resolved": "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-3.3.5.tgz",
+          "overridden": false,
+          "dependencies": {
+            "minimatch": {
+              "version": "3.1.5"
+            }
+          }
+        },
+        "minimatch": {
+          "version": "3.1.5",
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.1.5.tgz",
+          "overridden": false
+        }
+      }
+    },
+    "next": {
+      "version": "16.4.1",
+      "resolved": "https://registry.npmjs.org/next/-/next-16.4.1.tgz",
+      "overridden": false,
+      "dependencies": {
+        "react-dom": {
+          "version": "19.2.4"
+        },
+        "react": {
+          "version": "19.2.4"
+        },
+        "sharp": {
+          "version": "0.35.5",
+          "resolved": "https://registry.npmjs.org/sharp/-/sharp-0.35.5.tgz",
+          "overridden": false
+        },
+        "styled-jsx": {
+          "version": "5.1.6",
+          "resolved": "https://registry.npmjs.org/styled-jsx/-/styled-jsx-5.1.6.tgz",
+          "overridden": false,
+          "dependencies": {
+            "react": {
+              "version": "19.2.4"
+            }
+          }
+        }
+      }
+    },
+    "react-dom": {
+      "version": "19.2.4",
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.4.tgz",
+      "overridden": false,
+      "dependencies": {
+        "react": {
+          "version": "19.2.4"
+        }
+      }
+    },
+    "react": {
+      "version": "19.2.4",
+      "resolved": "https://registry.npmjs.org/react/-/react-19.2.4.tgz",
+      "overridden": false
+    },
+    "recharts": {
+      "version": "3.8.1",
+      "resolved": "https://registry.npmjs.org/recharts/-/recharts-3.8.1.tgz",
+      "overridden": false,
+      "dependencies": {
+        "@reduxjs/toolkit": {
+          "version": "2.12.0",
+          "resolved": "https://registry.npmjs.org/@reduxjs/toolkit/-/toolkit-2.12.0.tgz",
+          "overridden": false,
+          "dependencies": {
+            "react": {
+              "version": "19.2.4"
+            }
+          }
+        },
+        "react-dom": {
+          "version": "19.2.4"
+        },
+        "react-redux": {
+          "version": "9.3.0",
+          "resolved": "https://registry.npmjs.org/react-redux/-/react-redux-9.3.0.tgz",
+          "overridden": false,
+          "dependencies": {
+            "react": {
+              "version": "19.2.4"
+            }
+          }
+        },
+        "react": {
+          "version": "19.2.4"
+        },
+        "use-sync-external-store": {
+          "version": "1.6.0",
+          "resolved": "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz",
+          "overridden": false,
+          "dependencies": {
+            "react": {
+              "version": "19.2.4"
+            }
+          }
+        }
+      }
+    }
+  }
+}

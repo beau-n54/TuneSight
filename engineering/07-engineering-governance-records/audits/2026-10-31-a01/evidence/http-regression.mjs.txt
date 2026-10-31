@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const origin='http://localhost:3101';
+const rows=[];
+async function check(name,url,init,expected){
+ const start=performance.now();
+ const response=await fetch(new URL(url,origin),{redirect:'manual',signal:AbortSignal.timeout(20000),...init});
+ const bytes=new Uint8Array(await response.arrayBuffer());
+ rows.push({name,method:init?.method??'GET',url,status:response.status,expectedStatus:expected,pass:response.status===expected,cacheControl:response.headers.get('cache-control'),location:response.headers.get('location'),contentType:response.headers.get('content-type'),bodyBytes:bytes.length,durationMs:Math.round(performance.now()-start)});
+ return {response,bytes};
+}
+const home=await check('public homepage','/',{},200);
+const html=new TextDecoder().decode(home.bytes);
+const image=html.match(/src="([^"]*\/_next\/image[^" ]*)"/);
+if(image) await check('normal image optimization',image[1].replaceAll('&amp;','&'),{},200);
+await check('invalid image width rejected','/_next/image?url=%2Ffavicon.ico&w=not-a-number&q=75',{},400);
+await check('anonymous protected page','/garage',{},307);
+await check('anonymous benign form POST','/garage',{method:'POST',headers:{origin,'content-type':'application/x-www-form-urlencoded'},body:'a01_probe=1'},307);
+await check('unsupported projection GET rejected','/api/calibration-workshop/projection',{},405);
+await check('anonymous Calibration projection POST','/api/calibration-workshop/projection',{method:'POST',headers:{origin,'content-type':'application/json'},body:'{}'},401);
+await check('foreign-origin mutation rejected','/api/calibration-workshop/working',{method:'POST',headers:{origin:'https://example.invalid','content-type':'application/json'},body:'{}'},403);
+fs.writeFileSync(path.join(root,'http-regressions.json'),JSON.stringify({recordedAt:new Date().toISOString(),scope:'Loopback patched Production build. Anonymous requests only; no action identifier, credentials or exploit payload supplied.',rows},null,2)+'\n');
+console.log(JSON.stringify(rows.map(({name,status,pass})=>({name,status,pass}))));
+if(rows.some(r=>!r.pass))process.exitCode=1;

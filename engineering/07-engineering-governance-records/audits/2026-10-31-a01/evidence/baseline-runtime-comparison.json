@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-31",
+  "source": "git archive HEAD from A01 branch at 63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "isolation": "Separate baseline-runtime directory, outside all existing historical worktrees",
+  "next": "16.3.8",
+  "lockfileMatchesReleasedCommit": true,
+  "localEnvironmentMatchesCandidate": true,
+  "cleanInstall": {
+    "exitCode": 0,
+    "packagesAdded": 406,
+    "seconds": 17
+  },
+  "build": {
+    "command": "npm run build",
+    "mode": "default Turbopack Production build with fresh generated cache",
+    "exitCode": 0,
+    "log": "baseline-clean-build.log"
+  },
+  "failedDiagnosticAttempts": [
+    {
+      "log": "baseline-build-sandbox.log",
+      "reason": "Google Font fetch blocked in sandbox"
+    },
+    {
+      "log": "baseline-build-panic.log",
+      "reason": "Turbopack worker exited before connection"
+    },
+    {
+      "log": "baseline-build-panic-retry.log",
+      "reason": "Same worker/cache failure"
+    },
+    {
+      "log": "baseline-webpack-build.log",
+      "reason": "Exploratory webpack compile failed on existing node:crypto client import; no repair made"
+    }
+  ],
+  "runtimeOrigin": "http://localhost:3103",
+  "browserFinding": "Same B58 owned Analysis log and same local Calibration context failure as candidate 16.4.1; 21 channels remain available, table bindings not evaluated.",
+  "displayedReason": "No explicit Current assignment or owner-scoped source-hash locator is available. The owned Calibration context is temporarily unavailable. No recovery or persistence was attempted.",
+  "conclusion": "Observed failure reproduced before dependency change. Underlying local evidence-read cause is unresolved; full admitted-context comparison is not claimed.",
+  "screenshots": [
+    "ui/released-local-b58-summary.png",
+    "ui/released-local-b58-context.png"
+  ],
+  "stoppedAfterCheck": true
+}

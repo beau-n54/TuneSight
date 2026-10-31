@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-10-31T10:37:30.206Z",
+  "repository": "beau-n54/TuneSight",
+  "queriedRef": "main",
+  "sha": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "message": "Record approved Analysis integration release",
+  "commitUrl": "https://github.com/beau-n54/TuneSight/commit/63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "githubStatus": {
+    "statuses": [
+      {
+        "context": "Vercel",
+        "state": "success",
+        "target_url": "https://vercel.com/beau-n54s-projects/tunesight/HSgCfFP8zgHH2AS9a2gehGVRe7gR"
+      }
+    ]
+  },
+  "canonicalAlias": "https://tunesight-beta.vercel.app",
+  "verifiedVercelDashboard": {
+    "method": "Read-only native browser inspection with existing authenticated session on 31 October 2026",
+    "deploymentId": "dpl_HSgCfFP8zgHH2AS9a2gehGVRe7gR",
+    "state": "Ready / Latest / Production / Current",
+    "sourceBranch": "main",
+    "sourceCommit": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+    "canonicalDomain": "tunesight-beta.vercel.app",
+    "deploymentUrl": "https://tunesight-59ygdqoi1-beau-n54s-projects.vercel.app",
+    "createdAtDisplayed": "24 October 2026, 6:40:46 PM GMT+10",
+    "buildDuration": "2m 57s",
+    "buildLogNextVersion": "16.3.8",
+    "versionLogLine": "18:38:16.848 Detected Next.js version: 16.3.8",
+    "compilerLogLine": "Next.js 16.3.8 (Turbopack)",
+    "screenshots": ["ui/vercel-current-deployment.png", "ui/vercel-deployed-next-16.3.8.png"]
+  },
+  "limit": "Current canonical alias, source commit and Next build version independently verified in Vercel. Deployed sharp/runtime package inventory not independently inspected. No deployment or settings change performed."
+}

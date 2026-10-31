@@ -1,0 +1,14 @@
+▲ Next.js 16.4.1 (Turbopack)
+- Local:         http://127.0.0.1:3102
+- Network:       http://127.0.0.1:3102
+- Environments: .env.local
+✓ Ready in 690ms
+✓ Running next.config.ts took 72ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+
+  To migrate automatically, run:
+  npx @next/codemod@canary middleware-to-proxy .
+
+  Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+✓ Generated AGENTS.md for AI agents. Set `agentRules: false` in next.config to disable.

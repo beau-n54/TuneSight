@@ -1,0 +1,68 @@
+{
+  "verifiedOn": "2026-10-31",
+  "sourceBaseline": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "baselineNext": "16.3.8",
+  "candidateNext": "16.4.1",
+  "releaseSource": "https://github.com/vercel/next.js/releases/tag/v16.4.1",
+  "nextAdvisories": [
+    {
+      "id": "GHSA-p3m5-59mp-jv5r",
+      "vendorSource": "https://github.com/vercel/next.js/security/advisories/GHSA-p3m5-59mp-jv5r",
+      "severity": "high",
+      "affected16Range": ">=16.0.0 <=16.4.0",
+      "firstFixed16": "16.4.1",
+      "condition": "App Router with at least one Server Action; crafted requests can exhaust CPU.",
+      "repositoryEvidence": "App Router routes and app/garage/page.tsx:22 use server action. Authentication within the action is not a vendor-listed workaround.",
+      "baselineDisposition": "Affected package and relevant application condition confirmed; no exploit attempted.",
+      "candidateDisposition": "Installed and locked first fixed 16.x release; production npm audit no longer reports advisory. Deployment pending."
+    },
+    {
+      "id": "GHSA-2464-fhr4-w9xw",
+      "vendorSource": "https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw",
+      "severity": "critical",
+      "affected16RangeAsPublishedByVendor": ">16.0.0 <=16.4.0",
+      "firstFixed16": "16.4.1",
+      "condition": "Image Optimization upstream memory issue; vendor identifies possible RCE on glibc-based Linux and SVG in the advisory title.",
+      "vendorWorkaround": "sharp >=0.35.5",
+      "repositoryEvidence": "Baseline lockfile sharp 0.35.5; installed baseline tree reported 0.35.5. No dangerouslyAllowSVG configuration found; static homepage PNG uses next/image. Actual deployed sharp was not independently inspected.",
+      "baselineDisposition": "Package range reported; recorded lockfile meets vendor sharp workaround. Do not equate range match with demonstrated RCE.",
+      "candidateDisposition": "Next 16.4.1 raises optional sharp range to ^0.35.5, clean installation retains sharp 0.35.5; normal image optimization HTTP 200. Deployment pending."
+    },
+    {
+      "id": "GHSA-673q-mjm6-r5xr",
+      "vendorSource": "https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr",
+      "severity": "critical",
+      "affected16Range": ">=16.0.0 <=16.4.0",
+      "firstFixed16": "16.4.1",
+      "condition": "App Router with Cache Components and a use cache function returning multiple typed arrays.",
+      "repositoryEvidence": "No use cache directive or cacheComponents configuration found in application source/configuration. React cache in subscriberAccess is not a use cache function.",
+      "baselineDisposition": "Package in advisory range; documented application prerequisite not found. Vendor recommends upgrading even without such functions.",
+      "candidateDisposition": "Installed and locked first fixed 16.x release; production npm audit no longer reports advisory. Deployment pending."
+    }
+  ],
+  "remainingDevelopmentAdvisories": [
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "vendorSource": "https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249",
+      "installedVersions": ["3.1.5", "10.2.5"],
+      "vendorAffectedVersion": "10.2.6",
+      "npmReportedRange": "<11.0.1",
+      "vendorFixedVersion": "11.0.1",
+      "condition": "Attacker-controlled glob pattern and optimizationLevel >=2.",
+      "scopeEvidence": "Development ESLint/TypeScript tooling paths. Repository configuration does not enable optimizationLevel >=2 or accept subscriber glob patterns. No zod/minimatch references in 49 production route trace files.",
+      "disposition": "Unchanged development advisory. Applicability not demonstrated; vendor and npm ranges differ. No forced major override or eslint downgrade introduced. Not waived or claimed fixed."
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "npmReportedRange": "<4.6.6",
+      "installedVersion": "4.3.6",
+      "reportedFixedVersion": "4.6.6",
+      "maintainerFix": "https://github.com/colinhacks/zod/commit/a0ebf970f2d752e5f58527cd2942ff48be4f46bd",
+      "maintainerDiscussion": "https://github.com/colinhacks/zod/pull/6475",
+      "condition": "Large invalid collections can accumulate excessive issues; maintainer fix moves size checks before element parsing.",
+      "scopeEvidence": "Development dependency via eslint-plugin-react-hooks 7.0.1 and zod-validation-error 4.0.2; inspected usage parses compiler/configuration schemas. No direct application imports or subscriber validation route found, and no zod/minimatch references in 49 production route trace files.",
+      "disposition": "High severity development advisory remains. No production request path identified. Tooling patch outside the narrowly cited Next finding is deferred for review, not waived or claimed fixed."
+    }
+  ],
+  "closure": "Three cited Next advisories removed from candidate production dependency tree. No production remediation claim before separately authorised deployment and exact version receipt. Full dependency tree remains 17 npm entries: 16 moderate and one high."
+}

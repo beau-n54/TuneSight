@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-31",
+  "browser": "Native DuckDuckGo on Windows; existing authenticated session",
+  "screenshotSize": {
+    "width": 1523,
+    "height": 824,
+    "includesBrowserChrome": true
+  },
+  "candidate": "http://localhost:3101, Next 16.4.1 Production build",
+  "production": "https://tunesight-beta.vercel.app; current Vercel deployment confirmed Next 16.3.8",
+  "releasedLocalComparator": "http://localhost:3103, Next 16.3.8 Production build",
+  "observedChecks": [
+    {
+      "surface": "B58 Analysis summary and telemetry",
+      "result": "Matching layout and source-derived counts: 42 intervals; six checks; two channel blockers; 144 RPM samples; one pull; 46 events."
+    },
+    {
+      "surface": "Analysis navigation and disclosures",
+      "result": "Telemetry/context/Investigation anchors and run/gear disclosure work. Gear inspect link changed interval anchor; complete resulting chart sample range was not independently observed."
+    },
+    {
+      "surface": "Approved Analysis stacking",
+      "result": "Full-width Investigation then Calibration Context within aligned page margins retained."
+    },
+    {
+      "surface": "B58 populated Calibration",
+      "result": "1175 tables; 7 qualified; 1168 unclassified; Current available; Reference missing; Working not created."
+    },
+    {
+      "surface": "Calibration search/selection",
+      "result": "Boost Ceiling search returns 28; identical FF Gear x RPM table and values compared with Production."
+    },
+    {
+      "surface": "Calibration Grid/2D/Inspector",
+      "result": "Grid/2D and Engineer/Standard switch; R2/C2 selection updates Inspector; 3D withheld for same degenerate source coordinates."
+    }
+  ],
+  "limitations": [
+    "Local Analysis admitted Calibration context fails on both released 16.3.8 and candidate 16.4.1; production succeeds. Cause unresolved.",
+    "N54 production Calibration opened unresolved; no source restore/upload performed.",
+    "No new mobile, screen-reader, cross-browser, exhaustive console, physical vehicle or edit/save acceptance.",
+    "No global pixel-equality claim. Browser chrome, Vercel overlay, pointer hover and saved selection differ."
+  ],
+  "applicationUiSourceChanged": false,
+  "subscriberEvidenceWritesPerformed": false,
+  "localPreviewServersStopped": true
+}

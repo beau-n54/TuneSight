@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-31T10:47:05.177Z",
+  "base": "63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+  "installedNext": "16.4.1",
+  "cleanInstall": {
+    "command": "npm ci --no-audit --no-fund",
+    "exitCode": 0,
+    "packagesAdded": 406,
+    "duration": "38 seconds",
+    "dependenciesCopied": false
+  },
+  "typegen": {
+    "command": "node node_modules/next/dist/bin/next typegen",
+    "exitCode": 0
+  },
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+    "exitCode": 0
+  },
+  "lint": {
+    "command": "node node_modules/eslint/bin/eslint.js .",
+    "exitCode": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "mode": "Production / default Turbopack",
+    "exitCode": 0
+  },
+  "regressions": {
+    "command": "node --experimental-strip-types --test --test-concurrency=3 --test-reporter=tap <regression-files.txt>",
+    "fileCount": 107,
+    "tests": 974,
+    "passed": 974,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 254319.5017,
+    "topLevelOkLines": 974,
+    "securityFiles": [
+      "lib/security\\accessPolicy.test.ts",
+      "lib/security\\deletionWorkflow.test.ts",
+      "lib/security\\listBounds.test.ts",
+      "lib/security\\serverBoundary.integration.test.ts",
+      "lib/security\\uploadPolicy.test.ts"
+    ]
+  },
+  "advisories": {
+    "production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "allDependencies": {
+      "info": 0,
+      "low": 0,
+      "moderate": 16,
+      "high": 1,
+      "critical": 0,
+      "total": 17
+    }
+  },
+  "warnings": [
+    "Next middleware convention deprecated; unchanged and migration out of scope.",
+    "Node strip-types module-type warnings; no assertion failures."
+  ],
+  "excluded": [
+    "No live exploit payloads or destructive authenticated action exercised.",
+    "No deployment or production dependency installation.",
+    "No fresh two-principal deployed RLS matrix.",
+    "Browser harness .test.tsx files are not part of the 974 Node cases."
+  ]
+}

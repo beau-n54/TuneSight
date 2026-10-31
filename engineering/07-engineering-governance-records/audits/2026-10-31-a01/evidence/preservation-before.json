@@ -1,0 +1,187 @@
+{
+  "RecordedAt": "2026-10-31T10:24:41.9434790Z",
+  "Files": [
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\app\\dashboard\\vehicles\\[id]\\analysis\\page.tsx",
+      "Sha256": "21B78D9FC70571EF520305E97AED4E0FB5D38DB7802C3D14FA7448806AD69D84"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\components\\EngineeringWorkspaceShell.test.ts",
+      "Sha256": "B59F9D54835A61806946AA489A12C9222FF6A9A7A421CFEBAB6E5697F3038993"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\components\\EngineeringWorkspaceShell.tsx",
+      "Sha256": "58B5C49DB2898922282A870693AEAC36B9C1191D91AE9A9EEC8AE695895B080F"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\engineering-project-status.md",
+      "Sha256": "F14519E0952A93BBE4340C3B3C7D8E836BBF4D282102E7A95E5D6EAC6CEEA39A"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\lib\\analysis\\analysisUsabilityPresentation.test.ts",
+      "Sha256": "A0CC699EEA4DE688A77E43A7551297C87C278C461C6E1E248FD506D8D6CAC2C0"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\lib\\analysis\\analysisWorkspace.test.ts",
+      "Sha256": "9051191637DD4CC7D1BC884D127A30EE26988037BB1668A2C029FDCBC5BCFD02"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\01-executive-assessment.md",
+      "Sha256": "C20DEC45DA35CD26F6673C63FB9343EC575B87E4199695B787D38F75237794EA"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\02-feature-work-package-matrix.md",
+      "Sha256": "F631A095F2E77864462BF220CD38F0D2A5866EA0E3923A53C4D2497824D1BFC9"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\02-inventory-crosswalk.md",
+      "Sha256": "29869AE11A5C15D42FFF731CE1F9BA2AF57511117ED7B77714F405002117499B"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\03-platform-logger-rom-coverage.md",
+      "Sha256": "6D061E252C868F75C3550C7D105B82EA7C458D38F30E66CF61AA7417BDEF4C15"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\04-discrepancy-register.md",
+      "Sha256": "D33A10BD30D3B82DE586D822B4F7B4BB9372163155FEAC43E1A028D98CB03828"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\05-ranked-backlog.md",
+      "Sha256": "A7BE631EE7512B3E343B01EDD2EACCA1F4561E103454F9C1233F93FE209E3805"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\06-milestones-and-acceptance-gates.md",
+      "Sha256": "F4A9EEF003AE531BB609D700448B6B01FB51DCF20FA1E7488693E7BC115FB28D"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\README.md",
+      "Sha256": "9B15EF1F1B9CADB0B0F9E9737EA8D67C8F41A81589EE4E25E295FA6E27EA4AF1"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\analysis-release-2026-10-24.md",
+      "Sha256": "BEC828D1EA7206AB4F70DC83EF8B8D4B9C9B2532F104846A784CC201FF59E838"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\artifact-manifest.json",
+      "Sha256": "749239F49303D56E2B50E95FEF13DF129C45C82AFE9619C31D5C862346586ECF"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\audit-inputs.json",
+      "Sha256": "4D24B0D282127CDB8F5803FF8DAF0600985595D9A6BC7042CC3A80F8989EF78B"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\baseline.json",
+      "Sha256": "F0916CECB43C02876B4526C816F0203566DAFFA13DD445DB22B96FDEFABA38A8"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\bridge-permitted-loopback.tap",
+      "Sha256": "A466F6FF30C2D61E826306171F92BD8B44FED055C5AA361165B1FAAA74972AC8"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\build-physical-dependencies.log",
+      "Sha256": "7A46830B36949AFC9821DD0D5D725A220C0409E5B011550113ED1B879622910D"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\build.log",
+      "Sha256": "9E4A52A40BE3AF7D7B8339ECDD5DE2ADC5DB9D2AEE49D660D15764541182D1D7"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\historical-evidence-manifest.json",
+      "Sha256": "313895F6BCDD3F303B9A0144F21CC1BEA92E88264EA43A2686195A7C3272C7FA"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\installed-top-level.json",
+      "Sha256": "DFA02AD29F9E71EDFD6C84232E5AFD011E3585F39CD5B1AFE3B2D24A63BC3B5C"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\installer-artifact.json",
+      "Sha256": "5568C37AD0946F3D4EC025EE376164D65E5484F528C43B79EEA054AF6EED6E05"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\lint.log",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\logger-dispatch-probe.json",
+      "Sha256": "D1F0D122A1E48737F076B173E04D50BB7C7FE65409C5EBCC231CBDE50F2ABC3D"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\node-tests.tap",
+      "Sha256": "1443340DA84AF6D005390F33C77CE088BBE3655DD8F9D641255196D327E279B7"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\npm-audit-all.json",
+      "Sha256": "737B64D07241CB7C5A23F038FAB31AD51D14F32A7C6B5BA75FD08D3AAC8DE67E"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\npm-audit-production.json",
+      "Sha256": "6BE1470EA4EC433518523AF5AD0B82A79BB51D9C80A4C92293609FF83A424048"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\preservation.json",
+      "Sha256": "E6A9870F0EAA29BDA208C82300D4965E54585604CBE78C43C40D04B6D0DD4967"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\r04-r05-progress-summary.json",
+      "Sha256": "5E1F43C984E562B354FF1738CCCF22FF33EDB8D0F15A305E0118496AD77197D3"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\remote-checks.json",
+      "Sha256": "812F48455AD7EA4B89B6F24F3A5F600C2B4CB0CCC14905DC2D0EBBB36B2C79D2"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\source-reference-manifest.json",
+      "Sha256": "52EDD6EAD38C6BF36DB4F087D31E0FDF3F9A0462B2F8AA0674AB8E0B49CE1BFF"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\test-files.txt",
+      "Sha256": "BA145E6136D2D9C0F52902A7249AD0A2D643396F37C9FED9AB68E13E3879644B"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\typecheck.log",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\typegen.log",
+      "Sha256": "8B0DB89A1E25137A4CB79143A4EA63AE347E6F5F2247F026D984E133255D3084"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\validation.json",
+      "Sha256": "AB40E78E3FFBD2245CC6088095450FC3292113466856474CEE70647AC59DBD34"
+    },
+    {
+      "Path": "C:\\Users\\beaud\\tunesight-app\\engineering\\07-engineering-governance-records\\audits\\2026-10-31\\evidence\\xdf-git-context.tap",
+      "Sha256": "9099878587FB9B111C96CFE2A32DE1D3DCBC5CAD5C6F05803ED7C745B6AE0624"
+    }
+  ],
+  "Status": [
+    " M app/dashboard/vehicles/[id]/analysis/page.tsx",
+    " M components/EngineeringWorkspaceShell.test.ts",
+    " M components/EngineeringWorkspaceShell.tsx",
+    " M engineering/07-engineering-governance-records/engineering-project-status.md",
+    " M lib/analysis/analysisUsabilityPresentation.test.ts",
+    " M lib/analysis/analysisWorkspace.test.ts",
+    "?? engineering/07-engineering-governance-records/audits/2026-10-31/"
+  ],
+  "Worktrees": [
+    "worktree C:/Users/beaud/tunesight-app",
+    "HEAD f91a91197a5e71024af1fd828e6e86bd53d96a49",
+    "branch refs/heads/codex/analysis-approved-ui",
+    "",
+    "worktree C:/Users/beaud/.codex/visualizations/2026/09/19/01a0bb51-eeef-7262-9965-a826b252613c/analysis-integration/release-main",
+    "HEAD 63d1fa4ef2aebdb6bd21692ca93f4e2f544c988d",
+    "branch refs/heads/main",
+    "",
+    "worktree C:/Users/beaud/.codex/worktrees/analysis-historical-cb43823/tunesight-app",
+    "HEAD cb43823990cb421bd7e8242c01964f7f341804db",
+    "detached",
+    "",
+    "worktree C:/Users/beaud/.codex/worktrees/analysis-historical-integration/tunesight-app",
+    "HEAD ce3104b77acbc5345ff6276ba5f571b0e83f42f0",
+    "branch refs/heads/codex/analysis-historical-integration",
+    ""
+  ],
+  "Stashes": [
+    "stash@{0} 82eb6f8cdd39e6a9b113d2dd8b670e49d2c982c2 On codex/analysis-run-review: Preserve generated AGENTS change"
+  ]
+}
